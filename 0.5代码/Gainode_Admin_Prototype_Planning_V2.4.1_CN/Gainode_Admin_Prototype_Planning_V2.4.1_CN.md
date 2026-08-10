@@ -109,6 +109,8 @@ ADMIN_ROOT_NAV_MUTATION = FORBIDDEN
 ├── 地区 / KYC / 保护策略
 ├── AI 策略 / 套利模拟
 ├── AI 运营建议 / 市场分析
+├── AI 竞猜运营助手（P1_CONDITIONAL）
+├── AI 用户/客服/风险助手（P1）
 ├── 紧急操作
 └── 运营与经济报表
 
@@ -118,7 +120,6 @@ ADMIN_ROOT_NAV_MUTATION = FORBIDDEN
 ├── 异步任务 / 系统状态
 ├── Provider 监控
 ├── 数据源管理
-├── AI 竞猜运营助手 / 用户客服风险助手
 ├── RBAC 角色
 ├── 语言管理
 ├── 系统配置
@@ -152,7 +153,9 @@ PRODUCTION_USE_REQUIRED
 
 | 旧 P0 页面数 | 新 P0 数 | 新 P1 数 | 新 P1_CONDITIONAL 数 | 新 FUTURE |
 |---|---|---|---|---|
-| 49 | 32 | 8 | 10 | 1 |
+| 49 | 31 | 8 | 18 | 1 |
+
+> [DERIVED] — 从 Page ID Migration Matrix 机械派生。
 
 ### 详细 Priority 重分类
 
@@ -164,6 +167,7 @@ PRODUCTION_USE_REQUIRED
 | A-AFF-002 | 代理列表 | Affiliate Object 未冻结于 05 |
 | A-AFF-003 | 代理详情 | Affiliate Object 未冻结于 05 |
 | A-AFF-004 | 推荐关系与代理统计 | AffiliateRelation 未冻结于 05 |
+| A-USER-004 | 用户资产调整 | AssetAdjustment Proposal/Approval/Execution 全链路未冻结于 05（GAP-014/GAP-015）；仅 Preview |
 | A-DATA-002 | 数据源管理 | DataProvider / ProviderHealth 未冻结于 05 |
 | A-DATA-004 | 市场/赔率/套利原始数据 | MarketFeed / ArbitrageOpportunity 未冻结于 05 |
 | A-DATA-005 | Signal与数据质量 | AISignal 未冻结于 05 |
@@ -193,12 +197,14 @@ PRODUCTION_USE_REQUIRED
 ### 最终 Priority Counts
 
 ```text
-P0_COUNT = 32
+P0_COUNT = 31
 P1_COUNT = 8
-P1_CONDITIONAL_COUNT = 10
+P1_CONDITIONAL_COUNT = 18
 FUTURE_COUNT = 1
-TOTAL = 51
+TOTAL = 58（51 Admin + 7 Agent Portal）
 ```
+
+> [DERIVED] — 从 Page ID Migration Matrix 机械派生。P0(31) + P1(8) + P1_CONDITIONAL(18) + FUTURE(1) = 58 ✓
 
 ---
 
@@ -216,6 +222,35 @@ NOT_PRODUCTION_READY = TRUE
 ---
 
 ## 5. HIGH-RISK SoD — 正式闭合
+
+### 权威 RBAC 来源
+
+SoD 必须基于 05 §8/§11 的 canonical Role ID，不得压缩为粗粒度 UI Persona：
+
+```text
+05_CANONICAL_ADMIN_ROLES = [
+  SUPPORT_AGENT, OPS_OPERATOR, KYC_REVIEWER,
+  RISK_ANALYST, RISK_APPROVER,
+  LEDGER_OPERATOR, FINANCE_REVIEWER,
+  PARAM_EDITOR, PARAM_APPROVER, RELEASE_OPERATOR,
+  AUDITOR, ADMIN_SECURITY
+]
+
+UI_PERSONA → CANONICAL_ROLE_IDS[] → ABAC_SCOPE
+```
+
+参数流程必须表达三段分离（05 §8/§11.1 确认）：
+
+```text
+PARAM_EDITOR → PARAM_APPROVER → RELEASE_OPERATOR
+（编辑 ≠ 批准 ≠ 激活）
+```
+
+不得简化为：
+
+```text
+Admin A → Admin B
+```
 
 ### 全局硬规则
 
@@ -334,12 +369,21 @@ NO_PERMISSION / DEPENDENCY_UNAVAILABLE
 | STATE_CHANGED（订单状态已变化） | ✓ |
 | CONFLICT / EXPIRED | ✓ |
 
-**A-CONFIG-002（Parameter Release/Snapshot）** 完整生命周期：
+**A-CONFIG-002（Parameter Release/Snapshot）** 必须对齐 05 canonical enum：
 
 ```text
-Draft → Review → Approved → Scheduled → Active →
-Paused → Rolled Back → Failed → Unknown
+DOMAIN_OBJECT_STATE（05 §4 canonical）:
+draft → pending_approval → approved → scheduled → active → paused → rolled_back → archived
+
+UI_OPERATION_STATE（页面临时状态）:
+SUBMITTING / PROCESSING / SUCCESS / FAILED
+
+REQUEST_RESOLUTION_STATE:
+KNOWN / RESULT_UNKNOWN
 ```
+
+> 不得将 Review、Failed、Unknown 加入 ParameterRelease 领域状态枚举。  
+> RESULT_UNKNOWN 是请求结果状态，不是领域对象状态。
 
 **A-RISK-001（Risk Case）/ A-APPROVAL-001（审批中心）**
 
@@ -551,7 +595,7 @@ SILENT_PAGE_DELETE = 0
 HIGH_RISK_SOD_RULE = PRESENT
 SELF_APPROVAL = FORBIDDEN
 OWNER_OVERRIDE = CONTROLLED_OR_CONTRACT_GAP
-P0_WITH_UNRESOLVED_CONTRACT_GAP = 0
+P0_WITH_UNRESOLVED_BLOCKING_CONTRACT_GAP = 0 [DERIVED]（A-USER-004 已降为 P1_CONDITIONAL；其余 P0 页面仅存非阻断子能力 GAP）
 HIGH_RISK_STATE_MODEL = PRESENT
 RESULT_UNKNOWN = PRESENT
 AGENT_SCOPE = FAIL_CLOSED

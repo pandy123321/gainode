@@ -13,8 +13,8 @@
 | A-USER-001 | A-USER-001 | KEEP | P0 | 02 | FROZEN | 无 | 用户列表不变 |
 | A-USER-002 | A-USER-002 | KEEP | P0 | 02 | FROZEN | 无 | 用户360不变 |
 | A-KYC-001 | A-KYC-001 | KEEP | P0 | 02 | FROZEN | 无 | KYC审核不变 |
-| A-USER-003 | A-USER-003 | KEEP | P0 | 02 | FROZEN | 无 | 用户限制不变 |
-| A-USER-004 | A-USER-004 | KEEP | P0 | 02 | FROZEN | 无 | 资产调整+SoD |
+| A-USER-003 | A-USER-003 | KEEP | P0 | 02 | FROZEN（BASE=FROZEN；扩展操作=CONTRACT_GAP/GAP-013） | 无 | 用户限制不变 |
+| A-USER-004 | A-USER-004 | KEEP | P1_CONDITIONAL | 02 | CONTRACT_GAP（GAP-014/GAP-015；Adjustment全链路未冻结） | 无 | 资产调整→降为P1_CONDITIONAL |
 | A-SUPPORT-001 | A-SUPPORT-001 | KEEP | P0 | 02 | FROZEN | 无 | 工单中心不变 |
 | A-AFF-001 | A-AFF-001 | KEEP | P1_CONDITIONAL | 02 | CONTRACT_GAP | 路由从03→02 | 代理总览 |
 | A-AFF-002 | A-AFF-002 | KEEP | P1_CONDITIONAL | 02 | CONTRACT_GAP | 路由从03→02 | 代理列表 |
@@ -33,11 +33,11 @@
 | A-PREDICT-004 | A-PREDICT-004 | KEEP | P0 | 06 | FROZEN | 无 | 结算更正+State |
 | A-DATA-001 | A-DATA-001 | KEEP | P1 | 06 | FROZEN | 路由从07→06 | 数据中心→P1 |
 | A-DATA-002 | A-DATA-002 | KEEP | P1_CONDITIONAL | 08 | CONTRACT_GAP | 路由从07→08 | 数据源→Provider |
-| A-DATA-003 | A-DATA-003 | KEEP | P1 | 06 | FROZEN | 路由从07→06 | 足球数据→赛事 |
+| A-DATA-003 | A-DATA-003 | KEEP | P1 | 06 | CONTRACT_GAP（GAP-006） | 路由从07→06 | 足球数据→赛事 |
 | A-DATA-004 | A-DATA-004 | KEEP | P1_CONDITIONAL | 06 | CONTRACT_GAP | 路由从07→06 | 市场数据 |
 | A-DATA-005 | A-DATA-005 | KEEP | P1_CONDITIONAL | 06 | CONTRACT_GAP | 路由从07→06 | 信号与质量 |
-| A-AI-001 | A-AI-001 | KEEP | P1 | 07 | FROZEN | 路由从08→07 | AI驾驶舱→P1 |
-| A-AI-002 | A-AI-002 | KEEP | P1 | 07 | FROZEN | 路由从08→07 | AI建议→P1 |
+| A-AI-001 | A-AI-001 | KEEP | P1 | 07 | CONTRACT_GAP（GAP-010） | 路由从08→07 | AI驾驶舱→P1 |
+| A-AI-002 | A-AI-002 | KEEP | P1 | 07 | CONTRACT_GAP（GAP-010） | 路由从08→07 | AI建议→P1 |
 | A-AI-003 | A-AI-003 | KEEP | P1_CONDITIONAL | 07 | CONTRACT_GAP | 路由从08→07 | AI市场分析 |
 | A-AI-004 | A-AI-004 | KEEP | P1_CONDITIONAL | 07 | CONTRACT_GAP | 路由从08→07 | AI策略模拟 |
 | A-AI-005 | A-AI-005 | KEEP | P1_CONDITIONAL | 07 | CONTRACT_GAP | 路由从08→07 | AI竞猜助手 |
@@ -50,10 +50,10 @@
 | A-OTC-002 | A-OTC-002 | KEEP | P0 | 05 | FROZEN | 无 | OTC详情+State |
 | A-OTC-003 | A-OTC-003 | KEEP | P1 | 05 | FROZEN | 无 | 撮合监控→P1 |
 | A-CONFIG-001 | A-CONFIG-001 | KEEP | P0 | 07 | FROZEN | 路由从11→07 | 参数定义不变 |
-| A-CONFIG-002 | A-CONFIG-002 | KEEP | P0 | 07 | FROZEN | 路由从11→07 | 参数发布+State |
+| A-CONFIG-002 | A-CONFIG-002 | KEEP | P0 | 07 | FROZEN（BASE=FROZEN；OwnerOverride=CONTRACT_GAP/GAP-015） | 路由从11→07 | 参数发布+State |
 | A-POLICY-001 | A-POLICY-001 | KEEP | P0 | 07 | FROZEN | 路由从11→07 | 策略矩阵不变 |
 | A-RISK-001 | A-RISK-001 | KEEP | P0 | 07 | FROZEN | 路由从12→07 | 风险事件+State |
-| A-APPROVAL-001 | A-APPROVAL-001 | KEEP | P0 | 07 | FROZEN | 路由从12→07 | 审批中心+SoD |
+| A-APPROVAL-001 | A-APPROVAL-001 | KEEP | P0 | 07 | FROZEN（BASE=FROZEN；threshold参数=CONTRACT_GAP/GAP-016） | 路由从12→07 | 审批中心+SoD |
 | A-AUDIT-001 | A-AUDIT-001 | KEEP | P0 | 08 | FROZEN | 路由从13→08 | 操作日志不变 |
 | A-AUDIT-002 | A-AUDIT-002 | KEEP | P0 | 08 | FROZEN | 路由从13→08 | 敏感审计不变 |
 | A-OPS-001 | A-OPS-001 | KEEP | P0 | 08 | FROZEN | 路由从14→08 | 系统运维不变 |
@@ -91,5 +91,5 @@ SPLIT_TO = 0
 SUPERSEDE = 0
 SILENT_DELETE = 0
 DUPLICATE_PAGE_ID = 0
-ROUTE_IMPACT = 34 pages（因 Root 变化路由变更）
+ROUTE_IMPACT = 32 pages（因 Root 变化路由变更）[DERIVED]（实际标有"路由从"的页面 = 32）
 ```

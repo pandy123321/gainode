@@ -97,3 +97,21 @@
 - 运营闭环 / 用户管理 / 限制 / 资产 / AI / OTC / Power / Audit 方向不变
 - 后台视觉方向不变
 - 不做的功能不变
+
+### I. GOVERNANCE REMEDIATION (Review #482 · 2026-08-11)
+
+| # | 变更项 | 说明 |
+|---|---|---|
+| I1 | RBAC/SoD 恢复 canonical 角色 | 权限矩阵增加 UI_PERSONA→CANONICAL_ROLE_IDS[] 映射；SoD 映射替换为 05 canonical Role ID；参数流程确认为 PARAM_EDITOR→PARAM_APPROVER→RELEASE_OPERATOR 三段分离 |
+| I2 | Contract Status/Priority 重算 | A-USER-004 降为 P1_CONDITIONAL（GAP-014/GAP-015）；A-DATA-003/A-AI-001/A-AI-002 Contract 从 FROZEN 修正为 CONTRACT_GAP；P0_COUNT: 32→31；P1_CONDITIONAL: 17→18；增加 PAGE_ID→GAP_ID JOIN 表 |
+| I3 | 领域状态三轴分离 | 拆分 DOMAIN_OBJECT_STATE / UI_OPERATION_STATE / REQUEST_RESOLUTION_STATE；A-CONFIG-002 对齐 05 canonical enum；RESULT_UNKNOWN 不得作为领域状态；A-USER-004 字段标 UI_CANDIDATE_ONLY |
+| I4 | QA Overclaim 删除 | HIFI_IMPLEMENTATION: 40/58 VERIFIED_PASS → 0/58 NOT_VERIFIED；增加 artifact_sha256/evidence_path 证据字段占位 |
+| I5 | AI 页面 Root 冲突修复 | A-AI-005/A-AI-006 统一归入 Root 07；Navigation Migration 补全；Main Planning Root 08 移除 AI 条目 |
+| I6 | 统计数字可复算 | ROUTE_IMPACT: 34→32 [DERIVED]；Contract Status: 33+24+1=58；Priority: 31+8+18+1=58 |
+| I7 | 中文 UI 本地化收口 | Page Map 英文混合词中文化；Gap Register 英文临时行为→中文+INTERNAL_ONLY 标记 |
+| I8 | OTA→OTC 拼写修正 | Navigation Migration "OTA 与 Power"→"OTC 与 Power" |
+
+```text
+V2_4_1_DOCUMENT_STATUS = READY_FOR_RE_REVIEW
+READY_TO_MERGE_INTO_04 = NO
+```

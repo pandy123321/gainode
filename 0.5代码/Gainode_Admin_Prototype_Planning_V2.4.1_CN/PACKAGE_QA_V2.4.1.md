@@ -62,9 +62,22 @@
 
 | 检查项 | 状态 |
 |---|---|
-| P0 pages (32) | HIFI_IMPLEMENTATION = VERIFIED_PASS（原型已完成） |
-| P1 pages (8) | HIFI_IMPLEMENTATION = VERIFIED_PASS（原型已完成） |
-| P1_CONDITIONAL pages (17) | HIFI_IMPLEMENTATION = NOT_VERIFIED（上游未冻结，Prototype 仅作占位） |
+| P0 pages (31) | HIFI_IMPLEMENTATION = NOT_VERIFIED（原型尚未经独立验证） |
+| P1 pages (8) | HIFI_IMPLEMENTATION = NOT_VERIFIED |
+| P1_CONDITIONAL pages (18) | HIFI_IMPLEMENTATION = NOT_VERIFIED（上游未冻结，Prototype 仅作占位） |
+| FUTURE pages (1) | HIFI_IMPLEMENTATION = NOT_VERIFIED |
+
+> HIFI_IMPLEMENTATION 当前均为 NOT_VERIFIED，因为本 Commit 未附带如下证据：
+> ```text
+> artifact_name = ___
+> artifact_sha256 = ___
+> page_id = ___
+> evidence_path = ___
+> test_method = ___
+> tested_at = ___
+> result = ___
+> ```
+> 如有真实原型 Artifact，需填充上述字段后方可改为 VERIFIED_PASS。
 
 ## Runtime Validation
 
@@ -82,8 +95,8 @@ PAGE_REGISTERED: 58/58 = VERIFIED_PASS
 POLICY_PRESENT: 13/13 = VERIFIED_PASS
 UPSTREAM_CONTRACT: 18/18 = CONTRACT_GAP（未冻结）
 PROVIDER_CONTRACT: 2/2 = CONTRACT_GAP
-HIFI_IMPLEMENTATION: 40/58 = VERIFIED_PASS, 18 = NOT_VERIFIED
+HIFI_IMPLEMENTATION: 0/58 = NOT_VERIFIED（无 Artifact Evidence）
 RUNTIME_VALIDATION: 0/4 = NOT_YET_EXECUTED
 
-OVERALL_VERDICT = PASS_WITH_GAPS（Contract Gaps 需 Owner 决定）
+OVERALL_VERDICT = PASS_WITH_GAPS（Contract Gaps 需 Owner 决定；HIFI 尚未验证）
 ```

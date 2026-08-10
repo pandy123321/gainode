@@ -36,8 +36,8 @@
 
 | 检查项 | 状态 |
 |---|---|
-| P0_WITH_UNRESOLVED_CONTRACT_GAP = 0 | ✓ PASS |
-| P1_CONDITIONAL_COUNT = 17 | ✓ VERIFIED |
+| P0_WITH_UNRESOLVED_BLOCKING_CONTRACT_GAP = 0 [DERIVED] | ✓ PASS（A-USER-004 已降为 P1_CONDITIONAL） |
+| P1_CONDITIONAL_COUNT = 18 | ✓ VERIFIED |
 | Agent Portal 全部 P1_CONDITIONAL | ✓ VERIFIED |
 | Provider Evidence 拆分为 UI_SPEC/CONTRACT/RUNTIME | ✓ VERIFIED |
 | AI Simulation 不标 REAL_EXECUTION | ✓ VERIFIED |
@@ -78,7 +78,7 @@ SILENT_PAGE_DELETE = 0----------------------------------✓
 HIGH_RISK_SOD_RULE = PRESENT----------------------------✓
 SELF_APPROVAL = FORBIDDEN-------------------------------✓
 OWNER_OVERRIDE = CONTROLLED_OR_CONTRACT_GAP-------------✓
-P0_WITH_UNRESOLVED_CONTRACT_GAP = 0---------------------✓
+P0_WITH_UNRESOLVED_BLOCKING_CONTRACT_GAP = 0 [DERIVED]---------✓
 HIGH_RISK_STATE_MODEL = PRESENT-------------------------✓
 RESULT_UNKNOWN = PRESENT--------------------------------✓
 AGENT_SCOPE = FAIL_CLOSED-------------------------------✓
@@ -92,5 +92,5 @@ V2_4_1_DOCUMENT_STATUS = READY_FOR_INDEPENDENT_REVIEW
 SELF_REVIEW_VERDICT = PASS
 ```
 
-> ⚠ 12 项 HUMAN_DECISION_REQUIRED 尚未闭合，需产品 Owner 确认。  
+> ⚠ 7 项 HUMAN_DECISION_REQUIRED 尚未闭合，需产品 Owner 确认。（另有 18 项 Contract Gap 需 Owner 决定，详见 Contract Gap Register）  
 > ⚠ NOT_YET_IMPLEMENTED 项目需在独立审核后进入 HIFI 执行阶段。

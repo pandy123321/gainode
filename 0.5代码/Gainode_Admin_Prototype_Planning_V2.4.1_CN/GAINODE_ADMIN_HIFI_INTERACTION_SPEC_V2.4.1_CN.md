@@ -17,12 +17,19 @@ V2.4 的 14 个一级导航在 V2.4.1 中恢复为 8 个。详见 `GAINODE_ADMIN
 
 ### 0.2 State 模型升级
 
-所有具有 Write Action 的页面必须增加以下 State（V2.4 仅有 6 个基础 State）：
+所有具有 Write Action 的页面必须增加以下 UI 操作状态（非领域状态）：
 
 - SUBMITTING / PROCESSING / UNDER_REVIEW（异步操作）
-- RESULT_UNKNOWN（客户端不知道结果）
+- RESULT_UNKNOWN（客户端不知道请求结果 — 不等于领域对象状态 "Unknown"）
 - STATE_CHANGED（数据在操作中被他人修改）
 - CONFLICT / EXPIRED
+
+> **关键区分**：
+> - **DOMAIN_OBJECT_STATE**：对象在系统中的权威状态（对齐 05 canonical enum）
+> - **UI_OPERATION_STATE**：页面操作的临时状态（SUBMITTING/PROCESSING/SUCCESS/FAILED）
+> - **REQUEST_RESOLUTION_STATE**：客户端对请求结果的认知（KNOWN/RESULT_UNKNOWN）
+>
+> RESULT_UNKNOWN 不得作为任何领域对象的 Domain State。处理方式：用原 Idempotency-Key 查询结果（05 §7）。
 
 ### 0.3 SoD 规则
 
@@ -40,32 +47,40 @@ V2.4 中英文混合的页面标题和按钮文案改为纯中文。锁定词（
 
 V2.4 原始流程中缺少 Proposal Status / Requester / Approver / Execution Status。
 
+> **权威状态**：05 中 AssetAdjustment 全链路 Object 未冻结（GAP-014）。本页面功能标记为 CONTRACT_GAP / P1_CONDITIONAL。以下字段仅作为 HIFI UI 候选占位，不构成 API Contract。
+
 **修正**：
 
-新增字段：
-- Proposal Status（Draft / Submitted / Under Review / Approved / Executed / Failed）
-- Requester ID（发起人）
-- Approver ID（审批人，必须 ≠ Requester）
-- Approval Requirement（审批条件）
-- Execution Status（执行结果）
-- Idempotency Reference（幂等参考）
+新增字段（全部标记为 UI_CANDIDATE_ONLY / NON_AUTHORITATIVE / NOT_API_CONTRACT）：
 
-修正流程：
+- Proposal Status（UI_CANDIDATE_ONLY — Draft / Submitted / Under Review / Approved / Executed / Failed；此枚举非 05 领域状态）
+- Requester ID（UI_CANDIDATE_ONLY — 发起人，必须 ≠ Approver）
+- Approver ID（UI_CANDIDATE_ONLY — 审批人，必须 ≠ Requester）
+- Approval Requirement（UI_CANDIDATE_ONLY — 审批条件）
+- Execution Status（UI_CANDIDATE_ONLY — 执行结果）
+- Idempotency Reference（UI_CANDIDATE_ONLY — 幂等参考）
+
+UI 操作状态（非领域状态）：
 ```text
-Create Proposal
-→ Validation
-→ Impact Preview
-→ Reason / Evidence
-→ MFA + UID Confirm
-→ Submit for Approval
-→ Independent Approval（Requester ≠ Approver）
-→ Execution
-→ Processing
-→ Success / Failed / Result Unknown
-→ Ledger Entry + Audit
+SUBMITTING / PROCESSING / RESULT_UNKNOWN / SUCCESS / FAILED
 ```
 
-禁止：点击"确认"直接调整余额。
+修正流程（CONTRACT_GAP 期间仅作 UI Spec，不执行）：
+```text
+Create Proposal [PREVIEW_ONLY]
+→ Validation [PREVIEW_ONLY]
+→ Impact Preview [PREVIEW_ONLY]
+→ Reason / Evidence [PREVIEW_ONLY]
+→ MFA + UID Confirm [PREVIEW_ONLY]
+→ Submit for Approval [DISABLED/CONTRACT_GAP]
+→ Independent Approval [DISABLED/CONTRACT_GAP]
+→ Execution [DISABLED/CONTRACT_GAP]
+→ Processing [DISABLED/CONTRACT_GAP]
+→ Success / Failed / Result Unknown [DISABLED/CONTRACT_GAP]
+→ Ledger Entry + Audit [DISABLED/CONTRACT_GAP]
+```
+
+> 在 05 AssetAdjustment Contract 冻结前，A-USER-004 仅提供资产查看（Preview），不执行调整操作。
 
 ### A-CONFIG-002 参数发布与快照（重大修正）
 
@@ -73,10 +88,35 @@ V2.4 中缺少完整生命周期和 Creator ≠ Approver 规则。
 
 **修正**：
 
-完整生命周期：
+#### 领域对象状态（DOMAIN_OBJECT_STATE — 必须对齐 05 §4 canonical enum）
+
 ```text
-Draft → Review → Approved → Scheduled → Active → Paused → Rolled Back → Failed → Unknown
+05_CANONICAL_PARAMETERRELEASE_STATE:
+draft → pending_approval → approved → scheduled → active → paused → rolled_back → archived
 ```
+
+> V2.4.1 不得自行加入 Review、Failed、Unknown 作为 ParameterRelease 领域状态。  
+> `approved` ≠ `active`：批准后可排期延迟生效。  
+> `archived` 仅供审计查询，不可再激活。
+
+#### UI 操作状态（UI_OPERATION_STATE — 页面临时状态，非领域状态）
+
+```text
+SUBMITTING / PROCESSING / SUCCESS / FAILED
+```
+
+> `FAILED` 是操作执行失败，不是 ParameterRelease.status = Failed。领域对象保持操作前状态不变。
+
+#### 请求结果状态（REQUEST_RESOLUTION_STATE — 客户端对请求结果的认知）
+
+```text
+KNOWN / RESULT_UNKNOWN
+```
+
+> RESULT_UNKNOWN 表示"客户端不知道请求最终结果"，不是 ParameterRelease Domain State 的 "Unknown"。  
+> 处理方式：用原 Idempotency-Key 查询原请求结果（05 §7）。
+
+#### 页面字段（UI 字段，非 API Contract）
 
 新增字段：
 - Proposal Creator（创建人）
@@ -178,7 +218,7 @@ TOTAL_ADMIN_PAGE_REGISTERED = 51
 AGENT_PORTAL_PAGE_REGISTERED = 7
 
 ADMIN_ROOT_NAV_COUNT = 8--------------------------------PASS
-P0_WITH_CONTRACT_GAP = 0--------------------------------PASS
+P0_WITH_BLOCKING_CONTRACT_GAP = 0 [DERIVED]-------------PASS（A-USER-004 已降为 P1_CONDITIONAL）
 SELF_APPROVAL = FORBIDDEN-------------------------------PASS
 HIGH_RISK_WRITE_STATE_MODEL = PRESENT-------------------PASS
 RESULT_UNKNOWN = PRESENT--------------------------------PASS
