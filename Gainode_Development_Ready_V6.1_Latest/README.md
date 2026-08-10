@@ -56,6 +56,19 @@ Power 是可消耗、可恢复操作资源。
 - Robot Start：启动自动执行能力使用 Power；C 端仍写"启动 Robot / 启动运行"，不要重新做成 Crypto Arbitrage Robot。
 - Prediction P0 当前不默认消耗 Power。
 
+## 设计执行伴随文档
+
+`/design-system/` 目录包含 Mobile/H5 设计执行伴随文档，用于 UI/原型/Flutter/Vue 的实现指导。
+
+| 文件 | 角色 |
+|---|---|
+| `design-system/10_HIFI_Prototype_Design_System_V1.2.md` | **ACTIVE** — 44 页 HIFI 设计执行伴随文档 |
+| `design-system/11_Full_Page_Visual_Interaction_Plan_V1.1.md` | MERGED — 75 页全量视觉交互策划 V1.1 |
+| `design-system/11_Full_Page_Visual_Interaction_Plan_V1.2_REFERENCE_ONLY.md` | REFERENCE ONLY — 仅保留策划背景 |
+| `design-system/10_Mobile_H5_Design_System_V1.1_ARCHIVED.md` | ARCHIVED — 有效增量已并入 V1.2 |
+
+> ⚠ 以上均为 `DESIGN_EXECUTION_COMPANION`。发生冲突时，以 `01–08`、`/i18n` 和 `/assets/logo` 为准。详见 `design-system/README.md`。
+
 ## 原型 / HIFI 下一步
 
 本地 Agent 直接基于本包继续：
