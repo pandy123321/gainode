@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gainode Admin — Login</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .login-ver{text-align:center;margin-top:24px;color:rgba(255,255,255,0.5);font-size:12px;position:relative;z-index:1;}
+</style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="logo-area">
+      <div class="logo-icon">◆</div>
+      <h1>Gainode Admin</h1>
+      <p class="sub">Management Console · V6.1 Wireframe</p>
+    </div>
+
+    <div id="pwdForm">
+      <div class="form-group">
+        <label>Account</label>
+        <input type="text" id="account" placeholder="admin" value="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password" value="admin123">
+      </div>
+      <div class="form-group">
+        <label>Verification</label>
+        <div class="captcha-row">
+          <input type="text" id="captcha" placeholder="Captcha" value="A3B9">
+          <div class="captcha-box" id="captchaImg" onclick="genCaptcha()" title="Click to refresh">A3B9</div>
+        </div>
+      </div>
+      <button class="btn-login" onclick="doLogin()">Sign In</button>
+      <div class="login-footer">
+        <a href="#" onclick="switchForm()">Login with SMS code →</a>
+      </div>
+    </div>
+
+    <div id="smsForm" style="display:none;">
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" id="phone" placeholder="+1 415-000-0000">
+      </div>
+      <div class="form-group">
+        <label>SMS Code</label>
+        <div class="captcha-row">
+          <input type="text" id="smsCode" placeholder="6-digit code">
+          <button class="btn" onclick="sendSms()" id="smsBtn" style="width:110px;white-space:nowrap;">Get Code</button>
+        </div>
+      </div>
+      <button class="btn-login" onclick="doCodeLogin()">Verify & Sign In</button>
+      <div class="login-footer">
+        <a href="#" onclick="switchForm()">← Back to password login</a>
+      </div>
+    </div>
+
+    <p id="msg" style="text-align:center;color:var(--danger-600);font-size:12px;margin-top:12px;display:none;"></p>
+  </div>
+  <p class="login-ver">Gainode Admin V6.1 · Wireframe Prototype</p>
+</div>
+
+<script>
+  function genCaptcha(){
+    const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';
+    for(let i=0;i<4;i++)s+=c[Math.floor(Math.random()*c.length)];
+    document.getElementById('captchaImg').textContent=s;
+  }
+  function switchForm(){
+    document.getElementById('pwdForm').style.display=document.getElementById('pwdForm').style.display==='none'?'block':'none';
+    document.getElementById('smsForm').style.display=document.getElementById('smsForm').style.display==='none'?'block':'none';
+    document.getElementById('msg').style.display='none';
+  }
+  function sendSms(){
+    const b=document.getElementById('smsBtn');if(b.disabled)return;b.disabled=true;let s=60;
+    b.textContent=s+'s';const t=setInterval(()=>{s--;b.textContent=s+'s';if(s<=0){clearInterval(t);b.disabled=false;b.textContent='Get Code';}},1000);
+  }
+  function show(m){const e=document.getElementById('msg');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',3000);}
+  function doLogin(){
+    if(!document.getElementById('account').value||!document.getElementById('password').value){show('Please enter account and password');return;}
+    if(!document.getElementById('captcha').value){show('Please enter captcha');return;}
+    window.location.href='main.html';
+  }
+  function doCodeLogin(){
+    if(!document.getElementById('phone').value||!document.getElementById('smsCode').value){show('Please enter phone and SMS code');return;}
+    window.location.href='main.html';
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Large files
+*.tar.gz
+*.mp4
+*.gif
+*.docx
+
+# Long paths / old archives
+0.5代码/gainode后端/
+历史文档/旧版本文档包/

@@ -1,0 +1,1804 @@
+{
+  "version": "2.2-latest",
+  "page_count": 75,
+  "locales": [
+    "zh-CN",
+    "en-US",
+    "ja-JP",
+    "ko-KR",
+    "th-TH",
+    "de-DE",
+    "fr-FR"
+  ],
+  "pages": {
+    "M-AUTH-001": {
+      "title_key": "page.m_auth_001.title",
+      "description_key": "page.m_auth_001.description",
+      "primary_action_key": "page.m_auth_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-AUTH-002": {
+      "title_key": "page.m_auth_002.title",
+      "description_key": "page.m_auth_002.description",
+      "primary_action_key": "page.m_auth_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-AUTH-003": {
+      "title_key": "page.m_auth_003.title",
+      "description_key": "page.m_auth_003.description",
+      "primary_action_key": "page.m_auth_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-AUTH-004": {
+      "title_key": "page.m_auth_004.title",
+      "description_key": "page.m_auth_004.description",
+      "primary_action_key": "page.m_auth_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-AUTH-005": {
+      "title_key": "page.m_auth_005.title",
+      "description_key": "page.m_auth_005.description",
+      "primary_action_key": "page.m_auth_005.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-KYC-001": {
+      "title_key": "page.m_kyc_001.title",
+      "description_key": "page.m_kyc_001.description",
+      "primary_action_key": "page.m_kyc_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "kyc.consent.body"
+      ],
+      "priority": "P0"
+    },
+    "M-KYC-002": {
+      "title_key": "page.m_kyc_002.title",
+      "description_key": "page.m_kyc_002.description",
+      "primary_action_key": "page.m_kyc_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "kyc.consent.body"
+      ],
+      "priority": "P0"
+    },
+    "M-KYC-003": {
+      "title_key": "page.m_kyc_003.title",
+      "description_key": "page.m_kyc_003.description",
+      "primary_action_key": "page.m_kyc_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "kyc.consent.body"
+      ],
+      "priority": "P0"
+    },
+    "M-HOME-001": {
+      "title_key": "page.m_home_001.title",
+      "description_key": "page.m_home_001.description",
+      "primary_action_key": "page.m_home_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0",
+      "v6_keys": [
+        "home.hero.today",
+        "home.action.claim_today",
+        "home.action.start_robot",
+        "home.action.view_robot",
+        "home.action.join_prediction",
+        "home.notice.more",
+        "home.section.claim",
+        "home.section.hot_prediction",
+        "home.section.upgrade_leaderboard",
+        "home.section.shortcuts",
+        "home.section.ai_watch",
+        "leaderboard.rank",
+        "leaderboard.my_rank",
+        "leaderboard.level",
+        "leaderboard.weekly_activity",
+        "leaderboard.gap_to_next"
+      ]
+    },
+    "M-NOTICE-001": {
+      "title_key": "page.m_notice_001.title",
+      "description_key": "page.m_notice_001.description",
+      "primary_action_key": "page.m_notice_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0",
+      "v6_keys": [
+        "home.notice.more"
+      ]
+    },
+    "M-ROBOT-001": {
+      "title_key": "page.m_robot_001.title",
+      "description_key": "page.m_robot_001.description",
+      "primary_action_key": "page.m_robot_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-002": {
+      "title_key": "page.m_robot_002.title",
+      "description_key": "page.m_robot_002.description",
+      "primary_action_key": "page.m_robot_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-003": {
+      "title_key": "page.m_robot_003.title",
+      "description_key": "page.m_robot_003.description",
+      "primary_action_key": "page.m_robot_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-004": {
+      "title_key": "page.m_robot_004.title",
+      "description_key": "page.m_robot_004.description",
+      "primary_action_key": "page.m_robot_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-005": {
+      "title_key": "page.m_robot_005.title",
+      "description_key": "page.m_robot_005.description",
+      "primary_action_key": "page.m_robot_005.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-006": {
+      "title_key": "page.m_robot_006.title",
+      "description_key": "page.m_robot_006.description",
+      "primary_action_key": "page.m_robot_006.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-ROBOT-007": {
+      "title_key": "page.m_robot_007.title",
+      "description_key": "page.m_robot_007.description",
+      "primary_action_key": "page.m_robot_007.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "robot.runtime.preparing",
+        "robot.runtime.starting",
+        "robot.runtime.running",
+        "robot.runtime.output_ready",
+        "robot.runtime.claimable",
+        "robot.runtime.claimed",
+        "robot.runtime.pausing",
+        "robot.runtime.paused",
+        "robot.runtime.upgrading",
+        "robot.runtime.restricted",
+        "robot.runtime.error",
+        "robot.metric.running_duration",
+        "robot.metric.health",
+        "robot.metric.last_update",
+        "robot.reward.today",
+        "robot.reward.yesterday",
+        "robot.reward.claimable",
+        "robot.reward.claimed_today",
+        "robot.reward.claimed_total",
+        "robot.reward.next_cycle",
+        "robot.action.claim",
+        "robot.action.start",
+        "robot.action.view_status",
+        "robot.action.view_issue",
+        "robot.activity.start",
+        "robot.activity.pause",
+        "robot.activity.resume",
+        "robot.activity.output",
+        "robot.activity.reward_generated",
+        "robot.activity.reward_claimed",
+        "robot.activity.upgrade",
+        "robot.activity.eligibility",
+        "robot.activity.error",
+        "robot.activity.recovered"
+      ]
+    },
+    "M-PREDICT-001": {
+      "title_key": "page.m_predict_001.title",
+      "description_key": "page.m_predict_001.description",
+      "primary_action_key": "page.m_predict_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-PREDICT-002": {
+      "title_key": "page.m_predict_002.title",
+      "description_key": "page.m_predict_002.description",
+      "primary_action_key": "page.m_predict_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-PREDICT-003": {
+      "title_key": "page.m_predict_003.title",
+      "description_key": "page.m_predict_003.description",
+      "primary_action_key": "page.m_predict_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-PREDICT-004": {
+      "title_key": "page.m_predict_004.title",
+      "description_key": "page.m_predict_004.description",
+      "primary_action_key": "page.m_predict_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-PREDICT-005": {
+      "title_key": "page.m_predict_005.title",
+      "description_key": "page.m_predict_005.description",
+      "primary_action_key": "page.m_predict_005.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-PREDICT-006": {
+      "title_key": "page.m_predict_006.title",
+      "description_key": "page.m_predict_006.description",
+      "primary_action_key": "page.m_predict_006.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "prediction.title",
+        "prediction.hub.hot",
+        "prediction.hub.closing_soon",
+        "prediction.hub.my_active",
+        "prediction.filter.league",
+        "prediction.filter.time",
+        "prediction.participants",
+        "prediction.heat",
+        "prediction.direction.home",
+        "prediction.direction.draw",
+        "prediction.direction.away",
+        "prediction.action.participate",
+        "prediction.confirm.title",
+        "prediction.my.active",
+        "prediction.my.waiting_result",
+        "prediction.my.completed",
+        "prediction.my.exceptions",
+        "prediction.ai_reference",
+        "prediction.data_quality"
+      ]
+    },
+    "M-ME-001": {
+      "title_key": "page.m_me_001.title",
+      "description_key": "page.m_me_001.description",
+      "primary_action_key": "page.m_me_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-ASSET-001": {
+      "title_key": "page.m_asset_001.title",
+      "description_key": "page.m_asset_001.description",
+      "primary_action_key": "page.m_asset_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "otc.action.buy",
+        "otc.action.sell"
+      ]
+    },
+    "M-ASSET-002": {
+      "title_key": "page.m_asset_002.title",
+      "description_key": "page.m_asset_002.description",
+      "primary_action_key": "page.m_asset_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "M-ASSET-003": {
+      "title_key": "page.m_asset_003.title",
+      "description_key": "page.m_asset_003.description",
+      "primary_action_key": "page.m_asset_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "M-POWER-001": {
+      "title_key": "page.m_power_001.title",
+      "description_key": "page.m_power_001.description",
+      "primary_action_key": "page.m_power_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell"
+      ]
+    },
+    "M-OTC-001": {
+      "title_key": "page.m_otc_001.title",
+      "description_key": "page.m_otc_001.description",
+      "primary_action_key": "page.m_otc_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-OTC-002": {
+      "title_key": "page.m_otc_002.title",
+      "description_key": "page.m_otc_002.description",
+      "primary_action_key": "page.m_otc_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-OTC-003": {
+      "title_key": "page.m_otc_003.title",
+      "description_key": "page.m_otc_003.description",
+      "primary_action_key": "page.m_otc_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-OTC-004": {
+      "title_key": "page.m_otc_004.title",
+      "description_key": "page.m_otc_004.description",
+      "primary_action_key": "page.m_otc_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-OTC-005": {
+      "title_key": "page.m_otc_005.title",
+      "description_key": "page.m_otc_005.description",
+      "primary_action_key": "page.m_otc_005.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-OTC-006": {
+      "title_key": "page.m_otc_006.title",
+      "description_key": "page.m_otc_006.description",
+      "primary_action_key": "page.m_otc_006.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0",
+      "v6_keys": [
+        "power.available",
+        "power.frozen",
+        "power.consumed",
+        "power.released",
+        "power.flow.freeze",
+        "power.flow.fill",
+        "power.flow.release",
+        "otc.action.buy",
+        "otc.action.sell",
+        "otc.status.matching",
+        "otc.status.partial",
+        "otc.status.completed",
+        "otc.status.cancelled",
+        "otc.partial.filled",
+        "otc.partial.remaining",
+        "otc.partial.power_consumed",
+        "otc.partial.power_frozen",
+        "otc.partial.power_released"
+      ]
+    },
+    "M-SEC-001": {
+      "title_key": "page.m_sec_001.title",
+      "description_key": "page.m_sec_001.description",
+      "primary_action_key": "page.m_sec_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-SEC-002": {
+      "title_key": "page.m_sec_002.title",
+      "description_key": "page.m_sec_002.description",
+      "primary_action_key": "page.m_sec_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-SUPPORT-001": {
+      "title_key": "page.m_support_001.title",
+      "description_key": "page.m_support_001.description",
+      "primary_action_key": "page.m_support_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "support.resolution.body"
+      ],
+      "priority": "P0"
+    },
+    "M-SUPPORT-002": {
+      "title_key": "page.m_support_002.title",
+      "description_key": "page.m_support_002.description",
+      "primary_action_key": "page.m_support_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "support.resolution.body"
+      ],
+      "priority": "P0"
+    },
+    "M-SUPPORT-003": {
+      "title_key": "page.m_support_003.title",
+      "description_key": "page.m_support_003.description",
+      "primary_action_key": "page.m_support_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "support.resolution.body"
+      ],
+      "priority": "P0"
+    },
+    "M-SETTINGS-001": {
+      "title_key": "page.m_settings_001.title",
+      "description_key": "page.m_settings_001.description",
+      "primary_action_key": "page.m_settings_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "M-AI-001": {
+      "title_key": "page.m_ai_001.title",
+      "description_key": "page.m_ai_001.description",
+      "primary_action_key": "page.m_ai_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P1"
+    },
+    "M-GROWTH-001": {
+      "title_key": "page.m_growth_001.title",
+      "description_key": "page.m_growth_001.description",
+      "primary_action_key": "page.m_growth_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P1"
+    },
+    "M-PREDICT-FREE-001": {
+      "title_key": "page.m_predict_free_001.title",
+      "description_key": "page.m_predict_free_001.description",
+      "primary_action_key": "page.m_predict_free_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P1"
+    },
+    "M-MIGRATION-001": {
+      "title_key": "page.m_migration_001.title",
+      "description_key": "page.m_migration_001.description",
+      "primary_action_key": "page.m_migration_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "Future"
+    },
+    "A-WORK-001": {
+      "title_key": "page.a_work_001.title",
+      "description_key": "page.a_work_001.description",
+      "primary_action_key": "page.a_work_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-WORK-002": {
+      "title_key": "page.a_work_002.title",
+      "description_key": "page.a_work_002.description",
+      "primary_action_key": "page.a_work_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-USER-001": {
+      "title_key": "page.a_user_001.title",
+      "description_key": "page.a_user_001.description",
+      "primary_action_key": "page.a_user_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-USER-002": {
+      "title_key": "page.a_user_002.title",
+      "description_key": "page.a_user_002.description",
+      "primary_action_key": "page.a_user_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-KYC-001": {
+      "title_key": "page.a_kyc_001.title",
+      "description_key": "page.a_kyc_001.description",
+      "primary_action_key": "page.a_kyc_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "kyc.consent.body"
+      ],
+      "priority": "P0"
+    },
+    "A-LEDGER-001": {
+      "title_key": "page.a_ledger_001.title",
+      "description_key": "page.a_ledger_001.description",
+      "primary_action_key": "page.a_ledger_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "A-LEDGER-002": {
+      "title_key": "page.a_ledger_002.title",
+      "description_key": "page.a_ledger_002.description",
+      "primary_action_key": "page.a_ledger_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "A-LEDGER-003": {
+      "title_key": "page.a_ledger_003.title",
+      "description_key": "page.a_ledger_003.description",
+      "primary_action_key": "page.a_ledger_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "A-LEDGER-004": {
+      "title_key": "page.a_ledger_004.title",
+      "description_key": "page.a_ledger_004.description",
+      "primary_action_key": "page.a_ledger_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "apt.reference_valuation.body"
+      ],
+      "priority": "P0"
+    },
+    "A-ROBOT-001": {
+      "title_key": "page.a_robot_001.title",
+      "description_key": "page.a_robot_001.description",
+      "primary_action_key": "page.a_robot_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0"
+    },
+    "A-ROBOT-002": {
+      "title_key": "page.a_robot_002.title",
+      "description_key": "page.a_robot_002.description",
+      "primary_action_key": "page.a_robot_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0"
+    },
+    "A-ROBOT-003": {
+      "title_key": "page.a_robot_003.title",
+      "description_key": "page.a_robot_003.description",
+      "primary_action_key": "page.a_robot_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "robot.restricted.body"
+      ],
+      "priority": "P0"
+    },
+    "A-OTC-001": {
+      "title_key": "page.a_otc_001.title",
+      "description_key": "page.a_otc_001.description",
+      "primary_action_key": "page.a_otc_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0"
+    },
+    "A-OTC-002": {
+      "title_key": "page.a_otc_002.title",
+      "description_key": "page.a_otc_002.description",
+      "primary_action_key": "page.a_otc_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "otc.submitted_not_completed.body"
+      ],
+      "priority": "P0"
+    },
+    "A-POWER-001": {
+      "title_key": "page.a_power_001.title",
+      "description_key": "page.a_power_001.description",
+      "primary_action_key": "page.a_power_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-PREDICT-001": {
+      "title_key": "page.a_predict_001.title",
+      "description_key": "page.a_predict_001.description",
+      "primary_action_key": "page.a_predict_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0"
+    },
+    "A-PREDICT-002": {
+      "title_key": "page.a_predict_002.title",
+      "description_key": "page.a_predict_002.description",
+      "primary_action_key": "page.a_predict_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0"
+    },
+    "A-PREDICT-003": {
+      "title_key": "page.a_predict_003.title",
+      "description_key": "page.a_predict_003.description",
+      "primary_action_key": "page.a_predict_003.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0"
+    },
+    "A-PREDICT-004": {
+      "title_key": "page.a_predict_004.title",
+      "description_key": "page.a_predict_004.description",
+      "primary_action_key": "page.a_predict_004.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "prediction.risk_disclosure.body"
+      ],
+      "priority": "P0"
+    },
+    "A-RISK-001": {
+      "title_key": "page.a_risk_001.title",
+      "description_key": "page.a_risk_001.description",
+      "primary_action_key": "page.a_risk_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-APPROVAL-001": {
+      "title_key": "page.a_approval_001.title",
+      "description_key": "page.a_approval_001.description",
+      "primary_action_key": "page.a_approval_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-CONFIG-001": {
+      "title_key": "page.a_config_001.title",
+      "description_key": "page.a_config_001.description",
+      "primary_action_key": "page.a_config_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-CONFIG-002": {
+      "title_key": "page.a_config_002.title",
+      "description_key": "page.a_config_002.description",
+      "primary_action_key": "page.a_config_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-POLICY-001": {
+      "title_key": "page.a_policy_001.title",
+      "description_key": "page.a_policy_001.description",
+      "primary_action_key": "page.a_policy_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-SUPPORT-001": {
+      "title_key": "page.a_support_001.title",
+      "description_key": "page.a_support_001.description",
+      "primary_action_key": "page.a_support_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "support.resolution.body"
+      ],
+      "priority": "P0"
+    },
+    "A-SUPPORT-002": {
+      "title_key": "page.a_support_002.title",
+      "description_key": "page.a_support_002.description",
+      "primary_action_key": "page.a_support_002.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [
+        "support.resolution.body"
+      ],
+      "priority": "P0"
+    },
+    "A-AUDIT-001": {
+      "title_key": "page.a_audit_001.title",
+      "description_key": "page.a_audit_001.description",
+      "primary_action_key": "page.a_audit_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-OPS-001": {
+      "title_key": "page.a_ops_001.title",
+      "description_key": "page.a_ops_001.description",
+      "primary_action_key": "page.a_ops_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P0"
+    },
+    "A-REPORT-001": {
+      "title_key": "page.a_report_001.title",
+      "description_key": "page.a_report_001.description",
+      "primary_action_key": "page.a_report_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P1"
+    },
+    "A-GROWTH-001": {
+      "title_key": "page.a_growth_001.title",
+      "description_key": "page.a_growth_001.description",
+      "primary_action_key": "page.a_growth_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "P1"
+    },
+    "A-MIGRATION-001": {
+      "title_key": "page.a_migration_001.title",
+      "description_key": "page.a_migration_001.description",
+      "primary_action_key": "page.a_migration_001.primary_action",
+      "state_keys": [
+        "status.open",
+        "status.paused",
+        "status.locked",
+        "status.review",
+        "status.processing"
+      ],
+      "domain_sensitive_keys": [],
+      "priority": "Future"
+    }
+  },
+  "string_asset_version": "V2.1",
+  "global_v6_keys": [
+    "home.hero.today",
+    "home.action.claim_today",
+    "home.action.start_robot",
+    "home.action.view_robot",
+    "home.action.join_prediction",
+    "home.notice.more",
+    "home.section.claim",
+    "home.section.hot_prediction",
+    "home.section.upgrade_leaderboard",
+    "home.section.shortcuts",
+    "home.section.ai_watch",
+    "leaderboard.rank",
+    "leaderboard.my_rank",
+    "leaderboard.level",
+    "leaderboard.weekly_activity",
+    "leaderboard.gap_to_next",
+    "robot.runtime.preparing",
+    "robot.runtime.starting",
+    "robot.runtime.running",
+    "robot.runtime.output_ready",
+    "robot.runtime.claimable",
+    "robot.runtime.claimed",
+    "robot.runtime.pausing",
+    "robot.runtime.paused",
+    "robot.runtime.upgrading",
+    "robot.runtime.restricted",
+    "robot.runtime.error",
+    "robot.metric.running_duration",
+    "robot.metric.health",
+    "robot.metric.last_update",
+    "robot.reward.today",
+    "robot.reward.yesterday",
+    "robot.reward.claimable",
+    "robot.reward.claimed_today",
+    "robot.reward.claimed_total",
+    "robot.reward.next_cycle",
+    "robot.action.claim",
+    "robot.action.start",
+    "robot.action.view_status",
+    "robot.action.view_issue",
+    "robot.activity.start",
+    "robot.activity.pause",
+    "robot.activity.resume",
+    "robot.activity.output",
+    "robot.activity.reward_generated",
+    "robot.activity.reward_claimed",
+    "robot.activity.upgrade",
+    "robot.activity.eligibility",
+    "robot.activity.error",
+    "robot.activity.recovered",
+    "prediction.title",
+    "prediction.hub.hot",
+    "prediction.hub.closing_soon",
+    "prediction.hub.my_active",
+    "prediction.filter.league",
+    "prediction.filter.time",
+    "prediction.participants",
+    "prediction.heat",
+    "prediction.direction.home",
+    "prediction.direction.draw",
+    "prediction.direction.away",
+    "prediction.action.participate",
+    "prediction.confirm.title",
+    "prediction.my.active",
+    "prediction.my.waiting_result",
+    "prediction.my.completed",
+    "prediction.my.exceptions",
+    "prediction.ai_reference",
+    "prediction.data_quality",
+    "power.available",
+    "power.frozen",
+    "power.consumed",
+    "power.released",
+    "power.flow.freeze",
+    "power.flow.fill",
+    "power.flow.release",
+    "otc.action.buy",
+    "otc.action.sell",
+    "otc.status.matching",
+    "otc.status.partial",
+    "otc.status.completed",
+    "otc.status.cancelled",
+    "otc.partial.filled",
+    "otc.partial.remaining",
+    "otc.partial.power_consumed",
+    "otc.partial.power_frozen",
+    "otc.partial.power_released"
+  ],
+  "one_locale_one_language": true,
+  "formal_ui_fixture_labels_hidden": true,
+  "global_v6_1_keys": [
+    "power.cap",
+    "power.impact.after_action",
+    "power.impact.required",
+    "power.level_source",
+    "power.next_restore",
+    "power.recovering",
+    "power.usage.otc_sell",
+    "power.usage.robot_start",
+    "power.usage.title",
+    "power.usage.withdrawal",
+    "robot.power.restores",
+    "robot.power.title",
+    "robot.upgrade.power_cap_diff"
+  ],
+  "latest_project_decisions": [
+    "home_leaderboard_bottom",
+    "robot_power_battery_no_upgrade_progress",
+    "power_cap_by_robot_level",
+    "power_used_by_otc_sell_withdrawal_robot_start",
+    "prediction_multi_market_root",
+    "one_page_one_image_no_device_frame"
+  ]
+}

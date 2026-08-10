@@ -1,0 +1,175 @@
+{
+  "rule": "V6 七语言工程字符串已完整生成并用于 HIFI/布局测试；涉及 KYC、Consent、动态 Reward、竞猜风险、OTC/Power、APT 参考估值、MFA 等敏感文案，在作为最终生产法律/金融/合规文案前仍需 Product/Legal/Compliance Owner 人工签核。",
+  "status": "PENDING_HUMAN_REVIEW",
+  "keys": {
+    "kyc.consent.body": {
+      "category": "KYC",
+      "human_review": "PENDING"
+    },
+    "kyc.needs_info.body": {
+      "category": "KYC",
+      "human_review": "PENDING"
+    },
+    "kyc.rejected.body": {
+      "category": "KYC",
+      "human_review": "PENDING"
+    },
+    "robot.restricted.body": {
+      "category": "SUPPORT",
+      "human_review": "PENDING"
+    },
+    "robot.upgrade_confirm.body": {
+      "category": "SUPPORT",
+      "human_review": "PENDING"
+    },
+    "robot.reward_dynamic.body": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "prediction.risk_disclosure.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "prediction.consent.body": {
+      "category": "CONSENT",
+      "human_review": "PENDING"
+    },
+    "prediction.low_liquidity.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "prediction.result_not_settlement.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "prediction.correction.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.submitted_not_completed.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.partial.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.unknown_result.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.power_flow.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "apt.reference_valuation.body": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "mfa.security_notice.body": {
+      "category": "SECURITY",
+      "human_review": "PENDING"
+    },
+    "support.resolution.body": {
+      "category": "SUPPORT",
+      "human_review": "PENDING"
+    },
+    "policy.region_restricted.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "financial.no_guarantee.body": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "home.action.claim_today": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "home.section.claim": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.today": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.yesterday": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.claimable": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.claimed_today": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.claimed_total": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.reward.next_cycle": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "robot.action.claim": {
+      "category": "FINANCIAL",
+      "human_review": "PENDING"
+    },
+    "prediction.action.participate": {
+      "category": "CONSENT",
+      "human_review": "PENDING"
+    },
+    "prediction.confirm.title": {
+      "category": "CONSENT",
+      "human_review": "PENDING"
+    },
+    "power.flow.freeze": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "power.flow.fill": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "power.flow.release": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.action.buy": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.action.sell": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.status.expired": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "otc.risk_disclosure.body": {
+      "category": "RISK",
+      "human_review": "PENDING"
+    },
+    "notice.status.delivery_failed": {
+      "category": "TECHNICAL",
+      "human_review": "PENDING"
+    },
+    "notice.status.read": {
+      "category": "TECHNICAL",
+      "human_review": "PENDING"
+    },
+    "notice.status.unread": {
+      "category": "TECHNICAL",
+      "human_review": "PENDING"
+    },
+    "notice.status.object_unavailable": {
+      "category": "TECHNICAL",
+      "human_review": "PENDING"
+    }
+  },
+  "version": "2.1-v6"
+}

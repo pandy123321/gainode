@@ -1,0 +1,48 @@
+{
+  "version": "2.0-v6",
+  "do_not_translate": [
+    "Gainode",
+    "APT",
+    "APT-I",
+    "APT-C",
+    "Robot",
+    "OTC",
+    "Power",
+    "1X2",
+    "MFA",
+    "KYC",
+    "OTP",
+    "AI"
+  ],
+  "localize_ui_terms": [
+    "Home",
+    "Prediction",
+    "Me",
+    "Rewards",
+    "Claim",
+    "Order",
+    "Market Detail",
+    "Settings",
+    "Support",
+    "Under Review",
+    "Restricted",
+    "Refund",
+    "Correction",
+    "Parameter Center",
+    "Risk Case"
+  ],
+  "canonical_never_translate": [
+    "id",
+    "code",
+    "version",
+    "hash",
+    "parameter_key",
+    "audit_event_code",
+    "request_id",
+    "object_id"
+  ],
+  "fallback_locale": "en-US",
+  "source_locale": "zh-CN",
+  "note": "ONE_LOCALE_ONE_LANGUAGE：除锁定产品词、用户原始内容和官方实体名 fallback 外，每个 locale 的用户界面必须使用该 locale 的自然语言；不允许英文工程整句 fallback 或半翻译 UI。中文用户端 Prediction 正式显示为「竞猜」，内部 Page ID/API/Domain 保持 canonical Prediction。",
+  "cross_language_pollution_allowed": false
+}

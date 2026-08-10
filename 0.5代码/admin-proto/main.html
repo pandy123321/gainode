@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gainode Admin V6.1</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span class="symbol">◆</span>Gainode</div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div class="sidebar-footer">
+      <div class="user-avatar">A</div>
+      <div class="user-name">admin@gaionde</div>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <header class="header">
+      <div class="breadcrumb" id="breadcrumb">Gainode Admin / <span>运营总览</span></div>
+      <div class="header-right">
+        <button class="header-btn" title="通知">🔔<span class="indicator"></span></button>
+        <button class="header-btn" title="语言">🌐</button>
+        <div class="dropdown">
+          <div class="header-user" onclick="toggleDropdown()">
+            <div class="avatar">A</div><span>admin</span><span style="font-size:10px;">▼</span>
+          </div>
+          <div class="dropdown-menu" id="userDropdown">
+            <button class="dm-item" onclick="App.toast('个人信息')">👤 个人信息</button>
+            <button class="dm-item" onclick="App.toast('修改密码')">🔑 修改密码</button>
+            <div class="dropdown-divider"></div>
+            <button class="dm-item danger" id="actionLogout">🚪 退出登录</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- 8 sections only — tabs inside each -->
+      <section class="page-section active" id="sec-dash"></section>
+      <section class="page-section" id="sec-user"></section>
+      <section class="page-section" id="sec-asset"></section>
+      <section class="page-section" id="sec-robot"></section>
+      <section class="page-section" id="sec-otc"></section>
+      <section class="page-section" id="sec-market"></section>
+      <section class="page-section" id="sec-risk"></section>
+      <section class="page-section" id="sec-support"></section>
+    </main>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modalTitle"></h3><button class="modal-close" onclick="App.closeModal()">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<script src="js/mock-data.js"></script>
+<script src="js/app.js"></script>
+<script>
+  function toggleDropdown(){
+    var d=document.getElementById('userDropdown');d.classList.toggle('show');
+    setTimeout(function(){document.addEventListener('click',function h(e){if(!e.target.closest('.dropdown')){d.classList.remove('show');document.removeEventListener('click',h);}});},0);
+  }
+</script>
+</body>
+</html>
