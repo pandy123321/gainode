@@ -111,7 +111,16 @@
 | I7 | 中文 UI 本地化收口 | Page Map 英文混合词中文化；Gap Register 英文临时行为→中文+INTERNAL_ONLY 标记 |
 | I8 | OTA→OTC 拼写修正 | Navigation Migration "OTA 与 Power"→"OTC 与 Power" |
 
+### J. GOVERNANCE MICRO-REMEDIATION (Review #485 · 2026-08-11)
+
+| # | 变更项 | 严重度 | 说明 |
+|---|---|---|---|
+| J1 | UI Persona / Canonical Role 严格分层 | P1 | 增加三层架构声明（§2.0）；UI Persona 仅控制导航可见性，API 权限由 Canonical Role 授权。移除高风险动作 Action→Requester→Approver 逐条映射表（§4），替换为 SoD 互斥约束 + Fail-Closed 原则。具体审批路由由 05 Contract 和 Policy Engine 决定，治理文档不越权指定 |
+| J2 | Contract Status 派生源统一 | P1 | 在 Page→Gap JOIN 表声明为 Contract Status 唯一派生源；A-AI-006 Contract 从 FROZEN 修正为 CONTRACT_GAP（GAP-010/BLOCKING），与 JOIN 表一致 |
+| J3 | Contract Status 统计更正 | P2 | 从 Migration Matrix 逐行加总重算：FROZEN(33→35)、CONTRACT_GAP(24→22)、FUTURE(1)；Page Map §4 增加机械复算说明，人工可独立验证 |
+| J4 | Gate 4 语义对齐 | P2 | 独立审核 Gate 4 从"P0 + Contract Gap 禁止共存"更新为"P0 + BLOCKING Contract Gap 禁止共存"；明确 NON_BLOCKING Gap 不触发阻断；验证方式引用 JOIN 表交叉检查 |
+
 ```text
-V2_4_1_DOCUMENT_STATUS = READY_FOR_RE_REVIEW
+V2_4_1_DOCUMENT_STATUS = READY_FOR_INDEPENDENT_REVIEW
 READY_TO_MERGE_INTO_04 = NO
 ```

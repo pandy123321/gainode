@@ -9,9 +9,21 @@ APPROVED != EXECUTED
 OWNER_OVERRIDE = CONTROLLED（需 MFA + Reason + Evidence + 事后审计）
 ```
 
-## 2. 角色
+## 2. 角色分层架构
 
-### 2.1 UI Persona（运营后台展示名称）
+本权限矩阵采用三层架构，严格区分"谁能看到什么"（UI Persona）、"谁能做什么"（Canonical Role）、"谁不能同时做什么"（SoD 约束）。
+
+### 2.0 分层原则
+
+| 层次 | 用途 | 决定内容 | 不决定内容 |
+| --- | --- | --- | --- |
+| **UI_PERSONA** | 界面展示 + 导航可见性 | 用户能看到哪些页面/菜单入口 | 用户能执行哪些 API 操作 |
+| **CANONICAL_ROLE** | API 权限来源（05 §8） | 用户能调用哪些 API（读写范围） | 界面导航结构 |
+| **SoD 约束** | 互斥规则 | 哪些角色对不可由同一自然人同时持有 | 每个 Action 的具体审批角色 |
+
+UI Persona 到 Canonical Role 的映射是**多对多**的——一个 UI Persona 可承载多个 Canonical Role，但同一自然人在同一事务中只能激活一个 Canonical Role，且受 SoD 互斥约束限制。
+
+### 2.1 UI Persona（运营后台展示名称，仅用于导航/显示）
 
 总后台：
 - 超级管理员
@@ -22,12 +34,14 @@ OWNER_OVERRIDE = CONTROLLED（需 MFA + Reason + Evidence + 事后审计）
 - 代理
 - 代理客服
 
+> UI Persona 仅控制**界面可见性**（菜单、页面入口），不是 API 权限来源。API 权限由 §2.2 的 Canonical Role 授权。
+
 ### 2.2 UI Persona → Canonical RBAC Roles 映射（权威来源：05 §8/§11）
 
 ```text
 UI_PERSONA             → CANONICAL_ROLE_IDS (from 05)           → ABAC_SCOPE
-超级管理员               → [PARAM_EDITOR, PARAM_APPROVER,        → ALL（但 PARAM_EDITOR≠PARAM_APPROVER≠RELEASE_OPERATOR）
-                           RELEASE_OPERATOR, RISK_ANALYST,
+超级管理员               → [PARAM_EDITOR, PARAM_APPROVER,        → ALL（多角色承载，但受 SoD 互斥约束：
+                           RELEASE_OPERATOR, RISK_ANALYST,         同一事务中 PARAM_EDITOR≠PARAM_APPROVER≠RELEASE_OPERATOR）
                            RISK_APPROVER, LEDGER_OPERATOR,
                            FINANCE_REVIEWER, OPS_OPERATOR,
                            KYC_REVIEWER, SUPPORT_AGENT,
@@ -42,7 +56,7 @@ UI_PERSONA             → CANONICAL_ROLE_IDS (from 05)           → ABAC_SCOPE
 
 > 05 权威 canonical Role ID 列表（§8）：END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / RISK_ANALYST / RISK_APPROVER / LEDGER_OPERATOR / FINANCE_REVIEWER / PARAM_EDITOR / PARAM_APPROVER / RELEASE_OPERATOR / AUDITOR / ADMIN_SECURITY
 >
-> 低 05 角色不得被 V2.4.1 重定义或压缩。UI Persona 仅作为运营后台展示名称，不得替代 canonical RBAC 角色。
+> 低 05 角色不得被 V2.4.1 重定义或压缩。UI Persona 仅作为运营后台展示名称，不得替代 canonical RBAC 角色。Canonical Role 是 API 权限的唯一来源。
 
 ## 3. 权限矩阵（以 UI Persona 展示，底层引用 05 canonical Role ID）
 
@@ -75,26 +89,26 @@ UI_PERSONA             → CANONICAL_ROLE_IDS (from 05)           → ABAC_SCOPE
 
 > 上表中"超级管理员"可承载多个 05 canonical Role，但**实际操作时必须满足相应 canonical Role 的 SoD 约束**。同一自然人不得在同一事务中同时占用冲突角色（如 PARAM_EDITOR + PARAM_APPROVER）。
 
-## 4. 高风险动作 SoD 映射（新增）
+## 4. SoD 互斥约束（新增）
 
-| 动作 | Requester（规范角色） | Approver（规范角色） | MFA | 特殊要求 |
-| --- | --- | --- | --- | --- |
-| 资产调整 | LEDGER_OPERATOR | FINANCE_REVIEWER 或 RISK_APPROVER | ✓ | 不可自审批；05 AssetAdjustment Contract = CONTRACT_GAP |
-| 账本冲正 | LEDGER_OPERATOR | FINANCE_REVIEWER | ✓ | 产生新 Ledger Entry |
-| 参数发布 | PARAM_EDITOR | PARAM_APPROVER | ✓ | Creator ≠ Approver; 激活由 RELEASE_OPERATOR 执行 |
-| 高风险参数变更 | PARAM_EDITOR | PARAM_APPROVER + RISK_APPROVER | ✓ | 双角色确认；激活由 RELEASE_OPERATOR 执行 |
-| 结算 | OPS_OPERATOR | FINANCE_REVIEWER | ✓ | Settlement Confirm ≠ Execute |
-| 结算更正 | LEDGER_OPERATOR | FINANCE_REVIEWER | ✓ | 保留原 Settlement 快照 |
-| 退款更正 | LEDGER_OPERATOR | FINANCE_REVIEWER | ✓ | 保留原订单 |
-| 重大用户限制 | RISK_ANALYST | RISK_APPROVER | ✓ | 按阈值 |
-| 重大权限变化 | OPS_OPERATOR | ADMIN_SECURITY | ✓ | 审计留痕 |
-| 紧急经济操作 | LEDGER_OPERATOR | FINANCE_REVIEWER 或 RISK_APPROVER | ✓ | 事后补审 + 期限；OWNER_OVERRIDE_CONTRACT_STATUS = CONTRACT_GAP |
+以下 SoD 规则声明**互斥角色对**——持有角色 A 的自然人不得在同一事务中同时持有角色 B。本表是**禁止性规则**（谁不能同时做什么），不是**授权性规则**（每个 Action 由谁审批）。具体审批路由由 05 API Contract 和运行时 Policy Engine 决定，本治理文档不越权指定。
 
-> **SoD 强制要求**：
-> - PARAM_EDITOR ≠ PARAM_APPROVER ≠ RELEASE_OPERATOR（参数三段分离）
-> - RISK_ANALYST ≠ RISK_APPROVER（风险分析与处置批准分离）
-> - LEDGER_OPERATOR ≠ FINANCE_REVIEWER（账本操作与财务审核分离）
-> - 申请人不能审批自己的申请（跨所有角色）
+| 互斥对 | 规则 | 来源 |
+| --- | --- | --- |
+| PARAM_EDITOR vs PARAM_APPROVER | 同一 Actor 不得同时持有 | 05 §8 三段分离 |
+| PARAM_EDITOR vs RELEASE_OPERATOR | 同一 Actor 不得同时持有 | 05 §8 三段分离 |
+| PARAM_APPROVER vs RELEASE_OPERATOR | 同一 Actor 不得同时持有 | 05 §8 三段分离 |
+| RISK_ANALYST vs RISK_APPROVER | 风险分析≠处置批准 | 05 §8 |
+| LEDGER_OPERATOR vs FINANCE_REVIEWER | 账本操作≠财务审核 | 05 §8/§11 |
+| 任意 Requester vs Approver | 不可自审批（跨所有 Canonical Role） | SoD 全局规则 |
+
+### Fail-Closed 原则
+
+- 当审批路由在 05 Contract 中未定义时，拒绝执行（FAIL_CLOSED），不猜测默认批准者。
+- 无 05 Contract 支持的操作一律标记为 CONTRACT_GAP，前端仅展示占位或 Preview，不开放实际执行。
+- Owner Override 不可绕过 Ledger/Audit/SoD 约束。
+
+> **重要**：上表的互斥对声明的是"禁止组合"，例如"同一人不得同时为 PARAM_EDITOR 和 PARAM_APPROVER"。本表**不指定**"某个具体 Action 必须由哪个特定角色审批"——此类决策属于 05 API Contract 设计范畴和运行时 Policy Engine 职责，不由本治理矩阵越权指定。
 
 ## 5. 数据范围（不变）
 

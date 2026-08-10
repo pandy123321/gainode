@@ -103,15 +103,18 @@ Gainode 总后台
 
 ## 4. Contract Status 分类
 
+> **派生源**：以下 Contract Status 从 `GAINODE_ADMIN_CONTRACT_GAP_REGISTER_V2.4.1.md` 的 Page→Gap JOIN 表和 `GAINODE_ADMIN_PAGE_ID_MIGRATION_MATRIX_V2.4.1.md` 的 Contract 列逐行加总 [DERIVED]，可机械复算：
+> - FROZEN = 未在 JOIN 表中出现（无任何 Gap）的页面数 + JOIN 表中派生 CONTRACT_STATUS=FROZEN 的页面数
+> - CONTRACT_GAP = JOIN 表中派生 CONTRACT_STATUS=CONTRACT_GAP 的页面数（含 BLOCKING 和 NON_BLOCKING）
+> - FUTURE = JOIN 表中派生 CONTRACT_STATUS=FUTURE 的页面数
+
 | Contract Status | 页面数 |
 |---|---|
-| CONTRACT_FROZEN（05 已正式定义；含 BASE=FROZEN + 非阻断GAP） | 33 |
-| CONTRACT_GAP（05 未冻结对应对象；含阻塞性 GAP） | 24 |
+| CONTRACT_FROZEN（05 已正式定义；含 BASE=FROZEN + 非阻断GAP） | 35 |
+| CONTRACT_GAP（05 未冻结对应对象；含阻塞性 GAP） | 22 |
 | FUTURE | 1 |
 
-> CONTRACT_FROZEN(33) + CONTRACT_GAP(24) + FUTURE(1) = 58 ✓ [DERIVED]  
+> CONTRACT_FROZEN(35) + CONTRACT_GAP(22) + FUTURE(1) = 58 ✓ [DERIVED]  
+> 逐行加总方法：从 Migration Matrix Contract 列统计——35 页标 FROZEN，22 页标 CONTRACT_GAP，1 页标 FUTURE，合计 58。任何人工均可独立复算。
+>
 > 本表中 FROZEN 含 BASE_CONTRACT=FROZEN 但存在非阻断子能力 GAP 的页面（A-USER-003/GAP-013, A-CONFIG-002/GAP-015, A-APPROVAL-001/GAP-016）
-
-> `DUPLICATE_PAGE_ID = 0` ✓  
-> `SILENT_DELETED_AUTHORITY_PAGE = 0` ✓  
-> `ADMIN_ROOT_NAV_COUNT = 8` ✓
