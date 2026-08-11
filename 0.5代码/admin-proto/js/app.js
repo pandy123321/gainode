@@ -24,7 +24,7 @@ var App = {
   tc:function(s){var m={active:'green',completed:'green',pending:'amber',rejected:'red',approved:'blue',draft:'default',open:'blue',locked:'amber',settled:'green',void:'default',closing:'amber',settlement:'amber',high:'red',medium:'amber',low:'green',critical:'red',review:'amber',cooling:'amber',suspended:'red',restricted:'red',analyzing:'amber',escalated:'red',resolved:'green',pending_approval:'amber',changes_requested:'amber',executed:'green',waiting_user:'amber',in_progress:'blue',not_started:'default',needs_info:'amber',disputed:'red',partial:'amber',cancelled:'default',held:'amber',pending_claim:'amber',claimed:'green',expired_returned:'default',failed:'red',running:'blue',scheduled:'amber',pending_confirmation:'amber',normal:'green',elevated:'amber',matched:'green','in':'green',out:'red'};return m[s]||'default';},
   tag:function(s,l){var c=this.tc(s);return'<span class="tag tag-'+c+'">'+(l||s.replace(/_/g,' '))+'</span>';},
   btn:function(l,a){return'<button class="btn btn-xs'+(a?' '+a:'')+'" onclick="'+l+'">';},
-  tbl:function(h,rows){return'<div class="table-wrap"><table><thead><tr>'+h.map(function(c){return'<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';},
+  tbl:function(h,rows){if(!Array.isArray(rows))throw new TypeError('tbl rows must be an array');return'<div class="table-wrap"><table><thead><tr>'+h.map(function(c){return'<th>'+c+'</th>';}).join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';},
   filter:function(els){return'<div class="card"><div class="filter-bar">'+els.join('')+'<button class="btn btn-primary">搜索</button></div>';},
   banner:function(t,m){return'<div class="banner banner-'+t+'">'+m+'</div>';},
   empty:function(m){return'<div class="empty"><div class="empty-icon">📭</div><p>'+(m||'暂无数据')+'</p></div>';},
@@ -258,16 +258,16 @@ var App = {
   /* ── Sidebar V2.4.1 (8 Root) ── */
   renderSidebar:function(){
     var s=this;
-    var sec=function(n,items){return'<div class="nav-section"><div class="nav-section-header"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item" data-group="'+i.g+'" data-tab="'+i.t+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+(i.p?' '+s.pri(i.p):'')+'</div>';}).join('')+'</div>';};
+    var sec=function(n,items){return'<div class="nav-section"><div class="nav-section-header"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item" data-group="'+i.g+'" data-tab="'+i.t+'" data-label="'+i.l+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
     document.getElementById('sidebarNav').innerHTML=
-      sec('01 工作台',[{l:'运营总览',g:'dash',t:'overview',p:'P0'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals,p:'P0'}])+
-      sec('02 用户与准入',[{l:'用户列表',g:'user',t:'list',p:'P0'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc,p:'P0'},{l:'User 360',g:'user',t:'user360',p:'P0'},{l:'用户限制与恢复',g:'user',t:'restrict',p:'P0'},{l:'用户资产调整',g:'user',t:'adjust',p:'P0'},{l:'代理总览',g:'user',t:'agentOverview',p:'P1_CONDITIONAL'},{l:'代理列表',g:'user',t:'agentList',p:'P1_CONDITIONAL'},{l:'代理详情',g:'user',t:'agentDetail',p:'P1_CONDITIONAL'},{l:'推荐关系',g:'user',t:'referral',p:'P1_CONDITIONAL'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets,p:'P0'}])+
-      sec('03 资产与账本',[{l:'资产总览',g:'asset',t:'overview',p:'P0'},{l:'APT 流水',g:'asset',t:'ledger',p:'P0'},{l:'池子对账',g:'asset',t:'pools',p:'P0'},{l:'更正/冲正',g:'asset',t:'correction',p:'P0'},{l:'经济模型总览',g:'asset',t:'econOverview',p:'P0'},{l:'奖励与结算监控',g:'asset',t:'econSettlement',p:'P0'},{l:'经济配置入口',g:'asset',t:'econConfig',p:'P0'}])+
-      sec('04 机器人与权益',[{l:'Robot 列表',g:'robot',t:'list',p:'P0'},{l:'Robot 详情',g:'robot',t:'detail',p:'P0'},{l:'奖励与领取监控',g:'robot',t:'reward',p:'P0'},{l:'升级与Power Cap',g:'robot',t:'upgrade',p:'P1'}])+
-      sec('05 OTC 与 Power',[{l:'OTC 订单',g:'otc',t:'order',p:'P0'},{l:'订单详情/审核',g:'otc',t:'detail',p:'P0'},{l:'撮合/争议监控',g:'otc',t:'monitor',p:'P1'},{l:'Power 账户',g:'otc',t:'power',p:'P0'}])+
-      sec('06 赛事预测',[{l:'赛事/竞猜列表',g:'market',t:'list',p:'P0'},{l:'竞猜详情',g:'market',t:'detail',p:'P0'},{l:'结果/结算',g:'market',t:'result',p:'P0'},{l:'退款/更正',g:'market',t:'refund',p:'P0'},{l:'数据驾驶舱',g:'market',t:'dataCockpit',p:'P1'},{l:'足球数据管理',g:'market',t:'footballData',p:'P1'},{l:'市场赔率数据',g:'market',t:'marketData',p:'P1_CONDITIONAL'},{l:'信号与数据质量',g:'market',t:'signal',p:'P1_CONDITIONAL'}])+
-      sec('07 风控/审批/参数/策略',[{l:'风险事件',g:'risk',t:'case',p:'P0'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals,p:'P0'},{l:'参数定义与候选值',g:'risk',t:'paramDef',p:'P0'},{l:'参数发布与快照',g:'risk',t:'paramRelease',p:'P0'},{l:'策略矩阵',g:'risk',t:'policy',p:'P0'},{l:'紧急操作',g:'risk',t:'emergency',p:'P0'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit',p:'P1'},{l:'AI运营建议',g:'risk',t:'aiSuggest',p:'P1'},{l:'AI市场分析',g:'risk',t:'aiMarket',p:'P1_CONDITIONAL'},{l:'AI策略模拟',g:'risk',t:'aiSim',p:'P1_CONDITIONAL'},{l:'AI竞猜助手',g:'risk',t:'aiPred',p:'P1_CONDITIONAL'},{l:'AI客服风险助手',g:'risk',t:'aiSupport',p:'P1'},{l:'运营报表',g:'risk',t:'report',p:'P1'}])+
-      sec('08 客服/审计/运维',[{l:'工单队列',g:'support',t:'tickets',b:MOCK.stats.openTickets,p:'P0'},{l:'工单详情',g:'support',t:'ticketDetail',p:'P0'},{l:'审计日志',g:'support',t:'audit',p:'P0'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit',p:'P0'},{l:'异步任务/状态',g:'support',t:'ops',p:'P0'},{l:'Provider 监控',g:'support',t:'provider',p:'P1_CONDITIONAL'},{l:'数据源管理',g:'support',t:'datasource',p:'P1_CONDITIONAL'},{l:'RBAC 角色',g:'support',t:'rbac',p:'P0'},{l:'语言管理',g:'support',t:'lang',p:'P0'},{l:'系统配置',g:'support',t:'config',p:'P0'},{l:'APT Migration',g:'support',t:'migration',p:'FUTURE'}]);
+      sec('01 工作台',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
+      sec('02 用户与准入',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
+      sec('03 资产与账本',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正',g:'asset',t:'correction'},{l:'经济模型总览',g:'asset',t:'econOverview'},{l:'奖励与结算监控',g:'asset',t:'econSettlement'},{l:'经济配置入口',g:'asset',t:'econConfig'}])+
+      sec('04 机器人与权益',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'奖励与领取监控',g:'robot',t:'reward'},{l:'升级与Power Cap',g:'robot',t:'upgrade'}])+
+      sec('05 OTC 与 Power',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
+      sec('06 赛事预测',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
+      sec('07 风控/审批/参数/策略',[{l:'风险事件',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'参数定义与候选值',g:'risk',t:'paramDef'},{l:'参数发布与快照',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit'},{l:'AI运营建议',g:'risk',t:'aiSuggest'},{l:'AI市场分析',g:'risk',t:'aiMarket'},{l:'AI策略模拟',g:'risk',t:'aiSim'},{l:'AI竞猜助手',g:'risk',t:'aiPred'},{l:'AI客服风险助手',g:'risk',t:'aiSupport'},{l:'运营报表',g:'risk',t:'report'}])+
+      sec('08 客服/审计/运维',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态',g:'support',t:'ops'},{l:'Provider 监控',g:'support',t:'provider'},{l:'数据源管理',g:'support',t:'datasource'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
   },
 
   /* ── Nav ── */
@@ -278,7 +278,8 @@ var App = {
     if(ni)ni.classList.add('active');
     document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
     var sec=document.getElementById('sec-'+g);if(sec)sec.classList.add('active');
-    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+(ni?ni.textContent.replace(/[\d\s]+/g,'').trim():t)+'</span>';
+    var label=ni?ni.dataset.label:t;
+    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+label+'</span>';
     var R={dash:this.rDash,user:this.rUser,asset:this.rAsset,robot:this.rRobot,otc:this.rOtc,market:this.rMarket,risk:this.rRisk,support:this.rSupport};
     if(R[g])R[g].call(this,sec,t);
   },
@@ -298,13 +299,11 @@ var App = {
         ['总注册用户|'+s.totalUsers.toLocaleString()+'|↑ 12% vs 上月|up','今日活跃|'+s.todayActive.toLocaleString()+'|在线率 13.5%|up','APT 流通量|'+s.aptInCirculation+'|总铸造 15.2M|up','法定收入累计|'+s.totalRevenueFiat+'|稳定增长|up','待审核 KYC|'+s.pendingKyc+'|⚠ 需要处理|warn','审批中心待办|'+s.pendingApprovals+'|需要审批|warn','活跃 Robot|'+s.robotActiveCount.toLocaleString()+'|运行中|up','活跃 Market|'+s.marketCount+'||'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value"'+(p[3]==='warn'?' style="color:var(--warning-600)"':'')+'>'+p[1]+'</div><div class="s-trend '+p[3]+'">'+p[2]+'</div></div>';}).join('')+
       '</div>'+
       '<div class="section-grid">'+
-        '<div class="card"><div class="card-header">Provider 健康 <span class="pri-badge pri-p1c">P1_COND</span></div>'+
-          ['API-Football|🟢 Normal|150ms|99.8%|98/100 quota','BetBurger|🟡 Latency|2.3s|97.2%|45/50 quota'].map(function(r){var p=r.split('|');return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:100px;">'+p[0]+'</span><span>'+p[1]+'</span><span style="margin-left:8px;font-size:11px;color:var(--gray-400);">延迟 '+p[2]+' | 成功率 '+p[3]+' | '+p[4]+'</span></div>';}).join('')+
-          '<div class="muted" style="padding-top:6px;">Provider 合同未签署 — 详情见 08 运维模块</div>'+
+        '<div class="card"><div class="card-header">Provider 健康</div>'+
+          '<p class="muted" style="padding:16px;">Provider 合同未签署（CONTRACT_GAP），Runtime 监控数据不可用。详情见 08 运维模块。</p>'+
         '</div>'+
-        '<div class="card"><div class="card-header">AI / Data Health <span class="pri-badge pri-p1">P1</span></div>'+
-          ['AI 建议|8 条待确认|🟡','数据质量|98.2%|🟢','信号引擎|Running|🟢','AI 执行|HUMAN_IN_LOOP|—'].map(function(r){var p=r.split('|');return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:100px;">'+p[0]+'</span><span style="margin-left:8px;font-weight:500;">'+p[1]+'</span><span style="margin-left:8px;font-size:11px;color:var(--gray-400);">'+p[2]+'</span></div>';}).join('')+
-          '<div class="muted" style="padding-top:6px;">AI 不直接执行高风险动作（HUMAN_IN_LOOP）</div>'+
+        '<div class="card"><div class="card-header">AI / 数据健康</div>'+
+          '<p class="muted" style="padding:16px;">AI Pipeline 对象未在 05 中冻结。AI 不直接执行高风险动作（HUMAN_IN_LOOP）。</p>'+
         '</div>'+
       '</div>'+
       '<div class="section-grid">'+
@@ -355,23 +354,19 @@ var App = {
       body=s.banner('info','账户/余额/OTC/Robot 分别限制，不隐式推导。冻结余额和重大恢复需审批（Requester ≠ Approver）。')+
         s.filter(['<input placeholder="搜索 UID"><select><option>全部类型</option><option>冻结账户</option><option>冻结余额</option><option>冻结OTC</option><option>限制Robot</option></select>'])+
         s.tbl(['Case ID','用户','类型','原因','生效','到期','状态','操作'],
-          (MOCK.userRestrictions||[]).map(function(r){return'<tr><td class="cell-mono">'+r.case_id+'</td><td>'+r.user+'</td><td>'+s.tag(r.type)+'</td><td>'+r.reason+'</td><td>'+r.effective+'</td><td>'+r.expiry+'</td><td>'+s.tag(r.status)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.openRestrictForm(\''+r.case_id+'\')">详情</button>'+(r.status==='active'?'<button class="btn btn-xs btn-success" onclick="App.toast(\'已提交解除申请 — 等待审批\')">解除</button>':'')+'</div></td></tr>';}))+
-        '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openRestrictForm(\'new\')">创建限制</button><span class="muted" style="margin-left:8px;">冻结余额/重大恢复需审批。发起人 ≠ 审批人（SoD）。</span></div>';
+          (MOCK.userRestrictions||[]).map(function(r){return'<tr><td class="cell-mono">'+r.case_id+'</td><td>'+r.user+'</td><td>'+s.tag(r.type)+'</td><td>'+r.reason+'</td><td>'+r.effective+'</td><td>'+r.expiry+'</td><td>'+s.tag(r.status)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.openRestrictForm(\''+r.case_id+'\')">详情</button></div></td></tr>';}));
     }else if(tab==='adjust'){
-      body=s.banner('warn','⚠ 资产调整走账本流程：Proposal → Preview → Impact → Approval → Execution → Ledger。禁止直接 SET balance。Requester ≠ Approver（SoD）。')+
+      body=s.gap('上游对象未冻结 — 资产调整依赖 Ledger Adjustment Object，未在 05 中正式冻结。当前为规划预览。')+
         '<div class="card" style="max-width:960px;">'+
-          '<div class="card-header">发起资产调整</div>'+
-          '<div class="form-group"><label>用户</label><select><option>选择用户</option><option>U-001/Alex Chen</option><option>U-004/John Smith</option></select></div>'+
-          '<div class="form-group"><label>调整类型</label><select><option>–选择–</option><option>credit</option><option>debit</option><option>correction</option></select></div>'+
-          '<div class="form-group"><label>金额 (APT)</label><input type="number" placeholder="输入正数，会显示为 Delta"></div>'+
-          '<div class="form-group"><label>原因</label><textarea rows="2" placeholder="必须填写调整原因和证据引用"></textarea></div>'+
-          '<div class="bar-info mt-12">ℹ 保存后进入审批流程（发起人 ≠ 审批人）。草案无资金效果。</div>'+
-          '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.toast(\'调整提案已创建 — 进入审批\')">创建提案</button><button class="btn btn-success" onclick="App.toast(\'已提交审批（需独立审批人）\')">提交审批</button></div>'+
-        '</div>'+
-        '<div class="card mt-16"><div class="card-header">调整历史</div>'+s.tbl(['ID','用户','类型','Delta','Before/After','原因','审批人','状态','时间'],[
-          '<tr><td class="cell-mono">ADJ-001</td><td>U-004/John Smith</td><td>credit</td><td class="ta-r highlight">+1,500</td><td>46,700 → 48,200</td><td>工单补偿</td><td>risk_approver_01</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-05</td></tr>',
-          '<tr><td class="cell-mono">ADJ-002</td><td>U-003</td><td>debit</td><td class="ta-r" style="color:var(--danger-600);">-500</td><td>5,200 → 4,700</td><td>欺诈案件</td><td>security_admin</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-03</td></tr>'
-        ].join(''))+'</div>';
+          '<div class="card-header">资产调整 — 规划预览</div>'+
+          '<p class="muted" style="padding:16px;">资产调整走账本流程：Proposal → Preview → Impact → Approval → Execution → Ledger。禁止直接 SET balance。Requester ≠ Approver（SoD）。</p>'+
+          '<div class="stat-grid dimmed">'+['待审批调整|—','本月调整次数|—','调整总金额|—','成功率|—'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+          '<div class="tabs mt-16"><div class="tab active">调整历史</div></div>'+
+          '<div class="table-wrap"><table><thead><tr><th>ID</th><th>用户</th><th>类型</th><th>Delta</th><th>Before/After</th><th>原因</th><th>审批人</th><th>状态</th><th>时间</th></tr></thead><tbody>'+
+            '<tr><td class="cell-mono">ADJ-001</td><td>U-004/John Smith</td><td>credit</td><td class="ta-r highlight">+1,500</td><td>46,700 → 48,200</td><td>工单补偿</td><td>risk_approver_01</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-05</td></tr>'+
+            '<tr><td class="cell-mono">ADJ-002</td><td>U-003</td><td>debit</td><td class="ta-r" style="color:var(--danger-600);">-500</td><td>5,200 → 4,700</td><td>欺诈案件</td><td>security_admin</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-03</td></tr>'+
+          '</tbody></table></div>'+
+        '</div>';
     }else if(tab==='agentOverview'||tab==='agentList'||tab==='agentDetail'||tab==='referral'){
       body=s.gap('代理管理（Affiliate）')+
         '<div class="card"><div class="card-header">代理管理 — 规划预览</div>'+
@@ -470,7 +465,13 @@ var App = {
     }else if(tab==='econOverview'){
       body=s.banner('info','经济模型运行总览 — 监控 Reward/Power/Settlement 全局运行。AI 和人工建议不走经济模型参数直接修改。')+
         '<div class="stat-grid">'+['今日派发 Reward|1,234 APT','本月累计|45,600 APT','活跃领取用户|8,934','Power 总消耗|180,500','竞猜结算额|285,000 APT','对账差异|0'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
-        '<div class="card mt-16">'+s.tbl(['指标','当前值','昨日','趋势','阈值'],['每日 Reward 总额|1,234 APT|1,180|↑ 4.5%|正常','平均 Reward/用户|0.14 APT|0.13|↑ 7%|正常','Power 消耗率|12.3%|11.8%|↑|正常','结算金额|285,000|310,000|↓ 8%|正常','手续费收入|8,550|9,300|↓ 8%|正常'].map(function(r){var p=r.split('|');return'<tr><td>'+p[0]+'</td><td class="highlight">'+p[1]+'</td><td>'+p[2]+'</td><td>'+p[3]+'</td><td>'+p[4]+'</td></tr>';}).join(''))+'</div>';
+        '<div class="card mt-16">'+s.tbl(['指标','当前值','昨日','趋势','阈值'],[
+          '<tr><td>每日 Reward 总额</td><td class="highlight">1,234 APT</td><td>1,180</td><td>↑ 4.5%</td><td>正常</td></tr>',
+          '<tr><td>平均 Reward/用户</td><td class="highlight">0.14 APT</td><td>0.13</td><td>↑ 7%</td><td>正常</td></tr>',
+          '<tr><td>Power 消耗率</td><td class="highlight">12.3%</td><td>11.8%</td><td>↑</td><td>正常</td></tr>',
+          '<tr><td>结算金额</td><td class="highlight">285,000</td><td>310,000</td><td>↓ 8%</td><td>正常</td></tr>',
+          '<tr><td>手续费收入</td><td class="highlight">8,550</td><td>9,300</td><td>↓ 8%</td><td>正常</td></tr>'
+        ])+'</div>';
     }else if(tab==='econSettlement'){
       body=s.banner('info','奖励与结算执行监控 — 查看 Reward batch 和 Settlement batch 的执行状态。')+
         '<div class="card">'+s.tbl(['批次','类型','周期','记录数','成功','失败','状态','执行时间'],
@@ -587,7 +588,7 @@ var App = {
           s.tbl(['Batch ID','Market','Result','Orders','Win','Payout','Fee','Recon','Settled'],MOCK.settlementBatches.map(function(b){return'<tr><td class="cell-mono">'+b.batch_id+'</td><td>'+b.market+'</td><td><span class="tag tag-green">'+b.result+'</span></td><td class="ta-r">'+b.orders_total+'</td><td class="ta-r">'+b.win_orders+'</td><td class="ta-r highlight">'+b.total_payout+'</td><td class="ta-r">'+b.fee+'</td><td>'+(b.reconciled?'<span class="tag tag-green">diff='+b.recon_diff+'</span>':'<span class="tag tag-amber">Pending</span>')+'</td><td>'+b.settled+'</td></tr>';}))+
           '<div class="btn-group mt-16"><button class="btn" onclick="App.openSettlementPreview()">模拟计算</button><button class="btn btn-success" onclick="App.openSettlementPreview()">提交 Settlement 审批</button></div>'+
         '</div>';
-    }else{
+    }else if(tab==='refund'){
       body=s.banner('warn','这是救火页——Refund/Correction 不覆盖 old snapshot、保留原订单。高危，必须证据 + 审批。')+
         '<div class="card"><div class="card-header">Refund & Correction Cases</div>'+
           s.tbl(['Case ID','Market','类型','理由','状态','受影响订单','Impact','创建','执行'],
@@ -595,18 +596,16 @@ var App = {
           '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.openRefundForm(\'refund\')">新建退款</button><button class="btn btn-warn" onclick="App.openRefundForm(\'correction\')">新建更正</button></div>'+
         '</div>';
     }else if(tab==='dataCockpit'){
-      body=s.banner('info','数据驾驶舱（P1）— 运营数据仪表板。P0 运营总览已覆盖核心 KPI 摘要，此页为深度数据视图。')+
-        '<div class="stat-grid">'+['Provider 健康|API-Football 🟢','数据延迟|2.3s','覆盖率|94%','数据质量|98.2%','今日 Snapshot|1,248','异常事件|3'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
-        '<div class="card mt-16"><div class="card-header">Provider 健康摘要</div>'+s.tbl(['Provider','状态','延迟','成功率','Quota','最后成功','操作'],[{name:'API-Football',status:'🟢 正常',latency:'150ms',rate:'99.8%',quota:'98/100',last:'2024-06-10 09:00',action:'查看'},{name:'BetBurger',status:'🟡 延迟',latency:'2,300ms',rate:'97.2%',quota:'45/50',last:'2024-06-10 08:45',action:'查看'}].map(function(r){return'<tr><td>'+r.name+'</td><td>'+r.status+'</td><td class="ta-r">'+r.latency+'</td><td class="ta-r">'+r.rate+'</td><td class="ta-r">'+r.quota+'</td><td>'+r.last+'</td><td><button class="btn btn-xs" onclick="App.nav(\'support\',\'provider\')">'+r.action+'</button></td></tr>';}).join(''))+'</div>'+
-        '<p class="muted" style="padding:8px 0;">P1 — 运营总览已覆盖核心 KPI 摘要，深度数据视图可后续上线。</p>';
+      body=s.banner('info','数据驾驶舱 — 运营数据仪表板依赖 DataProvider 合同和 MarketFeed 对象，均未在 05 中正式冻结。P0 运营总览已覆盖核心 KPI 摘要。')+
+        '<p style="padding:16px;">Provider 连接、数据延迟监控、覆盖率仪表板等功能待 Provider 合同签署后开放。当前仅占位。</p>';
     }else if(tab==='footballData'){
-      body=s.banner('info','足球数据管理（P1）— 查看归一化后的足球赛事、队伍、阵容、数据完整性。')+
+      body=s.banner('info','足球数据管理 — FootballEventNormalized 对象未在 05 中正式冻结。当前为规划预览，显示数据结构和字段占位。')+
         s.tbl(['Event ID','赛事','联赛','开赛','数据源','归一化','质量','操作'],[
-          '<tr><td class="cell-mono">EVT-001</td><td>ARS vs MCI</td><td>Premier League</td><td>2024-06-15 20:00</td><td>API-Football</td><td>✅</td><td class="ta-r">98%</td><td><button class="btn btn-xs">详情</button></td></tr>',
-          '<tr><td class="cell-mono">EVT-002</td><td>LFC vs MNU</td><td>Premier League</td><td>2024-06-12 17:30</td><td>API-Football</td><td>✅</td><td class="ta-r">95%</td><td><button class="btn btn-xs">详情</button></td></tr>',
-          '<tr><td class="cell-mono">EVT-003</td><td>FCB vs RMD</td><td>La Liga</td><td>2024-06-08 21:00</td><td>API-Football</td><td>✅</td><td class="ta-r">99%</td><td><button class="btn btn-xs">详情</button></td></tr>'
-        ].join(''))+
-        '<p class="muted" style="padding:8px 0;">P1 — 05 仅定义数据流方向，FootballEventNormalized 对象未正式冻结。可后续上线。</p>';
+          '<tr><td class="cell-mono">EVT-001</td><td>ARS vs MCI</td><td>Premier League</td><td>2024-06-15 20:00</td><td>API-Football</td><td>✅</td><td class="ta-r">98%</td><td>—</td></tr>',
+          '<tr><td class="cell-mono">EVT-002</td><td>LFC vs MNU</td><td>Premier League</td><td>2024-06-12 17:30</td><td>API-Football</td><td>✅</td><td class="ta-r">95%</td><td>—</td></tr>',
+          '<tr><td class="cell-mono">EVT-003</td><td>FCB vs RMD</td><td>La Liga</td><td>2024-06-08 21:00</td><td>API-Football</td><td>✅</td><td class="ta-r">99%</td><td>—</td></tr>'
+        ])+
+        '<p class="muted" style="padding:8px 0;">仅定义数据流方向，FootballEventNormalized 对象未正式冻结，暂不可操作。</p>';
     }else if(tab==='marketData'){
       body=s.gap('市场/赔率/套利原始数据')+
         '<p style="padding:16px;">BetBurger Prematch/Live Feed 和 ArbitrageOpportunity 未在 05 中正式冻结。Provider 合同未签署（CONTRACT_GAP）。当前不可用。</p>';
@@ -663,26 +662,18 @@ var App = {
          '🇨🇳 China|N/A|Restricted|Restricted|Restricted|N/A|N/A',
          '🇬🇧 United Kingdom|L2|Yes|Yes (P0)|Yes|Available|24h'].map(function(r){var p=r.split('|');
           return'<tr><td>'+p[0]+'</td><td class="'+(p[1]==='N/A'?'deny':'allow')+'">'+p[1]+'</td><td class="'+(p[2]==='Restricted'?'deny':'allow')+'">'+p[2]+'</td><td class="'+(p[3].match(/\d+\+/)||p[3].indexOf('Age')>=0?'conditional':p[3]==='Restricted'?'deny':'allow')+'">'+p[3]+'</td><td class="'+(p[4].indexOf('Limit')>=0?'conditional':p[4]==='Restricted'?'deny':'allow')+'">'+p[4]+'</td><td class="'+(p[5]==='Not available'||p[5]==='N/A'?'deny':'allow')+'">'+p[5]+'</td><td class="'+(p[6]==='N/A'?'deny':'conditional')+'">'+p[6]+'</td></tr>';}).join('')+'</tbody></table></div></div>';
-    }else{
+    }else if(tab==='emergency'){
       body=s.banner('danger','紧急操作只允许预授权角色执行。需 case_id、理由、双人授权。事后补审超时必须升级。')+
         '<div class="card">'+s.tbl(['Action ID','类型','目标','理由','状态','执行人','审批人','执行时间','事后复审'],
           MOCK.emergencyActions.map(function(e){return'<tr><td class="cell-mono">'+e.action_id+'</td><td><span class="tag tag-red">'+e.type.replace(/_/g,' ')+'</span></td><td>'+e.target+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+e.reason+'">'+e.reason+'</td><td>'+s.tag(e.status)+'</td><td>'+e.executor+'</td><td>'+e.approver+'</td><td>'+(e.executed||e.created||'—')+'</td><td>'+(e.post_review_status?s.tag(e.post_review_status)+' (by '+e.post_deadline+')':'—')+'</td></tr>';}))+
           '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openEmergencyForm()">发起紧急操作</button><span class="muted" style="margin-left:12px;">影响资产/账本/资格的操作默认仍需双人授权</span></div>'+
         '</div>';
     }else if(tab==='aiCockpit'){
-      body=s.banner('info','AI运营驾驶舱（P1）— AI 建议汇总、异常检测、待确认任务。AI 不直接执行高风险动作（HUMAN_IN_LOOP）。')+
-        '<div class="stat-grid">'+['高优先级建议|12','市场异常|3','用户异常|5','经济模型异常|0','待确认 AI 任务|8'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
-        s.tbl(['建议标题','依据','影响对象','置信度','预计影响','风险','状态','操作'],[
-          '<tr><td>BTC/USDT 套利机会</td><td>BetBurger surebet 2.3%</td><td>OTC-005</td><td><span class="tag tag-amber">中</span></td><td>±2,300 APT</td><td><span class="tag tag-amber">中</span></td><td><span class="tag tag-blue">待评估</span></td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'risk\',\'aiSuggest\')">查看</button></div></td></tr>',
-          '<tr><td>用户 U-006 异常交易</td><td>OTC 集群检测</td><td>U-006</td><td><span class="tag tag-red">高</span></td><td>10,000 APT</td><td><span class="tag tag-red">高</span></td><td><span class="tag tag-red">待处理</span></td><td><div class="btn-group"><button class="btn btn-xs btn-danger" onclick="App.nav(\'risk\',\'case\')">创建 Case</button></div></td></tr>'
-        ].join(''))+
-        '<p class="muted" style="padding:8px 0;">P1 — 05 未冻结 AI 运营对象，AI 驾驶舱可后续上线。</p>';
+      body=s.banner('info','依赖能力尚未就绪 — AI 运营驾驶舱依赖 AIAnalysis / AIPipeline 对象，未冻结于 05。当前仅支持占位查看。')+
+        '<p style="padding:16px;">AI 建议汇总、异常检测、待确认任务等功能依赖下游 AI 服务。AI 不直接执行高风险动作。待 05 正式授权后开放。</p>';
     }else if(tab==='aiSuggest'){
-      body=s.banner('info','AI运营建议（P1）— 管理 AI 建议、执行状态和实际效果回看。AI 不直接改参数/余额/结算。')+
-        '<div class="card">'+s.tbl(['建议 ID','模块','标题','建议动作','优先级','风险','状态','负责人','效果'],
-          [{id:'AI-001',module:'市场',title:'BTC套利',action:'创建 OTC 订单',priority:'高',risk:'中',status:'已采纳',owner:'admin',outcome:'+2,300 APT'},
-           {id:'AI-002',module:'用户',title:'流失预警 — U-006',action:'发放激励',priority:'中',risk:'低',status:'待评估',owner:'运营',outcome:'—'},
-           {id:'AI-003',module:'竞猜',title:'MKT-004 数据不足',action:'延迟开赛',priority:'低',risk:'低',status:'已拒绝',owner:'运营',outcome:'预测风险'}]].map(function(r){return'<tr><td class="cell-mono">'+r.id+'</td><td>'+r.module+'</td><td>'+r.title+'</td><td>'+r.action+'</td><td>'+s.tag(r.priority)+'</td><td>'+s.tag(r.risk)+'</td><td>'+s.tag(r.status)+'</td><td>'+r.owner+'</td><td>'+r.outcome+'</td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — AIRecommendation 对象未在 05 冻结。</p>';
+      body=s.banner('info','依赖能力尚未就绪 — AI 运营建议依赖 AIRecommendation 对象，未冻结于 05。当前仅支持占位查看。')+
+        '<p style="padding:16px;">AI 提供运营和市场建议，但建议对象未在 05 正式冻结。待 05/06 明确对象定义和 Provider 合同后开放此功能。</p>';
     }else if(tab==='aiMarket'){
       body=s.gap('AI市场分析')+
         '<p style="padding:16px;">AI 市场分析依赖 MarketFeed / DataProvider / AIAnalysis 对象，当前均未冻结于 05。</p>';
@@ -693,17 +684,16 @@ var App = {
       body=s.gap('AI竞猜运营助手')+
         '<p style="padding:16px;">AI 竞猜助手依赖 AI 建议 Pipeline 和 MarketReadiness 对象，未冻结于 05（CONTRACT_GAP）。</p>';
     }else if(tab==='aiSupport'){
-      body=s.banner('info','AI用户/客服/风险助手（P1）— AI 分群、工单摘要、回复草稿、风险证据整理。')+
-        '<div class="card"><div class="card-header">AI 分群建议</div>'+s.tbl(['用户群','问题/机会','依据','建议动作','置信度','操作'],
-          [{segment:'高流失风险用户',issue:'7天未活跃',evidence:'登录频率下降 80%',suggest:'推送激励通知','高','创建运营任务'},
-           {segment:'重复客服问题',issue:'KYC 文档模糊',evidence:'工单 TKT-034',suggest:'生成标准回复草稿','高','查看草稿'},
-           {segment:'活跃用户',issue:'OTC 使用增长',evidence:'月交易量 +200%',suggest:'提升 Power Cap','中','创建提案'}].map(function(r){return'<tr><td>'+r.segment+'</td><td>'+r.issue+'</td><td>'+r.evidence+'</td><td>'+r.suggest+'</td><td>'+s.tag(r[4])+'</td><td><button class="btn btn-xs" onclick="App.toast(\''+r[5]+'\')">执行</button></td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — AI 只辅助判断，不代替权限。真实执行需人工确认。</p>';
+      body=s.banner('info','依赖能力尚未就绪 — AI客服/风险助手依赖 AIAnalysis 对象，未在 05 中冻结。当前仅支持占位查看。')+
+        '<p style="padding:16px;">AI 分群、工单摘要、回复草稿、风险证据整理等功能依赖 AIPipeline，上游契约未冻结。待 05 正式授权后开放。</p>';
     }else if(tab==='report'){
-      body=s.banner('info','运营与经济报表（P1）— 生成用户/代理/Robot/Reward/Power/竞猜/OTC/数据源/AI建议效果报表。')+
-        '<div class="card">'+s.tbl(['报表类型','时间范围','数据版本','生成时间','状态','操作'],
-          [{type:'日运营报表',range:'2024-06-10',version:'Snapshot #124',time:'2024-06-11 00:05',status:'已生成'},
-           {type:'周经济报表',range:'2024-W23',version:'Snapshot #W23-3',time:'2024-06-10 00:05',status:'已生成'},
-           {type:'月度审计报表',range:'2024-05',version:'Snapshot #M05',time:'2024-06-01 00:05',status:'已生成'}].map(function(r){return'<tr><td>'+r.type+'</td><td>'+r.range+'</td><td>'+r.version+'</td><td>'+r.time+'</td><td>'+s.tag(r.status)+'</td><td><div class="btn-group"><button class="btn btn-xs" onclick="App.toast(\'报表下载中\')">下载</button></div></td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — 运营总览覆盖核心指标，报表可后续上线。</p>';
+      body=s.banner('info','运营与经济报表 — 生成用户/代理/Robot/Reward/Power/竞猜/OTC/数据源/AI建议效果报表。运营总览已覆盖核心指标。')+
+        '<div class="card">'+s.tbl(['报表类型','时间范围','数据版本','生成时间','状态','操作'],[
+          '<tr><td>日运营报表</td><td>2024-06-10</td><td>Snapshot #124</td><td>2024-06-11 00:05</td><td><span class="tag tag-green">已生成</span></td><td><button class="btn btn-xs" onclick="App.toast(\'报表下载中\')">下载</button></td></tr>',
+          '<tr><td>周经济报表</td><td>2024-W23</td><td>Snapshot #W23-3</td><td>2024-06-10 00:05</td><td><span class="tag tag-green">已生成</span></td><td><button class="btn btn-xs" onclick="App.toast(\'报表下载中\')">下载</button></td></tr>',
+          '<tr><td>月度审计报表</td><td>2024-05</td><td>Snapshot #M05</td><td>2024-06-01 00:05</td><td><span class="tag tag-green">已生成</span></td><td><button class="btn btn-xs" onclick="App.toast(\'报表下载中\')">下载</button></td></tr>'
+        ])+'</div>'+
+        '<p class="muted" style="padding:8px 0;">运营总览覆盖核心指标，报表可后续上线。</p>';
     }
     sec.innerHTML='<div class="page-header"><h2>风控 / 审批 / 参数 / 策略</h2></div>'+s.tabs(ts,tab)+body;
   },
@@ -721,8 +711,6 @@ var App = {
   /* ===== 08 客服 / 审计 / 运维 ===== */
   rSupport:function(sec,tab){
     var s=this,ts=[
-      {id:'tickets',label:'工单队列',group:'support',badge:MOCK.stats.openTickets,p:'P0'},
-      {id:'ticketDetail',label:'工单详情',group:'support',p:'P0'},
       {id:'audit',label:'全量操作日志',group:'support',p:'P0'},
       {id:'sensitiveAudit',label:'敏感操作审计',group:'support',p:'P0'},
       {id:'ops',label:'异步任务/状态',group:'support',p:'P0'},
@@ -734,33 +722,21 @@ var App = {
       {id:'migration',label:'APT Migration',group:'support',p:'FUTURE'}
     ];
     var body='';
-    if(tab==='tickets'){
-      body=s.filter(['<select><option>全部优先级</option><option>critical</option><option>high</option></select><select><option>全部状态</option><option>in_progress</option><option>waiting_user</option></select>'])+
-        s.tbl(['Ticket ID','用户','类别','优先级','状态','主题','负责人','SLA','操作'],
-          MOCK.tickets.map(function(t){return'<tr><td class="cell-mono">'+t.ticket_id+'</td><td>'+t.user+'</td><td>'+t.category.replace(/_/g,' ')+'</td><td>'+s.tag(t.priority)+'</td><td>'+s.tag(t.status)+'</td><td>'+t.subject+'</td><td>'+t.assignee+'</td><td>'+t.sla+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'support\',\'ticketDetail\')">处理</button>'+(t.status==='in_progress'?'<button class="btn btn-xs btn-success" onclick="App.openTicketResolution(\''+t.ticket_id+'\')">解决</button>':'')+'</div></td></tr>';}));
-    }else if(tab==='ticketDetail'){
-      var tc=MOCK.ticketConversations;
-      body=s.banner('info','客服能解释和推进，不能绕过业务系统直接"帮用户改好"。内部 note 与用户回复严格区分。')+
-        '<div class="card"><div class="card-header">Conversation — '+tc.ticket_id+' | '+tc.user+'</div>'+
-          tc.timeline.map(function(m){var cls=m.type==='user'?'msg-user':m.type==='agent'?'msg-agent':m.type==='internal'?'msg-internal':'msg-system';
-            return'<div class="msg '+cls+'"><div class="msg-header"><span class="msg-actor">'+(m.actor||'System')+'</span><span class="msg-time">'+m.time+'</span>'+(m.visible?'<span class="tag tag-'+({user:'blue',internal:'amber'}[m.visible]||'default')+'">'+(m.visible==='user'?'User Visible':'Internal Only')+'</span>':'')+'</div><div class="msg-body">'+m.msg+'</div></div>';}).join('')+
-          '<div class="msg-input mt-16"><textarea placeholder="输入回复 (User Visible)..." rows="2"></textarea><div class="btn-group mt-8"><button class="btn btn-primary" onclick="App.toast(\'回复已发送 — User Visible\')">发送回复</button><button class="btn btn-warn" onclick="App.openInternalNote(\'ticket\',\'TKT-033\')">添加内部 Note</button></div></div>'+
-        '</div>'+
-        '<div class="card mt-16"><div class="card-header">关联对象</div>'+tc.related.map(function(r){return'<div class="flex-row" style="padding:6px 0;"><span class="tag tag-'+{ledger:'green',batch:'amber',user:'blue'}[r.type]+'">'+r.type+'</span><span style="margin-left:8px;">'+r.label+'</span></div>';}).join('')+'</div>';
-    }else if(tab==='sensitiveAudit'){
+    if(tab==='sensitiveAudit'){
       body=s.banner('info','敏感操作审计 — 聚焦余额调整、冻结、参数发布、结算更正、权限变化。仅超级管理员。')+
-        s.tbl(['事件','操作者','对象','Before','After','原因','证据','审批人','执行结果','时间'],
-          [{event:'资产调整',actor:'admin',obj:'U-004',before:'46,700',after:'48,200',reason:'工单补偿',evidence:'TKT-033',approver:'risk_approver_01',result:'已执行',time:'2024-06-05'},
-           {event:'参数发布',actor:'param_editor_01',obj:'REL-3.2.1',before:'V3.2.0',after:'V3.2.1',reason:'简化56级表',evidence:'—',approver:'admin',result:'已激活',time:'2024-06-10'},
-           {event:'权限变化',actor:'admin',obj:'cs_agent_02',before:'support',after:'support+escalation',reason:'紧急升级授权',evidence:'—',approver:'security_admin',result:'已执行',time:'2024-06-10'}].map(function(e){return'<tr><td>'+e.event+'</td><td>'+e.actor+'</td><td>'+e.obj+'</td><td>'+e.before+'</td><td>'+e.after+'</td><td>'+e.reason+'</td><td>'+e.evidence+'</td><td>'+e.approver+'</td><td>'+s.tag(e.result)+'</td><td>'+e.time+'</td></tr>';}).join(''))+
+        s.tbl(['事件','操作者','对象','Before','After','原因','证据','审批人','执行结果','时间'],[
+          '<tr><td>资产调整</td><td>admin</td><td>U-004</td><td>46,700</td><td>48,200</td><td>工单补偿</td><td>TKT-033</td><td>risk_approver_01</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-05</td></tr>',
+          '<tr><td>参数发布</td><td>param_editor_01</td><td>REL-3.2.1</td><td>V3.2.0</td><td>V3.2.1</td><td>简化56级表</td><td>—</td><td>admin</td><td><span class="tag tag-green">已激活</span></td><td>2024-06-10</td></tr>',
+          '<tr><td>权限变化</td><td>admin</td><td>cs_agent_02</td><td>support</td><td>support+escalation</td><td>紧急升级授权</td><td>—</td><td>security_admin</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-10</td></tr>'
+        ])+
         '<p class="muted" style="padding:8px 0;">append-only，不可删除。</p>';
     }else if(tab==='provider'){
       body=s.gapLite('DataProvider / ProviderHealth 对象未冻结于 05')+
         '<div class="card"><div class="card-header">Provider 监控 — 规划预览</div>'+
         s.tbl(['Provider','类型','状态','延迟','成功率','Quota','上次成功','上次失败','合同状态'],[
-          '<tr><td><strong>API-Football</strong></td><td>足球数据</td><td><span class="tag tag-green">正常</span></td><td class="ta-r">150ms</td><td class="ta-r">99.8%</td><td class="ta-r">98/100</td><td>2024-06-10 09:00</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>',
-          '<tr><td><strong>BetBurger</strong></td><td>市场数据</td><td><span class="tag tag-amber">延迟</span></td><td class="ta-r">2,300ms</td><td class="ta-r">97.2%</td><td class="ta-r">45/50</td><td>2024-06-10 08:45</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>'
-        ].join(''))+'</div>'+
+          '<tr><td><strong>API-Football</strong></td><td>足球数据</td><td>—</td><td class="ta-r">—</td><td class="ta-r">—</td><td class="ta-r">—</td><td>—</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>',
+          '<tr><td><strong>BetBurger</strong></td><td>市场数据</td><td>—</td><td class="ta-r">—</td><td class="ta-r">—</td><td class="ta-r">—</td><td>—</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>'
+        ])+'</div>'+
         '<p class="muted" style="padding:8px 0;">UI_SPEC = VERIFIED_PASS，PROVIDER_CONTRACT = CONTRACT_GAP，RUNTIME = NOT_YET_EXECUTED。</p>';
     }else if(tab==='datasource'){
       body=s.gapLite('DataProvider 对象未冻结于 05')+
