@@ -478,7 +478,15 @@ var MOCK = {
 
   /* ───── Ticket Detail (TKT-033) ───── */
   ticketConversations: {
-    ticket_id:'TKT-033',user:'U-001 / Alex Chen',
+    'TKT-031':{ticket_id:'TKT-031',user:'Sophie Martin',
+      timeline:[{type:'user',actor:'Sophie Martin',msg:'My account was suddenly locked. I need access to my funds.',time:'08:10',visible:'user'},{type:'agent',actor:'cs_agent_01',msg:'Hi Sophie, your account was auto-locked due to 5 consecutive failed login attempts. We are reviewing.',time:'08:30',visible:'user'}],
+      related:[{type:'user',id:'U-003',label:'Sophie Martin — User 360'}]
+    },
+    'TKT-032':{ticket_id:'TKT-032',user:'James Wu',
+      timeline:[{type:'user',actor:'James Wu',msg:'KYC verification failed for the third time. The error message says "document blurry" but I used a high-res camera.',time:'09:00',visible:'user'},{type:'agent',actor:'cs_agent_03',msg:'Hi James, we checked your last submission. Please ensure the passport photo page is fully visible without glare.',time:'09:45',visible:'user'}],
+      related:[{type:'user',id:'U-004',label:'James Wu — User 360'}]
+    },
+    'TKT-033':{ticket_id:'TKT-033',user:'U-001 / Alex Chen',
     timeline:[
       {type:'user',actor:'Alex Chen',msg:'My withdrawal of 5,000 APT has been processing for 3 hours. Is there an issue?',time:'06:00',visible:'user'},
       {type:'system',msg:'Auto-assigned to cs_agent_02 (SLA: 4h)',time:'06:01'},
@@ -491,5 +499,10 @@ var MOCK = {
       {type:'agent',actor:'cs_agent_02',msg:'Transfer completed at 07:15. 5,000 APT should now appear in your external wallet.',time:'07:20',visible:'user'}
     ],
     related:[{type:'ledger',id:'LE-002',label:'Withdrawal -5,000 APT'},{type:'batch',id:'B-891',label:'Journal batch B-891'},{type:'user',id:'U-001',label:'Alex Chen — User 360'}]
+    },
+    'TKT-034':{ticket_id:'TKT-034',user:'Maria Lopez',
+      timeline:[{type:'user',actor:'Maria Lopez',msg:'I submitted my KYC documents three times and they keep getting rejected. I need help.',time:'11:20',visible:'user'},{type:'agent',actor:'cs_agent_02',msg:'Hi Maria, let me check your submissions. Please hold.',time:'11:45',visible:'user'}],
+      related:[{type:'user',id:'U-005',label:'Maria Lopez — User 360'}]
+    }
   }
 };

@@ -160,51 +160,57 @@ app/
 
 ### Vue 3 + TypeScript 编码规则（H5 / Admin Web）
 
-> 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
+> 依赖等级：**MUST** = CAPABILITY 必须实现 / **RECOMMENDED** = 推荐 package 选型 / **TBC** = Agent 不得自行安装
 >
-> **MUST 项来源说明**：Vite 5+ / Vue Router 4+ / vue-i18n 9+ 均为 **Vue 3 标准工具链**，其 MUST 等级派生自 `frontend_h5` / `frontend_admin` 的 CONFIRMED 决策（manifest.yaml decisionSources），不视为独立决策。`decimal.js` 的 MUST 等级派生自已确认的跨端规则："所有资产类数字使用 string 类型做业务计算"。
+> **核心原则**：区分 **能力要求（CAPABILITY_REQUIREMENT）** 与 **包选型（PACKAGE_SELECTION）**。
+> - 能力要求标 MUST（如"精确十进制计算"、"7 语言 I18N"、"前端路由"）。
+> - 具体包选型标 RECOMMENDED（如 `decimal.js`、`vue-i18n`、`Vue Router`），除非已在 manifest.yaml decisionSources 中单独 CONFIRMED。
 
-#### 项目约定（MUST）
+#### 能力要求（MUST — CAPABILITY）
 
-1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">` 语法。**[MUST]** — 来源：decisionSources.frontend_h5 / frontend_admin（CONFIRMED）
-2. **构建工具**：Vite 5+。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
-3. **路由**：Vue Router 4+，基于页面 ID 的路由命名规范。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
-4. **TypeScript 严格模式**：启用 `strict: true`，禁止 `any` 类型（业务逻辑层），允许 `unknown`。**[MUST]**
-5. **i18n**：使用 vue-i18n 9+。7 语言 key 集在 `ui-copy-manifest.json` 中统一定义，禁止在模板中硬编码文案。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
-6. **金额处理**：所有资产类数字使用 `string` 类型、`decimal.js` 做计算，禁止 `number`/`parseFloat`。**[MUST]** — 来源：跨端规则（context.md）
-7. **组件颗粒度**：页面级组件按 Page ID 命名（如 `AUser004AssetAdjustment.vue`）；通用组件放 `components/common/`。**[MUST]**
+1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">`。**[MUST]** — 来源：decisionSources（CONFIRMED）
+2. **TypeScript 严格模式**：启用 `strict: true`，禁止 `any` 类型（业务逻辑层），允许 `unknown`。**[MUST]**
+3. **7 语言 I18N**：所有用户可见字符串通过 i18n key 读取，7 语言 key 集一致，禁止 raw enum 直接显示。**[MUST]** — 来源：跨端规则
+4. **精确十进制计算**：所有资产类数字使用 `string` 类型做业务计算，禁止 `number`/`parseFloat`。**[MUST]** — 来源：跨端规则
+5. **页面路由**：前端路由基于 Page ID 命名规范。**[MUST]** — 来源：跨端规则
+6. **组件颗粒度**：页面级组件按 Page ID 命名（如 `AUser004AssetAdjustment.vue`）；通用组件放 `components/common/`。**[MUST]**
 
-#### 项目约定（RECOMMENDED）
+#### 推荐包选型（RECOMMENDED — PACKAGE）
 
-8. **状态管理**：Pinia（按模块拆分 store，不使用单一巨型 store）。**[RECOMMENDED]**
-9. **API 调用封装**：统一 Axios 实例，自动注入 Token / Sign / Timestamp / Version / Language / TraceId 六个请求头。**[RECOMMENDED]**
-10. **样式方案**：SCSS + CSS Modules 或 `<style scoped>`。全局设计令牌（颜色、间距、字体）从 `08_VISUAL_DESIGN_SYSTEM_V2.4.md` 提取为 CSS 变量。**[RECOMMENDED]**
+7. **构建工具**：Vite 5+。**[RECOMMENDED]**
+8. **路由库**：Vue Router 4+。**[RECOMMENDED]**
+9. **I18N 库**：vue-i18n 9+。**[RECOMMENDED]**
+10. **精度库**：`decimal.js`。**[RECOMMENDED]**
+11. **状态管理**：Pinia（按模块拆分 store，不使用单一巨型 store）。**[RECOMMENDED]**
+12. **API 调用封装**：统一 Axios 实例，自动注入六个请求头。**[RECOMMENDED]**
+13. **样式方案**：SCSS + CSS Modules 或 `<style scoped>`。全局设计令牌从 `08_VISUAL_DESIGN_SYSTEM_V2.4.md` 提取为 CSS 变量。**[RECOMMENDED]**
 
-#### 项目约定（TBC — NOT_AUTHORIZED_TO_INSTALL）
+#### 待定（TBC — NOT_AUTHORIZED_TO_INSTALL）
 
-11. **UI 组件库**：Admin 端使用 Arco Design 或 Ant Design Vue；H5 端使用 Vant UI 或自研组件。**[TBC]** — Agent 不得在团队确认前锁定依赖。
+14. **UI 组件库**：Admin 端 Arco Design / Ant Design Vue；H5 端 Vant UI / 自研。**[TBC]**
 
 ### Flutter 编码规则（App）
 
-> 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
+> 依赖等级：**MUST** = CAPABILITY 必须实现 / **RECOMMENDED** = 推荐 package 选型 / **TBC** = Agent 不得自行安装
 >
-> **RECOMMENDED 项来源说明**：GoRouter / Dio 是 Flutter 生态常用方案，RECOMMENDED 等级派生自 `frontend_app` 的 CONFIRMED 决策（manifest.yaml decisionSources），不视为独立决策。`decimal` 包的 RECOMMENDED 等级派生自已确认的跨端规则。
+> 同 Vue 规则：**能力要求标 MUST，具体包选型标 RECOMMENDED**，除非在 manifest.yaml decisionSources 中单独 CONFIRMED。
 
-#### 项目约定（MUST）
+#### 能力要求（MUST — CAPABILITY）
 
 1. **Dart 版本**：Dart 3+，启用 null safety。**[MUST]**
-2. **i18n**：使用 Flutter 官方 `flutter_localizations` + ARB 文件，从 `ui-copy-manifest.json` 同步 key 集。**[MUST]**
-3. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。**[MUST]**
+2. **7 语言 I18N**：使用 Flutter 官方 i18n 方案，ARB 文件 key 集与 `ui-copy-manifest.json` 一致。**[MUST]**
+3. **精确十进制计算**：禁止 `double` 做业务计算。**[MUST]** — 来源：跨端规则
+4. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。**[MUST]**
 
-#### 项目约定（RECOMMENDED）
+#### 推荐包选型（RECOMMENDED — PACKAGE）
 
-4. **金额精度**：全部使用 `String` + `decimal` 包，禁止 `double`。**[RECOMMENDED]** — 来源：跨端规则（context.md）
-5. **路由**：GoRouter，基于页面 ID 的路由命名规范。**[RECOMMENDED]** — 来源：Flutter 生态常用方案，派生自框架决策
-6. **网络层**：Dio，统一封装六个请求头。**[RECOMMENDED]** — 来源：Flutter 生态常用方案，派生自框架决策
+5. **精度包**：`decimal`。**[RECOMMENDED]**
+6. **路由**：GoRouter，基于页面 ID 的路由命名规范。**[RECOMMENDED]**
+7. **网络层**：Dio，统一封装六个请求头。**[RECOMMENDED]**
 
-#### 项目约定（TBC — NOT_AUTHORIZED_TO_INSTALL）
+#### 待定（TBC — NOT_AUTHORIZED_TO_INSTALL）
 
-7. **状态管理**：Riverpod 或 Bloc。**[TBC]** — Agent 不得在团队确认前锁定依赖。
+8. **状态管理**：Riverpod 或 Bloc。**[TBC]**
 
 ### 后端通用规则（V6.1 新增模块也需遵守）
 

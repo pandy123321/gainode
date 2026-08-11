@@ -1,17 +1,24 @@
 var App = {
   curGroup:'dash',curTab:'overview',
+  collapsedGroups:{}, // V2.5 collapse state
+  routeLabels:{}, // populated by renderSidebar
 
   init:function(){
     this.renderSidebar();
     this.nav('dash','overview');
     var s=this;
-    document.getElementById('sidebarNav').addEventListener('click',function(e){
+    var sn=document.getElementById('sidebarNav');
+    /* Single delegation — nav-item */
+    sn.addEventListener('click',function(e){
       var ni=e.target.closest('.nav-item');if(!ni)return;
       s.nav(ni.dataset.group,ni.dataset.tab);
     });
-    document.getElementById('sidebarNav').addEventListener('click',function(e){
+    /* Single delegation — section-header: expand/collapse */
+    sn.addEventListener('click',function(e){
       var h=e.target.closest('.nav-section-header');if(!h)return;
-      h.parentElement.classList.toggle('collapsed');
+      var g=h.dataset.group;
+      if(s.collapsedGroups[g]){delete s.collapsedGroups[g];}else{s.collapsedGroups[g]=true;}
+      s.renderSidebar();
     });
     document.getElementById('actionLogout')&&document.getElementById('actionLogout').addEventListener('click',function(){window.location.href='index.html';});
     var mo=document.getElementById('modalOverlay');if(mo)mo.addEventListener('click',function(e){if(e.target===this)s.closeModal();});
@@ -139,7 +146,7 @@ var App = {
 
   /* Ticket Conversation */
   openTicketConversation:function(tid){
-    var t=MOCK.tickets.find(function(x){return x.ticket_id===tid;}),s=this,tc=MOCK.ticketConversations;
+    var t=MOCK.tickets.find(function(x){return x.ticket_id===tid;}),s=this,tc=MOCK.ticketConversations[tid];
     if(!t)return;
     var timeline=(tc&&tc.timeline)?tc.timeline.map(function(m){var cls=m.type==='user'?'msg-user':m.type==='agent'?'msg-agent':m.type==='internal'?'msg-internal':'msg-system';
       return'<div class="msg '+cls+'" style="padding:10px 0;border-bottom:1px solid var(--gray-100);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-weight:600;font-size:12px;">'+(m.actor||'System')+'</span><span style="font-size:10px;color:var(--gray-400);">'+m.time+'</span>'+(m.visible?'<span class="tag tag-'+({user:'blue',internal:'amber'}[m.visible]||'default')+'" style="margin-left:8px;">'+(m.visible==='user'?'用户可见':'内部')+'</span>':'')+'</div><div style="font-size:13px;color:var(--gray-700);">'+m.msg+'</div></div>';
@@ -271,24 +278,28 @@ var App = {
 
   /* ── Sidebar V2.4.1 (8 Root) ── */
   renderSidebar:function(){
-    var s=this,cur=s.curGroup,def={'dash':'overview','user':'list','asset':'overview','robot':'list','otc':'order','market':'list','risk':'case','support':'audit'};
-    var sec=function(n,g,items){var isActive=(cur===g);return'<div class="nav-section'+(isActive?' expanded':' collapsed')+'"><div class="nav-section-header" data-group="'+g+'" data-tab="'+(def[g]||'')+'"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item'+(cur===i.g&&s.curTab===i.t?' active':'')+'" data-group="'+i.g+'" data-tab="'+i.t+'" data-label="'+i.l+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
+    var s=this,cur=s.curGroup;
+    var sec=function(n,g,items){var isOpen=!(s.collapsedGroups[g]);return'<div class="nav-section'+(cur===g?' active-root':'')+(isOpen?' expanded':' collapsed')+'"><div class="nav-section-header" data-group="'+g+'"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item'+(cur===i.g&&s.curTab===i.t?' active':'')+'" data-group="'+i.g+'" data-tab="'+i.t+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
     document.getElementById('sidebarNav').innerHTML=
       sec('01 工作台','dash',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
       sec('02 用户与准入','user',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
       sec('03 资产与账本','asset',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正',g:'asset',t:'correction'},{l:'经济模型总览',g:'asset',t:'econOverview'},{l:'奖励与结算监控',g:'asset',t:'econSettlement'},{l:'经济配置入口',g:'asset',t:'econConfig'}])+
       sec('04 机器人与权益','robot',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'奖励与领取监控',g:'robot',t:'reward'},{l:'升级与Power Cap',g:'robot',t:'upgrade'}])+
       sec('05 OTC 与 Power','otc',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
-      sec('06 赛事预测','market',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
+      sec('06 赛事预测','market',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'参与订单管理',g:'market',t:'orders'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
       sec('07 风控/审批/参数/策略','risk',[{l:'风险事件',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'参数定义与候选值',g:'risk',t:'paramDef'},{l:'参数发布与快照',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit'},{l:'AI运营建议',g:'risk',t:'aiSuggest'},{l:'AI市场分析',g:'risk',t:'aiMarket'},{l:'AI策略模拟',g:'risk',t:'aiSim'},{l:'AI竞猜助手',g:'risk',t:'aiPred'},{l:'AI客服风险助手',g:'risk',t:'aiSupport'},{l:'运营报表',g:'risk',t:'report'}])+
-      sec('08 客服/审计/运维','support',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态',g:'support',t:'ops'},{l:'Provider 监控',g:'support',t:'provider'},{l:'数据源管理',g:'support',t:'datasource'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
-    /* Delegate clicks: section header or nav-item */
-    document.querySelectorAll('.nav-section-header').forEach(function(h){
-      h.addEventListener('click',function(){var g=this.dataset.group,t=this.dataset.tab;if(g&&t)App.nav(g,t);});
-    });
-    document.querySelectorAll('.nav-item').forEach(function(it){
-      it.addEventListener('click',function(){App.nav(this.dataset.group,this.dataset.tab);});
-    });
+      sec('08 客服/审计/运维','support',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态 (A-OPS-001)',g:'support',t:'ops'},{l:'Provider 监控 (A-DATA-002)',g:'support',t:'provider'},{l:'数据源管理 (A-DATA-002)',g:'support',t:'datasource'},{l:'RBAC 角色 (A-OPS-001)',g:'support',t:'rbac'},{l:'语言管理 (A-OPS-001)',g:'support',t:'lang'},{l:'系统配置 (A-OPS-001)',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
+    /* Sidebar uses single Event Delegation on sidebarNav (init), not per-element listeners */
+    /* Populate breadcrumb label lookup (keyed by group:tab) */
+    var lbl=this.routeLabels={};
+    lbl['dash:overview']='运营总览';lbl['dash:today']='今日待办';
+    lbl['user:list']='用户列表';lbl['user:kyc']='KYC 审核队列';lbl['user:user360']='User 360';lbl['user:restrict']='用户限制与恢复';lbl['user:adjust']='用户资产调整';lbl['user:agentOverview']='代理总览';lbl['user:agentList']='代理列表';lbl['user:agentDetail']='代理详情';lbl['user:referral']='推荐关系';lbl['user:tickets']='客服工单中心';
+    lbl['asset:overview']='资产总览';lbl['asset:ledger']='APT 流水';lbl['asset:pools']='池子对账';lbl['asset:correction']='更正/冲正';lbl['asset:econOverview']='经济模型总览';lbl['asset:econSettlement']='奖励与结算监控';lbl['asset:econConfig']='经济配置入口';
+    lbl['robot:list']='Robot 列表';lbl['robot:detail']='Robot 详情';lbl['robot:reward']='奖励与领取监控';lbl['robot:upgrade']='升级与Power Cap';
+    lbl['otc:order']='OTC 订单';lbl['otc:detail']='订单详情/审核';lbl['otc:monitor']='撮合/争议监控';lbl['otc:power']='Power 账户';
+    lbl['market:list']='赛事/竞猜列表';lbl['market:detail']='竞猜详情';lbl['market:result']='结果/结算';lbl['market:refund']='退款/更正';lbl['market:dataCockpit']='数据驾驶舱';lbl['market:footballData']='足球数据管理';lbl['market:marketData']='市场赔率数据';lbl['market:signal']='信号与数据质量';
+    lbl['risk:case']='风险事件';lbl['risk:approval']='审批中心';lbl['risk:paramDef']='参数定义与候选值';lbl['risk:paramRelease']='参数发布与快照';lbl['risk:policy']='策略矩阵';lbl['risk:emergency']='紧急操作';lbl['risk:aiCockpit']='AI运营驾驶舱';lbl['risk:aiSuggest']='AI运营建议';lbl['risk:aiMarket']='AI市场分析';lbl['risk:aiSim']='AI策略模拟';lbl['risk:aiPred']='AI竞猜助手';lbl['risk:aiSupport']='AI客服风险助手';lbl['risk:report']='运营报表';
+    lbl['support:audit']='全量操作日志';lbl['support:sensitiveAudit']='敏感操作审计';lbl['support:ops']='异步任务/状态';lbl['support:provider']='Provider 监控';lbl['support:datasource']='数据源管理';lbl['support:rbac']='RBAC 角色';lbl['support:lang']='语言管理';lbl['support:config']='系统配置';lbl['support:migration']='APT Migration';
   },
 
   /* ── Nav ── */
@@ -296,7 +307,7 @@ var App = {
     this.curGroup=g;this.curTab=t;
     document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
     var sec=document.getElementById('sec-'+g);if(sec)sec.classList.add('active');
-    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+(t||'')+'</span>';
+    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+(this.routeLabels[g+':'+t]||t)+'</span>';
     var R={dash:this.rDash,user:this.rUser,asset:this.rAsset,robot:this.rRobot,otc:this.rOtc,market:this.rMarket,risk:this.rRisk,support:this.rSupport};
     if(R[g])R[g].call(this,sec,t);
     this.renderSidebar();
