@@ -38,6 +38,11 @@ REQUIRED_OWNER_DECISION = 18
 ## PAGE_ID → GAP_ID JOIN 表（用于派生 CONTRACT_STATUS / PRIORITY）
 
 > **⚠ 唯一派生源声明**：本 JOIN 表是 V2.4.1 中所有 Contract Status 的**唯一派生源**。Page Map、Migration Matrix、Self Check 及其他文件中的 Contract Status 值必须从本 JOIN 表派生，不得手写。若发现不一致，以本 JOIN 表为准。
+>
+> - **JOIN 表 = AUTHORITY**（唯一权威源）
+> - **Migration Matrix Contract 列 = PROJECTION**（仅投影 JOIN 表结果，不是派生输入）
+> - **Page Map Count = PROJECTION**（仅投影统计汇总）
+> - **IF PROJECTION != AUTHORITY → VALIDATION_FAIL**（任何文件中的 Contract Status 与 JOIN 表不一致时，以 JOIN 表为准并标记验证失败）
 
 | Page ID | 关联 GAP ID | BLOCKING_LEVEL | 派生 CONTRACT_STATUS | 派生 PRIORITY | 临时行为 |
 |---|---|---|---|---|---|

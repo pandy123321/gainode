@@ -103,10 +103,14 @@ Gainode 总后台
 
 ## 4. Contract Status 分类
 
-> **派生源**：以下 Contract Status 从 `GAINODE_ADMIN_CONTRACT_GAP_REGISTER_V2.4.1.md` 的 Page→Gap JOIN 表和 `GAINODE_ADMIN_PAGE_ID_MIGRATION_MATRIX_V2.4.1.md` 的 Contract 列逐行加总 [DERIVED]，可机械复算：
+> **派生源 = JOIN 表（唯一权威源）**：以下 Contract Status 从 `GAINODE_ADMIN_CONTRACT_GAP_REGISTER_V2.4.1.md` 的 Page→Gap JOIN 表**唯一**派生 [AUTHORITY]：
 > - FROZEN = 未在 JOIN 表中出现（无任何 Gap）的页面数 + JOIN 表中派生 CONTRACT_STATUS=FROZEN 的页面数
 > - CONTRACT_GAP = JOIN 表中派生 CONTRACT_STATUS=CONTRACT_GAP 的页面数（含 BLOCKING 和 NON_BLOCKING）
 > - FUTURE = JOIN 表中派生 CONTRACT_STATUS=FUTURE 的页面数
+>
+> `GAINODE_ADMIN_PAGE_ID_MIGRATION_MATRIX_V2.4.1.md` 的 Contract 列 = **PROJECTION**（仅投影 JOIN 表结果，不是派生输入）。本表的统计数值不从 Migration Matrix 的 Contract 列计数得出。
+>
+> **IF PROJECTION != AUTHORITY → VALIDATION_FAIL**（若 Migration Matrix 或其他文件的 Contract Status 与 JOIN 表不一致，标记为验证失败）
 
 | Contract Status | 页面数 |
 |---|---|
@@ -114,7 +118,7 @@ Gainode 总后台
 | CONTRACT_GAP（05 未冻结对应对象；含阻塞性 GAP） | 22 |
 | FUTURE | 1 |
 
-> CONTRACT_FROZEN(35) + CONTRACT_GAP(22) + FUTURE(1) = 58 ✓ [DERIVED]  
-> 逐行加总方法：从 Migration Matrix Contract 列统计——35 页标 FROZEN，22 页标 CONTRACT_GAP，1 页标 FUTURE，合计 58。任何人工均可独立复算。
+> CONTRACT_FROZEN(35) + CONTRACT_GAP(22) + FUTURE(1) = 58 ✓ [PROJECTION — 从 JOIN 表机械派生]  
+> 本统计唯一派生源为 Page→Gap JOIN 表。Migration Matrix Contract 列仅作投影参考，不作为计数输入。
 >
 > 本表中 FROZEN 含 BASE_CONTRACT=FROZEN 但存在非阻断子能力 GAP 的页面（A-USER-003/GAP-013, A-CONFIG-002/GAP-015, A-APPROVAL-001/GAP-016）
