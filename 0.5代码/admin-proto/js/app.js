@@ -250,18 +250,24 @@ var App = {
       '<button class="btn" onclick="App.closeModal()">关闭</button>');
   },
 
-  /* ── Sidebar ── */
+  /* ── Helpers for V2.4.1 ── */
+  pri:function(p){var cls=p==='P0'?'pri-p0':p==='P1'?'pri-p1':p==='P1_CONDITIONAL'?'pri-p1c':p==='FUTURE'?'pri-future':'';return'<span class="pri-badge '+cls+'">'+p+'</span>';},
+  gap:function(m){return'<div class="banner banner-gap"><span class="gap-icon">🔒</span><strong>上游契约未冻结</strong> — '+m+' 对象/权限/API 尚未进入 05/06 正式冻结。当前功能暂不可用（FAIL_CLOSED）。<span class="pri-sm">P1_CONDITIONAL</span></div>';},
+  gapLite:function(m){return'<div class="banner banner-gap" style="padding:6px 10px;font-size:12px;margin-bottom:0;"><span style="margin-right:6px;">🔒</span>'+m+' — 上游未冻结，暂不可用</div>';},
+
+  /* ── Sidebar V2.4.1 (8 Root) ── */
   renderSidebar:function(){
-    var sec=function(n,items){return'<div class="nav-section"><div class="nav-section-header"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item" data-group="'+i.g+'" data-tab="'+i.t+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
+    var s=this;
+    var sec=function(n,items){return'<div class="nav-section"><div class="nav-section-header"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item" data-group="'+i.g+'" data-tab="'+i.t+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+(i.p?' '+s.pri(i.p):'')+'</div>';}).join('')+'</div>';};
     document.getElementById('sidebarNav').innerHTML=
-      sec('01 工作台',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
-      sec('02 用户与准入',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'}])+
-      sec('03 资产与账本',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正申请',g:'asset',t:'correction'}])+
-      sec('04 机器人与权益',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'Reward 运营',g:'robot',t:'reward'}])+
-      sec('05 OTC 与 Power',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'Power 账户',g:'otc',t:'power'}])+
-      sec('06 赛事预测',[{l:'Market 列表',g:'market',t:'list'},{l:'Market 详情',g:'market',t:'detail'},{l:'Result/结算',g:'market',t:'result'},{l:'Refund/更正',g:'market',t:'refund'}])+
-      sec('07 风控审批参数',[{l:'Risk Case',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'Parameter 定义',g:'risk',t:'paramDef'},{l:'Parameter 发布',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'}])+
-      sec('08 客服审计运维',[{l:'工单队列',g:'support',t:'tickets',b:MOCK.stats.openTickets},{l:'工单详情',g:'support',t:'ticketDetail'},{l:'审计日志',g:'support',t:'audit'},{l:'异步任务/系统状态',g:'support',t:'ops'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'}]);
+      sec('01 工作台',[{l:'运营总览',g:'dash',t:'overview',p:'P0'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals,p:'P0'}])+
+      sec('02 用户与准入',[{l:'用户列表',g:'user',t:'list',p:'P0'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc,p:'P0'},{l:'User 360',g:'user',t:'user360',p:'P0'},{l:'用户限制与恢复',g:'user',t:'restrict',p:'P0'},{l:'用户资产调整',g:'user',t:'adjust',p:'P0'},{l:'代理总览',g:'user',t:'agentOverview',p:'P1_CONDITIONAL'},{l:'代理列表',g:'user',t:'agentList',p:'P1_CONDITIONAL'},{l:'代理详情',g:'user',t:'agentDetail',p:'P1_CONDITIONAL'},{l:'推荐关系',g:'user',t:'referral',p:'P1_CONDITIONAL'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets,p:'P0'}])+
+      sec('03 资产与账本',[{l:'资产总览',g:'asset',t:'overview',p:'P0'},{l:'APT 流水',g:'asset',t:'ledger',p:'P0'},{l:'池子对账',g:'asset',t:'pools',p:'P0'},{l:'更正/冲正',g:'asset',t:'correction',p:'P0'},{l:'经济模型总览',g:'asset',t:'econOverview',p:'P0'},{l:'奖励与结算监控',g:'asset',t:'econSettlement',p:'P0'},{l:'经济配置入口',g:'asset',t:'econConfig',p:'P0'}])+
+      sec('04 机器人与权益',[{l:'Robot 列表',g:'robot',t:'list',p:'P0'},{l:'Robot 详情',g:'robot',t:'detail',p:'P0'},{l:'奖励与领取监控',g:'robot',t:'reward',p:'P0'},{l:'升级与Power Cap',g:'robot',t:'upgrade',p:'P1'}])+
+      sec('05 OTC 与 Power',[{l:'OTC 订单',g:'otc',t:'order',p:'P0'},{l:'订单详情/审核',g:'otc',t:'detail',p:'P0'},{l:'撮合/争议监控',g:'otc',t:'monitor',p:'P1'},{l:'Power 账户',g:'otc',t:'power',p:'P0'}])+
+      sec('06 赛事预测',[{l:'赛事/竞猜列表',g:'market',t:'list',p:'P0'},{l:'竞猜详情',g:'market',t:'detail',p:'P0'},{l:'结果/结算',g:'market',t:'result',p:'P0'},{l:'退款/更正',g:'market',t:'refund',p:'P0'},{l:'数据驾驶舱',g:'market',t:'dataCockpit',p:'P1'},{l:'足球数据管理',g:'market',t:'footballData',p:'P1'},{l:'市场赔率数据',g:'market',t:'marketData',p:'P1_CONDITIONAL'},{l:'信号与数据质量',g:'market',t:'signal',p:'P1_CONDITIONAL'}])+
+      sec('07 风控/审批/参数/策略',[{l:'风险事件',g:'risk',t:'case',p:'P0'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals,p:'P0'},{l:'参数定义与候选值',g:'risk',t:'paramDef',p:'P0'},{l:'参数发布与快照',g:'risk',t:'paramRelease',p:'P0'},{l:'策略矩阵',g:'risk',t:'policy',p:'P0'},{l:'紧急操作',g:'risk',t:'emergency',p:'P0'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit',p:'P1'},{l:'AI运营建议',g:'risk',t:'aiSuggest',p:'P1'},{l:'AI市场分析',g:'risk',t:'aiMarket',p:'P1_CONDITIONAL'},{l:'AI策略模拟',g:'risk',t:'aiSim',p:'P1_CONDITIONAL'},{l:'AI竞猜助手',g:'risk',t:'aiPred',p:'P1_CONDITIONAL'},{l:'AI客服风险助手',g:'risk',t:'aiSupport',p:'P1'},{l:'运营报表',g:'risk',t:'report',p:'P1'}])+
+      sec('08 客服/审计/运维',[{l:'工单队列',g:'support',t:'tickets',b:MOCK.stats.openTickets,p:'P0'},{l:'工单详情',g:'support',t:'ticketDetail',p:'P0'},{l:'审计日志',g:'support',t:'audit',p:'P0'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit',p:'P0'},{l:'异步任务/状态',g:'support',t:'ops',p:'P0'},{l:'Provider 监控',g:'support',t:'provider',p:'P1_CONDITIONAL'},{l:'数据源管理',g:'support',t:'datasource',p:'P1_CONDITIONAL'},{l:'RBAC 角色',g:'support',t:'rbac',p:'P0'},{l:'语言管理',g:'support',t:'lang',p:'P0'},{l:'系统配置',g:'support',t:'config',p:'P0'},{l:'APT Migration',g:'support',t:'migration',p:'FUTURE'}]);
   },
 
   /* ── Nav ── */
@@ -292,11 +298,21 @@ var App = {
         ['总注册用户|'+s.totalUsers.toLocaleString()+'|↑ 12% vs 上月|up','今日活跃|'+s.todayActive.toLocaleString()+'|在线率 13.5%|up','APT 流通量|'+s.aptInCirculation+'|总铸造 15.2M|up','法定收入累计|'+s.totalRevenueFiat+'|稳定增长|up','待审核 KYC|'+s.pendingKyc+'|⚠ 需要处理|warn','审批中心待办|'+s.pendingApprovals+'|需要审批|warn','活跃 Robot|'+s.robotActiveCount.toLocaleString()+'|运行中|up','活跃 Market|'+s.marketCount+'||'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value"'+(p[3]==='warn'?' style="color:var(--warning-600)"':'')+'>'+p[1]+'</div><div class="s-trend '+p[3]+'">'+p[2]+'</div></div>';}).join('')+
       '</div>'+
       '<div class="section-grid">'+
+        '<div class="card"><div class="card-header">Provider 健康 <span class="pri-badge pri-p1c">P1_COND</span></div>'+
+          ['API-Football|🟢 Normal|150ms|99.8%|98/100 quota','BetBurger|🟡 Latency|2.3s|97.2%|45/50 quota'].map(function(r){var p=r.split('|');return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:100px;">'+p[0]+'</span><span>'+p[1]+'</span><span style="margin-left:8px;font-size:11px;color:var(--gray-400);">延迟 '+p[2]+' | 成功率 '+p[3]+' | '+p[4]+'</span></div>';}).join('')+
+          '<div class="muted" style="padding-top:6px;">Provider 合同未签署 — 详情见 08 运维模块</div>'+
+        '</div>'+
+        '<div class="card"><div class="card-header">AI / Data Health <span class="pri-badge pri-p1">P1</span></div>'+
+          ['AI 建议|8 条待确认|🟡','数据质量|98.2%|🟢','信号引擎|Running|🟢','AI 执行|HUMAN_IN_LOOP|—'].map(function(r){var p=r.split('|');return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:100px;">'+p[0]+'</span><span style="margin-left:8px;font-weight:500;">'+p[1]+'</span><span style="margin-left:8px;font-size:11px;color:var(--gray-400);">'+p[2]+'</span></div>';}).join('')+
+          '<div class="muted" style="padding-top:6px;">AI 不直接执行高风险动作（HUMAN_IN_LOOP）</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="section-grid">'+
         '<div class="card"><div class="card-header">近期活动</div>'+al.map(function(a){return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="width:60px;font-size:11px;color:var(--gray-400);">'+a.time+'</span><span style="color:var(--gray-700);">'+a.text+'</span><span class="muted" style="margin-left:auto;">'+a.detail+'</span></div>';}).join('')+'</div>'+
         '<div class="card"><div class="card-header">系统状态</div>'+Object.keys(ss).map(function(k){return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:120px;">'+k+'</span><span class="tag '+(ss[k]==='Normal'||ss[k]==='Running'?'tag-green':'tag-amber')+'">'+ss[k]+'</span></div>';}).join('')+'</div>'+
       '</div>'+
       '<div class="card" style="margin-top:16px;"><div class="card-header">快捷入口</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">'+
-        ['👤 用户列表|user|list','🆔 KYC 审核|user|kyc','🛡️ 风险案件|risk|case','✅ 审批中心|risk|approval','🤖 Robot 管理|robot|list','💱 OTC 订单|otc|order','⚽ 赛事预测|market|list','🎫 工单中心|support|tickets'].map(function(x){var p=x.split('|');return'<button class="btn" onclick="App.nav(\''+p[1]+'\',\''+p[2]+'\')">'+p[0]+'</button>';}).join('')+'</div></div>';
+        ['👤 用户列表|user|list','🆔 KYC 审核|user|kyc','🛡️ 风险事件|risk|case','✅ 审批中心|risk|approval','🤖 Robot 管理|robot|list','💱 OTC 订单|otc|order','⚽ 赛事预测|market|list','🎫 工单中心|support|tickets'].map(function(x){var p=x.split('|');return'<button class="btn" onclick="App.nav(\''+p[1]+'\',\''+p[2]+'\')">'+p[0]+'</button>';}).join('')+'</div></div>';
     }else{
       body=self.filter(['<select><option>全部类型</option><option>审批</option><option>KYC</option><option>风险</option></select><select><option>全部优先级</option></select>'])+
         self.tbl(['类型','标题','优先级','请求人','SLA','操作'],
@@ -308,24 +324,86 @@ var App = {
 
   /* ===== 02 用户与准入 ===== */
   rUser:function(sec,tab){
-    var s=this,ts=[{id:'list',label:'用户列表',group:'user'},{id:'kyc',label:'KYC 审核队列',group:'user',badge:MOCK.stats.pendingKyc},{id:'user360',label:'User 360',group:'user'}];
+    var s=this,ts=[
+      {id:'list',label:'用户列表',group:'user',p:'P0'},
+      {id:'kyc',label:'KYC 审核队列',group:'user',badge:MOCK.stats.pendingKyc,p:'P0'},
+      {id:'user360',label:'User 360',group:'user',p:'P0'},
+      {id:'restrict',label:'用户限制与恢复',group:'user',p:'P0'},
+      {id:'adjust',label:'用户资产调整',group:'user',p:'P0'},
+      {id:'agentOverview',label:'代理总览',group:'user',p:'P1_CONDITIONAL'},
+      {id:'agentList',label:'代理列表',group:'user',p:'P1_CONDITIONAL'},
+      {id:'agentDetail',label:'代理详情',group:'user',p:'P1_CONDITIONAL'},
+      {id:'referral',label:'推荐关系',group:'user',p:'P1_CONDITIONAL'},
+      {id:'tickets',label:'客服工单',group:'user',badge:MOCK.stats.openTickets,p:'P0'}
+    ];
     var body='';
     if(tab==='list'){
-      body=s.filter(['<input placeholder="搜索 Display Name / Phone"><select><option>全部 KYC</option><option>approved</option><option>pending</option></select><select><option>全部状态</option><option>active</option><option>restricted</option></select><button class="btn">保存视图</button>'])+
-        s.tbl(['ID','Display Name','Phone','KYC','Level','Status','P Lv','AI','Pred','操作'],
-          MOCK.users.map(function(m){return'<tr><td class="cell-mono">'+m.id+'</td><td>'+m.display_name+'</td><td>'+m.phone+'</td><td>'+s.tag(m.kyc_status)+'</td><td>'+m.kyc_level+'</td><td>'+s.tag(m.status)+'</td><td>'+m.global_p_level+'</td><td>'+(m.ai_eligible?'<span class="tag tag-green">Yes</span>':'<span class="tag tag-default">No</span>')+'</td><td>'+(m.prediction_eligible?'<span class="tag tag-blue">Yes</span>':'<span class="tag tag-default">No</span>')+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'user\',\'user360\')">360</button></div></td></tr>';}));
+      body=s.filter(['<input placeholder="搜索 UID / 手机号 / 邮箱 / 推荐码"><select><option>全部 KYC</option><option>approved</option><option>pending</option></select><select><option>全部状态</option><option>active</option><option>restricted</option></select><button class="btn">保存视图</button>'])+
+        s.tbl(['UID','昵称','手机号','KYC','等级','状态','直推','上级','推荐码','Robot','操作'],
+          MOCK.users.map(function(m){return'<tr><td class="cell-mono">'+m.id+'</td><td>'+m.display_name+'</td><td>'+m.phone+'</td><td>'+s.tag(m.kyc_status)+'</td><td>'+m.kyc_level+'</td><td>'+s.tag(m.status)+'</td><td>3</td><td>U-004</td><td class="cell-mono">REF-'+m.id+' <button class="btn btn-xs" onclick="App.toast(\'已复制\')">📋</button></td><td>Lv.'+(m.global_p_level||0)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'user\',\'user360\')">360</button><button class="btn btn-xs btn-warn" onclick="App.nav(\'user\',\'restrict\')">限制</button></div></td></tr>';}));
     }else if(tab==='kyc'){
       body=s.filter(['<select><option>全部状态</option><option>pending</option><option>needs_info</option><option>review</option></select>'])+
-        s.tbl(['Case ID','用户','Level','状态','文件','风险','提交','操作'],
+        s.tbl(['Case ID','用户','等级','状态','文件','风险','提交','操作'],
           MOCK.kycQueue.map(function(c){var bt='';
             if(c.status==='pending')bt='<button class="btn btn-xs btn-success" onclick="App.openKycDecision(\''+c.case_id+'\',\'approve\')">通过</button><button class="btn btn-xs btn-danger" onclick="App.openKycDecision(\''+c.case_id+'\',\'reject\')">驳回</button>';
             else if(c.status==='needs_info')bt='<button class="btn btn-xs btn-warn" onclick="App.openKycDecision(\''+c.case_id+'\',\'needs_info\')">补件</button>';
             else if(c.status==='review')bt='<button class="btn btn-xs btn-primary" onclick="App.openKycReview(\''+c.case_id+'\')">复核</button>';
             return'<tr><td class="cell-mono">'+c.case_id+'</td><td>'+c.user_name+'</td><td>'+c.kyc_level+'</td><td>'+s.tag(c.status)+'</td><td>'+Object.keys(c.documents||{}).map(function(k){return'<span class="tag tag-'+(c.documents[k]==='ok'?'green':'amber')+'">'+k+':'+c.documents[k]+'</span>';}).join(' ')+'</td><td>'+s.tag(c.risk_score)+'</td><td>'+c.submitted+'</td><td><div class="btn-group">'+bt+'</div></td></tr>';}));
+    }else if(tab==='user360'){
+      body='<div class="banner banner-info">User 360 展示用户全貌：准入/KYC/Robot/APT/Power/OTC/竞猜/风险/工单。高风险动作不在详情页直接执行。</div>'+s._u360(MOCK.user360);
+    }else if(tab==='restrict'){
+      body=s.banner('info','账户/余额/OTC/Robot 分别限制，不隐式推导。冻结余额和重大恢复需审批（Requester ≠ Approver）。')+
+        s.filter(['<input placeholder="搜索 UID"><select><option>全部类型</option><option>冻结账户</option><option>冻结余额</option><option>冻结OTC</option><option>限制Robot</option></select>'])+
+        s.tbl(['Case ID','用户','类型','原因','生效','到期','状态','操作'],
+          (MOCK.userRestrictions||[]).map(function(r){return'<tr><td class="cell-mono">'+r.case_id+'</td><td>'+r.user+'</td><td>'+s.tag(r.type)+'</td><td>'+r.reason+'</td><td>'+r.effective+'</td><td>'+r.expiry+'</td><td>'+s.tag(r.status)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.openRestrictForm(\''+r.case_id+'\')">详情</button>'+(r.status==='active'?'<button class="btn btn-xs btn-success" onclick="App.toast(\'已提交解除申请 — 等待审批\')">解除</button>':'')+'</div></td></tr>';}))+
+        '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openRestrictForm(\'new\')">创建限制</button><span class="muted" style="margin-left:8px;">冻结余额/重大恢复需审批。发起人 ≠ 审批人（SoD）。</span></div>';
+    }else if(tab==='adjust'){
+      body=s.banner('warn','⚠ 资产调整走账本流程：Proposal → Preview → Impact → Approval → Execution → Ledger。禁止直接 SET balance。Requester ≠ Approver（SoD）。')+
+        '<div class="card" style="max-width:960px;">'+
+          '<div class="card-header">发起资产调整</div>'+
+          '<div class="form-group"><label>用户</label><select><option>选择用户</option><option>U-001/Alex Chen</option><option>U-004/John Smith</option></select></div>'+
+          '<div class="form-group"><label>调整类型</label><select><option>–选择–</option><option>credit</option><option>debit</option><option>correction</option></select></div>'+
+          '<div class="form-group"><label>金额 (APT)</label><input type="number" placeholder="输入正数，会显示为 Delta"></div>'+
+          '<div class="form-group"><label>原因</label><textarea rows="2" placeholder="必须填写调整原因和证据引用"></textarea></div>'+
+          '<div class="bar-info mt-12">ℹ 保存后进入审批流程（发起人 ≠ 审批人）。草案无资金效果。</div>'+
+          '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.toast(\'调整提案已创建 — 进入审批\')">创建提案</button><button class="btn btn-success" onclick="App.toast(\'已提交审批（需独立审批人）\')">提交审批</button></div>'+
+        '</div>'+
+        '<div class="card mt-16"><div class="card-header">调整历史</div>'+s.tbl(['ID','用户','类型','Delta','Before/After','原因','审批人','状态','时间'],[
+          '<tr><td class="cell-mono">ADJ-001</td><td>U-004/John Smith</td><td>credit</td><td class="ta-r highlight">+1,500</td><td>46,700 → 48,200</td><td>工单补偿</td><td>risk_approver_01</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-05</td></tr>',
+          '<tr><td class="cell-mono">ADJ-002</td><td>U-003</td><td>debit</td><td class="ta-r" style="color:var(--danger-600);">-500</td><td>5,200 → 4,700</td><td>欺诈案件</td><td>security_admin</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-03</td></tr>'
+        ].join(''))+'</div>';
+    }else if(tab==='agentOverview'||tab==='agentList'||tab==='agentDetail'||tab==='referral'){
+      body=s.gap('代理管理（Affiliate）')+
+        '<div class="card"><div class="card-header">代理管理 — 规划预览</div>'+
+        '<p class="muted" style="padding:16px;">代理总览/列表/详情/推荐关系归入用户与准入模块。当前 Affiliate Object 未在 05 中正式冻结，生产实现暂不可用。</p>'+
+        '<div class="stat-grid dimmed">'+['代理总数|—','有效代理|—','今日新增|—','代理域用户|—'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+        s.tbl(['代理ID','名称','负责人','等级','邀请码','状态','操作'],[
+          '<tr><td class="cell-mono">AF-001</td><td>北美区域代理</td><td>U-010/Emma Wilson</td><td>Gold</td><td class="cell-mono">INV-N-001</td><td><span class="tag tag-default">规划中</span></td><td>—</td></tr>'
+        ])+'</div>';
     }else{
-      body='<div class="banner banner-info">User 360 展示用户全貌：Admission / Robot / APT / Power / OTC / Prediction / Risk / Support。高风险动作不在详情页直接执行。</div>'+s._u360(MOCK.user360);
+      body=s.filter(['<select><option>全部优先级</option><option>critical</option><option>high</option></select><select><option>全部状态</option><option>处理中</option><option>等待用户</option></select>'])+
+        s.tbl(['工单号','用户','类别','优先级','状态','主题','负责人','SLA','操作'],
+          MOCK.tickets.map(function(t){return'<tr><td class="cell-mono">'+t.ticket_id+'</td><td>'+t.user+'</td><td>'+t.category+'</td><td>'+s.tag(t.priority)+'</td><td>'+s.tag(t.status)+'</td><td>'+t.subject+'</td><td>'+t.assignee+'</td><td>'+t.sla+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'support\',\'ticketDetail\')">处理</button>'+(t.status==='in_progress'?'<button class="btn btn-xs btn-success" onclick="App.openTicketResolution(\''+t.ticket_id+'\')">解决</button>':'')+'</div></td></tr>';}));
     }
     sec.innerHTML='<div class="page-header"><h2>用户与准入</h2></div>'+s.tabs(ts,tab)+body;
+  },
+
+  /* ── User Restriction Form ── */
+  openRestrictForm:function(cid){
+    var s=this;
+    if(cid==='new'){
+      s.openModal('创建用户限制',
+        s._form('用户','<select><option>选择用户</option><option>U-001/Alex Chen</option><option>U-004/John Smith</option></select>')+
+        s._form('限制类型','<select><option>–选择–</option><option>freeze_account</option><option>freeze_balance</option><option>freeze_otc</option><option>restrict_robot</option></select>')+
+        s._form('原因','<textarea rows="3" placeholder="输入限制原因和证据"></textarea>')+
+        s._form('到期时间','<input type="datetime-local">')+
+        '<div class="bar-warn mt-12">⚠ 冻结余额和重大恢复需审批。发起人 ≠ 审批人（SoD）。</div>',
+        '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-danger" onclick="App.closeModal();App.toast(\'限制申请已提交 — 等待审批\')">提交审批</button>');
+    }else{
+      s.openModal('限制详情 — '+cid,
+        s._dm(null,[['Case ID',cid],['用户','U-004/John Smith'],['类型','<span class=\'tag tag-red\'>freeze_balance</span>'],['原因','风控要求'],['生效','2024-06-01'],['到期','2024-06-15'],['状态','<span class=\'tag tag-red\'>active</span>'],['操作人','admin'],['审批人','risk_approver_01']]),
+        '<button class="btn" onclick="App.closeModal()">关闭</button><button class="btn btn-warn" onclick="App.closeModal();App.toast(\'解除申请已提交\')">申请解除</button>');
+    }
   },
 
   _u360:function(d){
@@ -352,7 +430,15 @@ var App = {
 
   /* ===== 03 资产与账本 ===== */
   rAsset:function(sec,tab){
-    var s=this,ts=[{id:'overview',label:'资产总览',group:'asset'},{id:'ledger',label:'APT 流水',group:'asset'},{id:'pools',label:'池子对账',group:'asset'},{id:'correction',label:'更正/冲正',group:'asset'}];
+    var s=this,ts=[
+      {id:'overview',label:'资产总览',group:'asset',p:'P0'},
+      {id:'ledger',label:'APT 流水',group:'asset',p:'P0'},
+      {id:'pools',label:'池子对账',group:'asset',p:'P0'},
+      {id:'correction',label:'更正/冲正',group:'asset',p:'P0'},
+      {id:'econOverview',label:'经济模型总览',group:'asset',p:'P0'},
+      {id:'econSettlement',label:'奖励与结算监控',group:'asset',p:'P0'},
+      {id:'econConfig',label:'经济配置入口',group:'asset',p:'P0'}
+    ];
     var body='',a=MOCK.assetOverview;
     if(tab==='overview'){
       body=s.banner('info','财务信息概览 — 只读视图。更正、调拨必须经过 Proposal → Approval → Execution 路径。')+
@@ -367,19 +453,34 @@ var App = {
         s.tbl(['Entry ID','批次','用户','类型','方向','数量','余额','状态','时间','操作'],
           MOCK.ledgerEntries.map(function(e){return'<tr><td class="cell-mono">'+e.id+'</td><td class="cell-mono">'+e.batch+'</td><td>'+e.user+'</td><td>'+e.type+'</td><td>'+(e.dir==='in'?'<span class="tag tag-green">收入</span>':'<span class="tag tag-red">支出</span>')+'</td><td class="ta-r">'+e.qty+'</td><td class="ta-r">'+e.balance+'</td><td>'+s.tag(e.status)+'</td><td>'+e.time+'</td><td><div class="btn-group"><button class="btn btn-xs" onclick="App.openLedgerDetail(\''+e.id+'\')">查看</button><button class="btn btn-xs btn-warn" onclick="App.nav(\'asset\',\'correction\')">标异常</button></div></td></tr>';}));
     }else if(tab==='pools'){
-      body=s.banner('info','四大账户隔离：OTC 储备 ≠ 运营预算 ≠ AI Reward Pool ≠ Prediction 资金。')+
+      body=s.banner('info','四大账户隔离：OTC 储备 ≠ 运营预算 ≠ AI Reward Pool ≠ 竞猜资金。')+
         '<div class="card">'+s.tbl(['池子名称','余额','预算','本月支出','对账','最后对账'],
           MOCK.pools.map(function(p){return'<tr><td><strong>'+p.name+'</strong></td><td class="ta-r highlight">'+(p.balance||p.available||'—').toLocaleString()+' APT</td><td class="ta-r">'+(p.budgeted||p.approved||p.spent||'—').toLocaleString()+' APT</td><td class="ta-r">'+(p.spent_this_month||'—')+'</td><td>'+(p.reconciled?'<span class="tag tag-green">已对账</span>':'<span class="tag tag-amber">未对账</span>')+'</td><td>'+p.last_recon+'</td></tr>';}))+'</div>';
-    }else{
+    }else if(tab==='correction'){
       body=s.banner('info','这里不是"修账按钮"——创建受控的 ledger correction proposal，不直接改账。草案无资金效果，必须经过审批。')+
         '<div class="card" style="max-width:960px;">'+
           '<div class="card-header">新建更正/冲正申请</div>'+
           '<div class="form-group"><label>来源 Entry</label><select><option>选择需要更正/冲正的流水记录</option><option>LE-004 — posting error</option></select></div>'+
           '<div class="form-group"><label>类型</label><div class="segmented"><button class="seg-btn active">Reversal (冲正)</button><button class="seg-btn">Correction (更正)</button></div></div>'+
           '<div class="form-group"><label>理由</label><textarea rows="3" placeholder="必须填写更正理由，包括证据引用"></textarea></div>'+
-          '<div class="form-group"><label>影响预览</label><div class="detail-item"><div class="dl">受影响金额</div><div class="dv highlight">LE-004: 500 APT</div></div><div class="detail-item"><div class="dl">原批次</div><div class="dv">B-892</div></div><div class="detail-item"><div class="dl">反转计划</div><div class="dv">Reversal entry + Repost to correct batch</div></div></div>'+
-          '<div class="form-group"><label>审批路径</label><div class="approval-flow"><div class="approval-step done"><div class="step-dot">✓</div><div class="step-label">Draft</div></div><div class="approval-line done"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">Finance Review</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">Approval</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">Execution</div></div></div></div>'+
-          '<div class="btn-group" style="margin-top:16px;"><button class="btn btn-primary" onclick="App.openCorrectionSubmit()">保存草案</button><button class="btn btn-success" onclick="App.openCorrectionSubmit()">提交审批</button><button class="btn">取消</button></div>'+
+          '<div class="form-group"><label>影响预览</label><div class="detail-item"><div class="dl">受影响金额</div><div class="dv highlight">LE-004: 500 APT</div></div></div>'+
+          '<div class="form-group"><label>审批路径</label><div class="approval-flow"><div class="approval-step done"><div class="step-dot">✓</div><div class="step-label">草案</div></div><div class="approval-line done"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">财务复核</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">审批</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">执行</div></div></div></div>'+
+          '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.openCorrectionSubmit()">保存草案</button><button class="btn btn-success" onclick="App.openCorrectionSubmit()">提交审批（SoD：发起人≠审批人）</button></div>'+
+        '</div>';
+    }else if(tab==='econOverview'){
+      body=s.banner('info','经济模型运行总览 — 监控 Reward/Power/Settlement 全局运行。AI 和人工建议不走经济模型参数直接修改。')+
+        '<div class="stat-grid">'+['今日派发 Reward|1,234 APT','本月累计|45,600 APT','活跃领取用户|8,934','Power 总消耗|180,500','竞猜结算额|285,000 APT','对账差异|0'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+        '<div class="card mt-16">'+s.tbl(['指标','当前值','昨日','趋势','阈值'],['每日 Reward 总额|1,234 APT|1,180|↑ 4.5%|正常','平均 Reward/用户|0.14 APT|0.13|↑ 7%|正常','Power 消耗率|12.3%|11.8%|↑|正常','结算金额|285,000|310,000|↓ 8%|正常','手续费收入|8,550|9,300|↓ 8%|正常'].map(function(r){var p=r.split('|');return'<tr><td>'+p[0]+'</td><td class="highlight">'+p[1]+'</td><td>'+p[2]+'</td><td>'+p[3]+'</td><td>'+p[4]+'</td></tr>';}).join(''))+'</div>';
+    }else if(tab==='econSettlement'){
+      body=s.banner('info','奖励与结算执行监控 — 查看 Reward batch 和 Settlement batch 的执行状态。')+
+        '<div class="card">'+s.tbl(['批次','类型','周期','记录数','成功','失败','状态','执行时间'],
+          MOCK.settlementBatches.concat([{batch_id:'B-892',type:'reward',period:'2024-06-10',records:'1,234',success:'1,232',failed:'2',status:'completed',executed:'2024-06-10 06:30'}]).map(function(b){return'<tr><td class="cell-mono">'+(b.batch_id||b.journal_batch)+'</td><td>'+(b.type||'settlement')+'</td><td>'+b.period+'</td><td class="ta-r">'+(b.records||b.orders_total)+'</td><td class="ta-r">'+(b.success||b.win_orders||'—')+'</td><td class="ta-r">'+(b.failed||'0')+'</td><td>'+s.tag(b.status)+'</td><td>'+(b.executed||b.settled||'—')+'</td></tr>';}))+'</div>';
+    }else{
+      body=s.banner('info','经济模型配置入口 — 统一跳转到参数中心（唯一真源）。不存在第二套 Active Parameter。')+
+        '<div class="card"><div class="card-header">经济模型相关参数</div>'+
+          '<p class="muted" style="padding:12px 16px 0;">以下配置项均在 <strong>参数中心</strong> 中管理。此处为业务视角入口，所有编辑跳转到 Parameter Center。</p>'+
+          s.tbl(['参数 Key','业务域','当前 Release','活跃值','操作'],
+            MOCK.parameters.filter(function(p){return ['AI','Prediction','OTC','Risk'].indexOf(p.namespace)>=0;}).map(function(p){return'<tr><td class="cell-mono">'+p.key+'</td><td>'+p.namespace+'</td><td class="cell-mono">'+p.current_release+'</td><td>'+(p.value||'TABLE')+'</td><td><button class="btn btn-xs btn-primary" onclick="App.nav(\'risk\',\'paramDef\')">去参数中心</button></td></tr>';}))+
         '</div>';
     }
     sec.innerHTML='<div class="page-header"><h2>资产与账本</h2></div>'+s.tabs(ts,tab)+body;
@@ -387,18 +488,23 @@ var App = {
 
   /* ===== 04 机器人与权益 ===== */
   rRobot:function(sec,tab){
-    var s=this,ts=[{id:'list',label:'Robot 列表',group:'robot'},{id:'detail',label:'Robot 详情',group:'robot'},{id:'reward',label:'Reward 运营',group:'robot'}];
+    var s=this,ts=[{id:'list',label:'Robot 列表',group:'robot',p:'P0'},{id:'detail',label:'Robot 详情',group:'robot',p:'P0'},{id:'reward',label:'奖励与领取监控',group:'robot',p:'P0'},{id:'upgrade',label:'升级与Power Cap',group:'robot',p:'P1'}];
     var body='';
     if(tab==='list'){
       body=s.filter(['<input placeholder="搜索 User / Robot ID"><select><option>全部等级组</option></select><select><option>全部状态</option><option>active</option><option>review</option></select>'])+
-        s.tbl(['Robot ID','用户','Level','Group','Status','Capacity','Coeff','Power Cap','Rule','操作'],
+        s.tbl(['Robot ID','用户','等级','组别','状态','容量','系数','Power Cap','规则版本','操作'],
           MOCK.robots.map(function(r){return'<tr><td class="cell-mono">'+r.robot_id+'</td><td>'+r.user+'</td><td><span class="tag tag-gold">Lv.'+r.level+'</span></td><td>'+r.level_group+'</td><td>'+s.tag(r.status)+'</td><td class="ta-r">'+r.standard_capacity+'</td><td class="ta-r">'+r.daily_reward_coefficient+'</td><td class="ta-r">'+r.power_cap+'</td><td class="cell-mono">'+r.rule_version+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'robot\',\'detail\')">详情</button></div></td></tr>';}));
     }else if(tab==='detail'){
       body=s.banner('info','Robot 详情是事实页。参数改动去 Parameter Center，高风险动作创建 case/proposal 再审批。')+s._robotDetail(MOCK.robotDetail);
-    }else{
-      body=s.filter(['<select><option>全部状态</option><option>held</option><option>pending_claim</option><option>claimed</option></select><input placeholder="批次">'])+
-        s.tbl(['Reward ID','用户','Robot','Capacity','Coeff','Pending APT','状态','Batch','周期','操作'],
+    }else if(tab==='reward'){
+      body=s.filter(['<select><option>全部状态</option><option>held</option><option>待领取</option><option>已领取</option></select><input placeholder="批次">'])+
+        s.tbl(['Reward ID','用户','Robot','容量','系数','待领取 APT','状态','批次','周期','操作'],
           MOCK.rewards.map(function(r){return'<tr><td class="cell-mono">'+r.reward_id+'</td><td>'+r.user+'</td><td>'+r.robot+'</td><td class="ta-r">'+r.std_capacity+'</td><td class="ta-r">'+r.coeff+'</td><td class="ta-r highlight">'+r.pending_apt+'</td><td>'+s.tag(r.status)+'</td><td class="cell-mono">'+r.batch+'</td><td>'+r.period+'</td><td><div class="btn-group"><button class="btn btn-xs" onclick="App.nav(\'robot\',\'detail\')">查看</button><button class="btn btn-xs btn-danger" onclick="App.openCaseForm(\'clawback\',\''+r.reward_id+'\')">回退</button></div></td></tr>';}));
+    }else{
+      body=s.banner('info','升级与 Power Cap 变化 — 查看机器人升级历史和 Power Cap 变化趋势。参数改动在参数中心。')+
+        s.tbl(['日期','Robot ID','用户','从','到','升级花费 APT','Power Cap 变化','规则版本'],
+          (MOCK.robotDetail.upgrades||[]).map(function(u){return'<tr><td>'+u.date+'</td><td class="cell-mono">RB-002</td><td>U-004</td><td>Lv.'+u.from+'</td><td>Lv.'+u.to+'</td><td class="ta-r">'+u.cost_apt+'</td><td class="ta-r">'+u.power_cap_after+'</td><td class="cell-mono">V3.2.1</td></tr>';}))+
+        '<p class="muted" style="padding:8px 0;">该页面为 P1，Robot 详情 Tab 内已包含升级历史。</p>';
     }
     sec.innerHTML='<div class="page-header"><h2>机器人与权益</h2></div>'+s.tabs(ts,tab)+body;
   },
@@ -418,7 +524,7 @@ var App = {
 
   /* ===== 05 OTC 与 Power ===== */
   rOtc:function(sec,tab){
-    var s=this,ts=[{id:'order',label:'OTC 订单',group:'otc'},{id:'detail',label:'订单详情/审核',group:'otc'},{id:'power',label:'Power 账户',group:'otc'}];
+    var s=this,ts=[{id:'order',label:'OTC 订单',group:'otc',p:'P0'},{id:'detail',label:'订单详情/审核',group:'otc',p:'P0'},{id:'monitor',label:'撮合/争议监控',group:'otc',p:'P1'},{id:'power',label:'Power 账户',group:'otc',p:'P0'}];
     var body='';
     if(tab==='order'){
       body=s.filter(['<select><option>全部方向</option><option>buy</option><option>sell</option></select><select><option>全部状态</option><option>review</option><option>partial</option><option>completed</option><option>disputed</option></select>'])+
@@ -431,8 +537,14 @@ var App = {
           '<div class="detail-grid mb-16">'+['用户|'+o.user,'方向|'+(o.side==='buy'?'<span class="tag tag-green">Buy</span>':'<span class="tag tag-red">Sell</span>'),'价格|'+o.price,'数量|'+o.qty_apt+' APT','已成交|'+o.filled,'状态|'+s.tag(o.status),'Power Frozen|'+(o.power_frozen||'—'),'风险|'+s.tag(o.risk)].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
           '<div class="tabs"><div class="tab active">Trades</div><div class="tab">Freeze</div><div class="tab">Timeline</div><div class="tab">Risk Evidence</div></div>'+
           '<div class="mt-16">'+s.tbl(['Trade ID','Buyer','Seller','Qty','Price','Status'],MOCK.otcTrades.map(function(t){return'<tr><td class="cell-mono">'+t.trade_id+'</td><td>'+t.buyer+'</td><td>'+t.seller+'</td><td class="ta-r">'+t.qty_apt+'</td><td>'+t.price+'</td><td>'+s.tag(t.status)+'</td></tr>';}))+'</div>'+
-          '<div class="btn-group mt-16"><button class="btn btn-success" onclick="App.openOtcDecision(\'OTC-001\',\'approve\')">Approve</button><button class="btn btn-danger" onclick="App.openOtcDecision(\'OTC-001\',\'reject\')">Reject</button><button class="btn btn-warn" onclick="App.openOtcDecision(\'OTC-001\',\'needs_info\')">Needs Info</button><button class="btn" onclick="App.openInternalNote(\'otc\',\'OTC-001\')">建内部 Note</button></div>'+
+          '<div class="btn-group mt-16"><button class="btn btn-success" onclick="App.openOtcDecision(\'OTC-001\',\'approve\')">审批通过</button><button class="btn btn-danger" onclick="App.openOtcDecision(\'OTC-001\',\'reject\')">审批驳回</button><button class="btn btn-warn" onclick="App.openOtcDecision(\'OTC-001\',\'needs_info\')">需要补充</button><button class="btn" onclick="App.openInternalNote(\'otc\',\'OTC-001\')">内部备注</button></div>'+
         '</div>';
+    }else if(tab==='monitor'){
+      body=s.banner('info','撮合/争议/Power 监控（P1）— 监控匹配质量、未成交、争议和 Power 冻结异常。')+
+        '<div class="stat-grid">'+['匹配率|92.3%','平均成交时长|2.3 min','未成交率|4.1%','过期率|1.5%','争议中|2','异常冻结|3'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+        s.tbl(['订单','状态','匹配次数','剩余','冻结 Power','异常原因','操作'],
+          [{order:'OTC-004',status:'disputed',matches:3,remaining:'10,000',frozen:400,anomaly:'异常集群'},{order:'OTC-006',status:'cancelled',matches:0,remaining:'500',frozen:20,anomaly:'超时 72h'}].map(function(o){return'<tr><td class="cell-mono">'+o.order+'</td><td>'+s.tag(o.status)+'</td><td class="ta-r">'+o.matches+'</td><td class="ta-r">'+o.remaining+'</td><td class="ta-r">'+o.frozen+'</td><td>'+o.anomaly+'</td><td><div class="btn-group"><button class="btn btn-xs btn-warn" onclick="App.toast(\'Case 已创建\')">创建 Case</button></div></td></tr>';}))+
+        '<p class="muted" style="padding:8px 0;">P1 — 订单中心+详情已覆盖核心运营能力，此监控页可后续上线。</p>';
     }else{
       body=s.banner('info','把 Power 当资源账管理。只读为主，不可直接手改。')+
         '<div class="card">'+s.tbl(['User ID','用户','Available','Frozen','Consumed','Cap','Robot Lv'],
@@ -443,7 +555,16 @@ var App = {
 
   /* ===== 06 赛事预测 ===== */
   rMarket:function(sec,tab){
-    var s=this,ts=[{id:'list',label:'Market 列表',group:'market'},{id:'detail',label:'Market 详情',group:'market'},{id:'result',label:'Result/结算',group:'market'},{id:'refund',label:'Refund/更正',group:'market'}];
+    var s=this,ts=[
+      {id:'list',label:'赛事/竞猜列表',group:'market',p:'P0'},
+      {id:'detail',label:'竞猜详情',group:'market',p:'P0'},
+      {id:'result',label:'结果/结算',group:'market',p:'P0'},
+      {id:'refund',label:'退款/更正',group:'market',p:'P0'},
+      {id:'dataCockpit',label:'数据驾驶舱',group:'market',p:'P1'},
+      {id:'footballData',label:'足球数据管理',group:'market',p:'P1'},
+      {id:'marketData',label:'市场赔率数据',group:'market',p:'P1_CONDITIONAL'},
+      {id:'signal',label:'信号与数据质量',group:'market',p:'P1_CONDITIONAL'}
+    ];
     var body='';
     if(tab==='list'){
       body=s.filter(['<input placeholder="搜索赛事"><select><option>全部状态</option><option>draft</option><option>open</option><option>locked</option></select>'])+
@@ -471,21 +592,54 @@ var App = {
         '<div class="card"><div class="card-header">Refund & Correction Cases</div>'+
           s.tbl(['Case ID','Market','类型','理由','状态','受影响订单','Impact','创建','执行'],
             MOCK.refundCorrections.map(function(r){return'<tr><td class="cell-mono">'+r.case_id+'</td><td>'+r.market+'</td><td>'+s.tag(r.type)+'</td><td>'+r.reason+'</td><td>'+s.tag(r.status)+'</td><td class="ta-r">'+r.affected_orders+'</td><td class="ta-r highlight">'+(r.principal_apt||r.impact_apt)+'</td><td>'+r.created+'</td><td>'+(r.executed||'—')+'</td></tr>';}))+
-          '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.openRefundForm(\'refund\')">新建 Refund</button><button class="btn btn-warn" onclick="App.openRefundForm(\'correction\')">新建 Correction</button></div>'+
+          '<div class="btn-group mt-16"><button class="btn btn-primary" onclick="App.openRefundForm(\'refund\')">新建退款</button><button class="btn btn-warn" onclick="App.openRefundForm(\'correction\')">新建更正</button></div>'+
         '</div>';
+    }else if(tab==='dataCockpit'){
+      body=s.banner('info','数据驾驶舱（P1）— 运营数据仪表板。P0 运营总览已覆盖核心 KPI 摘要，此页为深度数据视图。')+
+        '<div class="stat-grid">'+['Provider 健康|API-Football 🟢','数据延迟|2.3s','覆盖率|94%','数据质量|98.2%','今日 Snapshot|1,248','异常事件|3'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+        '<div class="card mt-16"><div class="card-header">Provider 健康摘要</div>'+s.tbl(['Provider','状态','延迟','成功率','Quota','最后成功','操作'],[{name:'API-Football',status:'🟢 正常',latency:'150ms',rate:'99.8%',quota:'98/100',last:'2024-06-10 09:00',action:'查看'},{name:'BetBurger',status:'🟡 延迟',latency:'2,300ms',rate:'97.2%',quota:'45/50',last:'2024-06-10 08:45',action:'查看'}].map(function(r){return'<tr><td>'+r.name+'</td><td>'+r.status+'</td><td class="ta-r">'+r.latency+'</td><td class="ta-r">'+r.rate+'</td><td class="ta-r">'+r.quota+'</td><td>'+r.last+'</td><td><button class="btn btn-xs" onclick="App.nav(\'support\',\'provider\')">'+r.action+'</button></td></tr>';}).join(''))+'</div>'+
+        '<p class="muted" style="padding:8px 0;">P1 — 运营总览已覆盖核心 KPI 摘要，深度数据视图可后续上线。</p>';
+    }else if(tab==='footballData'){
+      body=s.banner('info','足球数据管理（P1）— 查看归一化后的足球赛事、队伍、阵容、数据完整性。')+
+        s.tbl(['Event ID','赛事','联赛','开赛','数据源','归一化','质量','操作'],[
+          '<tr><td class="cell-mono">EVT-001</td><td>ARS vs MCI</td><td>Premier League</td><td>2024-06-15 20:00</td><td>API-Football</td><td>✅</td><td class="ta-r">98%</td><td><button class="btn btn-xs">详情</button></td></tr>',
+          '<tr><td class="cell-mono">EVT-002</td><td>LFC vs MNU</td><td>Premier League</td><td>2024-06-12 17:30</td><td>API-Football</td><td>✅</td><td class="ta-r">95%</td><td><button class="btn btn-xs">详情</button></td></tr>',
+          '<tr><td class="cell-mono">EVT-003</td><td>FCB vs RMD</td><td>La Liga</td><td>2024-06-08 21:00</td><td>API-Football</td><td>✅</td><td class="ta-r">99%</td><td><button class="btn btn-xs">详情</button></td></tr>'
+        ].join(''))+
+        '<p class="muted" style="padding:8px 0;">P1 — 05 仅定义数据流方向，FootballEventNormalized 对象未正式冻结。可后续上线。</p>';
+    }else if(tab==='marketData'){
+      body=s.gap('市场/赔率/套利原始数据')+
+        '<p style="padding:16px;">BetBurger Prematch/Live Feed 和 ArbitrageOpportunity 未在 05 中正式冻结。Provider 合同未签署（CONTRACT_GAP）。当前不可用。</p>';
+    }else if(tab==='signal'){
+      body=s.gap('AI 信号与数据质量')+
+        '<p style="padding:16px;">AISignal / SignalEngine 未在 05 中正式冻结。AI 信号质量页不可用。</p>';
     }
     sec.innerHTML='<div class="page-header"><h2>赛事预测</h2></div>'+s.tabs(ts,tab)+body;
   },
 
-  /* ===== 07 风控 / 审批 / 参数 / 策略 ===== */
+  /* ===== 07 风控 / 审批 / 参数 / 策略 V2.4.1 ===== */
   rRisk:function(sec,tab){
-    var s=this,ts=[{id:'case',label:'Risk Case',group:'risk'},{id:'approval',label:'审批中心',group:'risk',badge:MOCK.stats.pendingApprovals},{id:'paramDef',label:'Parameter',group:'risk'},{id:'paramRelease',label:'发布历史',group:'risk'},{id:'policy',label:'策略矩阵',group:'risk'},{id:'emergency',label:'紧急操作',group:'risk'}];
+    var s=this,ts=[
+      {id:'case',label:'风险事件',group:'risk',p:'P0'},
+      {id:'approval',label:'审批中心',group:'risk',badge:MOCK.stats.pendingApprovals,p:'P0'},
+      {id:'paramDef',label:'参数定义与候选值',group:'risk',p:'P0'},
+      {id:'paramRelease',label:'参数发布与快照',group:'risk',p:'P0'},
+      {id:'policy',label:'策略矩阵',group:'risk',p:'P0'},
+      {id:'emergency',label:'紧急操作',group:'risk',p:'P0'},
+      {id:'aiCockpit',label:'AI运营驾驶舱',group:'risk',p:'P1'},
+      {id:'aiSuggest',label:'AI运营建议',group:'risk',p:'P1'},
+      {id:'aiMarket',label:'AI市场分析',group:'risk',p:'P1_CONDITIONAL'},
+      {id:'aiSim',label:'AI策略模拟',group:'risk',p:'P1_CONDITIONAL'},
+      {id:'aiPred',label:'AI竞猜助手',group:'risk',p:'P1_CONDITIONAL'},
+      {id:'aiSupport',label:'AI客服风险助手',group:'risk',p:'P1'},
+      {id:'report',label:'运营与经济报表',group:'risk',p:'P1'}
+    ];
     var body='';
     if(tab==='case'){
       body=s.banner('warn','Analyst 和 Approver 分离。内部知道得更多≠把模型细节展示给用户。')+
         s.filter(['<select><option>全部严重度</option><option>critical</option><option>high</option></select><select><option>全部状态</option><option>analyzing</option><option>pending_approval</option></select>'])+
         s.tbl(['Case ID','类型','严重度','状态','对象','分析师','Flags','SLA','操作'],
-          MOCK.riskCases.map(function(r){var bt='';if(r.status==='analyzing')bt='<button class="btn btn-xs btn-success" onclick="App.openRiskDecision(\''+r.case_id+'\',\'recommend_approve\')">推荐通过</button><button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'recommend_reject\')">推荐驳回</button>';else if(r.status==='pending_approval')bt='<button class="btn btn-xs btn-success" onclick="App.openRiskDecision(\''+r.case_id+'\',\'approve\')">Approve</button><button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'reject\')">Reject</button>';else if(r.status==='escalated')bt='<button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'escalate\')">紧急处置</button>';else bt='<button class="btn btn-xs">查看</button>';
+          MOCK.riskCases.map(function(r){var bt='';if(r.status==='analyzing')bt='<button class="btn btn-xs btn-success" onclick="App.openRiskDecision(\''+r.case_id+'\',\'recommend_approve\')">推荐通过</button><button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'recommend_reject\')">推荐驳回</button>';else if(r.status==='pending_approval')bt='<button class="btn btn-xs btn-success" onclick="App.openRiskDecision(\''+r.case_id+'\',\'approve\')">审批通过</button><button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'reject\')">审批驳回</button>';else if(r.status==='escalated')bt='<button class="btn btn-xs btn-danger" onclick="App.openRiskDecision(\''+r.case_id+'\',\'escalate\')">紧急处置</button>';else bt='<button class="btn btn-xs">查看</button>';
           return'<tr><td class="cell-mono">'+r.case_id+'</td><td>'+r.type.replace(/_/g,' ')+'</td><td>'+s.tag(r.severity)+'</td><td>'+s.tag(r.status)+'</td><td>'+r.subject+'</td><td>'+r.analyst+'</td><td>'+(r.flags||'').split(',').map(function(f){return'<span class="tag tag-amber" style="margin-right:4px;">'+f+'</span>';}).join('')+'</td><td>'+r.sla+'</td><td><div class="btn-group">'+bt+'</div></td></tr>';}));
     }else if(tab==='approval'){
       body=s.banner('warn','Approved ≠ Executed。审批通过只是允许执行，后续异步任务可能失败。')+
@@ -515,6 +669,41 @@ var App = {
           MOCK.emergencyActions.map(function(e){return'<tr><td class="cell-mono">'+e.action_id+'</td><td><span class="tag tag-red">'+e.type.replace(/_/g,' ')+'</span></td><td>'+e.target+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+e.reason+'">'+e.reason+'</td><td>'+s.tag(e.status)+'</td><td>'+e.executor+'</td><td>'+e.approver+'</td><td>'+(e.executed||e.created||'—')+'</td><td>'+(e.post_review_status?s.tag(e.post_review_status)+' (by '+e.post_deadline+')':'—')+'</td></tr>';}))+
           '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openEmergencyForm()">发起紧急操作</button><span class="muted" style="margin-left:12px;">影响资产/账本/资格的操作默认仍需双人授权</span></div>'+
         '</div>';
+    }else if(tab==='aiCockpit'){
+      body=s.banner('info','AI运营驾驶舱（P1）— AI 建议汇总、异常检测、待确认任务。AI 不直接执行高风险动作（HUMAN_IN_LOOP）。')+
+        '<div class="stat-grid">'+['高优先级建议|12','市场异常|3','用户异常|5','经济模型异常|0','待确认 AI 任务|8'].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+        s.tbl(['建议标题','依据','影响对象','置信度','预计影响','风险','状态','操作'],[
+          '<tr><td>BTC/USDT 套利机会</td><td>BetBurger surebet 2.3%</td><td>OTC-005</td><td><span class="tag tag-amber">中</span></td><td>±2,300 APT</td><td><span class="tag tag-amber">中</span></td><td><span class="tag tag-blue">待评估</span></td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'risk\',\'aiSuggest\')">查看</button></div></td></tr>',
+          '<tr><td>用户 U-006 异常交易</td><td>OTC 集群检测</td><td>U-006</td><td><span class="tag tag-red">高</span></td><td>10,000 APT</td><td><span class="tag tag-red">高</span></td><td><span class="tag tag-red">待处理</span></td><td><div class="btn-group"><button class="btn btn-xs btn-danger" onclick="App.nav(\'risk\',\'case\')">创建 Case</button></div></td></tr>'
+        ].join(''))+
+        '<p class="muted" style="padding:8px 0;">P1 — 05 未冻结 AI 运营对象，AI 驾驶舱可后续上线。</p>';
+    }else if(tab==='aiSuggest'){
+      body=s.banner('info','AI运营建议（P1）— 管理 AI 建议、执行状态和实际效果回看。AI 不直接改参数/余额/结算。')+
+        '<div class="card">'+s.tbl(['建议 ID','模块','标题','建议动作','优先级','风险','状态','负责人','效果'],
+          [{id:'AI-001',module:'市场',title:'BTC套利',action:'创建 OTC 订单',priority:'高',risk:'中',status:'已采纳',owner:'admin',outcome:'+2,300 APT'},
+           {id:'AI-002',module:'用户',title:'流失预警 — U-006',action:'发放激励',priority:'中',risk:'低',status:'待评估',owner:'运营',outcome:'—'},
+           {id:'AI-003',module:'竞猜',title:'MKT-004 数据不足',action:'延迟开赛',priority:'低',risk:'低',status:'已拒绝',owner:'运营',outcome:'预测风险'}]].map(function(r){return'<tr><td class="cell-mono">'+r.id+'</td><td>'+r.module+'</td><td>'+r.title+'</td><td>'+r.action+'</td><td>'+s.tag(r.priority)+'</td><td>'+s.tag(r.risk)+'</td><td>'+s.tag(r.status)+'</td><td>'+r.owner+'</td><td>'+r.outcome+'</td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — AIRecommendation 对象未在 05 冻结。</p>';
+    }else if(tab==='aiMarket'){
+      body=s.gap('AI市场分析')+
+        '<p style="padding:16px;">AI 市场分析依赖 MarketFeed / DataProvider / AIAnalysis 对象，当前均未冻结于 05。</p>';
+    }else if(tab==='aiSim'){
+      body=s.gap('AI套利策略模拟')+
+        '<p style="padding:16px;">AI 策略模拟依赖 ArbitrageOpportunity / AIStrategy / SimulationRun 对象，未冻结于 05。UI 规格完成（UI_SPEC=PASS），Provider/Runtime 未验证。AI_REAL_EXECUTION = DISABLED。</p>';
+    }else if(tab==='aiPred'){
+      body=s.gap('AI竞猜运营助手')+
+        '<p style="padding:16px;">AI 竞猜助手依赖 AI 建议 Pipeline 和 MarketReadiness 对象，未冻结于 05（CONTRACT_GAP）。</p>';
+    }else if(tab==='aiSupport'){
+      body=s.banner('info','AI用户/客服/风险助手（P1）— AI 分群、工单摘要、回复草稿、风险证据整理。')+
+        '<div class="card"><div class="card-header">AI 分群建议</div>'+s.tbl(['用户群','问题/机会','依据','建议动作','置信度','操作'],
+          [{segment:'高流失风险用户',issue:'7天未活跃',evidence:'登录频率下降 80%',suggest:'推送激励通知','高','创建运营任务'},
+           {segment:'重复客服问题',issue:'KYC 文档模糊',evidence:'工单 TKT-034',suggest:'生成标准回复草稿','高','查看草稿'},
+           {segment:'活跃用户',issue:'OTC 使用增长',evidence:'月交易量 +200%',suggest:'提升 Power Cap','中','创建提案'}].map(function(r){return'<tr><td>'+r.segment+'</td><td>'+r.issue+'</td><td>'+r.evidence+'</td><td>'+r.suggest+'</td><td>'+s.tag(r[4])+'</td><td><button class="btn btn-xs" onclick="App.toast(\''+r[5]+'\')">执行</button></td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — AI 只辅助判断，不代替权限。真实执行需人工确认。</p>';
+    }else if(tab==='report'){
+      body=s.banner('info','运营与经济报表（P1）— 生成用户/代理/Robot/Reward/Power/竞猜/OTC/数据源/AI建议效果报表。')+
+        '<div class="card">'+s.tbl(['报表类型','时间范围','数据版本','生成时间','状态','操作'],
+          [{type:'日运营报表',range:'2024-06-10',version:'Snapshot #124',time:'2024-06-11 00:05',status:'已生成'},
+           {type:'周经济报表',range:'2024-W23',version:'Snapshot #W23-3',time:'2024-06-10 00:05',status:'已生成'},
+           {type:'月度审计报表',range:'2024-05',version:'Snapshot #M05',time:'2024-06-01 00:05',status:'已生成'}].map(function(r){return'<tr><td>'+r.type+'</td><td>'+r.range+'</td><td>'+r.version+'</td><td>'+r.time+'</td><td>'+s.tag(r.status)+'</td><td><div class="btn-group"><button class="btn btn-xs" onclick="App.toast(\'报表下载中\')">下载</button></div></td></tr>';}).join(''))+'</div>'+'<p class="muted" style="padding:8px 0;">P1 — 运营总览覆盖核心指标，报表可后续上线。</p>';
     }
     sec.innerHTML='<div class="page-header"><h2>风控 / 审批 / 参数 / 策略</h2></div>'+s.tabs(ts,tab)+body;
   },
@@ -531,7 +720,19 @@ var App = {
 
   /* ===== 08 客服 / 审计 / 运维 ===== */
   rSupport:function(sec,tab){
-    var s=this,ts=[{id:'tickets',label:'工单队列',group:'support',badge:MOCK.stats.openTickets},{id:'ticketDetail',label:'工单详情',group:'support'},{id:'audit',label:'审计日志',group:'support'},{id:'ops',label:'异步任务/状态',group:'support'},{id:'rbac',label:'RBAC',group:'support'},{id:'lang',label:'语言',group:'support'},{id:'config',label:'配置',group:'support'}];
+    var s=this,ts=[
+      {id:'tickets',label:'工单队列',group:'support',badge:MOCK.stats.openTickets,p:'P0'},
+      {id:'ticketDetail',label:'工单详情',group:'support',p:'P0'},
+      {id:'audit',label:'全量操作日志',group:'support',p:'P0'},
+      {id:'sensitiveAudit',label:'敏感操作审计',group:'support',p:'P0'},
+      {id:'ops',label:'异步任务/状态',group:'support',p:'P0'},
+      {id:'provider',label:'Provider 监控',group:'support',p:'P1_CONDITIONAL'},
+      {id:'datasource',label:'数据源管理',group:'support',p:'P1_CONDITIONAL'},
+      {id:'rbac',label:'RBAC 角色',group:'support',p:'P0'},
+      {id:'lang',label:'语言管理',group:'support',p:'P0'},
+      {id:'config',label:'系统配置',group:'support',p:'P0'},
+      {id:'migration',label:'APT Migration',group:'support',p:'FUTURE'}
+    ];
     var body='';
     if(tab==='tickets'){
       body=s.filter(['<select><option>全部优先级</option><option>critical</option><option>high</option></select><select><option>全部状态</option><option>in_progress</option><option>waiting_user</option></select>'])+
@@ -546,6 +747,29 @@ var App = {
           '<div class="msg-input mt-16"><textarea placeholder="输入回复 (User Visible)..." rows="2"></textarea><div class="btn-group mt-8"><button class="btn btn-primary" onclick="App.toast(\'回复已发送 — User Visible\')">发送回复</button><button class="btn btn-warn" onclick="App.openInternalNote(\'ticket\',\'TKT-033\')">添加内部 Note</button></div></div>'+
         '</div>'+
         '<div class="card mt-16"><div class="card-header">关联对象</div>'+tc.related.map(function(r){return'<div class="flex-row" style="padding:6px 0;"><span class="tag tag-'+{ledger:'green',batch:'amber',user:'blue'}[r.type]+'">'+r.type+'</span><span style="margin-left:8px;">'+r.label+'</span></div>';}).join('')+'</div>';
+    }else if(tab==='sensitiveAudit'){
+      body=s.banner('info','敏感操作审计 — 聚焦余额调整、冻结、参数发布、结算更正、权限变化。仅超级管理员。')+
+        s.tbl(['事件','操作者','对象','Before','After','原因','证据','审批人','执行结果','时间'],
+          [{event:'资产调整',actor:'admin',obj:'U-004',before:'46,700',after:'48,200',reason:'工单补偿',evidence:'TKT-033',approver:'risk_approver_01',result:'已执行',time:'2024-06-05'},
+           {event:'参数发布',actor:'param_editor_01',obj:'REL-3.2.1',before:'V3.2.0',after:'V3.2.1',reason:'简化56级表',evidence:'—',approver:'admin',result:'已激活',time:'2024-06-10'},
+           {event:'权限变化',actor:'admin',obj:'cs_agent_02',before:'support',after:'support+escalation',reason:'紧急升级授权',evidence:'—',approver:'security_admin',result:'已执行',time:'2024-06-10'}].map(function(e){return'<tr><td>'+e.event+'</td><td>'+e.actor+'</td><td>'+e.obj+'</td><td>'+e.before+'</td><td>'+e.after+'</td><td>'+e.reason+'</td><td>'+e.evidence+'</td><td>'+e.approver+'</td><td>'+s.tag(e.result)+'</td><td>'+e.time+'</td></tr>';}).join(''))+
+        '<p class="muted" style="padding:8px 0;">append-only，不可删除。</p>';
+    }else if(tab==='provider'){
+      body=s.gapLite('DataProvider / ProviderHealth 对象未冻结于 05')+
+        '<div class="card"><div class="card-header">Provider 监控 — 规划预览</div>'+
+        s.tbl(['Provider','类型','状态','延迟','成功率','Quota','上次成功','上次失败','合同状态'],[
+          '<tr><td><strong>API-Football</strong></td><td>足球数据</td><td><span class="tag tag-green">正常</span></td><td class="ta-r">150ms</td><td class="ta-r">99.8%</td><td class="ta-r">98/100</td><td>2024-06-10 09:00</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>',
+          '<tr><td><strong>BetBurger</strong></td><td>市场数据</td><td><span class="tag tag-amber">延迟</span></td><td class="ta-r">2,300ms</td><td class="ta-r">97.2%</td><td class="ta-r">45/50</td><td>2024-06-10 08:45</td><td>—</td><td><span class="tag tag-amber">CONTRACT_GAP</span></td></tr>'
+        ].join(''))+'</div>'+
+        '<p class="muted" style="padding:8px 0;">UI_SPEC = VERIFIED_PASS，PROVIDER_CONTRACT = CONTRACT_GAP，RUNTIME = NOT_YET_EXECUTED。</p>';
+    }else if(tab==='datasource'){
+      body=s.gapLite('DataProvider 对象未冻结于 05')+
+        '<div class="card"><div class="card-header">数据源管理 — 规划预览</div>'+
+        '<p style="padding:16px;">API-Football 和 BetBurger 的 Provider 合同未签署（CONTRACT_GAP），Runtime 验证未执行。当前仅显示 Provider 名称占位。</p>'+
+        '</div>';
+    }else if(tab==='migration'){
+      body='<div class="banner banner-info">APT Migration — 功能预留（FUTURE）。APT-I → APT-C 管理入口，当前 P0 保持 Closed。</div>'+
+        '<div class="card"><p class="muted" style="padding:16px;">Future 占位，不是当前运营任务。后台有页面不代表已开放。</p></div>';
     }else if(tab==='audit'){
       body=s.banner('info','任何"谁改了什么"都应该在这里回答。审计日志不可编辑/删除。')+
         s.filter(['<input placeholder="操作人"><input type="date">'])+

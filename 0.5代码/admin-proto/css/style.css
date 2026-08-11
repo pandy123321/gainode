@@ -550,3 +550,26 @@ body{
 .msg-input{margin-top:12px;}
 .msg-input textarea{width:100%;border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px 12px;font-size:13px;resize:vertical;min-height:60px;}
 .msg-input textarea:focus{outline:none;border-color:var(--brand-blue-600);box-shadow:0 0 0 3px rgba(2,78,194,0.1);}
+
+/* ===== V2.4.1 Priority Badges ===== */
+.pri-badge{display:inline-block;padding:1px 5px;border-radius:var(--radius-sm);font-size:10px;font-weight:700;line-height:1.4;margin-left:4px;vertical-align:middle;}
+.pri-p0{background:var(--success-100);color:var(--success-600);}
+.pri-p1{background:var(--info-100);color:var(--info-600);}
+.pri-p1c{background:var(--warning-100);color:var(--warning-600);}
+.pri-future{background:var(--gray-100);color:var(--gray-500);}
+.pri-sm{display:inline-block;padding:1px 4px;border-radius:3px;font-size:10px;font-weight:600;margin-left:6px;background:var(--warning-100);color:var(--warning-600);}
+
+/* ===== V2.4.1 Contract Gap Banners ===== */
+.banner-gap{
+  padding:12px 16px;border-radius:var(--radius);font-size:13px;border:1px dashed var(--warning-600);
+  background:var(--warning-100);color:var(--gray-700);margin-bottom:16px;line-height:1.6;
+}
+.banner-gap .gap-icon{margin-right:6px;font-size:16px;}
+.banner-gap strong{color:var(--warning-600);}
+
+/* ===== V2.4.1 Dimmed ===== */
+.dimmed{opacity:0.5;pointer-events:none;}
+.dimmed .stat-card{filter:grayscale(0.5);}
+
+/* ===== V2.4.1 SoD Indicator ===== */
+.sod-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-left:4px;background:var(--danger-100);color:var(--danger-600);}

@@ -336,7 +336,7 @@ var MOCK = {
      status:'archived',effective:'2024-04-01 00:00',diff:'Original 5-level buckets design'}
   ],
 
-  /* ───── 08 Support / Audit ───── */
+  /* ───── Support / Audit ───── */
   tickets: [
     {ticket_id:'TKT-034',user:'U-002/Maria Lopez',category:'kyc_help',priority:'medium',
      status:'waiting_user',subject:'KYC documents rejected — need guidance',
@@ -366,6 +366,13 @@ var MOCK = {
      result:'pending',detail:'Submitted correction proposal for LE-004',time:'2024-06-09 16:20',ip:'10.0.1.54'},
     {id:'AUD-1006',actor:'admin',action:'role_change',target:'cs_agent_02',
      result:'success',detail:'Granted temp escalation access for critical tickets',time:'2024-06-10 09:00',ip:'10.0.1.50'}
+  ],
+
+  /* ───── User Restrictions ───── */
+  userRestrictions: [
+    {case_id:'RST-001',user:'U-003/田中太郎',type:'freeze_account',reason:'账户盗用',effective:'2024-06-05',expiry:'2024-06-19',status:'active'},
+    {case_id:'RST-002',user:'U-006/박민수',type:'freeze_balance',reason:'异常交易',effective:'2024-03-15',expiry:'2024-09-15',status:'active'},
+    {case_id:'RST-003',user:'U-002/Maria Lopez',type:'restrict_robot',reason:'冷却期',effective:'2024-06-01',expiry:'2024-06-15',status:'expired'}
   ],
 
   /* ───── RBAC Roles ───── */
