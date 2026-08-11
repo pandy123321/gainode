@@ -137,6 +137,20 @@ var App = {
       '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-primary" onclick="App.closeModal();App.toast(\''+title+' 已创建 — 进入审批\')">提交申请</button>',true);
   },
 
+  /* Ticket Conversation */
+  openTicketConversation:function(tid){
+    var t=MOCK.tickets.find(function(x){return x.ticket_id===tid;}),s=this,tc=MOCK.ticketConversations;
+    if(!t)return;
+    var timeline=(tc&&tc.timeline)?tc.timeline.map(function(m){var cls=m.type==='user'?'msg-user':m.type==='agent'?'msg-agent':m.type==='internal'?'msg-internal':'msg-system';
+      return'<div class="msg '+cls+'" style="padding:10px 0;border-bottom:1px solid var(--gray-100);"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><span style="font-weight:600;font-size:12px;">'+(m.actor||'System')+'</span><span style="font-size:10px;color:var(--gray-400);">'+m.time+'</span>'+(m.visible?'<span class="tag tag-'+({user:'blue',internal:'amber'}[m.visible]||'default')+'" style="margin-left:8px;">'+(m.visible==='user'?'用户可见':'内部')+'</span>':'')+'</div><div style="font-size:13px;color:var(--gray-700);">'+m.msg+'</div></div>';
+    }).join(''):'<p class="muted">暂无对话记录</p>';
+    s.openModal('工单对话 — '+tid,
+      s._dm(null,[['工单号',tid],['用户',t.user],['类别',t.category],['优先级',s.tag(t.priority)],['状态',s.tag(t.status)],['主题',t.subject]])+
+      '<div class="divider"></div><div style="max-height:300px;overflow-y:auto;">'+timeline+'</div>'+
+      '<div class="msg-input" style="margin-top:12px;"><textarea placeholder="输入回复（用户可见）..." rows="2" style="width:100%;padding:8px;border:1px solid var(--gray-300);border-radius:var(--radius);font-size:13px;resize:vertical;"></textarea></div>',
+      '<button class="btn" onclick="App.closeModal()">关闭</button><button class="btn btn-warn" onclick="App.closeModal();App.openInternalNote(\'ticket\',\''+tid+'\')">内部备注</button><button class="btn btn-primary" onclick="App.closeModal();App.toast(\'回复已发送\')">发送回复</button>',true);
+  },
+
   /* Ticket Resolution */
   openTicketResolution:function(tid){
     var t=MOCK.tickets.find(function(x){return x.ticket_id===tid;}),s=this;
@@ -257,31 +271,35 @@ var App = {
 
   /* ── Sidebar V2.4.1 (8 Root) ── */
   renderSidebar:function(){
-    var s=this;
-    var sec=function(n,items){return'<div class="nav-section"><div class="nav-section-header"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item" data-group="'+i.g+'" data-tab="'+i.t+'" data-label="'+i.l+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
+    var s=this,cur=s.curGroup,def={'dash':'overview','user':'list','asset':'overview','robot':'list','otc':'order','market':'list','risk':'case','support':'audit'};
+    var sec=function(n,g,items){var isActive=(cur===g);return'<div class="nav-section'+(isActive?' expanded':' collapsed')+'"><div class="nav-section-header" data-group="'+g+'" data-tab="'+(def[g]||'')+'"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item'+(cur===i.g&&s.curTab===i.t?' active':'')+'" data-group="'+i.g+'" data-tab="'+i.t+'" data-label="'+i.l+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
     document.getElementById('sidebarNav').innerHTML=
-      sec('01 工作台',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
-      sec('02 用户与准入',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
-      sec('03 资产与账本',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正',g:'asset',t:'correction'},{l:'经济模型总览',g:'asset',t:'econOverview'},{l:'奖励与结算监控',g:'asset',t:'econSettlement'},{l:'经济配置入口',g:'asset',t:'econConfig'}])+
-      sec('04 机器人与权益',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'奖励与领取监控',g:'robot',t:'reward'},{l:'升级与Power Cap',g:'robot',t:'upgrade'}])+
-      sec('05 OTC 与 Power',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
-      sec('06 赛事预测',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
-      sec('07 风控/审批/参数/策略',[{l:'风险事件',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'参数定义与候选值',g:'risk',t:'paramDef'},{l:'参数发布与快照',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit'},{l:'AI运营建议',g:'risk',t:'aiSuggest'},{l:'AI市场分析',g:'risk',t:'aiMarket'},{l:'AI策略模拟',g:'risk',t:'aiSim'},{l:'AI竞猜助手',g:'risk',t:'aiPred'},{l:'AI客服风险助手',g:'risk',t:'aiSupport'},{l:'运营报表',g:'risk',t:'report'}])+
-      sec('08 客服/审计/运维',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态',g:'support',t:'ops'},{l:'Provider 监控',g:'support',t:'provider'},{l:'数据源管理',g:'support',t:'datasource'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
+      sec('01 工作台','dash',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
+      sec('02 用户与准入','user',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
+      sec('03 资产与账本','asset',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正',g:'asset',t:'correction'},{l:'经济模型总览',g:'asset',t:'econOverview'},{l:'奖励与结算监控',g:'asset',t:'econSettlement'},{l:'经济配置入口',g:'asset',t:'econConfig'}])+
+      sec('04 机器人与权益','robot',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'奖励与领取监控',g:'robot',t:'reward'},{l:'升级与Power Cap',g:'robot',t:'upgrade'}])+
+      sec('05 OTC 与 Power','otc',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
+      sec('06 赛事预测','market',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
+      sec('07 风控/审批/参数/策略','risk',[{l:'风险事件',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'参数定义与候选值',g:'risk',t:'paramDef'},{l:'参数发布与快照',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit'},{l:'AI运营建议',g:'risk',t:'aiSuggest'},{l:'AI市场分析',g:'risk',t:'aiMarket'},{l:'AI策略模拟',g:'risk',t:'aiSim'},{l:'AI竞猜助手',g:'risk',t:'aiPred'},{l:'AI客服风险助手',g:'risk',t:'aiSupport'},{l:'运营报表',g:'risk',t:'report'}])+
+      sec('08 客服/审计/运维','support',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态',g:'support',t:'ops'},{l:'Provider 监控',g:'support',t:'provider'},{l:'数据源管理',g:'support',t:'datasource'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
+    /* Delegate clicks: section header or nav-item */
+    document.querySelectorAll('.nav-section-header').forEach(function(h){
+      h.addEventListener('click',function(){var g=this.dataset.group,t=this.dataset.tab;if(g&&t)App.nav(g,t);});
+    });
+    document.querySelectorAll('.nav-item').forEach(function(it){
+      it.addEventListener('click',function(){App.nav(this.dataset.group,this.dataset.tab);});
+    });
   },
 
   /* ── Nav ── */
   nav:function(g,t){
     this.curGroup=g;this.curTab=t;
-    document.querySelectorAll('.nav-item').forEach(function(i){i.classList.remove('active');});
-    var ni=document.querySelector('.nav-item[data-group="'+g+'"][data-tab="'+t+'"]');
-    if(ni)ni.classList.add('active');
     document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
     var sec=document.getElementById('sec-'+g);if(sec)sec.classList.add('active');
-    var label=ni?ni.dataset.label:t;
-    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+label+'</span>';
+    document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+(t||'')+'</span>';
     var R={dash:this.rDash,user:this.rUser,asset:this.rAsset,robot:this.rRobot,otc:this.rOtc,market:this.rMarket,risk:this.rRisk,support:this.rSupport};
     if(R[g])R[g].call(this,sec,t);
+    this.renderSidebar();
   },
 
   tabs:function(items,cur){
@@ -311,7 +329,7 @@ var App = {
         '<div class="card"><div class="card-header">系统状态</div>'+Object.keys(ss).map(function(k){return'<div class="flex-row" style="padding:6px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:120px;">'+k+'</span><span class="tag '+(ss[k]==='Normal'||ss[k]==='Running'?'tag-green':'tag-amber')+'">'+ss[k]+'</span></div>';}).join('')+'</div>'+
       '</div>'+
       '<div class="card" style="margin-top:16px;"><div class="card-header">快捷入口</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">'+
-        ['👤 用户列表|user|list','🆔 KYC 审核|user|kyc','🛡️ 风险事件|risk|case','✅ 审批中心|risk|approval','🤖 Robot 管理|robot|list','💱 OTC 订单|otc|order','⚽ 赛事预测|market|list','🎫 工单中心|support|tickets'].map(function(x){var p=x.split('|');return'<button class="btn" onclick="App.nav(\''+p[1]+'\',\''+p[2]+'\')">'+p[0]+'</button>';}).join('')+'</div></div>';
+        ['👤 用户列表|user|list','🆔 KYC 审核|user|kyc','🛡️ 风险事件|risk|case','✅ 审批中心|risk|approval','🤖 Robot 管理|robot|list','💱 OTC 订单|otc|order','⚽ 赛事预测|market|list','🎫 工单中心|user|tickets'].map(function(x){var p=x.split('|');return'<button class="btn" onclick="App.nav(\''+p[1]+'\',\''+p[2]+'\')">'+p[0]+'</button>';}).join('')+'</div></div>';
     }else{
       body=self.filter(['<select><option>全部类型</option><option>审批</option><option>KYC</option><option>风险</option></select><select><option>全部优先级</option></select>'])+
         self.tbl(['类型','标题','优先级','请求人','SLA','操作'],
@@ -378,7 +396,7 @@ var App = {
     }else{
       body=s.filter(['<select><option>全部优先级</option><option>critical</option><option>high</option></select><select><option>全部状态</option><option>处理中</option><option>等待用户</option></select>'])+
         s.tbl(['工单号','用户','类别','优先级','状态','主题','负责人','SLA','操作'],
-          MOCK.tickets.map(function(t){return'<tr><td class="cell-mono">'+t.ticket_id+'</td><td>'+t.user+'</td><td>'+t.category+'</td><td>'+s.tag(t.priority)+'</td><td>'+s.tag(t.status)+'</td><td>'+t.subject+'</td><td>'+t.assignee+'</td><td>'+t.sla+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'support\',\'ticketDetail\')">处理</button>'+(t.status==='in_progress'?'<button class="btn btn-xs btn-success" onclick="App.openTicketResolution(\''+t.ticket_id+'\')">解决</button>':'')+'</div></td></tr>';}));
+          MOCK.tickets.map(function(t){return'<tr><td class="cell-mono">'+t.ticket_id+'</td><td>'+t.user+'</td><td>'+t.category+'</td><td>'+s.tag(t.priority)+'</td><td>'+s.tag(t.status)+'</td><td>'+t.subject+'</td><td>'+t.assignee+'</td><td>'+t.sla+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.openTicketConversation(\''+t.ticket_id+'\')">处理</button>'+(t.status==='in_progress'?'<button class="btn btn-xs btn-success" onclick="App.openTicketResolution(\''+t.ticket_id+'\')">解决</button>':'')+'</div></td></tr>';}));
     }
     sec.innerHTML='<div class="page-header"><h2>用户与准入</h2></div>'+s.tabs(ts,tab)+body;
   },

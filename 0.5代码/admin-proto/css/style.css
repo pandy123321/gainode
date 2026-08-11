@@ -84,12 +84,14 @@ body{
   color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;
   text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;user-select:none;
 }
-.nav-section-header:hover{color:rgba(255,255,255,0.6);}
+.nav-section-header:hover{color:rgba(255,255,255,0.7);}
 .nav-section-header .caret{
   margin-left:auto;font-size:10px;transition:transform var(--transition);
 }
 .nav-section.collapsed .nav-item{display:none;}
 .nav-section.collapsed .caret{transform:rotate(-90deg);}
+.nav-section.expanded .nav-section-header{color:var(--brand-cyan-500);}
+.nav-section.expanded .caret{transform:rotate(0deg);}
 
 .nav-item{
   display:flex;align-items:center;padding:9px 20px 9px 32px;gap:8px;

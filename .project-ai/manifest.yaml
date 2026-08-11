@@ -6,16 +6,52 @@ governanceBaselineCommit: fb56bfe
 governanceBaseline: "V2.4.1 Admin Governance Baseline merged into 04 spec (review #491, 0 findings)"
 projectionBuiltAt: "2026-08-11"
 decisionSources:
-  arbitrage_disposition: "Plan B — retained as AI economic engine foundation. Decision: 2026-08-11, owner TBC"
-  frontend_h5: "Vue 3 + TypeScript. Decision: 2026-08-11, owner TBC"
-  frontend_admin: "Vue 3 + TypeScript. Decision: 2026-08-11, owner TBC"
-  frontend_app: "Flutter. Decision: 2026-08-11, owner TBC"
-  php_version: "8.2 (aligns with Dockerfile php:8.2-cli). Decision: 2026-08-11, owner TBC"
-  db_migration: "Two-phase: SQL files → Phinx after 10+ DDL changes. Decision: 2026-08-11, owner TBC"
-  test_framework: "PHPUnit 10+, tests/Unit|Integration|Feature. Decision: 2026-08-11, owner TBC"
-  openapi_strategy: "Manual openapi.yaml + sys_route table scan. Decision: 2026-08-11, owner TBC"
-  ci_strategy: "Three-stage progressive: lint → php-cs-fixer + DDL → PHPUnit + i18n scan. Decision: 2026-08-11, owner TBC"
-note: "decisionSources.owner = TBC indicates the decision direction is confirmed but formal owner sign-off is pending. Do not treat TBC owner as blocking."
+  arbitrage_disposition:
+    value: "Plan B — retained as AI economic engine foundation"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  frontend_h5:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  frontend_admin:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11; scope: Admin Web"
+  frontend_app:
+    value: "Flutter"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  php_version:
+    value: "8.2"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "INFERRED_FROM_ARTIFACT — Dockerfile uses php:8.2-cli; align composer.json with Docker"
+  db_migration:
+    value: "Two-phase: SQL files (YYYYMMDD_description.sql) → Phinx after 10+ DDL changes"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  test_framework:
+    value: "PHPUnit 10+, tests/Unit|Integration|Feature"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  openapi_strategy:
+    value: "Manual openapi.yaml + sys_route table scan for validation"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ci_strategy:
+    value: "Three-stage progressive: lint → php-cs-fixer + DDL discipline → PHPUnit + i18n scan"
+    decision_date: "2026-08-11"
+    owner: TBC
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). owner = TBC means decision direction confirmed but formal sign-off pending."
 enabledDocuments:
   - context.md
   - architecture.md

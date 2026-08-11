@@ -99,7 +99,7 @@ class XxxModel extends Model
    **阶段二（DDL 变更超过 10 次后）**：引入 Phinx。必须遵循 `Phinx Adoption Protocol`：
    - **设立 PHINX_ADOPTION_POINT**：明确 adoption point 的日期/Commit SHA。Adoption point 之前的 dated SQL 标记 `ARCHIVE_ONLY`，仅作历史参考。
    - **已有环境（Existing DB）**：创建 baseline/stamp，标记 adoption point 之前的 schema 已存在。不得将已执行的历史 SQL 简单转为 migration 后再次执行（会导致 duplicate column/index/table）。
-   - **新环境（Fresh DB）**：先初始化 baseline schema（从 `sql/database.sql` 或等效 baseline dump），再运行 adoption point 之后的 Phinx migrations。
+   - **新环境（Fresh DB）**：必须使用**不可变 baseline 构件**（`sql/baseline/<adoption-id>/schema.sql`），该构件在 adoption point 时冻结，包含 SHA256 hash。不得使用持续变化的 `sql/database.sql` 作为 Fresh DB baseline（会导致 adoption point 之后的字段被 migration 重复创建）。Fresh DB 初始化流程：baseline schema → Phinx migrations from adoption point → schema final state 验证。
    - **禁止**：把已执行的历史 SQL 直接转成 migration 后无差别重新执行。
    - **必须验证的场景**：
      - Fresh DB bootstrap（新环境全量初始化）
@@ -161,15 +161,17 @@ app/
 ### Vue 3 + TypeScript 编码规则（H5 / Admin Web）
 
 > 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
+>
+> **MUST 项来源说明**：Vite 5+ / Vue Router 4+ / vue-i18n 9+ 均为 **Vue 3 标准工具链**，其 MUST 等级派生自 `frontend_h5` / `frontend_admin` 的 CONFIRMED 决策（manifest.yaml decisionSources），不视为独立决策。`decimal.js` 的 MUST 等级派生自已确认的跨端规则："所有资产类数字使用 string 类型做业务计算"。
 
 #### 项目约定（MUST）
 
-1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">` 语法。**[MUST]**
-2. **构建工具**：Vite 5+。**[MUST]**
-3. **路由**：Vue Router 4+，基于页面 ID 的路由命名规范。**[MUST]**
+1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">` 语法。**[MUST]** — 来源：decisionSources.frontend_h5 / frontend_admin（CONFIRMED）
+2. **构建工具**：Vite 5+。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
+3. **路由**：Vue Router 4+，基于页面 ID 的路由命名规范。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
 4. **TypeScript 严格模式**：启用 `strict: true`，禁止 `any` 类型（业务逻辑层），允许 `unknown`。**[MUST]**
-5. **i18n**：使用 vue-i18n 9+。7 语言 key 集在 `ui-copy-manifest.json` 中统一定义，禁止在模板中硬编码文案。**[MUST]**
-6. **金额处理**：所有资产类数字使用 `string` 类型、`decimal.js` 做计算，禁止 `number`/`parseFloat`。**[MUST]**
+5. **i18n**：使用 vue-i18n 9+。7 语言 key 集在 `ui-copy-manifest.json` 中统一定义，禁止在模板中硬编码文案。**[MUST]** — 来源：Vue 3 标准工具链，派生自框架决策
+6. **金额处理**：所有资产类数字使用 `string` 类型、`decimal.js` 做计算，禁止 `number`/`parseFloat`。**[MUST]** — 来源：跨端规则（context.md）
 7. **组件颗粒度**：页面级组件按 Page ID 命名（如 `AUser004AssetAdjustment.vue`）；通用组件放 `components/common/`。**[MUST]**
 
 #### 项目约定（RECOMMENDED）
@@ -185,18 +187,20 @@ app/
 ### Flutter 编码规则（App）
 
 > 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
+>
+> **RECOMMENDED 项来源说明**：GoRouter / Dio 是 Flutter 生态常用方案，RECOMMENDED 等级派生自 `frontend_app` 的 CONFIRMED 决策（manifest.yaml decisionSources），不视为独立决策。`decimal` 包的 RECOMMENDED 等级派生自已确认的跨端规则。
 
 #### 项目约定（MUST）
 
 1. **Dart 版本**：Dart 3+，启用 null safety。**[MUST]**
 2. **i18n**：使用 Flutter 官方 `flutter_localizations` + ARB 文件，从 `ui-copy-manifest.json` 同步 key 集。**[MUST]**
-3. **金额精度**：全部使用 `String` + `decimal` 包，禁止 `double`。**[MUST]**
-4. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。**[MUST]**
+3. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。**[MUST]**
 
 #### 项目约定（RECOMMENDED）
 
-5. **路由**：GoRouter，基于页面 ID 的路由命名规范。**[RECOMMENDED]**
-6. **网络层**：Dio，统一封装六个请求头。**[RECOMMENDED]**
+4. **金额精度**：全部使用 `String` + `decimal` 包，禁止 `double`。**[RECOMMENDED]** — 来源：跨端规则（context.md）
+5. **路由**：GoRouter，基于页面 ID 的路由命名规范。**[RECOMMENDED]** — 来源：Flutter 生态常用方案，派生自框架决策
+6. **网络层**：Dio，统一封装六个请求头。**[RECOMMENDED]** — 来源：Flutter 生态常用方案，派生自框架决策
 
 #### 项目约定（TBC — NOT_AUTHORIZED_TO_INSTALL）
 

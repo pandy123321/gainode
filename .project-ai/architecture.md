@@ -219,7 +219,7 @@ foreach ($routes as $v) {
 
 ## 待确认事项
 
-以下为**仍未确认**的技术事项（已确认的决策见 context.md「已确认的技术决策」表格和 decisions.yaml）：
+以下为**仍未确认**的技术事项（已确认的决策见 context.md「已确认的技术决策」和 manifest.yaml 的 decisionSources）：
 
 - [ ] 数据库分库策略：Ledger 表放 `gainode` 库还是新建 `gainode_ledger` 库
 - [ ] 结果源、通知渠道（PUSH/SMS 服务商）、汇率源的具体服务商
