@@ -16,7 +16,7 @@
 Root 页面（视觉锚点，优先定稿）：
   M-HOME-001   首页
   M-ROBOT-001  Robot
-  M-PRED-001   竞猜
+  M-PREDICT-001   竞猜
   M-ME-001     我的
 
 Sub 页面（继承 Root 视觉体系）：

@@ -92,7 +92,21 @@ class XxxModel extends Model
 16. **字符集**：utf8mb4 / utf8mb4_unicode_ci。
 17. **引擎**：InnoDB。
 18. **事务**：涉及多表写入必须使用数据库事务，在 Service 层控制。
-19. **Migration**：当前无 migration 框架。数据库变更通过 `sql/YYYYMMDD_description.sql` 独立文件管理，文件名包含日期，顶部注释变更原因和影响范围。DDL 变更超过 10 次后引入 Phinx，将已有 SQL 文件转为 migration。
+19. **Migration**：DDL 变更纪律分两阶段。
+   
+   **阶段一（当前）**：通过 `sql/YYYYMMDD_description.sql` 独立文件管理，文件名包含日期，顶部注释变更原因和影响范围。
+   
+   **阶段二（DDL 变更超过 10 次后）**：引入 Phinx。必须遵循 `Phinx Adoption Protocol`：
+   - **设立 PHINX_ADOPTION_POINT**：明确 adoption point 的日期/Commit SHA。Adoption point 之前的 dated SQL 标记 `ARCHIVE_ONLY`，仅作历史参考。
+   - **已有环境（Existing DB）**：创建 baseline/stamp，标记 adoption point 之前的 schema 已存在。不得将已执行的历史 SQL 简单转为 migration 后再次执行（会导致 duplicate column/index/table）。
+   - **新环境（Fresh DB）**：先初始化 baseline schema（从 `sql/database.sql` 或等效 baseline dump），再运行 adoption point 之后的 Phinx migrations。
+   - **禁止**：把已执行的历史 SQL 直接转成 migration 后无差别重新执行。
+   - **必须验证的场景**：
+     - Fresh DB bootstrap（新环境全量初始化）
+     - Existing DB upgrade（adoption point 前的 DB 升级到当前）
+     - Forward migration（adoption point 后的增量变更）
+     - Rollback policy（migration 回滚策略）
+   - 历史 dated SQL 不删除（保留为审计轨迹）。
 20. **连接池**：使用 illuminate/database 连接池配置，默认最大 5 连接、最小 1 连接。
 
 #### 日志
@@ -146,31 +160,47 @@ app/
 
 ### Vue 3 + TypeScript 编码规则（H5 / Admin Web）
 
-#### 项目约定
+> 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
 
-1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">` 语法。
-2. **构建工具**：Vite 5+。
-3. **状态管理**：Pinia（按模块拆分 store，不使用单一巨型 store）。
-4. **路由**：Vue Router 4+，基于页面 ID 的路由命名规范。
-5. **UI 组件库**：Admin 端使用 Arco Design 或 Ant Design Vue（待定），H5 端使用 Vant UI 或自研组件。
-6. **样式方案**：SCSS + CSS Modules 或 `<style scoped>`。全局设计令牌（颜色、间距、字体）从 `08_VISUAL_DESIGN_SYSTEM_V2.4.md` 提取为 CSS 变量。
-7. **TypeScript 严格模式**：启用 `strict: true`，禁止 `any` 类型（业务逻辑层），允许 `unknown`。
-8. **API 调用封装**：统一 Axios 实例，自动注入 Token / Sign / Timestamp / Version / Language / TraceId 六个请求头。
-9. **i18n**：使用 vue-i18n 9+。7 语言 key 集在 `ui-copy-manifest.json` 中统一定义，禁止在模板中硬编码文案。
-10. **金额处理**：所有资产类数字使用 `string` 类型、`decimal.js` 做计算，禁止 `number`/`parseFloat`。
-11. **组件颗粒度**：页面级组件按 Page ID 命名（如 `AUser004AssetAdjustment.vue`）；通用组件放 `components/common/`。
+#### 项目约定（MUST）
+
+1. **框架版本**：Vue 3.4+，使用 Composition API + `<script setup lang="ts">` 语法。**[MUST]**
+2. **构建工具**：Vite 5+。**[MUST]**
+3. **路由**：Vue Router 4+，基于页面 ID 的路由命名规范。**[MUST]**
+4. **TypeScript 严格模式**：启用 `strict: true`，禁止 `any` 类型（业务逻辑层），允许 `unknown`。**[MUST]**
+5. **i18n**：使用 vue-i18n 9+。7 语言 key 集在 `ui-copy-manifest.json` 中统一定义，禁止在模板中硬编码文案。**[MUST]**
+6. **金额处理**：所有资产类数字使用 `string` 类型、`decimal.js` 做计算，禁止 `number`/`parseFloat`。**[MUST]**
+7. **组件颗粒度**：页面级组件按 Page ID 命名（如 `AUser004AssetAdjustment.vue`）；通用组件放 `components/common/`。**[MUST]**
+
+#### 项目约定（RECOMMENDED）
+
+8. **状态管理**：Pinia（按模块拆分 store，不使用单一巨型 store）。**[RECOMMENDED]**
+9. **API 调用封装**：统一 Axios 实例，自动注入 Token / Sign / Timestamp / Version / Language / TraceId 六个请求头。**[RECOMMENDED]**
+10. **样式方案**：SCSS + CSS Modules 或 `<style scoped>`。全局设计令牌（颜色、间距、字体）从 `08_VISUAL_DESIGN_SYSTEM_V2.4.md` 提取为 CSS 变量。**[RECOMMENDED]**
+
+#### 项目约定（TBC — NOT_AUTHORIZED_TO_INSTALL）
+
+11. **UI 组件库**：Admin 端使用 Arco Design 或 Ant Design Vue；H5 端使用 Vant UI 或自研组件。**[TBC]** — Agent 不得在团队确认前锁定依赖。
 
 ### Flutter 编码规则（App）
 
-#### 项目约定
+> 依赖等级：**MUST** = 已确认必须遵守 / **RECOMMENDED** = 推荐但非硬性约束 / **TBC** = 待团队确认前 Agent 不得自行安装
 
-1. **Dart 版本**：Dart 3+，启用 null safety。
-2. **状态管理**：Riverpod 或 Bloc（待定，需与团队统一）。
-3. **路由**：GoRouter，基于页面 ID 的路由命名规范。
-4. **网络层**：Dio，统一封装六个请求头。
-5. **i18n**：使用 Flutter 官方 `flutter_localizations` + ARB 文件，从 `ui-copy-manifest.json` 同步 key 集。
-6. **金额精度**：全部使用 `String` + `decimal` 包，禁止 `double`。
-7. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。
+#### 项目约定（MUST）
+
+1. **Dart 版本**：Dart 3+，启用 null safety。**[MUST]**
+2. **i18n**：使用 Flutter 官方 `flutter_localizations` + ARB 文件，从 `ui-copy-manifest.json` 同步 key 集。**[MUST]**
+3. **金额精度**：全部使用 `String` + `decimal` 包，禁止 `double`。**[MUST]**
+4. **组件化**：每个 Page ID 一个独立 Widget；通用组件放 `lib/widgets/`。**[MUST]**
+
+#### 项目约定（RECOMMENDED）
+
+5. **路由**：GoRouter，基于页面 ID 的路由命名规范。**[RECOMMENDED]**
+6. **网络层**：Dio，统一封装六个请求头。**[RECOMMENDED]**
+
+#### 项目约定（TBC — NOT_AUTHORIZED_TO_INSTALL）
+
+7. **状态管理**：Riverpod 或 Bloc。**[TBC]** — Agent 不得在团队确认前锁定依赖。
 
 ### 后端通用规则（V6.1 新增模块也需遵守）
 

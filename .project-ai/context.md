@@ -201,7 +201,6 @@ docker-compose up -d
 
 - 现有 arbitrage 套利引擎（BetBurger + API-Football）将改造为 "内部 AI 经济引擎"（`confirmed_profit → reference_profit → mapped_apt_budget`），拆除对 C 端的直接暴露路径，`ArbitrageTask` 进程保留。
 - 现有路由 DB 驱动架构可以作为 V6.1 Parameter Center 的启发——参数也可存储在 DB 中，通过 Release 版本控制生效。
-- 现有路由 DB 驱动架构可以作为 V6.1 Parameter Center 的启发——参数也可存储在 DB 中，通过 Release 版本控制生效。
 - 现有 Service 层已有 `extends support\extend\Service` 的统一基类模式，新模块（Robot/Power/OTC/Prediction）可以直接复用这套分层约定。
 - Docker 化部署已就绪，生产部署只需调整 `APP_PROCESS_LIST` 环境变量即可控制启用的后台进程。
 

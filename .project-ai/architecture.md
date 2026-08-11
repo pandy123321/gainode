@@ -120,7 +120,7 @@ foreach ($routes as $v) {
 
 | 模块 | 职责 | V6.1 差距 |
 |---|---|---|
-| **Mobile/H5** | Vue 3 + TypeScript。4 个底部导航。75 个 P0 页面。375/390/430 三尺寸兼容。 | 原型阶段进行中 |
+| **Mobile/H5** | Vue 3 + TypeScript。4 个底部导航。44 个 Page ID（来自 03 Page Registry，当前 HIFI Task 覆盖全部 44 页）。375/390/430 三尺寸兼容。 | 原型阶段进行中 |
 | **App (iOS/Android)** | Flutter。原生 App，后续阶段开发。 | 全新 |
 | **Admin Web** | Vue 3 + TypeScript。8 个一级导航，58 个 Page ID（51 Admin + 7 Agent Portal），基于现有 RBAC 后台改造。含 P1_CONDITIONAL 页面（A-USER-004 资产调整，Preview-Only）。 | 需从旧菜单结构迁移至 V6.1 8 导航 |
 | **Admin Governance (V2.4.1)** | Contract Gap Registry（Page→Gap JOIN）、Blocking/NON-BLOCKING Gap 分类、SoD 权限矩阵、Evidence-Based QA 框架。 | 治理基线已合入 04（审核 #491 零 Finding） |
@@ -180,7 +180,7 @@ foreach ($routes as $v) {
 
 ### 关键 API 约定
 
-- API 风格：REST/JSON，OpenAPI 3.1（待引入 swagger-php）
+- API 风格：REST/JSON，OpenAPI 3.1（手动维护 `openapi.yaml`，辅助以 `sys_route` 表扫描校验）
 - 路由前缀：`/v1/`
 - 请求头必带：Token / Sign / Timestamp / Version / Language / TraceId
 - 时间：UTC timestamp，客户端本地化
@@ -219,13 +219,16 @@ foreach ($routes as $v) {
 
 ## 待确认事项
 
-- [ ] 现有 arbitrage 模块处置：保留为 AI 经济引擎（方案 B）/ 完全废弃 / 保留为独立功能
+以下为**仍未确认**的技术事项（已确认的决策见 context.md「已确认的技术决策」表格和 decisions.yaml）：
+
 - [ ] 数据库分库策略：Ledger 表放 `gainode` 库还是新建 `gainode_ledger` 库
-- [ ] 前端框架选型（React/Vue）
 - [ ] 结果源、通知渠道（PUSH/SMS 服务商）、汇率源的具体服务商
-- [ ] 测试框架引入（PHPUnit 版本）
-- [ ] OpenAPI 文档生成方案（swagger-php 或手动维护）
-- [ ] 数据库 migration 方案（Phinx 或 Laravel Migration）
+- [ ] Vue 3 具体版本锁定（3.4/3.5）、UI 组件库定选（Admin：Arco Design / Ant Design Vue；H5：Vant / 自研）
+- [ ] Flutter 状态管理方案定选（Riverpod / Bloc）和 Dart 版本锁定
+- [ ] 前端 ESLint / Prettier / Stylelint 配置规范
+- [ ] CI/CD 管线的具体平台选型（GitHub Actions / GitLab CI）
+- [ ] PHPUnit 测试覆盖率目标
+- [ ] OpenAPI 文档的 CI 自动化校验方案
 
 ## 信息来源
 

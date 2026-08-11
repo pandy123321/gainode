@@ -2,8 +2,20 @@ schemaVersion: 1
 projectName: Gainode
 contextVersion: 4
 status: DRAFT
-sourceCommit: fb56bfe
+governanceBaselineCommit: fb56bfe
 governanceBaseline: "V2.4.1 Admin Governance Baseline merged into 04 spec (review #491, 0 findings)"
+projectionBuiltAt: "2026-08-11"
+decisionSources:
+  arbitrage_disposition: "Plan B — retained as AI economic engine foundation. Decision: 2026-08-11, owner TBC"
+  frontend_h5: "Vue 3 + TypeScript. Decision: 2026-08-11, owner TBC"
+  frontend_admin: "Vue 3 + TypeScript. Decision: 2026-08-11, owner TBC"
+  frontend_app: "Flutter. Decision: 2026-08-11, owner TBC"
+  php_version: "8.2 (aligns with Dockerfile php:8.2-cli). Decision: 2026-08-11, owner TBC"
+  db_migration: "Two-phase: SQL files → Phinx after 10+ DDL changes. Decision: 2026-08-11, owner TBC"
+  test_framework: "PHPUnit 10+, tests/Unit|Integration|Feature. Decision: 2026-08-11, owner TBC"
+  openapi_strategy: "Manual openapi.yaml + sys_route table scan. Decision: 2026-08-11, owner TBC"
+  ci_strategy: "Three-stage progressive: lint → php-cs-fixer + DDL → PHPUnit + i18n scan. Decision: 2026-08-11, owner TBC"
+note: "decisionSources.owner = TBC indicates the decision direction is confirmed but formal owner sign-off is pending. Do not treat TBC owner as blocking."
 enabledDocuments:
   - context.md
   - architecture.md
