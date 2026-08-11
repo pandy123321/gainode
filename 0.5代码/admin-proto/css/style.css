@@ -79,6 +79,7 @@ body{
 .sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:2px;}
 
 .nav-section{margin-bottom:2px;}
+.nav-section.active-root > .nav-section-header{color:var(--brand-cyan-500);}
 .nav-section-header{
   display:flex;align-items:center;padding:10px 20px;gap:8px;
   color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;
