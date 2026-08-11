@@ -1,0 +1,19 @@
+schemaVersion: 1
+projectName: Gainode
+contextVersion: 4
+status: DRAFT
+sourceCommit: fb56bfe
+governanceBaseline: "V2.4.1 Admin Governance Baseline merged into 04 spec (review #491, 0 findings)"
+enabledDocuments:
+  - context.md
+  - architecture.md
+  - glossary.md
+  - rules/coding.md
+  - rules/review.md
+excludedPaths:
+  - .env
+  - application-prod.yml
+  - '**/secrets/**'
+  - Gainode_Development_Ready_V6.1_Latest/i18n/sensitive-copy-review.json
+  - 0.5代码/gainode后端/gainode/.env
+  - '0.5代码/gainode后端/gainode/vendor/**'
