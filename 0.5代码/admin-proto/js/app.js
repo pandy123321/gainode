@@ -620,9 +620,9 @@ var App = {
           '<div class="btn-group mt-16"><button class="btn" onclick="App.openSettlementPreview()">模拟计算</button><button class="btn btn-success" onclick="App.openSettlementPreview()">提交 Settlement 审批</button></div>'+
         '</div>';
     }else if(tab==='orders'){
-      body=s.filter(['<input placeholder="搜索订单"><select><option>全部状态</option><option>submitted</option><option>won</option><option>lost</option></select>'])+
+      body=s.filter(['<input placeholder="搜索订单"><select><option>全部状态</option><option>submitted</option><option>locked</option><option>awaiting_result</option><option>settled</option><option>refunding</option></select>'])+
         s.tbl(['Order ID','Market','用户','Selection','APT','状态','提交时间','结算时间'],
-          MOCK.predictionOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.market+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r highlight">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td><td>'+(o.submitted||'—')+'</td><td>'+(o.settled||'—')+'</td></tr>';}));
+          MOCK.predictionOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.market+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r highlight">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td><td>'+(o.created||'—')+'</td><td>'+(o.settled||'—')+'</td></tr>';}));
     }else if(tab==='refund'){
       body=s.banner('warn','这是救火页——Refund/Correction 不覆盖 old snapshot、保留原订单。高危，必须证据 + 审批。')+
         '<div class="card"><div class="card-header">Refund & Correction Cases</div>'+

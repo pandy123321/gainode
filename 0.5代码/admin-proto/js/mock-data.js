@@ -484,7 +484,7 @@ var MOCK = {
     },
     'TKT-032':{ticket_id:'TKT-032',user:'Emma Wilson',
       timeline:[{type:'user',actor:'Emma Wilson',msg:'My robot reward for the last cycle is not showing in my wallet. The robot status says claimed but nothing appeared.',time:'10:00',visible:'user'},{type:'agent',actor:'cs_agent_03',msg:'Hi Emma, we checked the reward batch. There was a ledger posting delay — the entry was queued but not yet committed. We are re-triggering the posting.',time:'10:30',visible:'user'},{type:'internal',actor:'cs_agent_03',msg:'Ledger batch L-334 delayed. Reward posted but not committed. Re-trigger confirmed.',time:'10:35',visible:'internal'},{type:'agent',actor:'cs_agent_03',msg:'The reward has been posted. You should see 120 APT in your wallet now. Please refresh and confirm.',time:'11:00',visible:'user'},{type:'user',actor:'Emma Wilson',msg:'Yes, I can see it now. Thank you!',time:'11:15',visible:'user'}],
-      related:[{type:'user',id:'U-010',label:'Emma Wilson — User 360'},{type:'robot',id:'RB-005',label:'Emma\'s Robot RB-005'},{type:'ledger',id:'L-334',label:'Reward batch L-334'}]
+      related:[{type:'user',id:'U-010',label:'Emma Wilson — User 360'},{type:'robot',id:'RB-004',label:'Emma\'s Robot RB-004'},{type:'ledger',id:'L-334',label:'Reward batch L-334'}]
     },
     'TKT-033':{ticket_id:'TKT-033',user:'U-001 / Alex Chen',
     timeline:[
