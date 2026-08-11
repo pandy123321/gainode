@@ -479,12 +479,12 @@ var MOCK = {
   /* ───── Ticket Detail (TKT-033) ───── */
   ticketConversations: {
     'TKT-031':{ticket_id:'TKT-031',user:'Sophie Martin',
-      timeline:[{type:'user',actor:'Sophie Martin',msg:'My account was suddenly locked. I need access to my funds.',time:'08:10',visible:'user'},{type:'agent',actor:'cs_agent_01',msg:'Hi Sophie, your account was auto-locked due to 5 consecutive failed login attempts. We are reviewing.',time:'08:30',visible:'user'}],
-      related:[{type:'user',id:'U-003',label:'Sophie Martin — User 360'}]
+      timeline:[{type:'user',actor:'Sophie Martin',msg:'My account was locked after the password reset. I cannot access my funds.',time:'03:00',visible:'user'},{type:'agent',actor:'cs_agent_02',msg:'Hi Sophie, we detected the lock was triggered by the password reset flow. We are verifying your identity now.',time:'03:30',visible:'user'},{type:'internal',actor:'cs_agent_02',msg:'Account lock confirmed — password reset triggered MFA failure count. Escalating for manual identity review.',time:'03:45',visible:'internal'},{type:'agent',actor:'cs_agent_02',msg:'We have initiated an identity verification review. This may take up to 2 hours. We will notify you once access is restored.',time:'04:00',visible:'user'}],
+      related:[{type:'user',id:'U-005',label:'Sophie Martin — User 360'}]
     },
-    'TKT-032':{ticket_id:'TKT-032',user:'James Wu',
-      timeline:[{type:'user',actor:'James Wu',msg:'KYC verification failed for the third time. The error message says "document blurry" but I used a high-res camera.',time:'09:00',visible:'user'},{type:'agent',actor:'cs_agent_03',msg:'Hi James, we checked your last submission. Please ensure the passport photo page is fully visible without glare.',time:'09:45',visible:'user'}],
-      related:[{type:'user',id:'U-004',label:'James Wu — User 360'}]
+    'TKT-032':{ticket_id:'TKT-032',user:'Emma Wilson',
+      timeline:[{type:'user',actor:'Emma Wilson',msg:'My robot reward for the last cycle is not showing in my wallet. The robot status says claimed but nothing appeared.',time:'10:00',visible:'user'},{type:'agent',actor:'cs_agent_03',msg:'Hi Emma, we checked the reward batch. There was a ledger posting delay — the entry was queued but not yet committed. We are re-triggering the posting.',time:'10:30',visible:'user'},{type:'internal',actor:'cs_agent_03',msg:'Ledger batch L-334 delayed. Reward posted but not committed. Re-trigger confirmed.',time:'10:35',visible:'internal'},{type:'agent',actor:'cs_agent_03',msg:'The reward has been posted. You should see 120 APT in your wallet now. Please refresh and confirm.',time:'11:00',visible:'user'},{type:'user',actor:'Emma Wilson',msg:'Yes, I can see it now. Thank you!',time:'11:15',visible:'user'}],
+      related:[{type:'user',id:'U-010',label:'Emma Wilson — User 360'},{type:'robot',id:'RB-005',label:'Emma\'s Robot RB-005'},{type:'ledger',id:'L-334',label:'Reward batch L-334'}]
     },
     'TKT-033':{ticket_id:'TKT-033',user:'U-001 / Alex Chen',
     timeline:[
@@ -502,7 +502,7 @@ var MOCK = {
     },
     'TKT-034':{ticket_id:'TKT-034',user:'Maria Lopez',
       timeline:[{type:'user',actor:'Maria Lopez',msg:'I submitted my KYC documents three times and they keep getting rejected. I need help.',time:'11:20',visible:'user'},{type:'agent',actor:'cs_agent_02',msg:'Hi Maria, let me check your submissions. Please hold.',time:'11:45',visible:'user'}],
-      related:[{type:'user',id:'U-005',label:'Maria Lopez — User 360'}]
+      related:[{type:'user',id:'U-002',label:'Maria Lopez — User 360'}]
     }
   }
 };

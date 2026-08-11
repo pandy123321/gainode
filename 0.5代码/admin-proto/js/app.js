@@ -305,6 +305,7 @@ var App = {
   /* ── Nav ── */
   nav:function(g,t){
     this.curGroup=g;this.curTab=t;
+    delete this.collapsedGroups[g]; // auto-expand target root
     document.querySelectorAll('.page-section').forEach(function(s){s.classList.remove('active');});
     var sec=document.getElementById('sec-'+g);if(sec)sec.classList.add('active');
     document.getElementById('breadcrumb').innerHTML='Gainode Admin / <span>'+(this.routeLabels[g+':'+t]||t)+'</span>';
@@ -588,6 +589,7 @@ var App = {
     var s=this,ts=[
       {id:'list',label:'赛事/竞猜列表',group:'market',p:'P0'},
       {id:'detail',label:'竞猜详情',group:'market',p:'P0'},
+      {id:'orders',label:'参与订单管理',group:'market',p:'P0'},
       {id:'result',label:'结果/结算',group:'market',p:'P0'},
       {id:'refund',label:'退款/更正',group:'market',p:'P0'},
       {id:'dataCockpit',label:'数据驾驶舱',group:'market',p:'P1'},
@@ -617,6 +619,10 @@ var App = {
           s.tbl(['Batch ID','Market','Result','Orders','Win','Payout','Fee','Recon','Settled'],MOCK.settlementBatches.map(function(b){return'<tr><td class="cell-mono">'+b.batch_id+'</td><td>'+b.market+'</td><td><span class="tag tag-green">'+b.result+'</span></td><td class="ta-r">'+b.orders_total+'</td><td class="ta-r">'+b.win_orders+'</td><td class="ta-r highlight">'+b.total_payout+'</td><td class="ta-r">'+b.fee+'</td><td>'+(b.reconciled?'<span class="tag tag-green">diff='+b.recon_diff+'</span>':'<span class="tag tag-amber">Pending</span>')+'</td><td>'+b.settled+'</td></tr>';}))+
           '<div class="btn-group mt-16"><button class="btn" onclick="App.openSettlementPreview()">模拟计算</button><button class="btn btn-success" onclick="App.openSettlementPreview()">提交 Settlement 审批</button></div>'+
         '</div>';
+    }else if(tab==='orders'){
+      body=s.filter(['<input placeholder="搜索订单"><select><option>全部状态</option><option>submitted</option><option>won</option><option>lost</option></select>'])+
+        s.tbl(['Order ID','Market','用户','Selection','APT','状态','提交时间','结算时间'],
+          MOCK.predictionOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.market+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r highlight">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td><td>'+(o.submitted||'—')+'</td><td>'+(o.settled||'—')+'</td></tr>';}));
     }else if(tab==='refund'){
       body=s.banner('warn','这是救火页——Refund/Correction 不覆盖 old snapshot、保留原订单。高危，必须证据 + 审批。')+
         '<div class="card"><div class="card-header">Refund & Correction Cases</div>'+
