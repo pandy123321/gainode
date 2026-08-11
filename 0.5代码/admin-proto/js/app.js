@@ -282,7 +282,7 @@ var App = {
     var sec=function(n,g,items){var isOpen=!(s.collapsedGroups[g]);return'<div class="nav-section'+(cur===g?' active-root':'')+(isOpen?' expanded':' collapsed')+'"><div class="nav-section-header" data-group="'+g+'"><span class="caret">▼</span>'+n+'</div>'+items.map(function(i){return'<div class="nav-item'+(cur===i.g&&s.curTab===i.t?' active':'')+'" data-group="'+i.g+'" data-tab="'+i.t+'">'+i.l+(i.b?' <span class="badge-warn">'+i.b+'</span>':'')+'</div>';}).join('')+'</div>';};
     document.getElementById('sidebarNav').innerHTML=
       sec('01 工作台','dash',[{l:'运营总览',g:'dash',t:'overview'},{l:'今日待办',g:'dash',t:'today',b:MOCK.stats.pendingApprovals}])+
-      sec('02 用户与准入','user',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'User 360',g:'user',t:'user360'},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
+      sec('02 用户与准入','user',[{l:'用户列表',g:'user',t:'list'},{l:'KYC 审核队列',g:'user',t:'kyc',b:MOCK.stats.pendingKyc},{l:'用户限制与恢复',g:'user',t:'restrict'},{l:'用户资产调整',g:'user',t:'adjust'},{l:'代理总览',g:'user',t:'agentOverview'},{l:'代理列表',g:'user',t:'agentList'},{l:'代理详情',g:'user',t:'agentDetail'},{l:'推荐关系',g:'user',t:'referral'},{l:'客服工单中心',g:'user',t:'tickets',b:MOCK.stats.openTickets}])+
       sec('03 资产与账本','asset',[{l:'资产总览',g:'asset',t:'overview'},{l:'APT 流水',g:'asset',t:'ledger'},{l:'池子对账',g:'asset',t:'pools'},{l:'更正/冲正',g:'asset',t:'correction'},{l:'经济模型总览',g:'asset',t:'econOverview'},{l:'奖励与结算监控',g:'asset',t:'econSettlement'},{l:'经济配置入口',g:'asset',t:'econConfig'}])+
       sec('04 机器人与权益','robot',[{l:'Robot 列表',g:'robot',t:'list'},{l:'Robot 详情',g:'robot',t:'detail'},{l:'奖励与领取监控',g:'robot',t:'reward'},{l:'升级与Power Cap',g:'robot',t:'upgrade'}])+
       sec('05 OTC 与 Power','otc',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
@@ -293,7 +293,7 @@ var App = {
     /* Populate breadcrumb label lookup (keyed by group:tab) */
     var lbl=this.routeLabels={};
     lbl['dash:overview']='运营总览';lbl['dash:today']='今日待办';
-    lbl['user:list']='用户列表';lbl['user:kyc']='KYC 审核队列';lbl['user:user360']='User 360';lbl['user:restrict']='用户限制与恢复';lbl['user:adjust']='用户资产调整';lbl['user:agentOverview']='代理总览';lbl['user:agentList']='代理列表';lbl['user:agentDetail']='代理详情';lbl['user:referral']='推荐关系';lbl['user:tickets']='客服工单中心';
+    lbl['user:list']='用户列表';lbl['user:kyc']='KYC 审核队列';lbl['user:restrict']='用户限制与恢复';lbl['user:adjust']='用户资产调整';lbl['user:agentOverview']='代理总览';lbl['user:agentList']='代理列表';lbl['user:agentDetail']='代理详情';lbl['user:referral']='推荐关系';lbl['user:tickets']='客服工单中心';
     lbl['asset:overview']='资产总览';lbl['asset:ledger']='APT 流水';lbl['asset:pools']='池子对账';lbl['asset:correction']='更正/冲正';lbl['asset:econOverview']='经济模型总览';lbl['asset:econSettlement']='奖励与结算监控';lbl['asset:econConfig']='经济配置入口';
     lbl['robot:list']='Robot 列表';lbl['robot:detail']='Robot 详情';lbl['robot:reward']='奖励与领取监控';lbl['robot:upgrade']='升级与Power Cap';
     lbl['otc:order']='OTC 订单';lbl['otc:detail']='订单详情/审核';lbl['otc:monitor']='撮合/争议监控';lbl['otc:power']='Power 账户';
@@ -356,7 +356,6 @@ var App = {
     var s=this,ts=[
       {id:'list',label:'用户列表',group:'user',p:'P0'},
       {id:'kyc',label:'KYC 审核队列',group:'user',badge:MOCK.stats.pendingKyc,p:'P0'},
-      {id:'user360',label:'User 360',group:'user',p:'P0'},
       {id:'restrict',label:'用户限制与恢复',group:'user',p:'P0'},
       {id:'adjust',label:'用户资产调整',group:'user',p:'P0'},
       {id:'agentOverview',label:'代理总览',group:'user',p:'P1_CONDITIONAL'},
@@ -369,7 +368,7 @@ var App = {
     if(tab==='list'){
       body=s.filter(['<input placeholder="搜索 UID / 手机号 / 邮箱 / 推荐码"><select><option>全部 KYC</option><option>approved</option><option>pending</option></select><select><option>全部状态</option><option>active</option><option>restricted</option></select><button class="btn">保存视图</button>'])+
         s.tbl(['UID','昵称','手机号','KYC','等级','状态','直推','上级','推荐码','Robot','操作'],
-          MOCK.users.map(function(m){return'<tr><td class="cell-mono">'+m.id+'</td><td>'+m.display_name+'</td><td>'+m.phone+'</td><td>'+s.tag(m.kyc_status)+'</td><td>'+m.kyc_level+'</td><td>'+s.tag(m.status)+'</td><td>3</td><td>U-004</td><td class="cell-mono">REF-'+m.id+' <button class="btn btn-xs" onclick="App.toast(\'已复制\')">📋</button></td><td>Lv.'+(m.global_p_level||0)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'user\',\'user360\')">360</button><button class="btn btn-xs btn-warn" onclick="App.nav(\'user\',\'restrict\')">限制</button></div></td></tr>';}));
+          MOCK.users.map(function(m){return'<tr><td class="cell-mono">'+m.id+'</td><td>'+m.display_name+'</td><td>'+m.phone+'</td><td>'+s.tag(m.kyc_status)+'</td><td>'+m.kyc_level+'</td><td>'+s.tag(m.status)+'</td><td>3</td><td>U-004</td><td class="cell-mono">REF-'+m.id+' <button class="btn btn-xs" onclick="App.toast(\'已复制\')">📋</button></td><td>Lv.'+(m.global_p_level||0)+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.openUser360Modal(\''+m.id+'\')">详情</button><button class="btn btn-xs btn-warn" onclick="App.nav(\'user\',\'restrict\')">限制</button></div></td></tr>';}));
     }else if(tab==='kyc'){
       body=s.filter(['<select><option>全部状态</option><option>pending</option><option>needs_info</option><option>review</option></select>'])+
         s.tbl(['Case ID','用户','等级','状态','文件','风险','提交','操作'],
@@ -378,8 +377,6 @@ var App = {
             else if(c.status==='needs_info')bt='<button class="btn btn-xs btn-warn" onclick="App.openKycDecision(\''+c.case_id+'\',\'needs_info\')">补件</button>';
             else if(c.status==='review')bt='<button class="btn btn-xs btn-primary" onclick="App.openKycReview(\''+c.case_id+'\')">复核</button>';
             return'<tr><td class="cell-mono">'+c.case_id+'</td><td>'+c.user_name+'</td><td>'+c.kyc_level+'</td><td>'+s.tag(c.status)+'</td><td>'+Object.keys(c.documents||{}).map(function(k){return'<span class="tag tag-'+(c.documents[k]==='ok'?'green':'amber')+'">'+k+':'+c.documents[k]+'</span>';}).join(' ')+'</td><td>'+s.tag(c.risk_score)+'</td><td>'+c.submitted+'</td><td><div class="btn-group">'+bt+'</div></td></tr>';}));
-    }else if(tab==='user360'){
-      body='<div class="banner banner-info">User 360 展示用户全貌：准入/KYC/Robot/APT/Power/OTC/竞猜/风险/工单。高风险动作不在详情页直接执行。</div>'+s._u360(MOCK.user360);
     }else if(tab==='restrict'){
       body=s.banner('info','账户/余额/OTC/Robot 分别限制，不隐式推导。冻结余额和重大恢复需审批（Requester ≠ Approver）。')+
         s.filter(['<input placeholder="搜索 UID"><select><option>全部类型</option><option>冻结账户</option><option>冻结余额</option><option>冻结OTC</option><option>限制Robot</option></select>'])+
@@ -431,17 +428,21 @@ var App = {
     }
   },
 
-  _u360:function(d){
-    var s=this;
-    return'<div class="card"><div class="card-header">Header Summary</div>'+
-      '<div class="detail-grid col4 mb-16">'+['Status|'+s.tag(d.status),'KYC|'+s.tag(d.kyc.status)+' Lv.'+d.kyc.level,'Robot|Lv.'+d.robot.level+' <span class="tag tag-green">'+d.robot.status+'</span>','APT Balance|'+d.apt.balance_apt_i+' APT'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv'+(p[0]==='APT Balance'?' highlight':'')+'">'+p[1]+'</div></div>';}).join('')+'</div>'+
-      '<div class="tabs"><div class="tab active">Admission</div><div class="tab">Robot</div><div class="tab">APT</div><div class="tab">Power</div><div class="tab">OTC</div><div class="tab">Prediction</div><div class="tab">Risk <span class="count">'+d.risk.history+'</span></div><div class="tab">Support <span class="count">'+d.tickets.history+'</span></div></div>'+
-      '<div class="section-grid mt-16">'+
-        '<div class="card"><div class="card-header">Admission</div><div class="detail-grid col2">'+['Country|'+d.kyc.country,'Documents|'+d.kyc.documents,'MFA|'+(d.security.mfa_enabled?'Enabled':'Disabled'),'Devices|'+d.security.devices,'Last Pwd Change|'+d.security.last_password_change].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
-        '<div class="card"><div class="card-header">APT Ledger</div><div class="detail-grid col2">'+['Balance|'+d.apt.balance_apt_i+' APT','Frozen|'+d.apt.frozen_apt_i+' APT','Total Earned|'+d.apt.total_earned+' APT'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv'+(p[0]==='Balance'?' highlight':'')+'">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
-        '<div class="card"><div class="card-header">Power</div><div class="detail-grid col2">'+['Available|'+d.power.available,'Frozen|'+d.power.frozen,'Consumed|'+d.power.consumed,'Cap|'+d.power.cap].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
-        '<div class="card"><div class="card-header">Prediction</div><div class="detail-grid col2">'+['Open Orders|'+d.prediction.open_orders,'Settled|'+d.prediction.settled,'Won|'+d.prediction.won,'Lost|'+d.prediction.lost,'Refunded|'+d.prediction.refunded].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
-      '</div></div>';
+  openUser360Modal:function(uid){
+    var d=MOCK.user360,s=this; // Prototype fixture — single user; production queries by uid
+    s.openModal('用户详情 — '+d.id+' '+d.display_name,
+      '<div class="banner banner-info" style="margin-bottom:12px;">用户全貌：准入 / KYC / 机器人 / 资产 / Power / OTC / 竞猜 / 风险 / 工单。高风险动作不在详情中直接执行。</div>'+
+      '<div class="detail-grid col4 mb-16">'+
+        ['状态|'+s.tag(d.status),'KYC|'+s.tag(d.kyc.status)+' Lv.'+d.kyc.level,'机器人|Lv.'+d.robot.level+' <span class="tag tag-green">'+d.robot.status+'</span>','APT 余额|<span class="highlight">'+d.apt.balance_apt_i+' APT</span>'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
+      '<div class="section-grid">'+
+        '<div class="card"><div class="card-header">准入信息</div><div class="detail-grid col2">'+['国家/地区|'+d.kyc.country,'证件材料|'+d.kyc.documents,'MFA|'+(d.security.mfa_enabled?'已启用':'未启用'),'设备数|'+d.security.devices,'上次改密|'+d.security.last_password_change].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
+        '<div class="card"><div class="card-header">APT 资产</div><div class="detail-grid col2">'+['余额|'+d.apt.balance_apt_i+' APT','冻结|'+d.apt.frozen_apt_i+' APT','累计收入|'+d.apt.total_earned+' APT'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
+        '<div class="card"><div class="card-header">Power 账户</div><div class="detail-grid col2">'+['可用|'+d.power.available,'冻结|'+d.power.frozen,'已消耗|'+d.power.consumed,'上限|'+d.power.cap].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
+        '<div class="card"><div class="card-header">OTC 交易</div><div class="detail-grid col2">'+['买入挂单|'+d.otc.open_buy,'卖出挂单|'+d.otc.open_sell,'已完成|'+d.otc.completed,'争议|'+d.otc.disputed].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
+        '<div class="card"><div class="card-header">竞猜统计</div><div class="detail-grid col2">'+['进行中|'+d.prediction.open_orders,'已结算|'+d.prediction.settled,'赢|'+d.prediction.won,'输|'+d.prediction.lost,'退款|'+d.prediction.refunded].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div></div>'+
+        '<div class="card"><div class="card-header">风险 &amp; 工单</div><div class="detail-grid col2">'+['活跃风险|'+d.risk.active_cases,'历史风险|'+d.risk.history,'进行中工单|'+d.tickets.open,'历史工单|'+d.tickets.history].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'<div class="btn-group mt-16"><button class="btn btn-xs btn-warn" onclick="App.nav(\'user\',\'tickets\')">查看工单</button><button class="btn btn-xs" onclick="App.nav(\'user\',\'restrict\')">去用户限制</button></div></div></div>'+
+      '</div>',
+      '<button class="btn" onclick="App.closeModal()">关闭</button><button class="btn btn-primary" onclick="App.nav(\'user\',\'tickets\')">查看工单</button><button class="btn btn-warn" onclick="App.nav(\'user\',\'restrict\')">用户限制</button>',true);
   },
 
   openKycReview:function(cid){
@@ -550,7 +551,7 @@ var App = {
         '<div class="card"><div class="card-header">Reward 历史</div>'+s.tbl(['周期','APT','状态'],d.rewardHistory.map(function(r){return'<tr><td>'+r.period+'</td><td class="ta-r highlight">'+r.apt+'</td><td>'+s.tag(r.status)+'</td></tr>';}))+'</div>'+
         '<div class="card"><div class="card-header">Power Ledger</div>'+s.tbl(['日期','动作','数量','余额'],d.powerLedger.map(function(p){return'<tr><td>'+p.date+'</td><td>'+p.action+'</td><td class="ta-r">'+p.qty+'</td><td class="ta-r">'+p.balance+'</td></tr>';}))+'</div>'+
       '</div>'+
-      '<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.openCaseForm(\'robot_pause\',\'RB-002\')">创建暂停 Case</button><button class="btn" onclick="App.nav(\'risk\',\'paramDef\')">去参数中心</button><button class="btn" onclick="App.nav(\'user\',\'user360\')">去 User 360</button></div></div>';
+      '<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.openCaseForm(\'robot_pause\',\'RB-002\')">创建暂停 Case</button><button class="btn" onclick="App.nav(\'risk\',\'paramDef\')">去参数中心</button><button class="btn" onclick="App.nav(\'user\',\'list\')">去用户列表</button></div></div>';
   },
 
   /* ===== 05 OTC 与 Power ===== */
