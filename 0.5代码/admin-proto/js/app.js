@@ -66,7 +66,7 @@ var App = {
       s._dm(null,[['Case ID',cid],['类型',r.type.replace(/_/g,' ')],['对象',r.subject],['严重度',s.tag(r.severity)],['分析师',r.analyst]])+
       s._form('结论理由','<textarea rows="3" placeholder="必须填写处置理由和证据引用"></textarea>')+
       (action==='reject'||action==='recommend_reject'?s._form('建议替代方案','<textarea rows="2" placeholder="驳回后的替代处理建议"></textarea>'):'')+
-      (action==='escalate'?s._form('升级级别','<select><option>Level 1 – Team Lead</option><option>Level 2 – Risk Director</option><option>Level 3 – C-Level</option></select>'+s._form('紧急程度','<select><option>Critical (SLA 1h)</option><option>High (SLA 4h)</option></select>')):''),
+      (action==='escalate'?s._form('升级级别','<select><option>Level 1 – 团队主管</option><option>Level 2 – 风险总监</option><option>Level 3 – 高管</option></select>'+s._form('紧急程度','<select><option>严重 (SLA 1h)</option><option>高 (SLA 4h)</option></select>')):''),
       '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-danger" onclick="App.closeModal();App.toast(\''+labels[action]+'\')">确认</button>',true);
   },
 
@@ -78,7 +78,7 @@ var App = {
     var labels={approve:'审批通过',reject:'审批驳回',needs_info:'要求补充信息'};
     var cls=act==='approve'?'btn-success':act==='reject'?'btn-danger':'btn-warn';
     s.openModal('OTC '+labels[act]+' — '+oid,
-      s._dm(null,[['Order ID',oid],['用户',o.user],['方向',o.side==='buy'?'Buy':'Sell'],['数量',o.qty_apt+' APT'],['状态',s.tag(o.status)],['风险',s.tag(o.risk)]])+
+      s._dm(null,[['Order ID',oid],['用户',o.user],['方向',o.side==='buy'?'买入':'卖出'],['数量',o.qty_apt+' APT'],['状态',s.tag(o.status)],['风险',s.tag(o.risk)]])+
       s._form('决定原因','<select><option>–选择–</option><option>risk_acceptable</option><option>abnormal_pattern</option>'+(act!=='approve'?'<option>insufficient_liquidity</option><option>policy_violation</option>':'<option>standard_review_passed</option>')+'</select>')+
       s._form('内部备注','<textarea rows="2" placeholder="Decision notes"></textarea>')+
       (act==='needs_info'?s._form('需要的信息','<textarea rows="2" placeholder="列出需要补充的信息"></textarea>'):''),
@@ -89,14 +89,14 @@ var App = {
   openMarketAction:function(mid,action){
     var m=MOCK.markets.find(function(x){return x.market_id===mid;}),s=this;
     if(!m)return;
-    var labels={publish:'发布 Market',pause:'暂停 Market',lockEval:'Lock Evaluation',settlement:'提交结算审批'};
+    var labels={publish:'发布 Market',pause:'暂停 Market',lockEval:'锁定评估',settlement:'提交结算审批'};
     var isDanger=action==='pause'||action==='lockEval';
     s.openModal(labels[action]+' — '+m.event,
       s._dm(null,[['Market ID',mid],['赛事',m.event],['联赛',m.league],['状态',s.tag(m.status)],['总订单',m.total_orders],['总 APT',m.total_apt]])+
       (action==='lockEval'?
         s._dm(null,[['H/D/A',''+m.home_odds+'/'+m.draw_odds+'/'+m.away_odds],
-        ['锁定时间',m.lock_time],['评估结果','<span class="tag tag-green">Pass — Liquidity OK</span>'],
-        ['集群检测','<span class="tag tag-green">No abnormal clusters</span>'],
+        ['锁定时间',m.lock_time],['评估结果','<span class="tag tag-green">通过 — 流动性正常</span>'],
+        ['集群检测','<span class="tag tag-green">无异常集群</span>'],
         ['冻结影响','~'+Math.round(parseInt(m.total_apt.replace(/,/g,''))||0)+' APT 将被冻结']]):
         s._form('理由','<textarea rows="2" placeholder="输入操作理由"></textarea>'))+
       '<div class="bar-warn" style="margin-top:12px;">⚠ 此操作将影响所有关联订单和资金。请确认后执行。</div>',
@@ -200,8 +200,8 @@ var App = {
         '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-warn" onclick="App.closeModal();App.toast(\'任务重试已发起\')">确认重试</button>');
     }else{
       s.openModal('任务详情 — '+jid,
-        s._dm(null,[['Job ID',jid],['类型',j.type.replace(/_/g,' ')],['目标',j.target],['状态',s.tag(j.status)],['进度',j.progress||'—'],['记录数',j.records||'—'],['失败数',j.failed||0],['DLQ',''+(j.dlq?j.failed+' items':'Empty')],['重试次数',j.retries],['错误',j.error||'—']])+
-        (j.dlq?'<div class="card mt-16"><div class="card-header">DLQ Items</div><table><thead><tr><th>#</th><th>Record ID</th><th>Error</th><th>Action</th></tr></thead><tbody><tr><td>1</td><td>LE-005-post</td><td>duplicate_entry</td><td><button class="btn btn-xs btn-warn" onclick="App.closeModal();App.toast(\'单条重试已发起\')">单条重试</button></td></tr><tr><td>2</td><td>LE-012-post</td><td>balance_overflow</td><td><button class="btn btn-xs btn-warn" onclick="App.closeModal();App.toast(\'单条重试已发起\')">单条重试</button></td></tr></tbody></table></div>':'')+
+        s._dm(null,[['Job ID',jid],['类型',j.type.replace(/_/g,' ')],['目标',j.target],['状态',s.tag(j.status)],['进度',j.progress||'—'],['记录数',j.records||'—'],['失败数',j.failed||0],['DLQ',''+(j.dlq?j.failed+' 条':'空')],['重试次数',j.retries],['错误',j.error||'—']])+
+        (j.dlq?'<div class="card mt-16"><div class="card-header">DLQ 记录</div><table><thead><tr><th>#</th><th>记录ID</th><th>错误</th><th>操作</th></tr></thead><tbody><tr><td>1</td><td>LE-005-post</td><td>duplicate_entry</td><td><button class="btn btn-xs btn-warn" onclick="App.closeModal();App.toast(\'单条重试已发起\')">单条重试</button></td></tr><tr><td>2</td><td>LE-012-post</td><td>balance_overflow</td><td><button class="btn btn-xs btn-warn" onclick="App.closeModal();App.toast(\'单条重试已发起\')">单条重试</button></td></tr></tbody></table></div>':'')+
         (j.status==='failed'?'<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.closeModal();App.openJobMonitor(\''+jid+'\',\'retry\')">重试</button></div>':''),
         '<button class="btn" onclick="App.closeModal()">关闭</button>');
     }
@@ -236,8 +236,8 @@ var App = {
   openSettlementPreview:function(){
     var s=this;
     s.openModal('结算模拟计算 — MKT-003 FCB vs RMD',
-      s._dm(null,[['赛果','HOME (confirmed)'],['模拟结算','Sandbox #2024-06-10-001'],['总订单','1,203'],['赢注订单','482'],['总派彩','285,000 APT'],['手续费','8,550 APT (3%)'],['对账状态','<span class="tag tag-green">Match — diff=0</span>']])+
-      '<div class="card mt-16"><div class="card-header">派彩明细</div><table><thead><tr><th>Selection</th><th>Orders</th><th>Type</th><th>Payout</th></tr></thead><tbody><tr><td>HOME</td><td>482</td><td><span class="tag tag-green">Win</span></td><td class="ta-r highlight">285,000</td></tr><tr><td>DRAW</td><td>421</td><td><span class="tag tag-red">Loss</span></td><td class="ta-r">0</td></tr><tr><td>AWAY</td><td>300</td><td><span class="tag tag-red">Loss</span></td><td class="ta-r">0</td></tr></tbody></table></div>',
+      s._dm(null,[['赛果','HOME (已确认)'],['模拟结算','沙箱 #2024-06-10-001'],['总订单','1,203'],['赢注订单','482'],['总派彩','285,000 APT'],['手续费','8,550 APT (3%)'],['对账状态','<span class="tag tag-green">匹配 — 差异=0</span>']])+
+      '<div class="card mt-16"><div class="card-header">派彩明细</div><table><thead><tr><th>选项</th><th>订单</th><th>类型</th><th>派彩</th></tr></thead><tbody><tr><td>主胜</td><td>482</td><td><span class="tag tag-green">赢</span></td><td class="ta-r highlight">285,000</td></tr><tr><td>平局</td><td>421</td><td><span class="tag tag-red">输</span></td><td class="ta-r">0</td></tr><tr><td>客胜</td><td>300</td><td><span class="tag tag-red">输</span></td><td class="ta-r">0</td></tr></tbody></table></div>',
       '<button class="btn" onclick="App.closeModal()">关闭</button><button class="btn btn-success" onclick="App.closeModal();App.toast(\'已提交 Settlement 审批\')">提交审批</button>',true);
   },
 
@@ -266,8 +266,8 @@ var App = {
     var a=MOCK.approvalTasks.find(function(x){return x.task_id===tid;}),s=this;
     if(!a)return;
     s.openModal('执行详情 — '+tid,
-      s._dm(null,[['Task ID',tid],['标题',a.title],['状态',s.tag(a.status)],['决定时间',a.decided||'—'],['执行时间',a.executed||'—'],['执行结果','<span class="tag tag-green">Success</span>']])+
-      '<div class="card mt-16"><div class="card-header">执行日志</div><table><thead><tr><th>步骤</th><th>状态</th><th>耗时</th></tr></thead><tbody><tr><td>1. Validate Release</td><td><span class="tag tag-green">Done</span></td><td>0.2s</td></tr><tr><td>2. Apply Parameters</td><td><span class="tag tag-green">Done</span></td><td>1.5s</td></tr><tr><td>3. Reconcile</td><td><span class="tag tag-green">Done</span></td><td>0.8s</td></tr><tr><td>4. Audit Log</td><td><span class="tag tag-green">Done</span></td><td>0.1s</td></tr></tbody></table></div>',
+      s._dm(null,[['Task ID',tid],['标题',a.title],['状态',s.tag(a.status)],['决定时间',a.decided||'—'],['执行时间',a.executed||'—'],['执行结果','<span class="tag tag-green">成功</span>']])+
+      '<div class="card mt-16"><div class="card-header">执行日志</div><table><thead><tr><th>步骤</th><th>状态</th><th>耗时</th></tr></thead><tbody><tr><td>1. 验证 Release</td><td><span class="tag tag-green">已完成</span></td><td>0.2s</td></tr><tr><td>2. 应用参数</td><td><span class="tag tag-green">已完成</span></td><td>1.5s</td></tr><tr><td>3. 对账</td><td><span class="tag tag-green">已完成</span></td><td>0.8s</td></tr><tr><td>4. 审计日志</td><td><span class="tag tag-green">已完成</span></td><td>0.1s</td></tr></tbody></table></div>',
       '<button class="btn" onclick="App.closeModal()">关闭</button>');
   },
 
@@ -288,7 +288,7 @@ var App = {
       sec('05 OTC 与 Power','otc',[{l:'OTC 订单',g:'otc',t:'order'},{l:'订单详情/审核',g:'otc',t:'detail'},{l:'撮合/争议监控',g:'otc',t:'monitor'},{l:'Power 账户',g:'otc',t:'power'}])+
       sec('06 赛事预测','market',[{l:'赛事/竞猜列表',g:'market',t:'list'},{l:'竞猜详情',g:'market',t:'detail'},{l:'参与订单管理',g:'market',t:'orders'},{l:'结果/结算',g:'market',t:'result'},{l:'退款/更正',g:'market',t:'refund'},{l:'数据驾驶舱',g:'market',t:'dataCockpit'},{l:'足球数据管理',g:'market',t:'footballData'},{l:'市场赔率数据',g:'market',t:'marketData'},{l:'信号与数据质量',g:'market',t:'signal'}])+
       sec('07 风控/审批/参数/策略','risk',[{l:'风险事件',g:'risk',t:'case'},{l:'审批中心',g:'risk',t:'approval',b:MOCK.stats.pendingApprovals},{l:'参数定义与候选值',g:'risk',t:'paramDef'},{l:'参数发布与快照',g:'risk',t:'paramRelease'},{l:'策略矩阵',g:'risk',t:'policy'},{l:'紧急操作',g:'risk',t:'emergency'},{l:'AI运营驾驶舱',g:'risk',t:'aiCockpit'},{l:'AI运营建议',g:'risk',t:'aiSuggest'},{l:'AI市场分析',g:'risk',t:'aiMarket'},{l:'AI策略模拟',g:'risk',t:'aiSim'},{l:'AI竞猜助手',g:'risk',t:'aiPred'},{l:'AI客服风险助手',g:'risk',t:'aiSupport'},{l:'运营报表',g:'risk',t:'report'}])+
-      sec('08 客服/审计/运维','support',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态 (A-OPS-001)',g:'support',t:'ops'},{l:'Provider 监控 (A-DATA-002)',g:'support',t:'provider'},{l:'数据源管理 (A-DATA-002)',g:'support',t:'datasource'},{l:'RBAC 角色 (A-OPS-001)',g:'support',t:'rbac'},{l:'语言管理 (A-OPS-001)',g:'support',t:'lang'},{l:'系统配置 (A-OPS-001)',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
+      sec('08 客服/审计/运维','support',[{l:'全量操作日志',g:'support',t:'audit'},{l:'敏感操作审计',g:'support',t:'sensitiveAudit'},{l:'异步任务/状态',g:'support',t:'ops'},{l:'Provider 监控',g:'support',t:'provider'},{l:'数据源管理',g:'support',t:'datasource'},{l:'RBAC 角色',g:'support',t:'rbac'},{l:'语言管理',g:'support',t:'lang'},{l:'系统配置',g:'support',t:'config'},{l:'APT Migration',g:'support',t:'migration'}]);
     /* Sidebar uses single Event Delegation on sidebarNav (init), not per-element listeners */
     /* Populate breadcrumb label lookup (keyed by group:tab) */
     var lbl=this.routeLabels={};
@@ -543,13 +543,12 @@ var App = {
 
   _robotDetail:function(d){
     var s=this;
-    return'<div class="card"><div class="card-header">Object Header</div>'+
-      '<div class="detail-grid col4 mb-16">'+['Robot ID|'+d.robot_id,'User|'+d.user,'Level|<span class="tag tag-gold">Lv.'+d.level+'</span>','Status|'+s.tag(d.status),'Capacity|'+d.standard_capacity,'Power Cap|'+d.power_cap,'Coeff|'+d.daily_reward_coefficient,'Rule Ver|'+d.rule_version].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
-      '<div class="tabs"><div class="tab active">Upgrades</div><div class="tab">Rewards</div><div class="tab">Power Ledger</div></div>'+
+    return'<div class="card"><div class="card-header">基本信息</div>'+
+      '<div class="detail-grid col4 mb-16">'+['机器人ID|'+d.robot_id,'用户|'+d.user,'等级|<span class="tag tag-gold">Lv.'+d.level+'</span>','状态|'+s.tag(d.status),'容量|'+d.standard_capacity,'Power 上限|'+d.power_cap,'系数|'+d.daily_reward_coefficient,'规则版本|'+d.rule_version].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
       '<div class="section-grid mt-16">'+
-        '<div class="card"><div class="card-header">升级历史</div>'+s.tbl(['日期','From','To','Cost APT','Power Cap After'],d.upgrades.map(function(u){return'<tr><td>'+u.date+'</td><td>Lv.'+u.from+'</td><td>Lv.'+u.to+'</td><td class="ta-r">'+u.cost_apt+'</td><td class="ta-r">'+u.power_cap_after+'</td></tr>';}))+'</div>'+
-        '<div class="card"><div class="card-header">Reward 历史</div>'+s.tbl(['周期','APT','状态'],d.rewardHistory.map(function(r){return'<tr><td>'+r.period+'</td><td class="ta-r highlight">'+r.apt+'</td><td>'+s.tag(r.status)+'</td></tr>';}))+'</div>'+
-        '<div class="card"><div class="card-header">Power Ledger</div>'+s.tbl(['日期','动作','数量','余额'],d.powerLedger.map(function(p){return'<tr><td>'+p.date+'</td><td>'+p.action+'</td><td class="ta-r">'+p.qty+'</td><td class="ta-r">'+p.balance+'</td></tr>';}))+'</div>'+
+        '<div class="card"><div class="card-header">升级历史</div>'+s.tbl(['日期','从','到','花费 APT','Power 上限变化'],d.upgrades.map(function(u){return'<tr><td>'+u.date+'</td><td>Lv.'+u.from+'</td><td>Lv.'+u.to+'</td><td class="ta-r">'+u.cost_apt+'</td><td class="ta-r">'+u.power_cap_after+'</td></tr>';}))+'</div>'+
+        '<div class="card"><div class="card-header">奖励历史</div>'+s.tbl(['周期','APT','状态'],d.rewardHistory.map(function(r){return'<tr><td>'+r.period+'</td><td class="ta-r highlight">'+r.apt+'</td><td>'+s.tag(r.status)+'</td></tr>';}))+'</div>'+
+        '<div class="card"><div class="card-header">Power 账本</div>'+s.tbl(['日期','动作','数量','余额'],d.powerLedger.map(function(p){return'<tr><td>'+p.date+'</td><td>'+p.action+'</td><td class="ta-r">'+p.qty+'</td><td class="ta-r">'+p.balance+'</td></tr>';}))+'</div>'+
       '</div>'+
       '<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.openCaseForm(\'robot_pause\',\'RB-002\')">创建暂停 Case</button><button class="btn" onclick="App.nav(\'risk\',\'paramDef\')">去参数中心</button><button class="btn" onclick="App.nav(\'user\',\'list\')">去用户列表</button></div></div>';
   },
@@ -561,14 +560,13 @@ var App = {
     if(tab==='order'){
       body=s.filter(['<select><option>全部方向</option><option>buy</option><option>sell</option></select><select><option>全部状态</option><option>review</option><option>partial</option><option>completed</option><option>disputed</option></select>'])+
         s.tbl(['Order ID','方向','用户','价格','数量','已成交','状态','Power','风险','时间','操作'],
-          MOCK.otcOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+(o.side==='buy'?'<span class="tag tag-green">Buy</span>':'<span class="tag tag-red">Sell</span>')+'</td><td>'+o.user+'</td><td>'+o.price+'</td><td class="ta-r">'+o.qty_apt+'</td><td class="ta-r">'+o.filled+'</td><td>'+s.tag(o.status)+'</td><td class="ta-r">'+(o.power_frozen||o.power_consumed||'—')+'</td><td>'+s.tag(o.risk)+'</td><td>'+o.created+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'otc\',\'detail\')">详情</button>'+(o.status==='review'?'<button class="btn btn-xs btn-success" onclick="App.openOtcDecision(\''+o.order_id+'\',\'approve\')">通过</button><button class="btn btn-xs btn-danger" onclick="App.openOtcDecision(\''+o.order_id+'\',\'reject\')">驳回</button>':'')+'</div></td></tr>';}));
+          MOCK.otcOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+(o.side==='buy'?'<span class="tag tag-green">买入</span>':'<span class="tag tag-red">卖出</span>')+'</td><td>'+o.user+'</td><td>'+o.price+'</td><td class="ta-r">'+o.qty_apt+'</td><td class="ta-r">'+o.filled+'</td><td>'+s.tag(o.status)+'</td><td class="ta-r">'+(o.power_frozen||o.power_consumed||'—')+'</td><td>'+s.tag(o.risk)+'</td><td>'+o.created+'</td><td><div class="btn-group"><button class="btn btn-xs btn-primary" onclick="App.nav(\'otc\',\'detail\')">详情</button>'+(o.status==='review'?'<button class="btn btn-xs btn-success" onclick="App.openOtcDecision(\''+o.order_id+'\',\'approve\')">通过</button><button class="btn btn-xs btn-danger" onclick="App.openOtcDecision(\''+o.order_id+'\',\'reject\')">驳回</button>':'')+'</div></td></tr>';}));
     }else if(tab==='detail'){
       var o=MOCK.otcOrders[0];
       body=s.banner('info','审核的是"订单能否继续"——查看冻结、Power、Trade、Ledger 全链路。决定必须写 reason。')+
-        '<div class="card"><div class="card-header">Order Header</div>'+
-          '<div class="detail-grid mb-16">'+['用户|'+o.user,'方向|'+(o.side==='buy'?'<span class="tag tag-green">Buy</span>':'<span class="tag tag-red">Sell</span>'),'价格|'+o.price,'数量|'+o.qty_apt+' APT','已成交|'+o.filled,'状态|'+s.tag(o.status),'Power Frozen|'+(o.power_frozen||'—'),'风险|'+s.tag(o.risk)].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
-          '<div class="tabs"><div class="tab active">Trades</div><div class="tab">Freeze</div><div class="tab">Timeline</div><div class="tab">Risk Evidence</div></div>'+
-          '<div class="mt-16">'+s.tbl(['Trade ID','Buyer','Seller','Qty','Price','Status'],MOCK.otcTrades.map(function(t){return'<tr><td class="cell-mono">'+t.trade_id+'</td><td>'+t.buyer+'</td><td>'+t.seller+'</td><td class="ta-r">'+t.qty_apt+'</td><td>'+t.price+'</td><td>'+s.tag(t.status)+'</td></tr>';}))+'</div>'+
+        '<div class="card"><div class="card-header">订单信息</div>'+
+          '<div class="detail-grid mb-16">'+['用户|'+o.user,'方向|'+(o.side==='buy'?'<span class="tag tag-green">买入</span>':'<span class="tag tag-red">卖出</span>'),'价格|'+o.price,'数量|'+o.qty_apt+' APT','已成交|'+o.filled,'状态|'+s.tag(o.status),'Power 冻结|'+(o.power_frozen||'—'),'风险|'+s.tag(o.risk)].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
+          '<div class="section-grid"><div class="card"><div class="card-header">成交记录</div>'+s.tbl(['交易ID','买方','卖方','数量','价格','状态'],MOCK.otcTrades.map(function(t){return'<tr><td class="cell-mono">'+t.trade_id+'</td><td>'+t.buyer+'</td><td>'+t.seller+'</td><td class="ta-r">'+t.qty_apt+'</td><td>'+t.price+'</td><td>'+s.tag(t.status)+'</td></tr>';}))+'</div></div>'+
           '<div class="btn-group mt-16"><button class="btn btn-success" onclick="App.openOtcDecision(\'OTC-001\',\'approve\')">审批通过</button><button class="btn btn-danger" onclick="App.openOtcDecision(\'OTC-001\',\'reject\')">审批驳回</button><button class="btn btn-warn" onclick="App.openOtcDecision(\'OTC-001\',\'needs_info\')">需要补充</button><button class="btn" onclick="App.openInternalNote(\'otc\',\'OTC-001\')">内部备注</button></div>'+
         '</div>';
     }else if(tab==='monitor'){
@@ -579,7 +577,7 @@ var App = {
         '<p class="muted" style="padding:8px 0;">P1 — 订单中心+详情已覆盖核心运营能力，此监控页可后续上线。</p>';
     }else{
       body=s.banner('info','把 Power 当资源账管理。只读为主，不可直接手改。')+
-        '<div class="card">'+s.tbl(['User ID','用户','Available','Frozen','Consumed','Cap','Robot Lv'],
+        '<div class="card">'+s.tbl(['用户ID','用户','可用','冻结','已消耗','上限','Robot 等级'],
           MOCK.powerAccounts.map(function(p){return'<tr><td class="cell-mono">'+p.user_id+'</td><td>'+p.user+'</td><td class="ta-r highlight">'+p.available+'</td><td class="ta-r">'+p.frozen+'</td><td class="ta-r">'+p.consumed+'</td><td class="ta-r">'+p.cap+'</td><td>Lv.'+p.robot_level+(p.status==='suspended'?'<span class="tag tag-red" style="margin-left:8px;">suspended</span>':'')+'</td></tr>';}))+'</div>';
     }
     sec.innerHTML='<div class="page-header"><h2>OTC 与 Power</h2></div>'+s.tabs(ts,tab)+body;
@@ -606,23 +604,22 @@ var App = {
     }else if(tab==='detail'){
       var mk=MOCK.markets[2];
       body=s.banner('info','三方向结构一定可见，但内部风控算法不暴露。锁定失败要有明确 reason 和 refund 路径。')+
-        '<div class="card"><div class="card-header">Event Header — '+mk.event+'</div>'+
-          '<div class="detail-grid col4 mb-16">'+['联赛|'+mk.league,'状态|'+s.tag(mk.status),'开赛|'+mk.kickoff,'锁定|'+mk.lock_time,'总订单|'+mk.total_orders,'总 APT|'+mk.total_apt,'Result|'+(mk.result||'pending'),'Risk|'+s.tag(mk.risk)].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv'+(p[0]==='总 APT'?' highlight':'')+'">'+p[1]+'</div></div>';}).join('')+'</div>'+
-          '<div class="stat-grid">'+['Home Win|'+(mk.home_odds||'—'),'Draw|'+(mk.draw_odds||'—'),'Away Win|'+(mk.away_odds||'—')].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
-          '<div class="tabs mt-16"><div class="tab active">Orders</div><div class="tab">Liquidity</div><div class="tab">Snapshots</div></div>'+
-          '<div class="mt-16">'+s.tbl(['Order ID','User','Selection','APT','状态'],MOCK.predictionOrders.filter(function(o){return o.market.indexOf(mk.event)>=0;}).map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td></tr>';}))+'</div>'+
-          '<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.openMarketAction(\'MKT-003\',\'lockEval\')">运行 Lock Evaluation</button><button class="btn" onclick="App.nav(\'market\',\'result\')">去 Result/Settlement</button></div>'+
+        '<div class="card"><div class="card-header">赛事信息 — '+mk.event+'</div>'+
+          '<div class="detail-grid col4 mb-16">'+['联赛|'+mk.league,'状态|'+s.tag(mk.status),'开赛|'+mk.kickoff,'锁定|'+mk.lock_time,'总订单|'+mk.total_orders,'总 APT|'+mk.total_apt,'赛果|'+(mk.result?mk.result:'待定'),'风险|'+s.tag(mk.risk)].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv'+(p[0]==='总 APT'?' highlight':'')+'">'+p[1]+'</div></div>';}).join('')+'</div>'+
+          '<div class="stat-grid">'+['主胜|'+(mk.home_odds||'—'),'平局|'+(mk.draw_odds||'—'),'客胜|'+(mk.away_odds||'—')].map(function(x){var p=x.split('|');return'<div class="stat-card"><div class="s-label">'+p[0]+'</div><div class="s-value">'+p[1]+'</div></div>';}).join('')+'</div>'+
+          '<div class="section-grid"><div class="card"><div class="card-header">参与订单</div>'+s.tbl(['订单ID','用户','选项','APT','状态'],MOCK.predictionOrders.filter(function(o){return o.market.indexOf(mk.event)>=0;}).map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td></tr>';}))+'</div></div>'+
+          '<div class="btn-group mt-16"><button class="btn btn-warn" onclick="App.openMarketAction(\'MKT-003\',\'lockEval\')">运行锁定评估</button><button class="btn" onclick="App.nav(\'market\',\'result\')">去结算页</button></div>'+
         '</div>';
     }else if(tab==='result'){
       body=s.banner('info','赛果确认 ≠ 钱已结算。Result Confirmer 和 Settlement Approver 分离。未 reconciliation=0 不得关闭 batch。')+
-        '<div class="card"><div class="card-header">Result & Settlement</div>'+
-          '<div class="detail-grid col3 mb-16">'+['Market|MKT-003 FCB vs RMD','Result|HOME (confirmed)','Evidence|BetBurger + API Feed','Primary|BetBurger','Secondary|API Feed','Settlement Status|completed'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
-          s.tbl(['Batch ID','Market','Result','Orders','Win','Payout','Fee','Recon','Settled'],MOCK.settlementBatches.map(function(b){return'<tr><td class="cell-mono">'+b.batch_id+'</td><td>'+b.market+'</td><td><span class="tag tag-green">'+b.result+'</span></td><td class="ta-r">'+b.orders_total+'</td><td class="ta-r">'+b.win_orders+'</td><td class="ta-r highlight">'+b.total_payout+'</td><td class="ta-r">'+b.fee+'</td><td>'+(b.reconciled?'<span class="tag tag-green">diff='+b.recon_diff+'</span>':'<span class="tag tag-amber">Pending</span>')+'</td><td>'+b.settled+'</td></tr>';}))+
-          '<div class="btn-group mt-16"><button class="btn" onclick="App.openSettlementPreview()">模拟计算</button><button class="btn btn-success" onclick="App.openSettlementPreview()">提交 Settlement 审批</button></div>'+
+        '<div class="card"><div class="card-header">赛果与结算</div>'+
+          '<div class="detail-grid col3 mb-16">'+['赛事|MKT-003 FCB vs RMD','赛果|HOME (已确认)','证据源|BetBurger + API Feed','主数据源|BetBurger','备用数据源|API Feed','结算状态|已完成'].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
+          s.tbl(['批次','赛事','赛果','订单数','赢注','派彩','手续费','对账','结算时间'],MOCK.settlementBatches.map(function(b){return'<tr><td class="cell-mono">'+b.batch_id+'</td><td>'+b.market+'</td><td><span class="tag tag-green">'+b.result+'</span></td><td class="ta-r">'+b.orders_total+'</td><td class="ta-r">'+b.win_orders+'</td><td class="ta-r highlight">'+b.total_payout+'</td><td class="ta-r">'+b.fee+'</td><td>'+(b.reconciled?'<span class="tag tag-green">差异='+b.recon_diff+'</span>':'<span class="tag tag-amber">未对账</span>')+'</td><td>'+b.settled+'</td></tr>';}))+
+          '<div class="btn-group mt-16"><button class="btn" onclick="App.openSettlementPreview()">模拟计算</button><button class="btn btn-success" onclick="App.closeModal();App.toast(\'已提交 Settlement 审批\')">提交 Settlement 审批</button></div>'+
         '</div>';
     }else if(tab==='orders'){
       body=s.filter(['<input placeholder="搜索订单"><select><option value="">全部状态</option><option value="submitted">已提交</option><option value="locked">已锁定</option><option value="awaiting_result">等待赛果</option><option value="settling">结算中</option><option value="settled">已结算</option><option value="refunding">退款中</option><option value="refunded">已退款</option><option value="correcting">更正中</option><option value="corrected">已更正</option></select>'])+
-        s.tbl(['Order ID','Market','用户','Selection','APT','状态','提交时间','结算时间'],
+        s.tbl(['订单ID','市场','用户','选项','APT','状态','提交时间','结算时间'],
           MOCK.predictionOrders.map(function(o){return'<tr><td class="cell-mono">'+o.order_id+'</td><td>'+o.market+'</td><td>'+o.user+'</td><td>'+o.selection+'</td><td class="ta-r highlight">'+o.amount_apt+'</td><td>'+s.tag(o.status)+'</td><td>'+(o.created||'—')+'</td><td>'+(o.settled||'—')+'</td></tr>';}));
     }else if(tab==='refund'){
       body=s.banner('warn','这是救火页——Refund/Correction 不覆盖 old snapshot、保留原订单。高危，必须证据 + 审批。')+
