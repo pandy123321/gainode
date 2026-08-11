@@ -1,14 +1,15 @@
 # 04 · Gainode Admin 高保真原型逐页规范
 
-> 版本：V2.3 · Ledger Reserve & RBAC & Emergency Closure
+> 版本：V2.4.1 · Admin Governance Baseline（合并自 `0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/`，审核 #491 通过）
 > 目标：重新生成桌面管理后台高保真可视化原型
 > 重要：不沿用旧大 Figma，也不照搬旧 Admin 菜单；新后台按 8 个一级导航组织。
-> 视觉依赖：全局颜色、Logo、字体、间距、表格密度、Drawer、状态、响应式与无障碍统一遵守 `08_VISUAL_DESIGN_SYSTEM_V2.3.md`。
+> 视觉依赖：全局颜色、Logo、字体、间距、表格密度、Drawer、状态、响应式与无障碍统一遵守 `08_VISUAL_DESIGN_SYSTEM_V2.4.md`。
 
-> 文档权威：本文件是该端逐页 HIFI Page Execution Spec。页面级布局、状态、交互与组件以本文件为准；全局视觉与 I18N/L10N 读取 `08_VISUAL_DESIGN_SYSTEM_V2.3.md`；业务字段、状态、权限、API 与参数继续读取 `05/06`。
+> 文档权威：本文件是该端逐页 HIFI Page Execution Spec。页面级布局、状态、交互与组件以本文件为准；全局视觉与 I18N/L10N 读取 `08_VISUAL_DESIGN_SYSTEM_V2.4.md`；业务字段、状态、权限、API 与参数继续读取 `05/06`。
+> 治理基线：V2.4.1 治理包（`0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/`）经 4 轮独立审核（#482→#485→#490→#491，零 Finding）确认了 8 Root IA、58 Page IDs、Canonical RBAC/SoD、Contract Gap Registry 和 Evidence-Based QA 框架。本文件已合并 V2.4.1 治理决策。
 > 合并说明：已确认的全量视觉/交互策划内容只作为合并来源，不再作为并行开发基线。
 
-> **权限权威说明**：全局角色、字段权限、数据范围和职责分离以 05「RBAC / ABAC 最小角色」及「RBAC / ABAC 补充」为准；页面中的"权限/限制"只定义页面特例，不构成完整权限矩阵。
+> **权限权威说明**：全局角色以 05「RBAC / ABAC 最小角色」定义的 13 个 Canonical Roles（SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / RISK_ANALYST / RISK_APPROVER / LEDGER_OPERATOR / FINANCE_REVIEWER / PARAM_EDITOR / PARAM_APPROVER / RELEASE_OPERATOR / AUDITOR / ADMIN_SECURITY）为准。UI Persona 限导航展示（PRESENTATION_ONLY），不授予 Role。最终授权 = canonical_role + data_scope + object_state + allowed_actions + risk_policy + SoD。RBAC 单独不等于授权；ABAC / Policy 失败 = FAIL_CLOSED。页面中的"权限/限制"只定义页面特例，不构成完整权限矩阵。SoD 为 Actor-level Invariant（同一 Workflow Object 冲突阶段由不同 Actor ID 执行），不可通过切换 active role 绕过。
 
 ## 1. Admin 设计原则
 
@@ -19,7 +20,7 @@
 - 高风险动作不直接放“编辑”按钮：先创建 case/proposal，再审批，再执行。
 - 状态不能只靠颜色；文字 + icon + tooltip。
 - TBC/Closed/No Permission 必须有真实页面状态，不用假数据填满。
-- 参数页保存 ≠ 生效；审批通过 ≠ 执行成功。
+- SoD 为 Actor-level Invariant：同一 Workflow Object 的冲突阶段（编辑/批准/激活）必须由不同 Actor ID 执行，不可通过切换 active role 绕过。参数三段分离：PARAM_EDITOR ≠ PARAM_APPROVER ≠ RELEASE_OPERATOR。申请人不可审批自己的申请。
 
 ## 2. 8 个一级导航
 
@@ -127,6 +128,32 @@
 - **接口参考**：`GET /users/{id}/rights；GET /users/{id}/eligibility`
 - **页面验收**：每个 Tab 的数字可回到原始对象。
 - **人话备注**：User360 是看全貌，不是万能“直接修改用户”页。
+
+### `A-USER-004｜资产调整` · P1_CONDITIONAL
+
+> **V2.4.1 治理声明**：本页为 P1_CONDITIONAL，Contract Status = CONTRACT_GAP。AssetAdjustment Proposal / Approval / Execution 全链路 05 契约尚未冻结。当前仅 Preview / Read-Only，不执行实际资产调整。
+
+- **页面目标**：查看资产调整提案和受控预览，不直接修改用户资产。
+- **高保真布局**：user summary；adjustment type；impact preview；approval status；ledger refs；evidence；timeline。
+- **I18N Copy Contract**：`page.a_user_004.title` / `page.a_user_004.description` / `page.a_user_004.primary_action`；通用 action/state 和敏感域文案读取 `/i18n/*.json` 与 `ui-copy-manifest.json`，不得直接显示 raw enum。
+- **视觉模板**：`高风险申请`。
+- **画布 / 容器**：基准 `1440×900`；Sidebar 240px / 收起 72px；Header 64px；内容边距 24px。
+- **视觉主任务**：来源对象 + Impact Preview + Evidence + Approval Route；底部固定提交区。
+- **首屏视觉结构**：沿用本页业务布局——user summary；adjustment type；impact preview；approval status；ledger refs；evidence；timeline。；Page Header 只放标题、状态和真正需要的主操作。
+- **品牌应用**：财务/订单页面以中性色和深蓝为主；金色不用于金额普遍高亮。
+- **关键尺寸 / 密度**：内容宽 960px；Diff 行 44px；Sticky Action 64px。
+- **原型 Frame**：`Default / Dependency Unavailable`；当前 CONTRACT_GAP，仅 Preview，无实际执行状态。
+- **宽屏规则**：1280/1440/1920 同一 IA；内容最大宽 1600px。
+- **无障碇**：表格、筛选、Tab 和 Action 支持键盘 Focus；状态必须有文字；图标按钮有 tooltip/label。
+- **视觉禁止**：草案不得表现成已执行；不得显示未冻结的 API 数据。
+- **读取数据**：AssetAdjustmentProposal（标记：UI_CANDIDATE_ONLY / NON_AUTHORITATIVE / NOT_API_CONTRACT / CONTRACT_GAP）。
+- **主要交互**：查看候选提案；打开关联账本/审批。
+- **跳转/返回**：→A-APPROVAL-001 / A-LEDGER-002。
+- **必须画出的状态**：CONTRACT_GAP / Preview Only；FAIL_CLOSED。
+- **权限/限制**：资产调整写能力 DISABLED（CONTRACT_GAP）；仅 Preview 可访问。
+- **接口参考**：`GET /admin/users/{id}/asset-preview`（TBC；05 未冻结）
+- **页面验收**：执行按钮不可用（Preview-Only）；所有候选字段标记 NON_AUTHORITATIVE。
+- **人话备注**：在 05 契约冻结前，此页面只看不动。
 
 ### `A-KYC-001｜KYC 审核队列` · P0
 - **页面目标**：处理 submitted/needs_info 的 KYC case。
@@ -807,3 +834,6 @@
 - [ ] 业务状态、账本状态、审批状态、异步执行状态分开显示。
 - [ ] No Permission/TBC/Closed/Dependency Unavailable 都有页面状态。
 - [ ] 大屏不把表格拉成超长空洞页面；核心内容区有最大宽度和信息密度控制。
+- [ ] V2.4.1 治理基线：A-USER-004（资产调整）保持 P1_CONDITIONAL / CONTRACT_GAP / Preview-Only。
+- [ ] SoD 为 Actor-level Invariant：PARAM_EDITOR ≠ PARAM_APPROVER ≠ RELEASE_OPERATOR。
+- [ ] 最终授权公式 = canonical_role + data_scope + object_state + allowed_actions + risk_policy + SoD。
