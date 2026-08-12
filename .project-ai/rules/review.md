@@ -108,7 +108,7 @@
 - [ ] 高风险操作走 Approval 工作流
 - [ ] SoD 为 Actor-level Invariant（`candidate.created_by_actor_id != approval.approved_by_actor_id`）
 - [ ] 授权逻辑使用完整公式（canonical_role + data_scope + object_state + allowed_actions + risk_policy + SoD）
-- [ ] 紧急操作默认双人授权 + case_id + 审计记录
+- [ ] 紧急操作：ADMIN_SECURITY 单人可执行 + MFA + 48h内向独立审计方提交 case_id/reason/evidence（OWNER_DIRECTIVE 2026-08-12）
 - [ ] 超级管理员仍受账本/审批/审计规则约束
 
 ### V2.4.1 治理文档审核
