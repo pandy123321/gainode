@@ -28,7 +28,7 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 
 #### H5 (gainode_h5)
 - **技术栈**：Vue 3.5 + TypeScript 6.0 + Vite 8，无 Pinia（自定义 reactive stores），无 vue-i18n（自定义 ~260 keys），无组件库（全部手写），无测试，无 .env
-- **架构问题**：MD5 签名 200+ 行手写 JS，S3 密钥硬编码，`package.json` name 为 "quiz"（非 "gainode"），ClaimCenterView 含硬编码 mock 数据
+- **架构问题**：S3 密钥硬编码（已决策：V2 改用后端预签名 URL），`package.json` name 为 "quiz"（非 "gainode"），ClaimCenterView 含硬编码 mock 数据
 - **优点**：Vue 3 Composition API 规范，统一暗色主题，良好 API 模块分层，完整的无线滚动模式，3 链钱包集成（MetaMask/TronLink/Phantom）
 - **页面**：19 个视图 / 17 条路由，4 Tab（Home/Robot/Team/My）+ 15 独立页
 
@@ -39,12 +39,12 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 - **页面**：46 条路由 / ~64 个 .vue 文件，覆盖用户/资产/配置/信号/矿机/团队/系统管理等
 
 #### 后端 (gainode后端)
-- **技术栈**：PHP 8.2 + Webman，MySQL 8.4.9（60+ 张表），3 实例 Redis，JWT + Casbin RBAC，DB 驱动路由（sys_route 表），Web3 集成（BSC/ETH/TRON），BetBurger + API-Football 集成，Docker 化部署
+- **技术栈**：PHP 8.2 + Webman，MySQL 8.4.9（60+ 张表），3 实例 Redis，JWT + Casbin RBAC，DB 驱动路由（sys_route 表），BetBurger + API-Football 集成，Docker 化部署。**V2.0 不保留链上能力**（OWNER_DIRECTIVE 2026-08-12），APT 为纯中心化账本。
 - **现有模块**：Auth（手机+邮箱登录）、Wallet（充提）、Team、Mining（矿机订单）、Signal/Arbitrage、RedEnvelope、Content、KYC、System（用户/角色/菜单/部门/字典）、Configuration
 
 ### 开发阶段
 
-项目 V6.1 基线就绪。Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、57/58 页可开发、17 个交互式 Modal、全部中文 UI）。
+项目 V6.1 基线就绪。Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、35/58 可开发、22 CONTRACT_GAP + 1 FUTURE、17 个交互式 Modal、全部中文 UI）。
 
 - V1.x → V2.0 迁移策略：**增量升级**（非重写）。后端在现有代码上扩展新模块；前端 H5/Admin 基于 V1.x 代码重构升级。
 - Development / Sandbox：允许立即开始（`DEVELOPMENT_START = NO`，需 Owner 激活）。
@@ -64,7 +64,6 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 | **权限** | Casbin | RBAC + RESTful，策略存储在 `sys_casbin_rbac` / `sys_casbin_restful` 表 |
 | **日志** | Monolog | 多通道：default/api/library/task/crontab/queue/change_logs |
 | **校验** | Laravel Illuminate Validation | ~10.48 |
-| **Web3** | web3.php | BSC/ETH/TRON RPC，智能合约交互，USDT 转账 |
 | **路由** | DB 驱动动态路由 | 路由存储在 `sys_route` 表，启动时从 DB 加载 |
 | **容器化** | Docker + docker-compose | php:8.2-cli 基础镜像，6 个暴露端口 |
 | **包管理** | Composer | PSR-4 autoloading |
@@ -91,7 +90,7 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 | Admin 测试 | 无 | Vitest | P1 |
 | Admin Schema 驱动 | 已有 | 保留 + 扩展至全部 58 页 | P0 |
 | 两端密钥管理 | 硬编码 | 环境变量 / Secret Manager | P0 |
-| 两端 S3 上传 | 硬编码 AWS 密钥 | 环境变量 + 预签名 URL | P0 |
+| 两端 S3 上传 | 硬编码 AWS 密钥 | 后端预签名 URL（V2：`POST /api/upload/presigned-url`） | P0 — **已决策 2026-08-12** |
 
 ### 后端代码结构与现有模块
 
@@ -109,7 +108,7 @@ sql/database.sql    # 全量数据库结构（60+ 张表）
 
 - **Robot**：56 级 AI 代理，`standard_capacity × daily_reward_coefficient = pending APT`（动态 Reward，系数可为 0）。
 - **Prediction**：P0 仅 Football Pre-match 1X2（Home/Draw/Away），90 分钟+伤停补时，不含加时/点球。中文用户端统一显示「竞猜」。
-- **APT**：系统内部数量代币，总量上限 1000 亿。APT-I 为内部数量账，APT-C 为链上形态（Future）。APT-I→APT-C 数量 1:1 映射。
+- **APT**：系统内部数量代币，总量上限 1000 亿。V2.0 纯中心化账本（不涉及链上发行），四账分离模型（数量×估值×收入×预算）
 - **Power**：可消耗、可恢复操作资源，用于 OTC Sell、Withdrawal、Robot Start。容量由 Robot 等级决定。
 - **OTC**：用户间受控撮合，非平台固定回购。
 - **Notice**：通知体系，与业务事务解耦，通过 Outbox/异步投递。
@@ -133,9 +132,22 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 
 ### Admin 合同状态
 
-- FROZEN = 57 页（05 契约已冻结，可进入 HIFI 实现。2026-08-11 合同缺口全部解除）
-- NON_BLOCKING_GAP = 2 页（核心功能已冻结，仅扩展能力待 06 定义）
-- FUTURE = 1 页（A-MIGRATION-001，默认关闭）
+参照 V2.4.1 Contract Gap Register + Page Map JOIN（唯一权威源）：
+
+| 状态 | 页数 | 说明 |
+|---|---|---|
+| CONTRACT_FROZEN | 35 | 05/06 契约已正式冻结，可进入 HIFI → 开发 |
+| CONTRACT_GAP | 22 | 05/06 契约未冻结（含 BLOCKING + NON_BLOCKING） |
+| FUTURE | 1 | A-MIGRATION-001（默认关闭） |
+
+**Owner 已决策纳入 V6.1 产品范围的 16 页**（Affiliate 4+7、AI 运营、Data Provider 等）目前仍为 CONTRACT_GAP，需在 05/06 Contract Freeze 完成后才能进入开发，不得将"产品范围确认"等同于"机器合同冻结"。
+
+| 决策 | Owner 状态 | Machine Contract | 可开发 |
+|---|---|---|---|
+| Affiliate/Agent 4+7 页 | IN_SCOPE | CONTRACT_GAP (GAP-001/002) | **否** |
+| AI 策略模拟 + 建议管线 | IN_SCOPE | CONTRACT_GAP (GAP-010/011/012) | **否** |
+| Data Provider (API-Football/BetBurger 已签) | CONTRACT_SIGNED | CONTRACT_GAP (GAP-003-009 等) | **否** |
+| Asset Adjustment (仅 ADMIN_SECURITY) | POLICY_CONFIRMED | CONTRACT_GAP (GAP-015) | **否** |
 
 ### 开发策略（已确认）
 
@@ -170,15 +182,13 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 | 资产调整权限 | 仅 ADMIN_SECURITY 可执行 |
 | Owner Override | 超级管理员自行决定，保留完整审计 |
 | AI 策略模拟/建议管线 | 纳入 V6.1 |
-| Contract Gap | 18→2（16 个已解除，2 个 NON_BLOCKING） |
+| Contract Gap | 35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE（Owner 确认 16 页入产品范围，Machine Contract 未冻结，≠ 可开发） |
+| Owner Override | 紧急：ADMIN_SECURITY 单人可执行，需 MFA + 48 小时内向独立审计方提交 case_id/reason/evidence。非紧急：SELF_APPROVAL = FORBIDDEN，需第二人审批 |
 | V1.x 生产代码 | 作为 V2.0 升级基线，增量重构（非重写） |
 | H5 组件库 | Vant 4 |
-| Admin 组件库 | Element Plus |
+| Admin 组件库 | Element Plus（迁自 Layui Vue） |
 | V1.x 数据迁移 | 一刀切迁移（Big Bang） |
 | API 签名密钥 | V2.0 从代码硬编码迁移至环境变量 |
-| H5 组件库 | Vant 4（移动端优先，轻量，1:1 映射 V1.x UI 模式） |
-| Admin 组件库 | Element Plus（从 Layui Vue 迁移，生态最丰富，切换成本低） |
-| V1.x 数据迁移 | 一刀切迁移（Big Bang），V1.x wallet 平表 vs V2.0 四账分离 append-only 结构不兼容双写 |
 
 ### V1.x 生产仓库清单（已全部确认）
 

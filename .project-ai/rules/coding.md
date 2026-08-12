@@ -53,9 +53,9 @@
 12. **API 调用封装**：统一 Axios 实例，自动注入六个请求头（Token/Sign/Timestamp/Version/Language/TraceId） **[RECOMMENDED]**
 13. **样式方案**：SCSS + `<style scoped>`。全局设计令牌从 `08_VISUAL_DESIGN_SYSTEM_V2.4.md` 提取为 CSS 变量 **[RECOMMENDED]**
 
-#### 待定（TBC — NOT_AUTHORIZED_TO_INSTALL）
+#### 已决策应用依赖（OWNER_DIRECTIVE）
 
-14. **UI 组件库**：Admin 端 Arco Design / Ant Design Vue；H5 端 Vant UI / 自研 **[TBC]**
+14. **UI 组件库**：H5 端 **Vant 4**（移动端优先，~50KB gzip）；Admin 端 **Element Plus**（Vue 3 原生，迁自 Layui Vue） **[OWNER_DIRECTIVE 2026-08-12]**
 
 ### Flutter 编码规则（App）
 
@@ -250,7 +250,7 @@ app/
 - [ ] CI/CD 管线的具体配置（GitHub Actions / GitLab CI 选型）
 - [ ] PHPUnit 覆盖率目标和 CI 集成方案
 - [ ] 前端 ESLint / Prettier / Stylelint 配置规范
-- [ ] Vue 3 UI 组件库选型（Arco Design / Ant Design Vue / Vant）
+- [x] Vue 3 UI 组件库：H5 = Vant 4，Admin = Element Plus（OWNER_DIRECTIVE 2026-08-12）
 - [ ] Flutter 状态管理选型（Riverpod / Bloc）
 
 ## 信息来源

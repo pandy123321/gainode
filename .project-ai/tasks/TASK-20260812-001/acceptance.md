@@ -2,7 +2,8 @@
 
 ## 开发启动前（当前阶段）
 
-- [x] `.project-ai` 上下文已创建并审核通过
+- [x] `.project-ai` 17 份文档已创建并已提交 Independent Review
+- [ ] Independent Review CHANGES_REQUIRED — 需完成 Remediation 后方可通过
 - [ ] 后端技术栈已确认（现有 PHP/Webman；参考 TASK-20260811-001）
 - [ ] 前端框架已确认（现有 Vue 3 原型；参考 TASK-20260811-001）
 - [ ] 数据库方案已确认（现有 MySQL 8.4.9）

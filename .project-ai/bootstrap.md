@@ -12,9 +12,9 @@ PROJECT_NAME = Gainode
 PROJECT_ID = GAINODE-2.0
 PROJECT_DESCRIPTION = AI 驱动的体育分析与竞猜平台。V2.0 基于 V1.x 上线版本（gainode_h5 / gainode_admin）升级，后端基于现有 PHP/Webman 代码扩展。
 REPOSITORY = E:\github\sports
-BASE_BRANCH = main
+BASE_BRANCH = master
 PROJECT_ROOT = E:\github\sports
-CURRENT_BASELINE_COMMIT = TBC（需用户确认当前治理基线 Commit）
+CURRENT_BASELINE_COMMIT = 0188276dddd121849becca98c19da2a93325b0d8
 CURRENT_FREEZE_VERSION = V6.1
 ```
 
@@ -22,21 +22,23 @@ CURRENT_FREEZE_VERSION = V6.1
 
 # 2. Owners
 
+> OWNER_DIRECTIVE 2026-08-12：本项目为单人开发，所有 Owner 角色由同一人兼任。以下视为 Agent Signoff 时的对应责任人标识。
+
 ```text
-PROJECT_OWNER = TBC
-PRODUCT_OWNER = TBC
-ARCHITECTURE_OWNER = TBC
-DATABASE_OR_DATA_OWNER = TBC
-API_OWNER = TBC
-EVENT_STATE_OWNER = TBC
-ENVIRONMENT_OWNER = TBC
-SECURITY_OWNER = TBC
-RBAC_OR_SIGNER_OWNER = TBC
-DEPENDENCY_OWNER = TBC
-LEGAL_OR_OPEN_SOURCE_OWNER = TBC
+PROJECT_OWNER = OWNER (TBC — 填入正式姓名)
+PRODUCT_OWNER = OWNER
+ARCHITECTURE_OWNER = OWNER
+DATABASE_OR_DATA_OWNER = OWNER
+API_OWNER = OWNER
+EVENT_STATE_OWNER = OWNER
+ENVIRONMENT_OWNER = OWNER
+SECURITY_OWNER = OWNER
+RBAC_OR_SIGNER_OWNER = N/A（V2.0 无链上资产，APT 纯中心化账本）
+DEPENDENCY_OWNER = OWNER（每次引入新库需记录 SBOM）
+LEGAL_OR_OPEN_SOURCE_OWNER = OWNER
 ```
 
-所有 Owner 字段待用户确认后填入正式姓名/角色。
+Signoff 格式：每项需 Date / Files / Scope / Risk / Exception / Change Process。
 
 ---
 
@@ -103,18 +105,28 @@ FORBIDDEN_ACTIONS =
 按项目填写：
 
 ```text
-1. V1.x 生产环境运行事实 / 已部署代码 / 数据库结构（运行时不可变事实）
-2. V1.x 源码固定 Commit（gainode_h5.git / gainode_admin.git / gainode后端 gainode/）
-3. V6.1 冻结规格文档（Gainode_Development_Ready_V6.1_Latest/）— 需求权威源
-4. V2.4.1 Admin 治理包（0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/）— Admin 契约权威源
-5. Admin 交互原型（0.5代码/admin-proto/）— Admin HIFI 交互权威源
-6. Owner Decision（用户聊天确认 / ADR / 正式签署）
-7. HIFI 设计系统文档（0.5代码/Gainode_Mobile_H5_Design_System_*.md）
-8. Project Context 文档（.project-ai/）— AI Agent 共享基线
-9. 历史文档（历史文档/）— 仅追溯，不得作为需求推导源
+L1 运行时不可变事实 / 已部署代码 / 数据库结构 / 生产运行证据
+L2 固定 Commit、源码、构建产物、数据库对象、机器规范
+L3 Owner Decision / Independent Review / Runtime Evidence
+L4 Product / Architecture / Design / Freeze 文档
+    L4a. V6.1 冻结规格文档（Gainode_Development_Ready_V6.1_Latest/）— 需求权威源
+    L4b. V2.4.1 Admin 治理包（0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/）— Admin 契约权威源
+    L4c. Admin 交互原型（0.5代码/admin-proto/）— Admin HIFI 交互权威源
+    L4d. HIFI 设计系统文档（0.5代码/Gainode_Mobile_H5_Design_System_*.md）
+L5 Self Review / Historical Report（.project-ai/v1-baseline-review.md）
+L6 Agent Summary / Conversation / Oral Description（历史文档/仅追溯）
 ```
 
 默认不得低层证据覆盖高层事实。
+
+| 层级 | 示例（Gainode 项目） |
+|---|---|
+| L1 | V1.x 生产数据库实际 Schema、生产 API 实际响应格式、链上部署记录 |
+| L2 | composer.json, package.json, vite.config.ts, database.sql, process.php |
+| L3 | manifest.yaml decisionSources 中 provenance=OWNER_DIRECTIVE 的项、Independent Review 结论 |
+| L4a-d | V6.1 01-08 规格、Admin Contract Register/Page Map、admin-proto/ HTML、H5 设计 MD |
+| L5 | v1-baseline-review.md、历史自检记录 |
+| L6 | 聊天确认的推断（context.md "基于代码的推断"）、历史文档 |
 
 ---
 
@@ -127,8 +139,9 @@ OLD_SYSTEM_ROLE = V1.x 生产代码作为 V2.0 的基线起点。两个前端仓
 NEW_SYSTEM_ROLE = V2.0 以 V6.1 规格为需求基准，在 V1.x 代码上增量扩展 10 个后端模块 + 58 Admin 页面 + 44 P0 H5 页面 + Flutter App
 DATA_MIGRATION_REQUIRED = YES（V1.x 用户数据、钱包数据、团队数据需迁移至 V2.0 新账本结构）
 DATA_REBUILD_REQUIRED = PARTIAL（arbitrage 引擎数据表改造为 AI 经济引擎结构；APT 账本从 V1.x wallet 系统迁移至四账分离模型）
-DUAL_WRITE_ALLOWED = TBC（需确认迁移期间是否允许 V1.x/V2.0 并行运行）
-SINGLE_WRITER_RULE = YES（每条数据有且仅有一个写入者）
+DATA_CUTOVER = BIG_BANG — 一刀切全量迁移，~4 小时计划停机，至少 3 次沙盒全量排练 + 回滚验证
+DUAL_WRITE_ALLOWED = NO — V1.x wallet 平表 → V2.0 四账 append-only 数据结构根本性不兼容；V1.x Mining 算力/周期 → V2.0 Robot 56级AI代理语义不兼容，双写在技术上不可行
+CODEBASE_UPGRADE = INCREMENTAL — 代码层在后端现有 PHP/Webman 上扩展新模块，前端 H5/Admin 基于 V1.x 代码重构升级
 ```
 
 ### V1.x 现有系统清单
@@ -143,14 +156,14 @@ SINGLE_WRITER_RULE = YES（每条数据有且仅有一个写入者）
 
 | 维度 | V1.x (现有生产) | V2.0 (目标) |
 |---|---|---|
+| **H5 组件库** | 手写所有 UI | Vant 4（移动端优先，70+ 组件） |
+| **H5 i18n** | 自定义轻量引擎 (~260 keys) | vue-i18n（7 语言） |
 | **H5 状态管理** | 自定义 reactive 对象 + localStorage | Pinia 2 + pinia-plugin-persistedstate |
-| **H5 i18n** | 自定义轻量引擎 (~260 keys) | vue-i18n / 统一 i18n 框架 |
-| **H5 组件库** | 手写所有 UI | 待选（Vuetify / Naive UI / 其他） |
-| **H5 API 签名** | 手写 MD5 (200+ 行 JS) | 统一 SDK 封装 |
-| **H5 Vite** | 8.1 | 同版本或升级 |
-| **H5 TS** | 6.0 | 保持一致或升级 |
-| **Admin 组件库** | Layui Vue 2.23 + JSON Schema Form | 待评估：保留或迁移 |
-| **Admin 路由** | Hash History | TBC：保留 Hash 或改为 History |
+| **H5 API 签名** | 手写 MD5 (200+ 行 JS) | crypto-js / Web Crypto API（密钥外置 .env） |
+| **H5 Vite** | 8.1 | 5.x 稳定版 |
+| **H5 TS** | 6.0 | 5.x LTS |
+| **Admin 组件库** | Layui Vue 2.23 + JSON Schema Form | Element Plus（迁自 Layui Vue，Schema 驱动改为 `<el-*>` 渲染） |
+| **Admin 路由** | Hash History | Hash History（保持不变，SEO 非管理端需求） |
 | **Admin Vite** | 4.3 | 需升级至 5.x/6.x |
 | **Admin TS** | 4.5 | 需升级至 5.x+ |
 | **Admin Schema 驱动** | 后端下发 schema 控制表格/表单 | 保留并扩展此架构模式 |
@@ -182,7 +195,7 @@ MODULES = Mobile/H5 (Vue3), App (Flutter), Admin Web (Vue3), Auth (JWT+Casbin), 
 PROCESSES = Webman\App (8787), task_server (8786), crontab_task, arb_task (改造), channel_server (2206), pusher_server (8888), proxy_server (8989), task
 DATABASES = MySQL 8.4.9 (webman + gainode), Redis (3 instances: default/cache/stack)
 QUEUES = Redis Queue (webman/redis-queue)
-EXTERNAL_SERVICES = BetBurger (已签署), API-Football (已签署), BSC/ETH/TRON RPC, 结果源 (待确认), 通知渠道 (待确认), 汇率源 (待确认), KYC 服务 (待确认)
+EXTERNAL_SERVICES = BetBurger (已签署), API-Football (已签署), 结果源 (待确认), 通知渠道 (待确认), 汇率源 (待确认), KYC 服务 (待确认)。链上服务 (BSC/ETH/TRON RPC) — 已移除，V2.0 不保留
 AUTHORITATIVE_WRITERS = 每个数据实体有且仅有一个 Service 作为 Authoritative Writer
 TRUST_BOUNDARIES = Client→API Gateway→Webman→Service→DAO→DB; External API→ArbitrageTask→Service; 区块链节点→web3.php; Admin→独立认证域（Admin URL 与 C 端 URL 分离）
 ```
@@ -280,7 +293,7 @@ SECRET_LOGGING = FORBIDDEN
 DEPENDENCY_RULE_FILE = E:\github\sports\通过agent开发前规则\开源项目通用引用准入规则V1.0.md
 NO_DOWNLOAD_AUTHORIZED = NO（开发期允许，生产前需全部批准）
 APPROVED_DEPENDENCIES = PHP: webman/workerman, illuminate/database, firebase/php-jwt, casbin/casbin, monolog/monolog, web3.php, workerman/redis-queue, workerman/crontab; H5: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Vant 4; Admin: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Element Plus; App: Flutter
-PENDING_DEPENDENCIES = 测试框架（Vitest/Playwright），Dart/Flutter 依赖包，前端代码格式化工具链（ESLint/Prettier/Stylelint 配置）
+PENDING_DEPENDENCIES = H5/Admin/App exact version lock + SBOM, 测试框架（Vitest/Playwright）, Dart/Flutter 依赖包, 前端 ESLint/Prettier/Stylelint 配置
 ```
 
 每个批准依赖必须有 exact version/tag/commit。
@@ -294,22 +307,27 @@ PENDING_DEPENDENCIES = 测试框架（Vitest/Playwright），Dart/Flutter 依赖
 ```text
 [x] README / INDEX (.project-ai/context.md ≈ README+INDEX)
 [x] Existing Baseline Review (V1.x 生产代码分析 — 本次 task 完成)
-[ ] Architecture Freeze (.project-ai/architecture.md 已有，需补 V1.x→V2.0 迁移架构图)
-[ ] Database/Data Freeze (需补充正式 DDL 冻结文档)
-[ ] API Freeze (需补充 OpenAPI 3.1 契约文件 + Admin Schema 契约)
-[ ] Event/State Freeze (需定义完整 Event Catalog + 所有状态机)
+[x] Architecture Freeze (.project-ai/architecture.md — V1.x→V2.0 migration architecture documented)
+[ ] Database/Data Freeze — 第一批（STAGE-01 前）：从 05 提取 8 核心实体 DDL；第二批：非核心实体
+[ ] API Freeze (需补充 OpenAPI 3.1 契约文件 + Admin Schema 契约 — 推迟至 STAGE-02，STAGE-01 不定义 API)
+[ ] Event/State Freeze — 第一批（STAGE-01 前）：05 §4 7 个实体的 canonical enum 已对齐到 TASK-20260811；第二批：Event Catalog 异步补
 [x] Business Rules (V6.1 05_DATA_STATE_PERMISSION_API_CONTRACT.md)
-[ ] Environment Freeze (需补充各环境详细配置清单)
-[x] Framework/Dependencies (H5: Vant 4 ✅, Admin: Element Plus ✅; 其余待补充)
+[ ] Environment Freeze — STAGE-01 并行配置 dev container + .env template
+[x] Framework/Dependencies (H5: Vant 4, Admin: Element Plus; exact versions pending)
 [x] Rules/Decision Register (.project-ai/manifest.yaml decisionSources)
-[ ] Self Review (需在执行开发前完成)
-[ ] Independent Review (需在冻结后提交 ChatGPT 审核)
-[x] Responsible Owner Freeze (bootstrap.md Section 2 — 待填入实际人员)
+[ ] Self Review (STAGE-00 Remediation 提交时一并执行)
+[x] Independent Review (GAINODE-STAGE00-IR-20260812-001 已提交 → CHANGES_REQUIRED → 本轮 Remediation 关闭 13/15 Finding)
+[x] Responsible Owner Freeze (bootstrap.md Section 2 — OWNER_DIRECTIVE 2026-08-12：单人兼任 11 角色，Signer=N/A)
 [x] Runtime Gate Plan (bootstrap.md Section 20)
 [x] Stage Plan (STAGE-00_PLANNING_AND_FREEZE 已定义，详见下文 Section 16)
 ```
 
-缺失文档：`Architecture Freeze`（需补迁移架构）、`Database Freeze`（需独立 DDL 冻结文档）、`API Freeze`（需独立 OpenAPI + Schema 契约文档）、`Event/State Freeze`（需独立 Event Catalog + 状态机文档）、`Environment Freeze`（需独立环境配置文档）、`Self Review`、`Independent Review`。
+Machine Contract 分两批策略（OWNER_DIRECTIVE 2026-08-12）：
+
+| 批次 | Contract | 时机 | 预计耗时 |
+|---|---|---|---|
+| **第一批** | DB Freeze（8 核心实体 DDL）+ Canonical State Freeze | STAGE-01 开始前 | 1.5 天 |
+| **第二批** | OpenAPI 3.1 + Admin Schema Contract + Event Catalog + Environment Freeze | STAGE-01 ~ STAGE-02 并行 | 3 天 |
 
 ---
 
@@ -368,7 +386,7 @@ REVIEW_REQUIREMENTS =
 EXIT_CRITERIA =
 - bootstrap.md 所有字段填写完毕（TBC 项记录为待确认）
 - 所有预开发文档创建/更新完毕
-- manifest.yaml contextVersion 更新至 11
+- manifest.yaml contextVersion ≥ 13（绑定当前 Freeze）
 - Self Review 完成
 - Independent Review 提交
 - Review 结果 APPROVED
@@ -619,7 +637,7 @@ FROZEN_FOR_DEVELOPMENT = YES
 
 - [ ] Section 2：所有 Owner 字段填入实际人员
 - [ ] Section 1：CURRENT_BASELINE_COMMIT 确认
-- [ ] Section 7：DUAL_WRITE_ALLOWED（迁移期间是否允许 V1.x/V2.0 双写）
+- [x] Section 7：DATA_CUTOVER = BIG_BANG，DUAL_WRITE_ALLOWED = NO（OWNER_DIRECTIVE 2026-08-12）
 - [ ] Section 11：GENERATED_TYPES（OpenAPI → TypeScript/PHP DTO 自动生成方案）
 - [ ] Section 12：Event Catalog 全部定义
 - [ ] Section 12：所有状态机确认/恢复/取消策略

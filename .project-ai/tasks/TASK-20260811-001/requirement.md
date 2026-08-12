@@ -7,7 +7,7 @@
 - 开发顺序：后端领域对象全量建好 → 前端按模块逐个接入
 - arbitrage 引擎：改造为内部 AI 经济引擎（方案 B），不对 C 端暴露
 - 代码基础：在现有 `0.5代码/gainode后端/gainode` 上升级
-- **Contract Gap 已全部解除（2026-08-11）**：16/18 缺口确认，57/58 页 Admin 可开发。Affiliate 入范围、API-Football/BetBurger 合同签署、AI 策略/建议管线入范围、资产调整权限策略确认
+- **Contract Gap 状态**：35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE。Owner 已确认 Affiliate/Agent、AI 运营等 16 页入产品范围，但 05/06 Machine Contract 未冻结，该 16 页仍需 FAIL_CLOSED。开发仅限 35 FROZEN 页面对应的后端模块结构
 
 当前后端代码有 Auth/用户/Admin 基础设施和 arbitrage 套利引擎，但缺 V6.1 新增模块的领域对象。
 

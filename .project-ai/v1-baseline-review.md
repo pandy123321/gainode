@@ -66,7 +66,6 @@
 | API 签名验证 | `support/middleware/Sign.php`（推断） | **直接复用** |
 | BetBurger 客户端 | `support/arbitrage/BetBurgerClient.php` | **保留改造** |
 | API-Football 客户端 | `support/arbitrage/ApiFootballClient.php` | **保留改造** |
-| Web3 工具 | `support/utils/Web3Util.php`（推断） | **直接复用** |
 | 统一响应格式 | `support/extend/Response.php`（推断） | **直接复用** |
 
 ### 2.4 已知风险
@@ -74,7 +73,7 @@
 | 风险 | 严重度 | 描述 | 建议 |
 |---|---|---|---|
 | R1-API 签名密钥 | P1 | API 签名密钥 `projectApi` 在代码中硬编码 | V2.0 迁移至环境变量/Secret Manager |
-| R2-Web3 私钥 | P0 | 区块链私钥存储位置不明 | 确认存储方式，确保不在代码中 |
+| R2-Web3 私钥 | P0 → **CLOSED** | 区块链私钥存储位置不明。OWNER_DIRECTIVE 2026-08-12：V2.0 APT 改为纯中心化账本，不保留任何链上能力。Signer contract = N/A | N/A — 链上能力已移除 |
 | R3-数据库密码 | P1 | 数据库密码在 config/database.php 中 | 迁移至 .env |
 | R4-无自动化测试 | P2 | 未发现 PHPUnit 测试代码 | STAGE-01 同步建立测试框架 |
 | R5-Docker 端口暴露 | P2 | 6 个端口全暴露 + Git 仓库中无 Dockerfile/docker-compose | 确认生产部署方式，Docker 文件同步至 Git 仓库 |
@@ -93,17 +92,16 @@
 | Vite | 8.1.5 | 5/6 (降级) | Vite 8 太新，降级至稳定版 |
 | 状态管理 | 自定义 reactive + localStorage | Pinia 2 + persistedstate | **需迁移** |
 | i18n | 自定义轻量引擎 (~260 keys) | vue-i18n (7 languages) | **需迁移 + 扩展** |
-| 组件库 | 无（全部手写） | 待选 | **需选型** |
+| 组件库 | 无（全部手写） | Vant 4（已决策） | **需集成** |
 | CSS 预处理 | Sass (sass-embedded) | 保留 | 无差距 |
 | HTTP | Native fetch | 保留或 Axios | 无差距 |
-| Web3 | @solana/web3.js, ethers 6, tronweb 6 | 保留 + 评估必要性 | 需评估 V6.1 是否需要 Solana |
-| S3 上传 | @aws-sdk/client-s3（硬编码密钥） | 环境变量 + 预签名 URL | **需修复** |
+| S3 上传 | @aws-sdk/client-s3（硬编码密钥） | 后端预签名 URL（V2：`POST /api/upload/presigned-url` → S3 presigned PUT） | **V2 已决策** |
 | 测试 | 无 | Vitest + Playwright | **需新增** |
 | .env | 无 | .env.development / .env.production | **需新增** |
 | 包管理器 | npm | 保留 | 无差距 |
 | 代码格式化 | Prettier | 保留 + 添加 ESLint | 需扩展 |
 
-### 3.2 页面清单（19 views / 17 routes）
+### 3.2 页面清单（19 views / 22 routes total：1 root + 4 tab children + 17 standalone top-level）
 
 | 页面 | 路由 | V2.0 处理 |
 |---|---|---|
@@ -156,7 +154,7 @@
 
 | 风险 | 严重度 | 描述 | 建议 |
 |---|---|---|---|
-| R6-S3 硬编码密钥 | P0 | `src/utils/s3Upload.ts` 第 21-22 行包含 AWS access key 和 secret | **立即**迁移至环境变量，轮换密钥 |
+| R6-S3 硬编码密钥 | P0 → **FULLY CLOSED 2026-08-12** | `src/utils/s3Upload.ts` 第 6-7 行硬编码 AWS Access Key + Secret Key。旧 Key 已在 AWS IAM 控制台轮换。V2.0 改用后端预签名 URL（`POST /api/upload/presigned-url` → S3 presigned PUT），前端不再持有任何 AWS 凭据 | ✅ Key 已轮换 + V2 contract 冻结 |
 | R7-包名不符 | P3 | `package.json` name 为 "quiz" 而非 "gainode" | 修正为 "gainode-h5" |
 | R8-自定义 MD5 | P2 | 200+ 行手写 MD5，浏览器兼容性风险 | 替换为 crypto-js 或 Web Crypto API |
 | R9-无构建环境变量 | P1 | Vite proxy target 硬编码为 `https://api.gainode.com` | 使用 `VITE_API_BASE_URL` |
@@ -175,7 +173,7 @@
 | TypeScript | 4.5.4 | 5.x | **需升级** |
 | Vite | 4.3.5 | 5.x/6.x | **需升级** |
 | 状态管理 | Pinia 2.1.7 + persistedstate 3.2.3 | Pinia 2 (保留) | 无差距 |
-| 组件库 | Layui Vue 2.23.3 | **待定**：保留升级 / 迁移至 Element Plus | **需决策** |
+| 组件库 | Layui Vue 2.23.3 | Element Plus（已决策，迁自 Layui Vue） | **需迁移** |
 | 表单 | JSON Schema Form 1.0.16 | JSON Schema Form (保留) | 无差距 |
 | i18n | vue-i18n (3 语言) | vue-i18n (7 语言) | **需扩展** |
 | HTTP | Axios 1.5.1 | 保留 | 无差距 |
@@ -242,7 +240,7 @@
 | R16-Demo 页面混入 | P3 | `/table/*`, `/form/*`, `/result/*`, `/component/*`, `/directive/*` 是开发者演示页 | 清理 |
 | R17-未注册路由 | P2 | `permissions/admin/`, `permissions/role/`, `permissions/menu/` 目录存在但未注册 | 清理或注册 |
 | R18-Hash History | P3 | 使用 `createWebHashHistory`，SEO 不友好 | 评估是否改为 History mode |
-| R19-Layui Vue 依赖风险 | P1 | Layui Vue 社区活跃度和长期维护不确定性 | 需评估：保留升级版本 / 迁移至 Element Plus / Ant Design Vue |
+| R19-Layui Vue 依赖风险 | P1 | Layui Vue 社区活跃度和长期维护不确定性 | **已决策：迁移至 Element Plus** |
 
 ---
 
@@ -256,7 +254,7 @@
 | 响应格式 `{code, message, data}` | ✅ | ✅ | ✅ | **一致** |
 | Token 头 | ✅ `Token` 头 | ✅ `Token` 头 | ✅ | **一致** |
 | Language 头 | ✅ `Language` 头 | ✅ `Language` 头 | ✅ | **一致** |
-| S3 上传 | ✅ 硬编码密钥 | ✅ ImageUpload | ✅ | **不一致**（安全风险） |
+| S3 上传 | ✅ → V2 后端预签名 URL | ✅ ImageUpload | ✅ | **V2 已决策：后端预签名** |
 
 ### 5.2 不一致问题
 
@@ -274,8 +272,8 @@
 
 | 优先级 | 类别 | 具体项 | 影响 Stage |
 |---|---|---|---|
-| **P0** | 安全 | S3 硬编码密钥轮换 (R6) | STAGE-00 |
-| **P0** | 安全 | 所有硬编码密钥外置 (R1, R2, R3, R12, R13) | STAGE-00 |
+| **P0** | 安全 | S3 硬编码密钥已决策轮换 (R6) ✅ | STAGE-00 — **OWNER_DIRECTIVE 2026-08-12** |
+| **P0** | 安全 | 所有硬编码密钥外置 (R1, R3, R12, R13)。R2/R6 已关闭 | STAGE-00 — R1/R3 STAGE-01 迁移至 .env |
 | **P0** | 架构 | H5 组件库选型 ✅ | STAGE-00 — **已决策：Vant 4** |
 | **P0** | 架构 | Admin 组件库选型 ✅ | STAGE-00 — **已决策：Element Plus** |
 | **P1** | 数据 | 数据迁移策略制定 ✅ | STAGE-01 — **已决策：一刀切 Big Bang** |
@@ -329,9 +327,10 @@ V1.x 生产数据库包含用户、钱包、团队等核心数据。V2.0 需要�
 - [ ] V1.x 生产数据库连接信息 + 完整 Schema 提取
 - [ ] V1.x 生产环境 URL（H5 / Admin / API 域名）
 - [ ] V1.x 生产数据库样本数据脱敏导出（用于迁移测试）
-- [ ] 数据迁移策略确认（双写 / 滚动升级 / 一刀切）
-- [ ] H5 组件库选型最终确认
-- [ ] Admin 组件库选型最终确认（Layui Vue 保留 vs 迁移）
+- [x] 数据迁移策略：Big Bang 一刀切（OWNER_DIRECTIVE 2026-08-12），沙盒演练待执行
+- [x] H5 组件库：Vant 4（OWNER_DIRECTIVE 2026-08-12）
+- [x] Admin 组件库：Element Plus（OWNER_DIRECTIVE 2026-08-12）
 - [ ] Admin 路由 History Mode 确认
-- [ ] S3 密钥轮换执行
-- [ ] 所有硬编码密钥外置执行
+- [x] S3 密钥轮换：2026-08-12 Owner 已完成 AWS IAM 控制台轮换；V2 改用后端预签名 URL
+- [ ] S3 旧凭据在 AWS 控制台执行 deactivate/delete（待 Owner 手动执行）
+- [ ] 所有硬编码密钥外置执行（R1/R3 等）

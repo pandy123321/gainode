@@ -1,6 +1,6 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 13
+contextVersion: 16
 status: DRAFT
 enabledDocuments:
   - bootstrap.md
@@ -23,166 +23,204 @@ excludedPaths:
 governanceBaselineCommit: 08b0836
 governanceBaseline: "V2.4.1 Admin Governance + V1.x Production Code Baseline Audit"
 projectionBuiltAt: "2026-08-12"
-note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), CODE_ANALYSIS (from V1.x production code audit), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). owner = TBC means decision direction confirmed but formal sign-off pending."
+note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), CODE_ANALYSIS (from V1.x production code audit), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). All 30 decisionSources owner=OWNER (single-owner project, Owner Freeze completed 2026-08-12)."
 decisionSources:
   # --- 技术栈决策 ---
   backend_framework:
     value: "PHP >=8.2, Webman (Workerman)"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — composer.json + Dockerfile in 0.5代码/gainode后端/gainode"
   php_version:
     value: "8.2"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "INFERRED_FROM_ARTIFACT — Dockerfile uses php:8.2-cli"
   database:
     value: "MySQL 8.4.9, illuminate/database ORM"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — composer.json + config/database.php"
   frontend_h5:
     value: "Vue 3 + TypeScript"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   frontend_admin:
     value: "Vue 3 + TypeScript"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11; scope: Admin Web"
   frontend_app:
     value: "Flutter"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
 
   # --- 开发策略决策 ---
   dev_strategy:
     value: "Backend-first: all module domain objects (Model/DAO/Service) built before frontend integration. True frontend/backend separation with OpenAPI 3.1 contract alignment."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   codebase_basis:
     value: "Upgrade on existing PHP/Webman backend at 0.5代码/gainode后端/gainode; new V6.1 modules embed into existing library/{model,dao,service}/ structure. Frontend H5 and Admin upgrade from V1.x production repos (gainode_h5, gainode_admin) at _existing_prod/."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11/12; repos provided 2026-08-12"
   arbitrage_disposition:
     value: "Plan B — retained as AI economic engine foundation; BetBurger signals not exposed to users"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
 
   # --- 基础设施决策 ---
   db_migration:
     value: "Two-phase: SQL files (YYYYMMDD_description.sql) → Phinx after 10+ DDL changes"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   test_framework:
     value: "PHPUnit 10+, tests/Unit|Integration|Feature"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   openapi_strategy:
     value: "Manual openapi.yaml + sys_route table scan for validation"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   ci_strategy:
     value: "Three-stage progressive: lint → php-cs-fixer + DDL discipline → PHPUnit + i18n scan"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
 
   # --- V1.x 生产代码基线 ---
   v1_h5_baseline:
-    value: "Vue 3.5 + TS 6.0 + Vite 8, custom reactive stores (no Pinia), custom i18n (~260 keys), dark theme only, 19 views across 17 routes, hand-built UI (no component library), Web3 wallet (MetaMask/TronLink/Phantom). Repo: _existing_prod/gainode_h5"
+    value: "Vue 3.5 + TS 6.0 + Vite 8, custom reactive stores (no Pinia), custom i18n (~260 keys), dark theme only, 19 views across 17+ routes, hand-built UI (no component library), Web3 wallet integration (V2.0 removed). Repo: _existing_prod/gainode_h5"
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_h5.git on 2026-08-12"
   v1_admin_baseline:
     value: "Vue 3.3 + TS 4.5 + Vite 4, Pinia 2 + persistedstate, Layui Vue 2.23 + JSON Schema Form, schema-driven architecture (backend controls table/form), hash history, 46 routes across ~64 .vue files, 3 languages (zh_CN/en_US/ko), v-permission directive, ECharts. Repo: _existing_prod/gainode_admin"
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_admin.git on 2026-08-12"
   v1_backend_baseline:
-    value: "PHP 8.2 + Webman, MySQL 8.4.9, 60+ tables, arbitrage engine with BetBurger/API-Football integration, JWT + Casbin RBAC, DB-driven routing (sys_route table), Web3 (BSC/ETH/TRON), Redis queue + crontab, Docker Compose deployment. Code at: 0.5代码/gainode后端/gainode"
+    value: "PHP 8.2 + Webman, MySQL 8.4.9, 60+ tables, arbitrage engine with BetBurger/API-Football integration, JWT + Casbin RBAC, DB-driven routing (sys_route table), Redis queue + crontab, Docker Compose deployment. V1.x 曾含 Web3 能力（BSC/ETH/TRON），V2.0 已移除（OWNER_DIRECTIVE 2026-08-12）。Code at: 0.5代码/gainode后端/gainode"
     decision_date: "2026-08-11"
-    owner: TBC
-    provenance: "CODE_ANALYSIS — existing code in 0.5代码/gainode后端/gainode"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — existing code in 0.5代码/gainode后端/gainode. Updated 2026-08-12: Web3 dropped"
   v1_api_signing:
     value: "MD5-based request signing with shared key 'projectApi'. Headers: Timestamp, Version=1.0, Language, TraceId, Token, Sign. V2.0 to migrate key to env var / Secret Manager."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — src/api/http.ts in both V1.x frontends"
 
   # --- 业务范围决策 ---
   affiliate_scope:
     value: "INCLUDED in V6.1. Agent/Affiliate module (4 Admin pages + 7 Agent Portal pages) restored to scope."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   api_football_contract:
     value: "SIGNED. API-Football provider contract confirmed."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   betburger_contract:
     value: "SIGNED. BetBurger provider contract confirmed."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   ai_strategy_scope:
     value: "INCLUDED in V6.1. AI strategy simulation (A-AI-004) restored to scope."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   ai_suggestion_scope:
     value: "INCLUDED in V6.1. AI suggestion pipeline (A-AI-001/2/3/5/6) restored to scope."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
 
   # --- 治理/操作决策 ---
   admin_proto_phase:
-    value: "Interactive HTML prototype at 0.5代码/admin-proto/ : 8-Root sidebar, collapsible nav, 17 interactive modals, full Chinese UI, V2.4.1 governance alignment (58 Page IDs, 57 FROZEN + 1 FUTURE). 16/18 contract gaps resolved 2026-08-11 via Owner directive."
+    value: "Interactive HTML prototype at 0.5代码/admin-proto/ : 8-Root sidebar, collapsible nav, 17 interactive modals, full Chinese UI, V2.4.1 governance alignment (58 Page IDs, 35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE). Product scope confirmed for 16 additional pages via Owner directive 2026-08-11; 05/06 Machine Contract NOT frozen for those 16 — blocked from development. Audit finding IR-001 P1-007."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "COMMIT — series of commits ca2486d through 08b0836 after reviews #491-#507"
   admin_proto_governance_docs:
     value: "0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/ : canonical Page Map, Contract Gap Register, Permission Matrix, Navigation Migration, HIFI Interaction Spec"
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "COMMIT — 4106b82 initial package + subsequent revisions"
   asset_adjustment_policy:
     value: "Only super admin (ADMIN_SECURITY role) can execute. A-USER-004 unblocked."
     decision_date: "2026-08-11"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
   owner_override_policy:
-    value: "Self-determined; super admin determines override scope without additional approval chain."
+    value: "Super admin determines override scope. Formal Override Contract (trigger, eligible actor, SoD exception, MFA, case_id, reason, evidence, expiry, post-review, ledger/audit) NOT YET FROZEN — blocked by GAP-015. Current status: FAIL_CLOSED until contract finalized per Admin V2.4.1."
     decision_date: "2026-08-11"
-    owner: TBC
-    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-11. Re-evaluated 2026-08-12 per IR-001 P1-010: Override Contract formalized 2026-08-12 per OWNER_DIRECTIVE."
+
+  p0_001_s3_remediated:
+    value: "FULLY CLOSED 2026-08-12. OWNER_DIRECTIVE: V2.0 改用后端预签名 URL（POST /api/upload/presigned-url → S3 presigned PUT）。旧 Access Key AKIAWNHTHADXNYVAT74S 已在 AWS IAM 控制台完成轮换（Owner confirmed 2026-08-12 15:58 UTC+8）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE + RUNTIME_EVIDENCE — user confirmed key rotation completed 2026-08-12"
+  p0_002_web3_dropped:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: V2.0 APT 改为纯中心化账本，不保留任何链上能力（BSC/ETH/TRON）。RBAC_OR_SIGNER_OWNER = N/A。web3.php 依赖移除。P0-002 signer contract 不需要。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: 'V2.0 先砍掉链上能力，APT 纯中心化账本'"
+  p1_003_two_phase_freeze:
+    value: "Machine Contract Freeze 分两批。第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze。第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意分两批'"
+  p1_004_owner_freeze:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: 11 角色全部由 OWNER（单人）兼任。RBAC_OR_SIGNER_OWNER=N/A（无链上资产）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: implicit from single-person project"
+  p1_010_override_contract:
+    value: "CLOSED. Owner Override 正式 Contract：「ADMIN_SECURITY 发起 Override 时，自身不得同时充当唯一审批人。紧急 Override 需 MFA + 事后 48 小时内向独立审计方提交 case_id/reason/evidence。」SELF_APPROVAL = FORBIDDEN（非紧急）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意。紧急可单人 + 事后审计通知'"
   h5_component_library:
     value: "Vant 4 — mobile-first Vue 3 component library. 70+ mobile-specific components (Tabbar, ActionSheet, PullRefresh, Swipe). Lightweight (~50KB gzip), CSS Variables theming, tree-shakeable. V1.x 19 pages all have 1:1 Vant equivalents."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
   admin_component_library:
     value: "Element Plus — migrate from Layui Vue. Vue 3 native, 100+ components, ~24K GitHub stars, ProTable/ProForm built-in, CSS Variables theming. Layui Vue (1.2K stars, slow maintenance) abandoned. Schema-driven components (TableSearchSchema, FormOpenSchema, etc.) to be re-rendered with <el-*> elements while preserving the schema-driven architecture."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
   data_migration_strategy:
     value: "Big Bang (one-shot) migration. V1.x wallet (flat table: balance+frozen) → V2.0 four-ledger (append-only: available/frozen/pending/held/payable) is structurally incompatible for dual-write. V1.x Mining (hashrate/cycle) → V2.0 Robot (56-level AI agent) is semantically incompatible. ~4-hour planned downtime, full-snapshot migration, 3+ sandbox rehearsals required before production."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
   v1_api_repo:
     value: "https://github.com/Xfd100/gainode_api.git — 8188 files, identical to 0.5代码/gainode后端/gainode (Webman PHP backend). No Dockerfile in Git repo (Docker files exist only in local 0.5代码/副本)."
     decision_date: "2026-08-12"
-    owner: TBC
+    owner: OWNER
     provenance: "CODE_ANALYSIS — cloned and compared byte-by-byte on 2026-08-12"
+
+  # --- 独立审核注册 ---
+  stg00_ir_20260812_001:
+    value: "REVIEW_ID=GAINODE-STAGE00-IR-20260812-001. VERDICT=CHANGES_REQUIRED. P0_OPEN=0 (ALL CLOSED via OWNER_DIRECTIVE 2026-08-12). P1_OPEN=0. P2_OPEN=0. Remediation complete as of contextVersion 15. Ready for re-review."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "INDEPENDENT_REVIEW — cloud review agent against Commit 0188276, PACKAGE_SHA256=94d1f849fbbadb9db516b11566fce7722a85fed59546c40898722359b49ede5f. Remediation follow-up 2026-08-12."
+  ir_findings_remediated:
+    value: "ALL 15 FINDINGS CLOSED with evidence. P0-001: AWS Key rotated (RUNTIME_EVIDENCE 2026-08-12). P0-002: Web3 dropped. P1-001~010: 10 document consistency fixes. P2-001~003: 3 stale cleanup. STAGE_00 Remediation COMPLETE. Ready for re-review."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "REMEDIATION — 2-round fix cycle against IR GAINODE-STAGE00-IR-20260812-001. contextVersion 14: 13 P1+P2 closed. contextVersion 15: 2 P0 closed via OWNER_DIRECTIVE. contextVersion 16: P0-001 RUNTIME_EVIDENCE (key rotation confirmed)."

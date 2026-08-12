@@ -26,7 +26,7 @@ E:\github\sports\
 │   │   ├── process/      # 长驻进程（ArbitrageTask / CrontabTask / ChannelServer / Pusher）
 │   │   ├── config/       # 配置文件
 │   │   └── sql/database.sql  # 60+ 张表
-│   ├── admin-proto/      # Admin 交互原型（HTML/CSS/JS，57/58 页可开发）
+│   ├── admin-proto/      # Admin 交互原型（HTML/CSS/JS，35 页 FROZEN + 23 待冻结）
 │   └── *.md              # 设计文档
 ├── _existing_prod/                                        # V1.x 生产代码镜像（只读，升级基线）
 │   ├── gainode_h5/       # 来源：https://github.com/Xfd100/gainode_h5.git
@@ -223,7 +223,7 @@ V2.0 需新增的 API 路由前缀：`/v1/api/`（C 端）、`/v1/`（Admin）�
 |---|---|---|---|
 | **Mobile/H5** | `gainode_h5` (19 views) | Vue 3 + TS，44 页 P0 | 重构升级 + 25 新页面 |
 | **App** | 无 | Flutter（V2 全新） | 从零开始 |
-| **Admin Web** | `gainode_admin` (46 routes) | Vue 3 + TS，58 Page ID | 重构升级 + 12 新页面 |
+| **Admin Web** | `gainode_admin` (46 routes) | Vue 3 + TS，58 Page ID，35 CONTRACT_FROZEN | 重构升级 + 23 新页面（含 22 CONTRACT_GAP 冻结后） |
 | **Auth** | 手机+邮箱登录，JWT | JWT + MFA/OTP | 缺 MFA/OTP |
 | **KYC** | `member_user_kyc` 表 | 多级状态机 | 缺多级状态机 |
 | **AI 经济引擎** | arbitrage (Signal/Arbitrage) | BetBurger + API-Football（合同已签） | 改造为内部引擎（方案 B） |
@@ -266,7 +266,8 @@ V2.0 扩展：
 | **通知渠道** | SwiftMailer/Smsbao/Telegram | 需统一 Outbox 框架 | 改造 |
 | **汇率源** | 待确认 | APT 参考估值 | 新增 |
 | **KYC 证据服务** | 待确认 | 身份验证 | 扩展 |
-| **区块链节点** | BSC/ETH/TRON RPC 已配置 | 链上转账、USDT 合约交互 | 不变 |
+| **BetBurger** | BetBurger 供应商 API Key | 套利信号数据 | 合同已签署 |
+| | | | **V2.0 不含区块链依赖**（OWNER_DIRECTIVE 2026-08-12） |
 
 ## 9. API 约定
 

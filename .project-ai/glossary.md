@@ -84,31 +84,30 @@
 | **ConsentReceipt** | 持久领域实体 | 用户确认回执 |
 | **MfaEnrollment** | 持久领域实体 | MFA 注册 |
 | **AssetAdjustmentProposal** | 工作流对象 | 资产调整提案（仅 ADMIN_SECURITY 可执行） |
-| **Agent** | 持久领域实体 | 代理 `pending / active / suspended / terminated` |
-| **Referral** | 持久领域实体 | 推荐关系 `pending / active / settled / revoked` |
-| **AgentEarning** | 持久领域实体 | 代理收益 `pending / calculated / payable / claimed` |
-| **AISignal** | 领域实体 | AI 信号 `generated / validated / published / rejected` |
-| **AIRecommendation** | 领域实体 | AI 运营建议 `draft / reviewed / published / dismissed` |
-| **SimulationRun** | 工作流对象 | AI 策略模拟 `queued / running / completed / failed / cancelled` |
+| **Agent** | 持久领域实体 | 代理。05: NOT DEFINED — 状态枚举 TBC，等待 Contract Freeze |
+| **Referral** | 持久领域实体 | 推荐关系。05: NOT DEFINED — 状态枚举 TBC |
+| **AgentEarning** | 持久领域实体 | 代理收益。05: NOT DEFINED — 状态枚举 TBC |
+| **AISignal** | 领域实体 | AI 信号。05: NOT DEFINED — 状态枚举 TBC |
+| **AIRecommendation** | 领域实体 | AI 运营建议。05: NOT DEFINED — 状态枚举 TBC |
+| **SimulationRun** | 工作流对象 | AI 策略模拟。05: NOT DEFINED — 状态枚举 TBC |
 
-### 状态定义
+### 状态定义（所有 Domain State 依法来自 05 §4）
 
-| 域 | 状态 |
-|------|------|
-| KYC | pending / under_review / approved / rejected / expired |
-| Robot | idle / running / upgrading / paused / disabled |
-| Prediction Fixture | scheduled / open / locked / in_settlement / settled / cancelled |
-| Prediction Order | pending / confirmed / settled / refunded / corrected |
-| OTC Order | open / partial_filled / filled / cancelled / expired / disputed |
-| Power | available / frozen / consumed |
-| Auth Session | active / expired / revoked |
-| Approval | draft / pending_review / approved / rejected / executed / rolled_back |
-| Parameter Release | draft / pending_approval / published / rolled_back |
-| Agent | pending / active / suspended / terminated |
-| Referral | pending / active / settled / revoked |
-| AgentEarning | pending / calculated / payable / claimed |
-| AISignal | generated / validated / published / rejected |
-| SimulationRun | queued / running / completed / failed / cancelled |
+| 域 | Canonical State | 05 行号 |
+|------|------|------|
+| Robot | inactive / active / cooling / review / restricted / paused | 05:740 |
+| AI Reward | candidate / held / pending_claim / claiming / claimed / expired_returned / review / reversed | 05:743 |
+| Ledger Entry | pending / posted / reversed / disputed | 05:746 |
+| Market | draft / open / closing / locked / awaiting_result / settlement / settled / void / exception | 05:749 |
+| Prediction Order | submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected | 05:758 |
+| OTC Order | draft / review / matching / partial / completed / cancelled / expired / rejected / disputed | 05:761 |
+| Power | 无 canonical status enum — 05 使用 scalar fields: available, frozen, consumed_period | 05:151 |
+| KYC | TBC — 不在 05 canon。需从 Admin Governance 或独立 Contract 定义 | — |
+| Auth Session | active / expired / revoked | — |
+| Approval | sub_draft_submitted / pending_review / approved_awaiting_execution / rejected / executed / rolled_back | 05:reusable-def |
+| Parameter Release | definition / candidate / approved / active / retired | 05:reusable-def |
+| Affiliate/Agent | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
+| AI Signal/Rec./Sim. | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
 
 ### 经济术语
 

@@ -67,58 +67,76 @@ sql/
 
 ### 状态机设计原则
 
+> **规则：Domain State 全部来自 `Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md` canonical enum。无自创状态。**
+
 每个实体必须有完整的状态机：
 
 - **状态转换图**：定义所有合法状态转换路径
 - **转换条件**：每个转换的前置条件和校验规则
 - **转换副作用**：每次转换触发的 Event / 日志 / 通知
-- **不可逆状态**：标记哪些状态不可回退（如 settled、burned）
+- **不可逆状态**：标记哪些状态不可回退（如 settled、void）
 
-### 关键领域模型（按模块）
+### 关键领域模型（按模块）— ALL FROM 05 CANONICAL
 
-#### Robot
+#### Robot（05 §4 canonical）
 ```
-Robot: [pending] → active → upgrading → active | paused | disabled
-Reward: [pending] → calculated → payable → claimed | expired
-UpgradeOrder: [pending] → payment_confirmed → completed | failed
+Robot: inactive / active / cooling / review / restricted / paused
+```
+- cooling: 连续运行后的冷却期，禁止立即重启
+- review: 触发风控/异常时的审计锁定
+- restricted: 策略受限运行（部分功能禁用）
+- paused: 管理员手动暂停
+
+#### AI Reward（05 §4 canonical）
+```
+AI Reward: candidate / held / pending_claim / claiming / claimed / expired_returned / review / reversed
+```
+- candidate: 奖励候选（预算内、待确认）
+- held: 已记账持有（不可提）
+- pending_claim: 进入领取窗口
+- claiming: 领取处理中（防重）
+- expired_returned: 过期退回预算池
+- review: 风控冻结审计中
+- reversed: 冲正（非业务取消，是财务纠正，生成 reversal entry）
+
+#### APT Ledger（05 §4 canonical）
+```
+LedgerEntry: pending / posted / reversed / disputed
+```
+四账分离模型（05 AptAccount Object）:
+1. **APT 数量账**（AptAccount：balance_apt_i + balance_apt_c + frozen_apt_i + frozen_apt_c）
+2. **APT 参考估值账**（Reference Price/Valuation，独立对象）
+3. **功能货币收入账**（Functional Currency Revenue，独立边界）
+4. **Reward / 预算账**（Budget allocation + consumption，独立边界）
+
+> **P1-009 FIX**: 前版本误将"APT 数量账的 internal bucket"描述成"四账"。数量账的 `available/frozen/pending/held/payable/claimed/burned` 是单账内部的 bucket，不是四账分离模型。
+
+所有 Ledger 为 append-only。更正（撤账）通过 reversal 分录实现，不得修改原文。
+
+#### Prediction（05 §4 canonical）
+```
+Market: draft / open / closing / locked / awaiting_result / settlement / settled / void / exception
+PredictionOrder: submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected
+```
+- RESULT_UNKNOWN must be separated as a PredictionResult enum (WON/LOST/DRAW/CANCELLED)，不得混入 Order 状态
+- correcting/corrected: 纠错状态流，仅在 settlement error 触发
+
+#### OTC（05 §4 canonical — VERIFIED: matches 05）
+```
+OtcOrder: draft / review / matching / partial / completed / cancelled / expired / rejected / disputed
 ```
 
-#### APT Ledger
-```
-LedgerEntry: append-only, reversal_of → reversal_entry
-四账：available | frozen | pending | held | payable | claimed | burned
-```
+#### Power（05 无 canonical state machine）
+PowerPosition 对象（05:151-166）使用 scalar fields（available, frozen, consumed_period），无单独 status enum。
+- **PREREQUISITE**: 若 V6.1 业务需要显式 Power state machine，应先冻结进 05 再实现。当前阶段仅建 PowerPosition 对象骨架和 Power Ledger。
 
-#### Prediction
-```
-Market: [upcoming] → open → locked → in_progress → completed → settled | cancelled | abandoned
-PredictionOrder: [pending] → confirmed → settled(won|lost) | refunded | corrected
-```
+#### Affiliate / Agent（05: NOT DEFINED）
+- **PREREQUISITE**: Affiliate/Agent 对象不在 05 canonical 定义中。需先完成 Contract Freeze（05 新增 §Agent 定义）再在 DB 中创建对应对象。
+- 当前阶段：仅建 `agent`、`referral`、`agent_earning` 三张表的结构骨架（字段 TBC），枚举列作为 VARCHAR 暂存，等待 05 冻结后改为 ENUM。
 
-#### OTC
-```
-OtcOrder: [draft] → review → matching → partial → completed | cancelled | expired | rejected | disputed
-```
-
-#### Power
-```
-PowerAccount: balance tracking, append-only
-PowerTransaction: consume | recover | convert
-```
-
-#### Affiliate / Agent
-```
-Agent: [pending] → active → suspended | terminated
-Referral: [pending] → active → settled | revoked
-AgentEarning: [pending] → calculated → payable → claimed
-```
-
-#### AI 运营
-```
-AISignal: generated → validated → published | rejected
-AIRecommendation: draft → reviewed → published | dismissed
-SimulationRun: queued → running → completed | failed | cancelled
-```
+#### AI 运营（05: NOT DEFINED）
+- **PREREQUISITE**: AI Signal/Recommendation/Simulation 不在 05 中。需先冻结 AI 运营 Contract。
+- 当前阶段：仅建对象骨架表，所有状态列标记为 TBC，功能 fail-closed。
 
 ## 不可做
 
