@@ -30,7 +30,8 @@ E:\github\sports\
 │   └── *.md              # 设计文档
 ├── _existing_prod/                                        # V1.x 生产代码镜像（只读，升级基线）
 │   ├── gainode_h5/       # 来源：https://github.com/Xfd100/gainode_h5.git
-│   │   │                   Vue 3.5 + TS 6.0 + Vite 8，19 views / 17 routes
+│   │   │                   Vue 3.5 + TS 6.0 + Vite 8，19 views / 22 routes
+│   │   │                   （计数详见 v1-baseline-review.md §3.2）
 │   └── gainode_admin/    # 来源：https://github.com/Xfd100/gainode_admin.git
 │                           Vue 3.3 + TS 4.5 + Vite 4 + Layui Vue + Pinia 2，46 routes
 ├── 通过agent开发前规则/                                   # 外部治理规则（只读）

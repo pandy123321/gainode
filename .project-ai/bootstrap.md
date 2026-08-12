@@ -58,9 +58,9 @@ EXECUTOR_REVIEWER_SEPARATION = MANDATORY
 
 ```text
 CURRENT_PHASE = PRE_DEVELOPMENT
-CURRENT_STAGE = STAGE-00_PLANNING_AND_FREEZE
+CURRENT_STAGE = STAGE-01_BACKEND_DOMAIN_OBJECTS
 STAGE_STATUS = IN_PROGRESS
-FROZEN_FOR_DEVELOPMENT = NO
+FROZEN_FOR_DEVELOPMENT = YES
 DEVELOPMENT_START = NO
 DEPLOYMENT_APPROVAL = NO
 PRODUCTION = NO-GO
@@ -315,8 +315,8 @@ PENDING_DEPENDENCIES = H5/Admin/App exact version lock + SBOM, 测试框架（Vi
 [ ] Environment Freeze — STAGE-01 并行配置 dev container + .env template
 [x] Framework/Dependencies (H5: Vant 4, Admin: Element Plus; exact versions pending)
 [x] Rules/Decision Register (.project-ai/manifest.yaml decisionSources)
-[ ] Self Review (STAGE-00 Remediation 提交时一并执行)
-[x] Independent Review (GAINODE-STAGE00-IR-20260812-001 已提交 → CHANGES_REQUIRED → 本轮 Remediation 关闭 13/15 Finding)
+[x] Self Review（STAGE-00 Self Review 已完成 2026-08-12，详见 stg00-self-review.md）
+[x] Independent Review（GAINODE-STAGE00-IR-20260812-001 已提交 → CHANGES_REQUIRED → 本轮 Remediation 关闭 13/15 Finding → GAINODE-STAGE00-IR-20260812-002 CONDITIONAL_APPROVAL（1 residual P3 documented））
 [x] Responsible Owner Freeze (bootstrap.md Section 2 — OWNER_DIRECTIVE 2026-08-12：单人兼任 11 角色，Signer=N/A)
 [x] Runtime Gate Plan (bootstrap.md Section 20)
 [x] Stage Plan (STAGE-00_PLANNING_AND_FREEZE 已定义，详见下文 Section 16)
@@ -496,7 +496,7 @@ OUT_OF_SCOPE_HUMAN_CONFIRMATION_REQUIRED
 ```text
 OWNER_FREEZE_REQUIRED = YES
 OWNER_FREEZE_FILE = .project-ai/bootstrap.md（Section 2）
-OWNER_FREEZE_STATUS = PENDING（待用户填入所有 Owner 字段）
+OWNER_FREEZE_STATUS = COMPLETE # 11 roles all assigned to OWNER (single-owner project, verified by IR-002)
 ```
 
 每项 Signoff 必须记录 Owner / Date / Scope / Risk / Exception / Change Process。

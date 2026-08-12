@@ -30,7 +30,7 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 - **技术栈**：Vue 3.5 + TypeScript 6.0 + Vite 8，无 Pinia（自定义 reactive stores），无 vue-i18n（自定义 ~260 keys），无组件库（全部手写），无测试，无 .env
 - **架构问题**：S3 密钥硬编码（已决策：V2 改用后端预签名 URL），`package.json` name 为 "quiz"（非 "gainode"），ClaimCenterView 含硬编码 mock 数据
 - **优点**：Vue 3 Composition API 规范，统一暗色主题，良好 API 模块分层，完整的无线滚动模式，3 链钱包集成（MetaMask/TronLink/Phantom）
-- **页面**：19 个视图 / 17 条路由，4 Tab（Home/Robot/Team/My）+ 15 独立页
+- **页面**：19 个视图 / 22 条路由，4 Tab（Home/Robot/Team/My）+ 17 独立页
 
 #### Admin (gainode_admin)
 - **技术栈**：Vue 3.3 + TypeScript 4.5 + Vite 4，Pinia 2（persistedstate），Layui Vue 2.23 组件库，Schema 驱动架构（后端下发表格列/表单字段定义），Hash History 路由，3 语言（zh_CN/en_US/ko），v-permission 指令，ECharts
