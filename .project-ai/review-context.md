@@ -1,7 +1,6 @@
 # Review Context — Compact Review Index / Critical Governance Summary
 
-> **Purpose**: Compact review index for 60K context budget. Does NOT replace full source docs.
-> Unlisted rules NOT invalidated — full source documents remain authoritative.
+> **Purpose**: Compact review index for 60K context. Does NOT replace full source docs. Unlisted rules NOT invalidated.
 > - Architecture Freeze → `.project-ai/architecture.md`
 > - Review Rules → `.project-ai/rules/review.md`
 > - V1 Baseline → `.project-ai/v1-baseline-review.md`（Lazy-load: V1.x migration/regression/legacy security）
@@ -19,7 +18,8 @@ Any code review MUST load the matching full source(s) below:
 | Diff Domain | Required Full Source(s) |
 |---|---|
 | Any code review | `rules/review.md` — read chapters matching changed area |
-| C-end commits | `rules/review.md` §前端审核清单 + §Vue 3 + TS |
+| C-end commits | `rules/review.md` §前端审核清单 + §Vue 3 + TS + `architecture.md` |
+| Trust Boundary / internal→external exposure | `architecture.md` |
 | Admin commits | `rules/review.md` §前端审核清单 + §V2.4.1 治理文档审核 |
 | Flutter (Dart) | `rules/review.md` §Flutter 审核清单 |
 | Backend (PHP/API/Service) | `rules/review.md` §后端审核清单 + `architecture.md` |
@@ -46,35 +46,27 @@ bootstrap.md > review-context.md > context.md > glossary.md
 ## Architecture Freeze (from architecture.md)
 
 ### Tech Stack
-- Backend: PHP ≥8.2 + Webman (Workerman), MySQL 8.4.9, illuminate/database ORM, Redis 3 instances
-- Frontend H5: Vue 3 + TS + Vant 4 + Pinia + vue-i18n
-- Frontend Admin: Vue 3 + TS + Element Plus + Pinia
+- Backend: PHP ≥8.2 + Webman, MySQL 8.4.9, illuminate/database, Redis 3 instances
+- H5: Vue 3 + TS + Vant 4 + Pinia + vue-i18n
+- Admin: Vue 3 + TS + Element Plus + Pinia
 - App: Flutter (Dart 3+, null safety)
-- Auth: JWT (firebase/php-jwt) + Casbin RBAC
+- Auth: JWT + Casbin RBAC
 
 ### Module Order (STAGE-01)
 Auth/KYC → User/Eligibility → Robot/Reward → APT Ledger → Prediction → OTC/Power → Affiliate/Agent → AI Operations → Approval/Parameter → Support/Audit
 
-### Key Path Constraints
-- Backend: `library/model/{module}/`, `library/dao/{module}/`, `library/service/{module}/`
-- All Service extends `support\extend\Service`, all Model extends `support\extend\Model`
-- API routes via `sys_route` table (never edit `config/route/` directly)
-- DDL: `sql/YYYYMMDD_description.sql`
+### Key Paths
+- Backend: `library/model/`, `library/dao/`, `library/service/` — all extend support\extend
+- API routes via `sys_route` table; DDL: `sql/YYYYMMDD_description.sql`
 
 ### 13 Forbidden Actions (from architecture.md §11)
-1. Frontend: NO self-determination of eligibility (must read allowed_actions/entitlement)
-2. Frontend: NO JS float for asset calculations
-3. Backend: NO overwrite/delete ledger history (use reversal append-only)
-4. Parameters: NO bypass of Approval workflow for changes
-5. Business state: NO rollback on notification failure
-6. Self-approval: SAME actor must not approve own request (non-emergency)
-7. UI copy: NO APR/APY/fixed-return/guaranteed/gambling vocabulary
-8. TBC parameters: NO local default value fill for production
-9. Routes: NO deletion of `sys_route` DB records
-10. Authorization: MUST use full formula, not pure RBAC
-11. Production: NO enable `file_monitor` process
-12. Security: NO hardcoded API signing keys, AES keys, S3 credentials
-13. Data migration: NO direct modification of V1.x production data before migration plan frozen
+1. Frontend NO self-determined eligibility (must use allowed_actions/entitlement)
+2. NO JS float for asset calc. 3. NO overwrite/delete ledger (reversal append-only)
+4. NO bypass Approval for param changes. 5. NO rollback on notification failure
+6. NO self-approve (non-emergency). 7. NO APR/APY/gambling vocab in UI
+8. NO local defaults for TBC params. 9. NO delete sys_route records
+10. Authorization MUST use full formula. 11. NO file_monitor in production
+12. NO hardcoded signing/AES/S3 keys. 13. NO modify V1.x data before migration frozen
 
 ### Stage Boundaries
 - STAGE-00: see bootstrap.md (IR-002 verdict: CONDITIONAL_APPROVAL, 1 P3 residual)
@@ -86,21 +78,19 @@ Auth/KYC → User/Eligibility → Robot/Reward → APT Ledger → Prediction →
 ## Critical Governance Summary (from rules/review.md)
 
 ### Review Principles
-- Evidence-based; P0/P1 must be fixed and confirmed closed
-- Every review must have explicit Verdict: APPROVED / CHANGES_REQUIRED / APPROVED_WITH_CONDITIONS
-- Review only current diff, do not assume uncommitted code
+- Evidence-based; P0/P1 must be fixed and closed; explicit Verdict required (APPROVED / CHANGES_REQUIRED / APPROVED_WITH_CONDITIONS)
+- Review only current diff
 
 ### Authority
-- Single requirement source: `Gainode_Development_Ready_V6.1_Latest/01–08`
-- Conflict resolution: Product > Economics > Mobile > Admin > Data/Permissions/API > Parameters > Dev/Acceptance > Visual/I18N > i18n strings > Logo
-- Never derive requirements from history docs / old Figma / old code
+- Single source: `Gainode_Development_Ready_V6.1_Latest/01–08`
+- Conflict order: Product > Economics > Mobile > Admin > Data/Permissions/API > Parameters > Dev/Acceptance > Visual/I18N > i18n > Logo
 
 ### High-Risk Review Gates
-- **Ledger**: APT/Power ledger append-only, reversal via追加, idempotency verified
-- **State Machine**: All domain states from 05 canonical enum; no self-invented states; `RESULT_UNKNOWN` only at request-resolution layer
-- **Authorization**: Full formula (`role + data_scope + object_state + allowed_actions + risk_policy + SoD`).  Non-emergency: SELF_APPROVAL = FORBIDDEN (different Actor required). Emergency (OWNER_DIRECTIVE 2026-08-12): ADMIN_SECURITY single person + MFA + 48h audit submission (case_id/reason/evidence).
-- **Parameters**: TBC values stay null/closed in production; ParameterRelease: saved≠effective, Approved≠Active
-- **Notifications**: Outbox pattern; business state must not rollback on notification failure
+- **Ledger**: APT/Power append-only, reversal via追加, idempotency verified
+- **State Machine**: All domain states from 05 canonical enum; no self-invented states
+- **Authorization**: Full formula (`canonical_role + data_scope + object_state + allowed_actions + risk_policy + SoD`). Non-emergency: SELF_APPROVAL = FORBIDDEN (different Actor required). Emergency (OWNER_DIRECTIVE 2026-08-12): ADMIN_SECURITY single person + MFA + 48h audit (case_id/reason/evidence).
+- **Parameters**: TBC null/closed in production; ParameterRelease: saved≠effective, Approved≠Active
+- **Notifications**: Outbox pattern; business state NOT rollback on notification failure
 
 ### Review Forbidden Actions
 - Do not judge business rules from memory or guess
