@@ -5,6 +5,7 @@ status: ACTIVE
 enabledDocuments:
   - bootstrap.md
   - context.md
+  - review-context.md
   - glossary.md
 excludedPaths:
   - .env
