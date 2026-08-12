@@ -5,11 +5,7 @@ status: ACTIVE
 enabledDocuments:
   - bootstrap.md
   - context.md
-  - architecture.md
-  - v1-baseline-review.md
   - glossary.md
-  - rules/coding.md
-  - rules/review.md
 excludedPaths:
   - .env
   - application-prod.yml
