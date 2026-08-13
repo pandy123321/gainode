@@ -3,7 +3,7 @@
 ## 当前架构（基于规范推断）
 
 ```
-C 端 Mobile H5  ←REST/JSON→  API Gateway  →  Business Services  →  DB + Blockchain
+C 端 Mobile H5  ←REST/JSON→  API Gateway  →  Business Services  →  DB（MySQL 8.4.9，无链上依赖）
 Admin Web (1440px)
 ```
 

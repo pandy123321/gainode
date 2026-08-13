@@ -77,7 +77,7 @@
 ### Approval/Parameter
 - [ ] ApprovalWorkflow 模型/DAO/Service 已创建
 - [ ] Actor-level SoD 已强制（`candidate.created_by_actor_id != approval.approved_by_actor_id`）
-- [ ] ParameterRelease 版本化生命周期已实现（Definition → Candidate → Approved → Active）
+- [ ] ParameterRelease 版本化生命周期已实现（canonical: draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived。05:854-865）
 - [ ] Snapshot 机制已实现
 - [ ] `sql/` 对应 DDL 文件已创建
 

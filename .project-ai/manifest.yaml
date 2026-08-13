@@ -1,7 +1,9 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 17
+contextVersion: 19
 status: ACTIVE
+STAGE_00_COMPLETE: true
+STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
 enabledDocuments:
   - bootstrap.md
   - context.md

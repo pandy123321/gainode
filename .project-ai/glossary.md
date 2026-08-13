@@ -105,7 +105,7 @@
 | KYC | TBC — 不在 05 canon。需从 Admin Governance 或独立 Contract 定义 | — |
 | Auth Session | active / expired / revoked | — |
 | Approval | sub_draft_submitted / pending_review / approved_awaiting_execution / rejected / executed / rolled_back | 05:reusable-def |
-| Parameter Release | definition / candidate / approved / active / retired | 05:reusable-def |
+| Parameter Release | draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived | 05:854-865 |
 | Affiliate/Agent | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
 | AI Signal/Rec./Sim. | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
 
@@ -159,7 +159,7 @@
 
 ## 基于代码的推断
 - 遗留 PHP 后端的 60 张 MySQL 表定义了完整的数据域
-- 遗留代码集成了 Tron/BSC/Ethereum 三条链
+- 遗留代码曾集成 Tron/BSC/Ethereum 三条链（V2.0 已移除。OWNER_DIRECTIVE 2026-08-12）
 - ORM 层使用 illuminate/database（Laravel Eloquent），非 ThinkPHP（来源：`composer.json` 依赖清单）
 
 ## 待确认事项

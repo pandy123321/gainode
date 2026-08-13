@@ -44,10 +44,14 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 
 ### 开发阶段
 
-项目 V6.1 基线就绪。Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、35/58 可开发、22 CONTRACT_GAP + 1 FUTURE、17 个交互式 Modal、全部中文 UI）。
+**STAGE-00：Planning & Document Freeze — 已完成。** Independent Review 第二轮（GAINODE-STAGE00-IR-20260812-002）结果 = **CONDITIONAL_APPROVAL**。15 项 Finding 全部闭合（0 P0 / 0 P1 / 0 blocking P2）。STAGE-01 已授权启动。Owner Freeze 完成（11/11 角色已指派）。
+
+Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE、17 个交互式 Modal、全部中文 UI）。
 
 - V1.x → V2.0 迁移策略：**增量升级**（非重写）。后端在现有代码上扩展新模块；前端 H5/Admin 基于 V1.x 代码重构升级。
-- Development / Sandbox：允许立即开始（`DEVELOPMENT_START = NO`，需 Owner 激活）。
+- STAGE-01 Backend Domain Objects：已创建 task（TASK-20260812-002），10 模块 Model/DAO/Service 骨架搭建。
+- Machine Contract 第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze — 待执行。
+- Machine Contract 第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
 
 ### 技术栈（已确认）
@@ -180,10 +184,9 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 | Affiliate 范围 | 纳入 V6.1（4+7 页） |
 | API-Football/BetBurger 合同 | 均已签署 |
 | 资产调整权限 | 仅 ADMIN_SECURITY 可执行 |
-| Owner Override | 超级管理员自行决定，保留完整审计 |
+| Owner Override | 紧急：ADMIN_SECURITY 单人可执行，需 MFA + 48 小时内向独立审计方提交 case_id/reason/evidence。非紧急：SELF_APPROVAL = FORBIDDEN，需第二人审批 |
 | AI 策略模拟/建议管线 | 纳入 V6.1 |
 | Contract Gap | 35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE（Owner 确认 16 页入产品范围，Machine Contract 未冻结，≠ 可开发） |
-| Owner Override | 紧急：ADMIN_SECURITY 单人可执行，需 MFA + 48 小时内向独立审计方提交 case_id/reason/evidence。非紧急：SELF_APPROVAL = FORBIDDEN，需第二人审批 |
 | V1.x 生产代码 | 作为 V2.0 升级基线，增量重构（非重写） |
 | H5 组件库 | Vant 4 |
 | Admin 组件库 | Element Plus（迁自 Layui Vue） |

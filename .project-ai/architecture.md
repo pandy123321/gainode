@@ -336,7 +336,7 @@ V2.0 扩展：
 - [ ] 通知渠道 PUSH/SMS 服务商
 - [ ] 汇率源、KYC 证据服务商
 - [ ] API Gateway 实现方案
-- [ ] 区块链链确认（Tron/BSC/Ethereum 全保留？）
+- [x] 区块链链确认（V2.0 纯中心化账本，链上能力已移除。OWNER_DIRECTIVE 2026-08-12）
 - [x] H5 组件库：Vant 4（OWNER_DIRECTIVE 2026-08-12）
 - [x] Admin 组件库：Element Plus（OWNER_DIRECTIVE 2026-08-12）
 - [x] 数据迁移策略：一刀切 Big Bang（OWNER_DIRECTIVE 2026-08-12）

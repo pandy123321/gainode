@@ -73,7 +73,7 @@ PRODUCTION = NO-GO
 ```text
 HIGH_RISK_SYSTEM = YES
 FUNDS_OR_FINANCIAL_LOGIC = YES
-BLOCKCHAIN_OR_SIGNER = YES
+BLOCKCHAIN_OR_SIGNER = NO（V2.0 纯中心化账本，Web3 能力已移除。OWNER_DIRECTIVE 2026-08-12）
 PII_OR_SENSITIVE_DATA = YES
 PRODUCTION_DATABASE = YES（V1.x 生产数据库存在，V2.0 需迁移策略）
 EXTERNAL_REGULATED_SYSTEM = YES（体育竞猜涉及博彩合规，需多法域法律审查）
@@ -197,7 +197,7 @@ DATABASES = MySQL 8.4.9 (webman + gainode), Redis (3 instances: default/cache/st
 QUEUES = Redis Queue (webman/redis-queue)
 EXTERNAL_SERVICES = BetBurger (已签署), API-Football (已签署), 结果源 (待确认), 通知渠道 (待确认), 汇率源 (待确认), KYC 服务 (待确认)。链上服务 (BSC/ETH/TRON RPC) — 已移除，V2.0 不保留
 AUTHORITATIVE_WRITERS = 每个数据实体有且仅有一个 Service 作为 Authoritative Writer
-TRUST_BOUNDARIES = Client→API Gateway→Webman→Service→DAO→DB; External API→ArbitrageTask→Service; 区块链节点→web3.php; Admin→独立认证域（Admin URL 与 C 端 URL 分离）
+TRUST_BOUNDARIES = Client→API Gateway→Webman→Service→DAO→DB; External API→ArbitrageTask→Service; Admin→独立认证域（Admin URL 与 C 端 URL 分离）
 ```
 
 ---
@@ -292,7 +292,7 @@ SECRET_LOGGING = FORBIDDEN
 ```text
 DEPENDENCY_RULE_FILE = E:\github\sports\通过agent开发前规则\开源项目通用引用准入规则V1.0.md
 NO_DOWNLOAD_AUTHORIZED = NO（开发期允许，生产前需全部批准）
-APPROVED_DEPENDENCIES = PHP: webman/workerman, illuminate/database, firebase/php-jwt, casbin/casbin, monolog/monolog, web3.php, workerman/redis-queue, workerman/crontab; H5: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Vant 4; Admin: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Element Plus; App: Flutter
+APPROVED_DEPENDENCIES = PHP: webman/workerman, illuminate/database, firebase/php-jwt, casbin/casbin, monolog/monolog, workerman/redis-queue, workerman/crontab; H5: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Vant 4; Admin: Vue 3, TypeScript, Vite, Pinia, vue-i18n, Element Plus; App: Flutter
 PENDING_DEPENDENCIES = H5/Admin/App exact version lock + SBOM, 测试框架（Vitest/Playwright）, Dart/Flutter 依赖包, 前端 ESLint/Prettier/Stylelint 配置
 ```
 
