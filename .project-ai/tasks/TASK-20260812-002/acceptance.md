@@ -1,5 +1,7 @@
 # Acceptance: STAGE-01 Backend Domain Objects — 10 模块 Model/DAO/Service 骨架搭建
 
+> STAGE-01 状态：**BLOCKED**（BLOCKED_BY = GAINODE-MC1-IR）。前置「Machine Contract 第一批（MC1）」仍为 CANDIDATE（待 Independent Review），未正式 FROZEN，故本 STAGE 尚未启动；MC1 通过并置 FROZEN 后方可开始逐模块开发。
+
 ## 验收方法
 
 - 代码审查（Code Review）：逐模块检查分层约定、状态机完整性

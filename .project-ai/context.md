@@ -44,7 +44,7 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 
 ### 开发阶段
 
-**STAGE-00：Planning & Document Freeze — 已完成。** Independent Review 第二轮（GAINODE-STAGE00-IR-20260812-002）结果 = **CONDITIONAL_APPROVAL**。15 项 Finding 全部闭合（0 P0 / 0 P1 / 0 blocking P2）。STAGE-01 已授权启动。Owner Freeze 完成（11/11 角色已指派）。
+**STAGE-00：Planning & Document Freeze — 已完成。** Independent Review 第二轮（GAINODE-STAGE00-IR-20260812-002）结果 = **CONDITIONAL_APPROVAL**。15 项 Finding 全部闭合（0 P0 / 0 P1 / 0 blocking P2）。Owner Freeze 完成（11/11 角色已指派）。STAGE-01 虽获授权，但因前置「Machine Contract 第一批（MC1）」仍为 CANDIDATE（待 GAINODE-MC1-IR 独立审核），**STAGE-01 尚未启动，状态 = BLOCKED（BLOCKED_BY = GAINODE-MC1-IR）**，MC1 正式 FROZEN 后方可解除。
 
 Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE、17 个交互式 Modal、全部中文 UI）。
 

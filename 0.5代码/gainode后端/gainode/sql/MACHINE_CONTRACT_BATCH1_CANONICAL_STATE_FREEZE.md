@@ -69,7 +69,8 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 `apt_ledger_entries` 采用 **append-only + 受控状态流转**，字段分两类：
 
 - **不可变字段（禁止 UPDATE/DELETE）**：`ledger_entry_id / account_id / asset / quantity / entry_direction / entry_type / source_object_type / source_object_id / journal_batch_id / reversal_of / idempotency_key / rule_version / snapshot_id / created_time`。这些是经济事实，一经写入永不覆盖，物理删除被禁止。
-- **唯一可变字段**：`state`（`pending / posted / reversed / disputed`），仅由 Ledger 模块唯一 Authoritative Writer（`LedgerService`）在事务内流转；每次流转必须写入 `audit_event_id`（指向 immutable audit evidence），保留可审计轨迹。
+- **可变字段（仅随 state 流转成对更新）**：`state`（`pending / posted / reversed / disputed`）与 `audit_event_id`（指向本次流转最新审计证据的游标）。二者仅由 Ledger 模块唯一 Authoritative Writer（`LedgerService`）在同一事务内流转；`audit_event_id` 不承载历史，只是「最新审计证据」的指针，**完整历史由 append-only 审计事件表保留（见下）**。
+- **每次 state 流转的审计证据（闭合契约）**：状态流转 `pending→posted`、`pending→disputed`、`*→reversed` 的每一笔，必须同时满足：**(a)** 向 append-only 审计事件表**追加一条不可变新记录**（以 `ledger_entry_id` 关联、顺序可重建），并把 `audit_event_id` 更新为该新事件指针——**不得原地覆盖/删除旧审计事件**；**(b)** `state`/`audit_event_id` 更新与审计事件追加在同一 DB 事务内原子完成；**(c)** 审计事件记录触发者、生效规则 `rule_version`、参数快照 `snapshot_id`；**(d)** 除 `state`/`audit_event_id` 外不改动任何经济字段。因此可完整重建时间线：`entry created → state change #1 → state change #2 → … → current state`，不会退化为「只剩最后一次 audit_event_id」。任何缺少审计证据的流转 = 违约，`LedgerService` MUST FAIL_CLOSED（拒绝写入）。审计事件表 schema 待 Event Catalog / Ledger Mutation Contract 阶段正式冻结（当前以 append-only 审计事件 + `ledger_entry_id` 关联为硬约束，不落具体表 DDL）。
 - 本表**无 `updated_time` 列**；`state` 流转的时序证据由 `audit_event_id` 指向的审计事件承载，不依赖行内时间戳。
 - **冲正（reversal）**：一律创建新分录，`reversal_of` 指向原分录；原分录不删除、不覆盖。
 - **CONTRACT GAP（待冻结）**：05 §4 仅定义 Ledger canonical enum，未定义精确状态转移矩阵（`pending→posted/disputed` 触发条件、dispute 仲裁、reversal 触发条件）。在 Event Catalog / Ledger Mutation Contract 冻结前，Ledger 状态流转保持 **FAIL_CLOSED**；Service 层不得自行发明转移规则。
