@@ -50,7 +50,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 
 - V1.x → V2.0 迁移策略：**增量升级**（非重写）。后端在现有代码上扩展新模块；前端 H5/Admin 基于 V1.x 代码重构升级。
 - STAGE-01 Backend Domain Objects：已创建 task（TASK-20260812-002），10 模块 Model/DAO/Service 骨架搭建。
-- Machine Contract 第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze — **已完成（2026-08-13）**。8 核心实体 DDL 已落盘 `sql/20260813_machine_contract_batch1_8_core_entities.sql`，Freeze 文档 `sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`。
+- Machine Contract 第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze — **已完成（2026-08-13）**。8 核心实体 DDL 已落盘 `backend/sql/20260813_machine_contract_batch1_8_core_entities.sql`，Freeze 文档 `backend/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`。
 - Machine Contract 第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
 

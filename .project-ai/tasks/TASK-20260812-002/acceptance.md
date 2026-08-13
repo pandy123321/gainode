@@ -8,8 +8,8 @@
 
 ## Machine Contract 第一批 — 前置验收
 
-- [x] DB DDL（8 核心实体）已创建（`sql/20260813_machine_contract_batch1_8_core_entities.sql`）— 独立审核待排期
-- [x] Canonical State Freeze 已完成（8 实体状态枚举与 05 canonical 一致，见 `sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`）
+- [x] DB DDL（8 核心实体）已创建（`backend/sql/20260813_machine_contract_batch1_8_core_entities.sql`）— 独立审核待排期
+- [x] Canonical State Freeze 已完成（8 实体状态枚举与 05 canonical 一致，见 `backend/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`）
 - [x] DDL 文件遵循日期命名约定（`YYYYMMDD_description.sql`）
 - [x] DDL 文件顶部有变更原因和影响范围注释
 
