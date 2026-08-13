@@ -1,6 +1,6 @@
 # Acceptance: STAGE-01 Backend Domain Objects — 10 模块 Model/DAO/Service 骨架搭建
 
-> STAGE-01 状态：**BLOCKED**（BLOCKED_BY = GAINODE-MC1-IR）。前置「Machine Contract 第一批（MC1）」仍为 CANDIDATE（待 Independent Review），未正式 FROZEN，故本 STAGE 尚未启动；MC1 通过并置 FROZEN 后方可开始逐模块开发。
+> STAGE-01 状态：**IN_PROGRESS**。前置「Machine Contract 第一批（MC1）」已通过独立审核（GAINODE-MC1-IR，记录 541/542/543）并经 Owner Signoff 置 FROZEN，本 STAGE 已授权启动。
 
 ## 验收方法
 
@@ -10,8 +10,8 @@
 
 ## Machine Contract 第一批 — 前置验收
 
-- [x] DB DDL（8 核心实体）已创建（`0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`，forward-only，无 DROP）— 独立审核进行中（GAINODE-MC1-IR）
-- [ ] Canonical State Freeze 正式 FROZEN（当前为 CANDIDATE；8 实体状态枚举与 05 canonical 一致，见 `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`；待 Independent Review 通过后由治理流程置 FROZEN）
+- [x] DB DDL（8 核心实体）已创建（`0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`，forward-only，无 DROP）— 独立审核通过（GAINODE-MC1-IR 记录 541/542/543）
+- [x] Canonical State Freeze 正式 FROZEN（2026-08-13，Owner Signoff；8 实体状态枚举与 05 canonical 一致，见 `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`）
 - [x] DDL 文件遵循日期命名约定（`YYYYMMDD_description.sql`）
 - [x] DDL 文件顶部有变更原因和影响范围注释
 

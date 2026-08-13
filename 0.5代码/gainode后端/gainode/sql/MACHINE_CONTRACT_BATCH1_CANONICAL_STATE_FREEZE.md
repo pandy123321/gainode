@@ -1,8 +1,8 @@
 # Machine Contract 第一批 — Canonical State Freeze
 
-> 状态：**CANDIDATE（已交付，待 Independent Review）**
-> 说明：本文件为 Freeze 候选，**未经 Independent Review 通过前不得作为 approved frozen baseline 使用**。审核通过后由治理流程置为正式 `FROZEN`。
-> 交付日期：2026-08-13
+> 状态：**FROZEN（正式冻结，Owner Signoff 2026-08-13）**
+> 说明：本文件为正式 frozen baseline。Machine Contract 第一批经独立审核（GAINODE-MC1-IR 记录 541/542/543，最终建议合并 0 P0/P1/P2）后由 Owner Signoff 置 `FROZEN`。修改须走 §6 变更流程。
+> 冻结日期：2026-08-13
 > 关联 DDL：`0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`
 > 权威契约：`Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§3 对象最低字段 + §4 统一状态机）
 > 治理依据：`manifest.yaml` decisionSources `p1_003_two_phase_freeze`（OWNER_DIRECTIVE 2026-08-12「同意分两批」）
@@ -122,7 +122,7 @@ Model 层须设 `$timestamps=false`（或等价配置）以杜绝误写 `updated
 ## 7. 验收对照（TASK-20260812-002 acceptance）
 
 - [x] DB DDL（8 核心实体）已创建（forward-only，无 DROP）
-- [ ] Canonical State Freeze 正式 FROZEN（本文件为 CANDIDATE，待 Independent Review 通过后由治理流程置 FROZEN）
+- [x] Canonical State Freeze 正式 FROZEN（本文件为 FROZEN，Owner Signoff 2026-08-13）
 - [x] 8 实体状态枚举与 05 canonical 一致（6 组状态机 + 2 个 scalar）
 - [x] DDL 文件遵循日期命名约定（`20260813_machine_contract_batch1_8_core_entities.sql`）
 - [x] DDL 文件顶部有变更原因和影响范围注释

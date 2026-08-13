@@ -6,7 +6,7 @@
 
 ## 需求
 
-规范基线 V6.1 已就绪。STAGE-00 Independent Review 两轮已完成：IR-001 CHANGES_REQUIRED → IR-002 修复后 CONDITIONAL_APPROVAL（15 项 Finding 全部闭合，0 P0 / 0 P1 / 0 blocking P2）。STAGE-01 已获授权，但受前置 Machine Contract 第一批（MC1）CANDIDATE（待 GAINODE-MC1-IR）阻塞，当前 STAGE_STATUS = BLOCKED，尚未启动。
+规范基线 V6.1 已就绪。STAGE-00 Independent Review 两轮已完成：IR-001 CHANGES_REQUIRED → IR-002 修复后 CONDITIONAL_APPROVAL（15 项 Finding 全部闭合，0 P0 / 0 P1 / 0 blocking P2）。前置 Machine Contract 第一批（MC1）已通过独立审核（GAINODE-MC1-IR，记录 541/542/543）并经 Owner Signoff 置 FROZEN，STAGE-01 已授权启动（STAGE_STATUS = IN_PROGRESS）。
 
 ### 已完成确认项（全部 8 项 OWNER_DIRECTIVE 已关闭）
 

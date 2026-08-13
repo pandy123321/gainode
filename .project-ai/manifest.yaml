@@ -4,8 +4,8 @@ contextVersion: 20
 status: ACTIVE
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
-STAGE_01_STATUS: BLOCKED
-STAGE_01_BLOCKED_BY: GAINODE-MC1-IR
+STAGE_01_STATUS: IN_PROGRESS
+MC1_FREEZE_STATUS: FROZEN
 enabledDocuments:
   - bootstrap.md
   - context.md
@@ -228,7 +228,7 @@ decisionSources:
     owner: OWNER
     provenance: "REMEDIATION — 2-round fix cycle against IR GAINODE-STAGE00-IR-20260812-001. contextVersion 14: 13 P1+P2 closed. contextVersion 15: 2 P0 closed via OWNER_DIRECTIVE. contextVersion 16: P0-001 RUNTIME_EVIDENCE (key rotation confirmed). contextVersion 17: IR-002 CONDITIONAL_APPROVAL, all 15 findings closed."
   machine_contract_batch1_freeze:
-    value: "DELIVERED(CANDIDATE) 2026-08-13 — 待 Independent Review（GAINODE-MC1-IR），未经批准不得作为 frozen baseline。Machine Contract 第一批（8 核心实体 DDL + Canonical State Freeze）已交付。8 表：apt_accounts / apt_ledger_entries / robots / robot_rewards / prediction_markets / prediction_orders / otc_orders / power_positions。6 个状态机枚举与 05 §4 canonical 严格一致（Robot / AI Reward / Ledger / Market / Prediction Order / OTC）；apt_accounts + power_positions 为 scalar（无状态机）。主键 Snowflake(bigint unsigned，禁 AUTO_INCREMENT)；金额 string decimal；账本 append-only（经济字段不可改，仅 state 流转，reversal_of 追加）。DDL: 0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql；Freeze: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md。STAGE-01 各模块骨架（Model/DAO/Service）为后续任务。"
+    value: "FROZEN 2026-08-13 — Independent Review（GAINODE-MC1-IR）三轮复审通过，最终记录 543 结论=建议合并（0 P0 / 0 P1 / 0 P2）。Machine Contract 第一批（8 核心实体 DDL + Canonical State Freeze）正式冻结。8 表：apt_accounts / apt_ledger_entries / robots / robot_rewards / prediction_markets / prediction_orders / otc_orders / power_positions。6 个状态机枚举与 05 §4 canonical 严格一致（Robot / AI Reward / Ledger / Market / Prediction Order / OTC）；apt_accounts + power_positions 为 scalar（无状态机）。主键 Snowflake(bigint unsigned，禁 AUTO_INCREMENT)；金额 string decimal；账本 append-only（经济字段不可改，仅 state 流转，reversal_of 追加）。DDL: 0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql；Freeze: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md。STAGE-01 各模块骨架（Model/DAO/Service）为后续任务。"
     decision_date: "2026-08-13"
     owner: OWNER
-    provenance: "OWNER_DIRECTIVE p1_003_two_phase_freeze (2026-08-12) → EXECUTOR_DELIVERY 2026-08-13"
+    provenance: "OWNER_DIRECTIVE 2026-08-13 (Owner Signoff: MC1 → FROZEN) ← EXECUTOR_DELIVERY 2026-08-13 ← INDEPENDENT_REVIEW GAINODE-MC1-IR 记录 541/542/543"
