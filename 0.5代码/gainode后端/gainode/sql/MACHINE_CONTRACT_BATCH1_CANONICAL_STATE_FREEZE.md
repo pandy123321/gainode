@@ -1,8 +1,9 @@
 # Machine Contract 第一批 — Canonical State Freeze
 
-> 状态：**FROZEN（冻结）**
-> 冻结日期：2026-08-13
-> 关联 DDL：`backend/sql/20260813_machine_contract_batch1_8_core_entities.sql`
+> 状态：**CANDIDATE（已交付，待 Independent Review）**
+> 说明：本文件为 Freeze 候选，**未经 Independent Review 通过前不得作为 approved frozen baseline 使用**。审核通过后由治理流程置为正式 `FROZEN`。
+> 交付日期：2026-08-13
+> 关联 DDL：`0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`
 > 权威契约：`Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§3 对象最低字段 + §4 统一状态机）
 > 治理依据：`manifest.yaml` decisionSources `p1_003_two_phase_freeze`（OWNER_DIRECTIVE 2026-08-12「同意分两批」）
 
@@ -39,7 +40,7 @@
 
 - **Robot**：`cooling` = 连续运行后冷却期，禁止立即重启；`review` = 风控/异常审计锁定；`restricted` = 策略受限运行；`paused` = 管理员手动暂停。
 - **AI Reward**：`candidate`（预算内待确认）→ `held`（已记账不可提）→ `pending_claim` → `claiming`（防重）→ `claimed`；`expired_returned`（退回预算池）；`review`（风控冻结）；`reversed`（财务冲正，生成 reversal entry）。
-- **Ledger**：`pending / posted / reversed / disputed`。append-only，`reversed` 通过 `reversal_of` 追加反向分录，不覆盖原文。
+- **Ledger**：`pending / posted / reversed / disputed`。append-only，`reversed` 通过 `reversal_of` 追加反向分录，不覆盖原文；`state` 是唯一可变列（详见 §3.6）。
 - **Market**：`settlement`（结算处理中）≠ `settled`（已结算）；`void`（作废，赛事取消是原因之一）；`exception`（异常）。
 - **Prediction Order**：`RESULT_UNKNOWN` 不得混入订单状态；`correcting / corrected` 仅在 settlement error 时触发。
 - **OTC**：`completed` = 完整成交；`cancelled` = 用户/系统主动取消；`expired` = 有效期自然到期（非取消）；`partial + cancelled/expired` 仅释放 remaining；`disputed` 保持冻结直到处置。不删除/覆盖历史 Trade、APT Ledger、Power Ledger。
@@ -64,8 +65,16 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 ### 3.5 时间戳：created_time / updated_time（int unsigned，Unix 秒）
 沿用 V1.x 约定与 `support/extend/Model` 基类（`CREATED_AT='created_time'`、`UPDATED_AT='updated_time'`、`dateFormat='U'`）。05 §3 对象字段中的 `created_at / updated_at` 为语义标签，映射到本项目的 `created_time / updated_time`。
 
-### 3.6 账本 append-only
-`apt_ledger_entries` **无 `updated_time` 列**（不可变），Service 层禁止 UPDATE/DELETE。更正通过 `reversal_of` 追加反向分录。Model 层须设 `$timestamps=false` 或等价配置。
+### 3.6 账本 append-only 与状态流转（闭合账本 mutation 语义）
+`apt_ledger_entries` 采用 **append-only + 受控状态流转**，字段分两类：
+
+- **不可变字段（禁止 UPDATE/DELETE）**：`ledger_entry_id / account_id / asset / quantity / entry_direction / entry_type / source_object_type / source_object_id / journal_batch_id / reversal_of / idempotency_key / rule_version / snapshot_id / created_time`。这些是经济事实，一经写入永不覆盖，物理删除被禁止。
+- **唯一可变字段**：`state`（`pending / posted / reversed / disputed`），仅由 Ledger 模块唯一 Authoritative Writer（`LedgerService`）在事务内流转；每次流转必须写入 `audit_event_id`（指向 immutable audit evidence），保留可审计轨迹。
+- 本表**无 `updated_time` 列**；`state` 流转的时序证据由 `audit_event_id` 指向的审计事件承载，不依赖行内时间戳。
+- **冲正（reversal）**：一律创建新分录，`reversal_of` 指向原分录；原分录不删除、不覆盖。
+- **CONTRACT GAP（待冻结）**：05 §4 仅定义 Ledger canonical enum，未定义精确状态转移矩阵（`pending→posted/disputed` 触发条件、dispute 仲裁、reversal 触发条件）。在 Event Catalog / Ledger Mutation Contract 冻结前，Ledger 状态流转保持 **FAIL_CLOSED**；Service 层不得自行发明转移规则。
+
+Model 层须设 `$timestamps=false`（或等价配置）以杜绝误写 `updated_time`。
 
 ### 3.7 并发控制与幂等
 - 每张表含 `object_version int unsigned`（乐观锁，对应 05 的 If-Match）。
@@ -78,6 +87,11 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 ### 3.9 文件组织
 8 实体以**单文件**交付（`20260813_machine_contract_batch1_8_core_entities.sql`），原因：同一「Machine Contract 第一批」为原子冻结单元，单文件便于一次性事务迁移与整包独立审核。STAGE-01 各模块（10 模块）的增量表仍按「每表一个 `YYYYMMDD_description.sql`」执行。
 
+### 3.10 migration 路径与执行方式
+- 本批 DDL 位于 bootstrap 冻结的 migration 路径：`0.5代码/gainode后端/gainode/sql/`（`MIGRATION_PATH = sql/YYYYMMDD_description.sql` 相对后端根目录）。
+- **forward-only**：文件不含任何 `DROP TABLE`；首次执行创建 8 表，目标表已存在则 fail-fast，绝不删除已有数据；重跑判定走 `information_schema` / migration version。
+- 资产归属：本批 `apt_ledger_entries.asset` 仅 `APT-I`；`APT-C` 为 Future/OUT_OF_SCOPE，须经正式 Product/Contract Change 方可扩展（`apt_accounts` 的 `balance_apt_c/frozen_apt_c` 仅为 Future 余额结构预留，不代表开通 APT-C 记账能力）。
+
 ## 4. 未冻结 / 延后项（不阻塞本批，明确 FAIL_CLOSED）
 
 | 字段 | 表 | 处理 |
@@ -87,6 +101,7 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 | `entry_type` / `entry_direction` | `apt_ledger_entries` | 05 未定义取值，暂以 `varchar(64)` + `tinyint` 表达，与 Event Catalog 对齐后冻结 |
 | `selections` / `liquidity_summary` / `capabilities` / `allowed_actions` | 多表 | 用 `json` 承载，结构由服务端下发，不在此处冻结具体 JSON schema |
 | Power 精确消耗/恢复规则 | `power_positions` | 由 Active Rule/Parameter 决定，生产参数未批准 |
+| Ledger 状态转移矩阵（dispute/reversal 触发） | `apt_ledger_entries.state` | CONTRACT GAP，待 Event Catalog / Ledger Mutation Contract 冻结 |
 
 ## 5. TBC（生产参数，非缺陷）
 
@@ -96,7 +111,7 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 
 ## 6. 变更控制
 
-冻结后修改本批任何实体的**状态枚举**或**字段语义**，必须：
+本批冻结后修改任何实体的**状态枚举**或**字段语义**，必须：
 1. 走 05 契约变更流程（先改 05 §3/§4，再改 DDL）；
 2. 更新本 Freeze 文档版本号；
 3. 变更 DDL 以**新增日期文件**形式提交（不改历史 dated SQL，保留审计轨迹，`rules/coding.md` 数据库规则第 6 条）；
@@ -104,7 +119,8 @@ V2.0 核心实体以 **ENUM 冻结领域状态**，取代 V1.x 的 `status tinyi
 
 ## 7. 验收对照（TASK-20260812-002 acceptance）
 
-- [x] DB DDL（8 核心实体）已创建
-- [x] Canonical State Freeze 已完成（8 实体状态枚举与 05 canonical 一致）
+- [x] DB DDL（8 核心实体）已创建（forward-only，无 DROP）
+- [ ] Canonical State Freeze 正式 FROZEN（本文件为 CANDIDATE，待 Independent Review 通过后由治理流程置 FROZEN）
+- [x] 8 实体状态枚举与 05 canonical 一致（6 组状态机 + 2 个 scalar）
 - [x] DDL 文件遵循日期命名约定（`20260813_machine_contract_batch1_8_core_entities.sql`）
 - [x] DDL 文件顶部有变更原因和影响范围注释

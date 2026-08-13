@@ -1,5 +1,5 @@
 -- =============================================================================
--- Machine Contract 第一批 — 8 核心实体 DDL（Canonical State Freeze）
+-- Machine Contract 第一批 — 8 核心实体 DDL（Canonical State Freeze CANDIDATE）
 -- =============================================================================
 -- 变更原因：
 --   STAGE-00 已完成并通过 Independent Review（GAINODE-STAGE00-IR-20260812-002，
@@ -22,10 +22,15 @@
 --   1. 主键：Snowflake ID（bigint unsigned），不使用 AUTO_INCREMENT（V1.x 为自增 id）。
 --   2. 领域状态：ENUM 冻结（canonical enum），不使用 V1.x 的 status tinyint 软删模式。
 --   3. 金额：decimal(36,18) string decimal，禁 float；精度待生产参数批准后可收窄。
---   4. 账本 append-only：apt_ledger_entries 无 updated_time，仅追加，reversal_of 引用。
+--   4. 账本 append-only：apt_ledger_entries 无 updated_time；经济字段不可改，仅 state 流转，
+--      更正通过 reversal_of 追加反向分录（不删不覆盖原文）。
 --   5. 时间戳：created_time / updated_time 为 Unix 秒（int unsigned），沿用 V1.x 约定。
 --
--- 执行方式：本文件为一次性 DDL（幂等：先 DROP IF EXISTS 再 CREATE）。
+-- 执行方式：forward-only migration（一次性建表，禁止内置 DROP/CREATE）。
+--   - 首次执行创建 8 张新表。
+--   - 若目标表已存在则失败（fail-fast），绝不删除已有数据。
+--   - 重跑判定应通过 information_schema / migration version 记录「已应用」，而非重建。
+--   - 回滚（如确需）走独立 HIGH_RISK 回滚文件 + Database Migration Gate；禁止自动回滚账本历史。
 -- 迁移阶段：阶段一（sql/YYYYMMDD_description.sql），后续 DDL 变更累计超 10 次后转 Phinx。
 -- =============================================================================
 
@@ -34,15 +39,13 @@ SET NAMES utf8mb4;
 -- =============================================================================
 -- 1. apt_accounts — APT 数量账主账号表（05 §3 AptAccount，无状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `apt_accounts`;
-
 CREATE TABLE `apt_accounts` (
   `account_id` bigint unsigned NOT NULL COMMENT '账号ID(Snowflake，主键)',
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID(引用 member_user.id，V2.0 拟加宽)',
   `balance_apt_i` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-I 可用余额',
-  `balance_apt_c` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-C 可用余额(Future)',
+  `balance_apt_c` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-C 可用余额(Future，余额结构预留，不代表开通 APT-C 记账能力)',
   `frozen_apt_i` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-I 冻结余额',
-  `frozen_apt_c` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-C 冻结余额(Future)',
+  `frozen_apt_c` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT 'APT-C 冻结余额(Future，同上)',
   `total_earned_apt` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT '历史累计获得 APT 总额',
   `total_spent_apt` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT '历史累计支出 APT 总额',
   `last_ledger_entry_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '最近一笔账本分录ID(apt_ledger_entries.ledger_entry_id)',
@@ -59,16 +62,14 @@ CREATE TABLE `apt_accounts` (
 -- =============================================================================
 -- 2. apt_ledger_entries — APT 账本分录（append-only，05 §3 AptLedgerEntry）
 -- =============================================================================
-DROP TABLE IF EXISTS `apt_ledger_entries`;
-
 CREATE TABLE `apt_ledger_entries` (
   `ledger_entry_id` bigint unsigned NOT NULL COMMENT '分录ID(Snowflake，主键)',
   `account_id` bigint unsigned NOT NULL COMMENT '账号ID(apt_accounts.account_id)',
-  `asset` enum('APT-I','APT-C') NOT NULL DEFAULT 'APT-I' COMMENT '资产类型: APT-I=Internal, APT-C=Convertible(Future)',
+  `asset` enum('APT-I') NOT NULL DEFAULT 'APT-I' COMMENT '资产类型: 仅 APT-I(Internal)。APT-C=Future/OUT_OF_SCOPE，禁止入账，须经正式 Product/Contract Change 后方可扩展',
   `quantity` decimal(36,18) NOT NULL DEFAULT '0.000000000000000000' COMMENT '变动数量(正数，方向见 entry_direction)',
   `entry_direction` tinyint NOT NULL DEFAULT '1' COMMENT '分录方向: 1=入账(CREDIT) -1=出账(DEBIT)',
   `entry_type` varchar(64) NOT NULL DEFAULT '' COMMENT '分录类型(业务事件码，与 Event Catalog 对齐，TBC)',
-  `state` enum('pending','posted','reversed','disputed') NOT NULL DEFAULT 'pending' COMMENT '分录状态(05 §4 canonical)',
+  `state` enum('pending','posted','reversed','disputed') NOT NULL DEFAULT 'pending' COMMENT '分录状态(05 §4 canonical，唯一可变列，仅 Authoritative Writer 流转)',
   `source_object_type` varchar(64) NOT NULL DEFAULT '' COMMENT '来源对象类型(如 robot_reward/prediction_order/otc_order)',
   `source_object_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '来源对象ID',
   `journal_batch_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '日记账批次ID(同批次多分录)',
@@ -76,7 +77,7 @@ CREATE TABLE `apt_ledger_entries` (
   `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键(写操作去重)',
   `rule_version` varchar(64) NOT NULL DEFAULT '' COMMENT '生效规则版本号',
   `snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联参数快照ID',
-  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
+  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID(state 流转的证据)',
   `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
   PRIMARY KEY (`ledger_entry_id`),
   UNIQUE KEY `uk_idempotency` (`idempotency_key`),
@@ -85,13 +86,11 @@ CREATE TABLE `apt_ledger_entries` (
   KEY `idx_source` (`source_object_type`,`source_object_id`),
   KEY `idx_batch` (`journal_batch_id`),
   KEY `idx_reversal` (`reversal_of`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='APT账本分录(append-only，不可UPDATE/DELETE，更正走 reversal_of)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='APT账本分录(append-only：经济字段不可UPDATE/DELETE，仅 state 流转，更正走 reversal_of 追加，不删原文)';
 
 -- =============================================================================
 -- 3. robots — Robot 主表（56 级，05 §3 Robot + §4 Robot 状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `robots`;
-
 CREATE TABLE `robots` (
   `robot_id` bigint unsigned NOT NULL COMMENT 'Robot ID(Snowflake，主键)',
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID(引用 member_user.id)',
@@ -116,8 +115,6 @@ CREATE TABLE `robots` (
 -- =============================================================================
 -- 4. robot_rewards — AI Reward 记录（05 §3 AIReward + §4 AI Reward 状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `robot_rewards`;
-
 CREATE TABLE `robot_rewards` (
   `reward_id` bigint unsigned NOT NULL COMMENT 'Reward ID(Snowflake，主键)',
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
@@ -149,8 +146,6 @@ CREATE TABLE `robot_rewards` (
 -- =============================================================================
 -- 5. prediction_markets — 预测市场（05 §3 Market + §4 Market 状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `prediction_markets`;
-
 CREATE TABLE `prediction_markets` (
   `market_id` bigint unsigned NOT NULL COMMENT '市场ID(Snowflake，主键)',
   `event_id` bigint unsigned NOT NULL COMMENT '赛事ID(引用 Fixture)',
@@ -178,8 +173,6 @@ CREATE TABLE `prediction_markets` (
 -- =============================================================================
 -- 6. prediction_orders — 预测订单（05 §3 PredictionOrder + §4 Prediction Order 状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `prediction_orders`;
-
 CREATE TABLE `prediction_orders` (
   `order_id` bigint unsigned NOT NULL COMMENT '订单ID(Snowflake，主键)',
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
@@ -208,8 +201,6 @@ CREATE TABLE `prediction_orders` (
 -- =============================================================================
 -- 7. otc_orders — OTC 订单（05 §3 OtcOrder + §4 OTC 状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `otc_orders`;
-
 CREATE TABLE `otc_orders` (
   `otc_order_id` bigint unsigned NOT NULL COMMENT 'OTC订单ID(Snowflake，主键)',
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
@@ -244,8 +235,6 @@ CREATE TABLE `otc_orders` (
 -- =============================================================================
 -- 8. power_positions — Power 持仓（05 §3 PowerPosition，scalar fields，无状态机）
 -- =============================================================================
-DROP TABLE IF EXISTS `power_positions`;
-
 CREATE TABLE `power_positions` (
   `user_id` bigint unsigned NOT NULL COMMENT '用户ID(主键，一用户一持仓)',
   `available` decimal(18,4) NOT NULL DEFAULT '0.0000' COMMENT '可用 Power',

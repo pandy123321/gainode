@@ -8,8 +8,8 @@
 
 ## Machine Contract 第一批 — 前置验收
 
-- [x] DB DDL（8 核心实体）已创建（`backend/sql/20260813_machine_contract_batch1_8_core_entities.sql`）— 独立审核待排期
-- [x] Canonical State Freeze 已完成（8 实体状态枚举与 05 canonical 一致，见 `backend/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`）
+- [x] DB DDL（8 核心实体）已创建（`0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`，forward-only，无 DROP）— 独立审核进行中（GAINODE-MC1-IR）
+- [ ] Canonical State Freeze 正式 FROZEN（当前为 CANDIDATE；8 实体状态枚举与 05 canonical 一致，见 `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`；待 Independent Review 通过后由治理流程置 FROZEN）
 - [x] DDL 文件遵循日期命名约定（`YYYYMMDD_description.sql`）
 - [x] DDL 文件顶部有变更原因和影响范围注释
 
