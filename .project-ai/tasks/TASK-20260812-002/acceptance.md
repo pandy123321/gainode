@@ -30,16 +30,20 @@
 - 8 冻结实体的业务逻辑 / 状态转移矩阵（Machine Contract 第二批：Event Catalog + Ledger Mutation Contract）
 - 非核心实体 DDL（OtcTrade、PowerTransaction、RobotUpgradeOrder 等）、`sys_route` 路由、`ErrorDict` 错误码
 
-### 2026-08-15 — P1 修复：Ledger append-only 机械强制（回复 IR 记录 603）
+### 2026-08-15 — P1 修复：Ledger append-only 机械强制（回复 IR 记录 603/604）
 
-独立审核（记录 603）指出 `apt_ledger_entries` 的 append-only 此前仅为注释约定，DAO 仍继承
-`delete/deleteAll`，Model 仅 `$timestamps=false`/`UPDATED_AT=null`，不足以机械阻断删除/覆盖。
-
-本轮修复（不扩大 STAGE-01 范围、不改 MC1 Frozen DDL、不改共用基类）：
-- `AptLedgerEntryModel`：`save()` 在已落盘实例（`$this->exists`）直接抛 `RunException`，杜绝 UPDATE 覆盖；`delete()` 抛异常，杜绝物理删除。
-- `AptLedgerEntryDao`：覆写 `delete/deleteAll/update/updateAll/updateOrCreate`，全部 fail-closed 抛 `RunException`，阻断 Query Builder 绕过 Model 的批量删除/覆盖路径。
-- 结果：该实体仅允许 INSERT（追加）；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED）。
-- 未修改 MC1 Frozen DDL；若后续判定需 DB Trigger/Role 层保护，将另走 Change Request。
+独立审核（记录 603）指出 `apt_ledger_entries` 的 append-only 此前仅为注释约定；记录 604 进一步指出
+Eloquent Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE。两轮修复（不扩大 STAGE-01 范围、不改 MC1
+Frozen DDL、不改共用基类、不改其他业务 Model）：
+- `AptLedgerEntryModel`：`save()` 在已落盘实例（`$this->exists`）直接抛 `RunException`；`delete()` 抛异常。
+- `AptLedgerEntryAppendOnlyBuilder`（新增，注入自 `AptLedgerEntryModel::newEloquentBuilder()`）：阻断
+  Eloquent Builder 的 `update/upsert/increment/decrement/touch/delete/forceDelete`。
+- `AptLedgerEntryDao`：覆写 `delete/deleteAll/update/updateAll/updateOrCreate`，全部 fail-closed 抛 `RunException`。
+- 结果：ORM 正常路径（Model 实例 + Eloquent Builder + DAO）仅允许 INSERT（追加）；reversal 反向分录与未冻结
+  state 流转仍为 CONTRACT GAP（FAIL_CLOSED）。
+- Protection boundary：底层 Query Builder（`toBase()`/`getQuery()`）与 `DB::table()` 直连属 DB 层边界，
+  应用层不封堵；需数据库级硬约束时另走 Change Request（DB Trigger / DB Role）。
+- 未修改 MC1 Frozen DDL。
 
 ## 验收方法
 
@@ -78,7 +82,7 @@
 - [ ] API 路由已插入 `sys_route` 表
 
 ### APT Ledger 改造
-- [ ] append-only 机制完整实现（reversal 追加反向分录，不删不覆盖原文）— 删除/覆盖路径已机械阻断（`AptLedgerEntryModel` `save()/delete()` fail-closed + `AptLedgerEntryDao` 覆写 `delete/deleteAll/update/updateAll/updateOrCreate` 抛异常，仅允许 INSERT）；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED，待 Ledger Mutation Contract 冻结），负向测试待补
+- [ ] append-only 机制完整实现（reversal 追加反向分录，不删不覆盖原文）— ORM 正常路径（Model 实例 `save()/delete()` + `AptLedgerEntryAppendOnlyBuilder` 阻断 Eloquent Builder `update/upsert/increment/decrement/touch/delete/forceDelete` + `AptLedgerEntryDao` 覆写 `delete/deleteAll/update/updateAll/updateOrCreate`）已机械阻断删除/覆盖；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED，待 Ledger Mutation Contract 冻结）；DB 层硬约束（Trigger/Role）待 Change Request
 - [ ] 四账分离模型（05 AptAccount）: 1.APT数量账(balance_apt_i/c + frozen_apt_i/c) 2.参考估值账 3.功能货币收入账 4.Reward/预算账 — 仅第 1 项「数量账」骨架已建（`AptAccountModel`）
 - [ ] 现有 wallet 表的迁移计划已制定（不直接破坏现有数据）
 - [x] `sql/` 对应 DDL 文件已创建（`apt_accounts` / `apt_ledger_entries` 已由 MC1 batch1 DDL 覆盖）

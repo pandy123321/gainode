@@ -12,7 +12,7 @@ use library\model\ledger\AptLedgerEntryModel;
  * AptLedgerEntry DAO — apt_ledger_entries 表查询封装（append-only）
  *
  * 注意：append-only 表禁止物理删除。本 DAO 对继承的 delete/deleteAll/update/updateAll/
- * updateOrCreate 全部 fail-closed 覆写，从代码层面机械阻断任何删除/覆盖路径，
+ * updateOrCreate 全部 fail-closed 覆写，从代码层面机械阻断 DAO 层的删除/覆盖路径，
  * 而非仅靠调用方自觉。仅保留只读查询与追加（create/insert）。
  */
 class AptLedgerEntryDao extends Dao

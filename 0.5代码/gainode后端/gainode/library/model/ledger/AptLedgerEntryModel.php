@@ -21,11 +21,18 @@ use support\exception\RunException;
  *   - 冲正（reversal）通过新增分录 + reversal_of 指向原分录，不删不覆盖原文。
  *
  * 机械强制（fail-closed，代码级，非仅注释约定）：
- *   - save() 在已落盘实例（$this->exists）上直接抛 RunException，杜绝任何 UPDATE 覆盖。
- *   - delete() 直接抛 RunException，杜绝物理删除。
+ *   - save() 在已落盘实例（$this->exists）上直接抛 RunException，杜绝实例级 UPDATE 覆盖。
+ *   - delete() 直接抛 RunException，杜绝实例级物理删除。
+ *   - newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，阻断 Eloquent Builder 层
+ *     的 update/upsert/increment/decrement/touch/delete/forceDelete。
  *   - 配合 AptLedgerEntryDao 对 delete/deleteAll/update/updateAll/updateOrCreate 的覆写，
- *     阻断通过 Query Builder 绕过 Model 的批量删除/覆盖路径。
+ *     阻断 DAO 层的删除/覆盖路径。
  *   - 本骨架因此仅允许 INSERT（追加）；state 流转与 reversal 仍为 CONTRACT GAP，FAIL_CLOSED。
+ *
+ * Protection boundary（不再宣称「任何路径都已阻断」）：
+ *   - 以上覆盖「ORM 正常路径」：Model 实例 + Eloquent Builder + DAO。
+ *   - 底层 Query Builder（toBase()/getQuery()）与 DB::table('apt_ledger_entries') 属数据库
+ *     直连层，应用层不封堵；若需数据库级硬约束须另走 Change Request（DB Trigger / DB Role）。
  *
  * @property string $ledger_entry_id 分录ID(Snowflake，主键)
  * @property string $account_id 账号ID(apt_accounts.account_id)
@@ -98,6 +105,17 @@ class AptLedgerEntryModel extends Model
         'audit_event_id',
         'created_time',
     ];
+
+    /**
+     * 注入 append-only Eloquent Builder，阻断 Query Builder 层 destructive mutation。
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return AptLedgerEntryAppendOnlyBuilder
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new AptLedgerEntryAppendOnlyBuilder($query);
+    }
 
     /**
      * append-only 账本：禁止 UPDATE。
