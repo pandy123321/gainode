@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace library\model\ledger;
 
 use support\extend\Model;
+use support\exception\RunException;
 
 /**
  * apt_ledger_entries 表映射 — APT 账本分录（05 §3 AptLedgerEntry，append-only）
@@ -18,6 +19,13 @@ use support\extend\Model;
  *   - state 是唯一可变列，仅由 Ledger 模块 Authoritative Writer（LedgerService）流转，
  *     且必须同时追加 append-only 审计事件并更新 audit_event_id。
  *   - 冲正（reversal）通过新增分录 + reversal_of 指向原分录，不删不覆盖原文。
+ *
+ * 机械强制（fail-closed，代码级，非仅注释约定）：
+ *   - save() 在已落盘实例（$this->exists）上直接抛 RunException，杜绝任何 UPDATE 覆盖。
+ *   - delete() 直接抛 RunException，杜绝物理删除。
+ *   - 配合 AptLedgerEntryDao 对 delete/deleteAll/update/updateAll/updateOrCreate 的覆写，
+ *     阻断通过 Query Builder 绕过 Model 的批量删除/覆盖路径。
+ *   - 本骨架因此仅允许 INSERT（追加）；state 流转与 reversal 仍为 CONTRACT GAP，FAIL_CLOSED。
  *
  * @property string $ledger_entry_id 分录ID(Snowflake，主键)
  * @property string $account_id 账号ID(apt_accounts.account_id)
@@ -90,6 +98,35 @@ class AptLedgerEntryModel extends Model
         'audit_event_id',
         'created_time',
     ];
+
+    /**
+     * append-only 账本：禁止 UPDATE。
+     *
+     * Eloquent 的 save() 是 INSERT（$this->exists=false）与 UPDATE（$this->exists=true）
+     * 的公共通道。此处对已落盘实例一律 fail-closed，杜绝普通 CRUD 覆盖经济字段。
+     * 更正/冲正必须通过追加 reversal 分录（待 Ledger Mutation Contract FROZEN）。
+     *
+     * @throws RunException
+     */
+    public function save(array $options = [])
+    {
+        if ($this->exists) {
+            throw new RunException(
+                'apt_ledger_entries 为 append-only 账本：禁止 UPDATE 已落盘分录，更正请追加 reversal 分录'
+            );
+        }
+        return parent::save($options);
+    }
+
+    /**
+     * append-only 账本：禁止物理删除。
+     *
+     * @throws RunException
+     */
+    public function delete()
+    {
+        throw new RunException('apt_ledger_entries 为 append-only 账本：禁止物理删除分录');
+    }
 
     /**
      * 账户归属（同模块 FK）

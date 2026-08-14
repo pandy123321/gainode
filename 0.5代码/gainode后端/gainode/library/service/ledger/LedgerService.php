@@ -19,6 +19,11 @@ use support\extend\Service;
  *     在同一 DB 事务内原子完成。
  *   - 冲正通过新增分录 + reversal_of 指向原分录，不删不覆盖原文。
  *
+ * 机械强制（已落实，非仅注释约定）：
+ *   - AptLedgerEntryModel::save() 在已落盘实例抛异常；delete() 抛异常。
+ *   - AptLedgerEntryDao 覆写 delete/deleteAll/update/updateAll/updateOrCreate 全部 fail-closed。
+ *   - 因此本骨架仅允许追加（INSERT）；任何删除/覆盖路径都会抛 RunException。
+ *
  * 重要（FAIL_CLOSED）：
  *   MC1 只冻结了 Ledger canonical enum、字段可变性与审计不变量，**未授权任何具体 state
  *   transition**（各 transition 触发条件、dispute 仲裁、reversal 触发条件均为 CONTRACT GAP）。
