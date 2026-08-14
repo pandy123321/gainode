@@ -22,11 +22,13 @@ use support\extend\Service;
  * 机械强制（已落实，非仅注释约定）：
  *   - AptLedgerEntryModel::save() 在已落盘实例抛异常；delete() 抛异常。
  *   - AptLedgerEntryModel::newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，
- *     阻断 Eloquent Builder 的 update/upsert/increment/decrement/touch/delete/forceDelete。
+ *     阻断 Eloquent Builder 的 update/upsert/increment/decrement/touch/delete/forceDelete，
+ *     并经其 __call() 兜底阻断 Query Builder 层的 updateOrInsert/truncate/incrementEach/
+ *     decrementEach。
  *   - AptLedgerEntryDao 覆写 delete/deleteAll/update/updateAll/updateOrCreate 全部 fail-closed。
- *   - 因此 ORM 正常路径（Model 实例 + Eloquent Builder + DAO）仅允许追加（INSERT）；
- *     底层 Query Builder（toBase()/getQuery()）与 DB::table() 直连属 DB 层边界，
- *     需数据库级硬约束时另走 Change Request。
+ *   - 因此 ORM 正常路径（Model 实例 + Eloquent Builder 含 __call 兜底 + DAO）仅允许追加（INSERT）；
+ *     显式取得底层 Query Builder（toBase()/getQuery()）与 DB::table() / PDO raw SQL 直连属
+ *     DB 层边界，需数据库级硬约束时另走 Change Request。
  *
  * 重要（FAIL_CLOSED）：
  *   MC1 只冻结了 Ledger canonical enum、字段可变性与审计不变量，**未授权任何具体 state

@@ -24,15 +24,18 @@ use support\exception\RunException;
  *   - save() 在已落盘实例（$this->exists）上直接抛 RunException，杜绝实例级 UPDATE 覆盖。
  *   - delete() 直接抛 RunException，杜绝实例级物理删除。
  *   - newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，阻断 Eloquent Builder 层
- *     的 update/upsert/increment/decrement/touch/delete/forceDelete。
+ *     的 update/upsert/increment/decrement/touch/delete/forceDelete，并经其 __call() 兜底
+ *     阻断经 Eloquent Builder 转发到底层 Query Builder 的 updateOrInsert/truncate/
+ *     incrementEach/decrementEach（deny set 见 AptLedgerEntryAppendOnlyBuilder::DESTRUCTIVE_METHODS）。
  *   - 配合 AptLedgerEntryDao 对 delete/deleteAll/update/updateAll/updateOrCreate 的覆写，
  *     阻断 DAO 层的删除/覆盖路径。
  *   - 本骨架因此仅允许 INSERT（追加）；state 流转与 reversal 仍为 CONTRACT GAP，FAIL_CLOSED。
  *
  * Protection boundary（不再宣称「任何路径都已阻断」）：
- *   - 以上覆盖「ORM 正常路径」：Model 实例 + Eloquent Builder + DAO。
- *   - 底层 Query Builder（toBase()/getQuery()）与 DB::table('apt_ledger_entries') 属数据库
- *     直连层，应用层不封堵；若需数据库级硬约束须另走 Change Request（DB Trigger / DB Role）。
+ *   - 以上覆盖「ORM 正常路径」：Model 实例 + Eloquent Builder（含 __call 转发兜底）+ DAO。
+ *   - 显式取得底层 Query Builder（toBase()/getQuery()）与 DB::table('apt_ledger_entries') /
+ *     PDO raw SQL 属数据库直连层，应用层不封堵；若需数据库级硬约束须另走 Change Request
+ *     （DB Trigger / DB Role）。
  *
  * @property string $ledger_entry_id 分录ID(Snowflake，主键)
  * @property string $account_id 账号ID(apt_accounts.account_id)
