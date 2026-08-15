@@ -44,7 +44,7 @@ Gainode 是一个 AI 驱动的体育分析与竞猜平台，围绕以下 5 个�
 
 ### 开发阶段
 
-**STAGE-00：Planning & Document Freeze — 已完成。** Independent Review 第二轮（GAINODE-STAGE00-IR-20260812-002）结果 = **CONDITIONAL_APPROVAL**。15 项 Finding 全部闭合（0 P0 / 0 P1 / 0 blocking P2）。Owner Freeze 完成（11/11 角色已指派）。前置「Machine Contract 第一批（MC1）」已通过独立审核（GAINODE-MC1-IR，记录 541/542/543，最终建议合并 0 P0/P1/P2）并经 Owner Signoff 正式置 **FROZEN**，**STAGE-01 已授权启动，状态 = IN_PROGRESS**。
+**STAGE-00：Planning & Document Freeze — 已完成。** Independent Review 第二轮（GAINODE-STAGE00-IR-20260812-002）结果 = **CONDITIONAL_APPROVAL**。15 项 Finding 全部闭合（0 P0 / 0 P1 / 0 blocking P2）。Owner Freeze 完成（11/11 角色已指派）。前置「Machine Contract 第一批（MC1）」已通过独立审核并经 Owner Signoff 正式置 **FROZEN**。**STAGE-01 = IN_PROGRESS**。
 
 Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级导航、35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE、17 个交互式 Modal、全部中文 UI）。
 
@@ -52,7 +52,12 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 - STAGE-01 Backend Domain Objects：已创建 task（TASK-20260812-002），10 模块 Model/DAO/Service 骨架搭建。
 - Machine Contract 第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze — **FROZEN（2026-08-13，Owner Signoff）**。独立审核 GAINODE-MC1-IR 三轮通过（记录 541/542/543，最终建议合并 0 P0/P1/P2）。8 核心实体 DDL 已落盘 `0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`，Freeze 文档 `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`。
 - **STAGE-01 第一批已落地（2026-08-14，commit `5fb3d01`）**：8 个 MC1 冻结核心实体的 Model/DAO/Service 骨架（24 文件）已创建，目录 `library/{model,dao,service}/{robot,ledger,prediction,otc,power}/`。状态枚举严格取自 MC1 Freeze；主键 Snowflake（`$incrementing=false` + `$keyType='string'`）；`apt_ledger_entries` append-only（`$timestamps=false` + `UPDATED_AT=null`）。状态转移矩阵未实现，一律 FAIL_CLOSED，待 Machine Contract 第二批（Event Catalog + Ledger Mutation Contract）。
-- Machine Contract 第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。
+- Ledger append-only 的 Model/Builder/DAO 防护与 CLI 回归已落地；已记录测试证据为 `67 pass / 0 fail`。这是已完成成果，除有效 Finding 外不得重写。
+- **MC2 当前进度**：Owner 22 项 + 2 项财务裁决已完成；IR 686 的 1 P1 + 3 P2 修复已提交到 `2795e38`，但独立复审尚未返回 APPROVED，当前状态必须写为 `IMPLEMENTED / RE_REVIEW_PENDING`，不得写 FROZEN。
+- 当前执行包：`S01-P01-MC2-REVIEW-LOCK`；其后依次为 2B-1 合同/骨架、2B-2 合同/骨架、投影、Affiliate/Agent、AI Operations 和 STAGE-01 收口。
+- 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
+- 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.0。
+- 开发采用一个 Development Agent 串行工作包；Quality 锁定快照后，如下一包路径不重叠且不消费未冻结合同，Developer 可继续，不把“继续开发”误写成“当前包审核/合并已通过”。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
 
 ### 技术栈（已确认）

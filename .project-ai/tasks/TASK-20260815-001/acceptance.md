@@ -1,6 +1,6 @@
 # Acceptance: Machine Contract 第二批
 
-> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686），修复中**。
+> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686）；修复已提交到 `2795e38`，独立复审待定**。
 > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 候选交付物：
 > - `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`

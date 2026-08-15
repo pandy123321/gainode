@@ -333,123 +333,68 @@ Machine Contract 分两批策略（OWNER_DIRECTIVE 2026-08-12）：
 
 # 16. Stage Plan
 
-## STAGE-00: Planning & Freeze
+唯一详细执行基线：
+
+`Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.0。
+
+本节只保存当前状态和 Stage 指针，禁止复制另一份相似路线。
 
 ```text
-STAGE_ID = STAGE-00
-STAGE_NAME = Planning & Document Freeze
-GOAL = 完成 V1.x 基线审查，冻结所有开发前文档，通过 Independent Review，获得 Owner Signoff
+PROJECT = Gainode
+WORKSPACE = E:\github\sports
+EXECUTION_MODEL = ONE_DEVELOPMENT_AGENT_SERIAL_PACKAGES
+QUALITY_MODEL = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 
-INPUTS = V6.1 规格, V1.x 生产代码 (gainode_h5, gainode_admin, gainode后端), V2.4.1 Admin 治理包, Admin 交互原型, HIFI 设计系统, PROJECT_BOOTSTRAP_TEMPLATE, MASTER_PROJECT_GOVERNANCE
+STAGE-00 = COMPLETE
+STAGE-01 = IN_PROGRESS
+STAGE-02 = DEFINED_NOT_STARTED
+STAGE-03 = DEFINED_NOT_STARTED
+STAGE-04 = DEFINED_NOT_STARTED
+STAGE-05 = DEFINED_NOT_STARTED
+STAGE-06 = DEFINED_NOT_STARTED
 
-ALLOWED_PATHS =
-- .project-ai/**
-- 0.5代码/（只读）
-- _existing_prod/（只读，V1.x 生产代码镜像）
-- 通过agent开发前规则/（只读，治理规则源）
+CURRENT_FORMAL_STAGE = STAGE-01_BACKEND_DOMAIN_OBJECTS
+CURRENT_DEVELOPER_PACKAGE = S01-P01-MC2-REVIEW-LOCK
+CURRENT_REVIEW_REVISION = 2795e38abd9bfff0383992f98ce01193e7fe1a5f
+CURRENT_REVIEW_STATUS = RE_REVIEW_PENDING
 
-FORBIDDEN_PATHS =
-- 任何业务代码创建/修改
-- 数据库 DDL/DML 执行
-- API 端点创建
-- 前端页面/组件创建
-- git push / deploy
-
-NON_GOALS =
-- 不执行任何业务代码开发
-- 不创建数据库对象
-- 不部署任何服务
-
-DEPENDENCIES = V1.x 代码镜像已克隆（✅）, V6.1 规格已就绪（✅）, V2.4.1 Admin 治理包已就绪（✅）, Admin 原型已冻结 57/58 页（✅）, HIFI 设计系统已就绪（✅）
-
-IMPLEMENTATION_REQUIREMENTS =
-- 填写 PROJECT_BOOTSTRAP_TEMPLATE 全部字段（bootstrap.md）
-- 补充 V1.x→V2.0 迁移架构（architecture.md）
-- 补充 V1.x 生产代码基线分析（context.md）
-- 创建缺失的预开发文档（DB Freeze, API Freeze, Event/State Freeze, Environment Freeze, Dependencies）
-- 更新 manifest.yaml（新增 V1.x baseline 引用）
-- 生成 Self Review 包
-
-VALIDATION_REQUIREMENTS =
-- 所有 "TBC" 字段已确认或记录为待确认
-- 所有 Forbidden Actions 已列出
-- 所有决策来源可追溯
-- AUTHORITATIVE_WRITERS 已分配
-- TRUST_BOUNDARIES 已定义
-
-REVIEW_REQUIREMENTS =
-- Independent Review Required
-- Review Package Required
-- Manifest Required
-- Package SHA256 Required
-
-EXIT_CRITERIA =
-- bootstrap.md 所有字段填写完毕（TBC 项记录为待确认）
-- 所有预开发文档创建/更新完毕
-- manifest.yaml contextVersion ≥ 13（绑定当前 Freeze）
-- Self Review 完成
-- Independent Review 提交
-- Review 结果 APPROVED
-- Owner Signoff 完成
-- FROZEN_FOR_DEVELOPMENT = YES
-
-NEXT_STAGE = STAGE-01_BACKEND_DOMAIN_OBJECTS
+MC1_FREEZE_STATUS = FROZEN
+MC1_8_ENTITY_SKELETONS = IMPLEMENTED_DO_NOT_REDO
+LEDGER_APPEND_ONLY_GUARD = IMPLEMENTED_DO_NOT_REDO
+MC2_OWNER_SIGNOFF = COMPLETE
+MC2_IR686_REMEDIATION = IMPLEMENTED_REVIEW_PENDING
 ```
 
-## STAGE-01: Backend Domain Objects
+正式 Stage：
+
+| Stage | 目标 | 状态 |
+|---|---|---|
+| STAGE-00 | 规划、原型、架构、MC1 基线 | COMPLETE |
+| STAGE-01 | 机器合同、DDL、领域对象与投影骨架 | IN_PROGRESS |
+| STAGE-02 | OpenAPI、环境合同、后端 P0 业务闭环 | NOT_STARTED |
+| STAGE-03 | H5 + Admin 增量升级与联调 | NOT_STARTED |
+| STAGE-04 | Flutter App | NOT_STARTED |
+| STAGE-05 | Sandbox E2E 与迁移演练 | NOT_STARTED |
+| STAGE-06 | 发布就绪审查（不含生产部署） | NOT_STARTED |
+
+开发与审核节奏：
 
 ```text
-STAGE_ID = STAGE-01
-STAGE_NAME = Backend Domain Object Skeletons
-GOAL = 在现有 PHP/Webman 代码上为 V6.1 全部 10 个模块建立 Model/DAO/Service 骨架
-
-INPUTS = V6.1 05_DATA_STATE_PERMISSION_API_CONTRACT.md, V1.x 后端代码结构, STAGE-00 冻结文档
-
-ALLOWED_PATHS =
-- 0.5代码/gainode后端/gainode/library/model/
-- 0.5代码/gainode后端/gainode/library/dao/
-- 0.5代码/gainode后端/gainode/library/service/
-- 0.5代码/gainode后端/gainode/sql/（增量 migration 文件）
-- 0.5代码/gainode后端/gainode/config/
-
-FORBIDDEN_PATHS =
-- 前端代码（H5/Admin/App）
-- V1.x 已有模块的内部逻辑修改（仅新增，不重构）
-
-NON_GOALS = 不实现业务逻辑细节，不集成外部 API，不写前端页面
-
-DEPENDENCIES = STAGE-00 完成并通过 Review
-
-IMPLEMENTATION_REQUIREMENTS =
-- 按模块顺序：Auth/KYC → User/Eligibility → Robot/Reward → APT Ledger → Prediction → OTC/Power → Affiliate/Agent → AI Operations → Approval/Parameter → Support/Audit
-- 每个模块：定义 Model（表映射 + 关联）、DAO（查询封装）、Service（接口骨架 + 事务边界）
-- 所有 Service 继承 support\extend\Service
-- 每个 Service 声明 Authoritative Writer
-- 增量 DDL 文件（sql/YYYYMMDD_description.sql）
-- 每个模块创建后更新 .project-ai/tasks/ 状态
-
-VALIDATION_REQUIREMENTS =
-- php -l 语法检查通过
-- 所有 Model 有 public $table / $primaryKey 属性（非 TABLE 常量 / 非 $pk）
-- 所有 DAO 有 docblock 类型提示
-- 所有 Service 有 @authoritative_writer 注解
-
-REVIEW_REQUIREMENTS =
-- Independent Review Required
-- Review Package Required
-- Manifest Required
-- Package SHA256 Required
-
-EXIT_CRITERIA = 10 个模块骨架建完并通过 Review
-
-NEXT_STAGE = STAGE-02_FRONTEND_INTEGRATION
+Developer 完成 Package
+→ 锁定 commit/path/hash Snapshot
+→ Quality 只读审核该 Snapshot
+→ Developer 在路径不重叠且不消费未冻结合同的前提下继续下一 Package
 ```
 
-后续阶段（骨架，待正式冻结）：
-- `STAGE-02`: Frontend Integration（H5/Admin 基于 V1.x 代码升级，逐个接入后端 API）
-- `STAGE-03`: App Development（Flutter 独立开发）
-- `STAGE-04`: Sandbox E2E（沙盒端到端测试）
-- `STAGE-05`: Staging & Production Deployment
+必须区分：
+
+```text
+DEV_NEXT_PACKAGE_ALLOWED != CURRENT_PACKAGE_MERGE_APPROVED
+SNAPSHOT_LOCKED != REVIEW_APPROVED
+FORMAL_STAGE_GATE != PRODUCTION_APPROVAL
+```
+
+Quality 报告只能写入 `.project-ai/reviews/**`；默认不得修改产品代码。正式 Stage 关闭仍要求其全部工作包通过独立审核，但开发 Agent 不因非重叠 Snapshot 审核而空等。
 
 ---
 

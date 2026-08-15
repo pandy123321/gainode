@@ -2,7 +2,7 @@
 
 ## 状态
 
-> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结、pending reversal 语义、DisputeCase→RiskCase、object_version 补 CR、证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界、RiskCase 冻结状态矛盾、证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机、账户级并发、证据完整性），已修复；IR 686（六审）返回 1 P1 + 3 P2（账户级统一经济锁域、PRE_HOLD_MUTATION_GUARD 通用化、并发错误码统一、证据截断），修复中。冻结候选已落盘：
+> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686）；修复已提交到 `2795e38`，独立复审待定**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结、pending reversal 语义、DisputeCase→RiskCase、object_version 补 CR、证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界、RiskCase 冻结状态矛盾、证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机、账户级并发、证据完整性），已修复；IR 686（六审）返回 1 P1 + 3 P2（账户级统一经济锁域、PRE_HOLD_MUTATION_GUARD 通用化、并发错误码统一、证据截断），修复代码与文档已提交，尚未取得复审 APPROVED。冻结候选已落盘：
 > - 候选文档：`0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
 > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
 > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`

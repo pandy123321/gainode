@@ -1,6 +1,6 @@
 # Design: Machine Contract 第二批
 
-> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 686，2026-08-15），修复中**。
+> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 686，2026-08-15）；修复已提交到 `2795e38`，独立复审待定**。
 > IR 629 返回 6 P1 + 2 P2，已修复并重提。IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复。IR 659（三审）返回 **2 P1 + 3 P2**（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复。IR 679（四审）返回 **1 P1 + 2 P2**（posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断），已修复。IR 682（五审）返回 **2 P1 + 1 P2**（shortfall 检查时机 / dispute_hold 账户级并发 / 证据截断），已修复。IR 686（六审）返回 **1 P1 + 3 P2**：P1-1 AptAccount CAS 只锁 hold mutation、未锁全部 `stored_available` mutation（跨业务并发可负余额）；P2-1 `PRE_L5` 名称 transition-specific（L4 pending DEBIT 同样增 hold）；P2-2 新增 `ACCOUNT_LOCK_CONFLICT` 与已冻结 `OBJECT_VERSION_CONFLICT` 冲突；P2-3 Review Package 仍截断。
 > 本文件已修复 IR 686 全部 1 P1 + 3 P2（账户级统一 Economic Mutation Lock + 11 步事务顺序 + 跨操作串行 / `PRE_HOLD_MUTATION_GUARD` 覆盖 L4+L5 / 错误码统一 `OBJECT_VERSION_CONFLICT(409)` / 证据验收保持 `REVIEW_PACKAGE_TRUNCATED = NO`）。
 > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
