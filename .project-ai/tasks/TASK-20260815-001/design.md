@@ -1,11 +1,11 @@
 # Design: Machine Contract 第二批
 
-> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 659，2026-08-15），修复中**。
-> IR 629 返回 6 P1 + 2 P2，已修复并重提。IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复。IR 659（三审）返回 **2 P1 + 3 P2**：P1-1 disputed 统一「排除分录影响」对 DEBIT 错误释放资金（需四格 Dispute Hold Matrix）；P1-2 `pending→reversed` 是否生成经济 reversal 自相矛盾；P2-1 未冻结 `DisputeCase` 被引用（应统一 RiskCase）；P2-2 `object_version` 改变 MC1 schema 缺 Change Request；P2-3 证据被 Diff 截断。
-> 本文件已修复 IR 659 全部 2 P1 + 3 P2（Dispute Hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / CR-20260815-001 / 内嵌验收断言）。
+> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 679，2026-08-15），修复中**。
+> IR 629 返回 6 P1 + 2 P2，已修复并重提。IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复。IR 659（三审）返回 **2 P1 + 3 P2**（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复。IR 679（四审）返回 **1 P1 + 2 P2**：P1-1 posted CREDIT 已被部分消费后再 dispute/reversal 的 shortfall 规则未定义；P2-1 RiskCase 冻结状态表述矛盾（「已冻结」vs「尚未冻结」）；P2-2 证据仍被 Diff 截断。
+> 本文件已修复 IR 679 全部 1 P1 + 2 P2（DISPUTE_SHORTFALL_POLICY = FAIL_CLOSED 安全默认 / RiskCase CONTRACT_GAP 状态统一 + L4/L5 dependency gate / 提升审核助手 diff 上限消除截断）。
 > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 正式 FROZEN 前，8 个核心实体的状态流转保持 **FAIL_CLOSED**。
-> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【IR修复】` = 针对 IR 629/IR 638/IR 659 的修复；`【待确认】` = 仍未决（06 TBC 处理）。
+> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【IR修复】` = 针对 IR 629/IR 638/IR 659/IR 679 的修复；`【待确认】` = 仍未决（06 TBC 处理）。
 
 ---
 
@@ -39,7 +39,7 @@
 | ADMIN_SECURITY | 管理角色/权限/安全配置（不可接触资产） | **不承担财务裁决**（保持 05 canonical 语义） |
 
 > **角色与状态写入分离（`【IR修复】` IR 638 P1-3）**：FINANCE_REVIEWER 是只读角色，**不得作为任何 `apt_ledger_entries` 状态转移的直接执行者**。L4/L5 的 `state` 写入由该实体的 **Authoritative Writer（Ledger Service）/ 系统**在合法工作流条件满足后执行（OPS_OPERATOR 发起争议处置；FINANCE_REVIEWER 仅提交对账差异 RiskCase，不改 state）。审批角色（RISK_APPROVER）批准 ≠ 执行；`approval actor != execution authority`。
-> **争议案件载体（`【IR修复】` IR 659 P2-1）**：本项目已冻结的领域对象中**不存在 `DisputeCase` 实体**。争议/对账差异一律复用已冻结的 **`RiskCase`**（`risk_type = LEDGER_RECONCILIATION_DISPUTE`），**不得自行发明新实体**。`RiskCase` 的 Authoritative Writer、状态机、DDL 归属 2B-2（见 Part C），在未冻结前相关流转 FAIL_CLOSED。
+> **争议案件载体（`【IR修复】` IR 659 P2-1 + IR 679 P2-1）**：本项目已冻结的领域对象中**不存在 `DisputeCase` 实体**。争议/对账差异一律复用 **`RiskCase`**（`risk_type = LEDGER_RECONCILIATION_DISPUTE`），**不得自行发明新实体**。**RiskCase 冻结状态**：`RiskCase object schema = DEFINED`（05 §3 定义 `case_id`/`user_id`/`risk_type`/`severity`/`status` 等字段）；`RiskCase state/type/DDL machine contract = CONTRACT_GAP`（05 §4 统一状态机未冻结 RiskCase canonical state）；`TARGET_BATCH = 2B-2`。`risk_type = LEDGER_RECONCILIATION_DISPUTE` 为本次新增候选类型值，`STATUS = CANDIDATE / PENDING_2B2_FREEZE`，**在 RiskCase type catalog 冻结前不得用于执行**（`UNFROZEN_RISK_TYPE_EXECUTION = 0`）。**L4/L5 dependency gate = RISK_CASE_CONTRACT_FROZEN**：RiskCase 2B-2 未冻结 → L4/L5 相关流转 FAIL_CLOSED。
 
 > **⚠️ 职责分离提醒（诚实边界，非阻碍）**：本项目 11 角色由 OWNER 单人兼任（manifest `p1_004_owner_freeze`）。系统层面 `OPS_OPERATOR(发起) ≠ RISK_APPROVER(审批)` 的角色分离仍成立；但若同一自然人同时持有两角色并自审自批，须满足 `p1_010_override_contract`（非紧急 SELF_APPROVAL=FORBIDDEN；紧急单人需 MFA + 事后 48h 审计）。此约束不影响本契约冻结，但执行时须遵守。
 
@@ -60,6 +60,7 @@
 - **状态分类（`【IR修复】` P2-1）**：`reversed` = TRUE_TERMINAL（无出边）；`posted` = STABLE_WITH_EXCEPTION_TRANSITIONS（可经 L3/L5 例外离开，不可退回 `pending`）；`pending`/`disputed` = 中间态。
 - **禁止**：`posted → pending`（反过账禁止，须走冲正）、任何态的物理删除/覆盖（append-only）。
 - **争议冻结实现（Owner 裁决 #3 + 财务硬骨头 1 = 方案 A，`【IR修复】` IR 659 P1-1 精确化）**：`state=disputed` 作为冻结标记，**不改原账数字（stored balance）、不改 `frozen_*` 字段**；冻结语义由 **A.1.2 Dispute Hold Matrix** 按 `origin × entry_direction` 精确给出。**禁止统一「排除 disputed 分录影响」**——该规则对 DEBIT 会错误释放已扣资金（见 P1-1）。
+- **L4/L5 dependency gate（`【IR修复】` IR 679 P2-1）**：`L4_DEPENDENCY_GATE = RISK_CASE_CONTRACT_FROZEN`、`L5_DEPENDENCY_GATE = RISK_CASE_CONTRACT_FROZEN`。RiskCase 2B-2 未冻结 → L4/L5 相关流转 FAIL_CLOSED（`UNFROZEN_RISK_TYPE_EXECUTION = 0`）。
 - **pending 长驻策略（Owner 裁决 #4）**：允许长驻，不删除不清理；对账任务标记 stale pending 并生成 RiskCase。
 
 #### A.1.1 Ledger Mutation Field Contract（`【IR修复】` P1-4 + IR 638 P1-2 方案 A：受控 metadata mutation）
@@ -145,6 +146,21 @@ effective_available  : = stored_available - dispute_hold（业务层支取/可�
 | posted | CREDIT (+1) | +100 | hold +100 | 0 / -100 | -100 / -100 / YES |
 | posted | DEBIT (-1) | -100 | hold 0 | 0 / 0 | +100 / 0 / YES |
 
+**D. DISPUTE_SHORTFALL_POLICY（`【IR修复】` IR 679 P1-1，安全默认 = FAIL_CLOSED）**：
+
+`posted CREDIT` 已被部分消费后再 dispute/reversal，会出现 `dispute_hold(+quantity) > stored_available` 的 shortfall（余额不足以支撑冻结或冲正）。本批**不自行发明经济政策**（不采用「允许负余额 / 部分冲正 / 自动债务 / 自动吞差额」任一种），采用审核建议的安全默认：
+
+```text
+shortfall = max(0, dispute_hold - stored_available)      # posted CREDIT 进 dispute 时 dispute_hold = +quantity
+DISPUTE_SHORTFALL_POLICY = FAIL_CLOSED（shortfall > 0）  # 拒绝该 transition，无经济效果
+```
+
+- **适用转移**：`posted CREDIT → disputed`（L5，产生 `dispute_hold = +quantity`）后，若 `dispute_hold > stored_available`，则 **L6（`disputed→posted`）与 L7（`disputed→reversed`）的后续执行 = FAIL_CLOSED**。
+- **禁止（不得自行实现）**：允许负 `stored_balance` / 负 `effective_available`；部分冲正；自动债务（debt/liability）；自动吞掉差额；后续 CREDIT/Reward 自动抵扣 deficit。
+- **未定义（deferred 至 2B-2 RiskCase 冻结 / Owner 最终经济裁决）**：shortfall 是否生成 RiskCase、账户是否 restricted、OTC/Withdrawal/Robot Start 是否禁止、是否需要 ApprovalRequest。**这些维度在 2B-2 冻结前一律不执行**（`SHORTFALL_UNDECIDED_EXECUTION = 0`）。
+- **审计**：FAIL_CLOSED 的拒绝尝试写一条 `outcome=REJECTED`、`reason_code=SHORTFALL_FAIL_CLOSED` 审计事件（不改任何余额/分录）。
+- **机械断言**：`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`；`SHORTFALL_UNDECIDED_EXECUTION = 0`。
+
 **机械字段全集（实现/测试必须逐一覆盖）**：
 
 ```text
@@ -155,6 +171,7 @@ L6_balance_delta
 L6_hold_release
 L7_balance_delta
 L7_hold_release
+shortfall                          # = max(0, dispute_hold - stored_available)，>0 即 FAIL_CLOSED
 ```
 
 **验收断言（IR 659 STEP 1/2/9）**：
@@ -164,6 +181,8 @@ POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0      # posted DEBIT 进 dispute 后 
 PENDING_DEBIT_DISPUTE_RESERVATION = PASS         # pending DEBIT 进 dispute 后必须产生 reservation/hold
 PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0        # pending 取消不得生成经济 reversal 分录
 POSTED_REVERSAL_DIRECTION = PASS                 # posted 冲正方向必须 = -original.entry_direction
+POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC   # posted CREDIT 被部分消费后再 dispute/reversal → shortfall>0 → FAIL_CLOSED
+SHORTFALL_UNDECIDED_EXECUTION = 0                # shortfall 的未定义维度（RiskCase/restricted/Approval）不得执行
 ```
 
 - **不变量**：dispute 期间 `stored_balance` 恒不变（冻结只通过 `dispute_hold` 投影作用于 `effective_available`）；仲裁后每个 origin×direction 恰好产生一次正确的余额效果与 hold 释放，**不二次入账、不二次冲正、不二次扣款**。
@@ -550,4 +569,5 @@ CREATE TABLE `audit_events` (
 - **IR 修复（IR 629，2026-08-15）**：P1-1 Event Catalog 补全 + 删 W6；P1-2 void→refund 断路修复；P1-3 ORDER_SETTLED 结算会计矩阵消歧；P1-4 Ledger Mutation Field Contract + Accounting Delta Matrix（方案 A）；P1-5 角色改 05 canonical；P1-6 快照改 typed reference；P2-1 终态三档拆分；P2-2 状态统一 + 落盘表述修正。
 - **IR 修复（IR 638，2026-08-15，针对修复后 commit 的复审）**：P1-1 Accounting Delta Matrix 改为 `signed_delta = quantity × entry_direction` 机械公式 + CREDIT/DEBIT 双套示例 + reversal 分录字段（A.1.2）；P1-2 方案 A：Ledger 新增 `object_version` 列（dated migration `20260815_machine_contract_batch2_ledger_object_version.sql`，白名单三列 + CAS 乐观锁，A.1.1/A.0）；P1-3 FINANCE_REVIEWER 只读，L4/L5/L6/L7 写入归 Authoritative Writer/系统（A.0.1/A.1）；P1-4 方案 A：P5 `settling→refunding` 触发改为结算异常（Market=exception）+ RefundCase 审批（A.5/A.7）；P2-1 删除自由文本「可逆性」列，改 `direct_reverse`（YES/NO，A.0 + A.1–A.6）；P2-2 修复项以本文件 + Freeze 文档 + DDL 为权威验证源（见 acceptance IR 638 核查表）。
 - **IR 修复（IR 659，2026-08-15，三审）**：P1-1 删除统一「排除 disputed 分录影响」，改为四格 Dispute Hold Matrix（`origin × entry_direction`，`stored_balance` 不变 + `dispute_hold` 投影 + `effective_available`，posted DEBIT 保持扣款、pending DEBIT 预留冻结，A.1.2/Freeze §3.1）；P1-2 统一 pending reversal 语义（`pending→reversed`/`pending-origin disputed→reversed` = `ACCOUNT_DELTA=0` + `ECONOMIC_REVERSAL_ENTRY=NO`，仅 posted 冲正才追加 reversal，A.1/A.1.2/Freeze §3.1）；P2-1 删除未冻结 `DisputeCase`，统一为 `RiskCase`（`risk_type=LEDGER_RECONCILIATION_DISPUTE`，A.0.1/A.1/Freeze §2）；P2-2 为 `object_version` 补 Change Request `CR-20260815-001`（A.1.1/Freeze §3.1/§7/§8）；P2-3 内嵌 Dispute Hold/Reversal 验收断言 + 聚焦本 Commit 证据（acceptance IR 659 核查表）；另按 STEP 5 补 P5 RefundCase 未冻结 FAIL_CLOSED、STEP 6 补涉财 transition 绑定 ApprovalRequest（A.0/A.5）。
+- **IR 修复（IR 679，2026-08-15，四审）**：P1-1 新增 `DISPUTE_SHORTFALL_POLICY`（posted CREDIT 已被部分消费后再 dispute/reversal 的 shortfall 边界：`shortfall = max(0, dispute_hold - stored_available)`，`shortfall > 0 → FAIL_CLOSED` 安全默认，禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2，A.1.2/Freeze §3.1）；P2-1 统一 RiskCase 冻结状态（`object schema = DEFINED` + `machine contract = CONTRACT_GAP` + `TARGET_BATCH = 2B-2`），`risk_type=LEDGER_RECONCILIATION_DISPUTE` 标 `CANDIDATE/PENDING_2B2_FREEZE`，新增 L4/L5 dependency gate = RISK_CASE_CONTRACT_FROZEN（A.0.1/A.1/Freeze §2/§3.1）；P2-2 根因修复：提升 AI Code Review Assistant `max_diff_chars`（25000→100000）消除 diff 截断，并新增机械断言 `POSTED_CREDIT_SHORTFALL_POLICY=DETERMINISTIC`/`SHORTFALL_UNDECIDED_EXECUTION=0`（acceptance IR 679 核查表）。
 - **待确认事项（不阻塞契约收敛，冻结后由 06 处理）**：① 生产参数数值（冷却阈值、领取窗口、OTC 有效期等，06 TBC）；② 单人项目下 OPS_OPERATOR↔RISK_APPROVER 职责分离的落地（`p1_010_override_contract` 兜底，执行时遵守）。
