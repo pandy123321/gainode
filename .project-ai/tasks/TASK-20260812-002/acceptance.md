@@ -163,10 +163,39 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
     1. `php >=8.1` → `>=8.2`（对齐 V2 正式 PHP target）；
     2. remove `web3p/web3.php`；
     3. remove `web3p/ethereum-tx`；
-    4. exact dependency lock / SBOM；
-    5. dependency vulnerability scan。
+    4. `EXACT_DEPENDENCY_LOCK = TRACKED`（`composer.lock` 已入库）；`SBOM = PENDING`；`DEPENDENCY_VULNERABILITY_SCAN = PENDING`；
+    5. clean-install 环境平台扩展（`ext-gd`/`ext-gmp`）补齐（供未来干净环境 `composer install` 验证）。
 - `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 维持，`append-only 机制完整实现`
   仍保持 `[ ]`。
+
+### 2026-08-15 — P2/P3 修复（第五轮）：补齐 Composer 可核验证据 + 修正 exact lock/SBOM 表述（回复 IR 记录 619）
+
+独立审核（记录 619，commit `8aefb97`）判定上一轮两个 P2（`composer.lock` 入库、遗留依赖 disposition）方向已修复
+（P0=0、P1=0），本轮 1 个 P2 + 1 个 P3：
+
+1. **P2**：新增 `composer.lock` 10,809 行，审核 Diff 在文件前段即被截断、远程仓库又无法解析该 Commit，故关键 lock
+   内容（`illuminate/database=10.38.1`、`webman/database=2.1.7`、package count、content-hash 一致性、`composer validate`
+   与 dry-run 结果）无法由独立审核直接核验，只能依赖 acceptance 文字自述。
+2. **P3**：`KNOWN_PENDING_DEPENDENCY_ITEMS` 第 4 项把「exact dependency lock / SBOM」混为一谈——本 Commit 已把 lock 入库，
+   SBOM 仍 pending，二者状态不同。
+
+本轮修复（不改 Ledger guard、不 `composer update`、不 ignore-platform-reqs、不清理遗留依赖）：
+- **补齐精确可核验证据**（原始命令输出，写入 `tests/ledger/ComposerDependencyEvidence.txt`，随本 Commit 提交）：
+  - `composer show illuminate/database --locked` → `v10.38.1`；
+  - `composer show webman/database --locked` → `v2.1.7`；
+  - `composer validate --no-check-publish` → `is valid`，仅 2 个 warning（no license、empty psr-4 namespace），`EXIT=0`；
+  - `composer install --dry-run` → 仅因 `ext-gd`（phpoffice/phpspreadsheet 4.5.0）与 `ext-gmp`（simplito/elliptic-php 1.0.12，
+    经 web3p/ethereum-util 0.1.4 间接引入）缺失而 FAIL，`EXIT=2`，`OTHER_BLOCKERS=0`；
+  - 关键 package 精确版本：`phpoffice/phpspreadsheet=4.5.0`、`simplito/elliptic-php=1.0.12`、`web3p/ethereum-tx=0.4.3`、
+    `web3p/ethereum-util=0.1.4`、`web3p/web3.php=0.3.2`；
+  - `content-hash=c315fa5d5da9b2b8355d335be52d390a`；`composer.json` SHA256=`D321D97F...32230FD8A`；
+    `composer.lock`（committed）SHA256=`B8CA7B2F...451313FB3`。
+  - **baseline lock 原样入库可验证性**：本机在 `git add -f` 前未保留独立历史副本，故按 review 指引如实记为
+    `EXISTING_BASELINE_LOCK_IMPORTED_UNCHANGED = NOT_INDEPENDENTLY_VERIFIABLE`（本次仅 `git add -f`，未执行 `composer update`，
+    `composer.json` content-hash 与 lock `content-hash` 一致可旁证未重解析）。
+- **修正 P3**：`KNOWN_PENDING_DEPENDENCY_ITEMS` 第 4 项拆分为 `EXACT_DEPENDENCY_LOCK = TRACKED`、`SBOM = PENDING`、
+  `DEPENDENCY_VULNERABILITY_SCAN = PENDING`。
+- `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 维持。
 
 ## 验收方法
 

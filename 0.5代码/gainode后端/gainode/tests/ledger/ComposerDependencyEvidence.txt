@@ -1,0 +1,83 @@
+Gainode STAGE-01 — Composer/Dependency Evidence (reply to IR 619)
+Commit: 8aefb974479f6408166dd592fc353c94c8dc8977
+================================================================
+
+=== composer show illuminate/database --locked ===
+name     : illuminate/database
+versions : * v10.38.1
+released : 2023-12-20
+type     : library
+source   : [git] https://github.com/illuminate/database.git 55b4633aff7c9fbf1e14bd579835344604fe4d31
+
+=== composer show webman/database --locked ===
+name     : webman/database
+versions : * v2.1.7
+released : 2025-11-27
+type     : library
+source   : [git] https://github.com/webman-php/database.git 81a8a834cc8db5a5dbb46fe0073a9d5ac73848f6
+
+=== composer validate --no-check-publish ===
+./composer.json is valid, but with a few warnings
+See https://getcomposer.org/doc/04-schema.md for details on the schema
+# General warnings
+- No license specified, it is recommended to do so. For closed-source software you may use "proprietary" as license.
+- Defining autoload.psr-4 with an empty namespace prefix is a bad idea for performance
+EXIT = 0
+WARNING_COUNT = 2
+
+=== composer install --dry-run --no-interaction ===
+Installing dependencies from lock file (including require-dev)
+Verifying lock file contents can be installed on current platform.
+Your lock file does not contain a compatible set of packages. Please run composer update.
+
+  Problem 1
+    - phpoffice/phpspreadsheet is locked to version 4.5.0 and an update of this package was not requested.
+    - phpoffice/phpspreadsheet 4.5.0 requires ext-gd * -> it is missing from your system. Install or enable PHP's gd extension.
+  Problem 2
+    - simplito/elliptic-php is locked to version 1.0.12 and an update of this package was not requested.
+    - simplito/elliptic-php 1.0.12 requires ext-gmp * -> it is missing from your system. Install or enable PHP's gmp extension.
+  Problem 3
+    - web3p/ethereum-util is locked to version 0.1.4 and an update of this package was not requested.
+    - simplito/elliptic-php 1.0.12 requires ext-gmp * -> it is missing from your system. Install or enable PHP's gmp extension.
+    - web3p/ethereum-util 0.1.4 requires simplito/elliptic-php ~1.0.6 -> satisfiable by simplito/elliptic-php[1.0.12].
+EXIT = 2
+BLOCKERS = ext-gd, ext-gmp
+OTHER_BLOCKERS = 0
+
+=== Key package versions (from composer.lock) ===
+phpoffice/phpspreadsheet = 4.5.0   (requires ext-gd *)
+simplito/elliptic-php    = 1.0.12  (requires ext-gmp *)
+web3p/ethereum-tx        = 0.4.3
+web3p/ethereum-util      = 0.1.4   (requires simplito/elliptic-php ~1.0.6 -> ext-gmp chain)
+web3p/web3.php           = 0.3.2
+
+=== ext-gd / ext-gmp dependency chain ===
+ext-gd  <- phpoffice/phpspreadsheet 4.5.0 (require "ext-gd": "*")
+ext-gmp <- simplito/elliptic-php 1.0.12   (require "ext-gmp": "*")
+         <- web3p/ethereum-util 0.1.4     (require simplito/elliptic-php ~1.0.6)
+
+=== Hashes ===
+composer.lock content-hash = c315fa5d5da9b2b8355d335be52d390a
+composer.json  SHA256      = D321D97FF35E5F5312D3868532659D149EC0F896B10D3C689981A6B32230FD8A
+composer.lock  SHA256      = B8CA7B2F98463A667DC0AFBCFB292464FEC632FE358F264038D6377451313FB3
+
+=== Disposition ===
+LOCKFILE_TRACKED              = YES
+ILLUMINATE_DATABASE_LOCKED    = 10.38.1  (== LOCKED_ILLUMINATE_DATABASE_VERSION)
+WEBMAN_DATABASE_LOCKED        = 2.1.7
+COMPOSER_VALIDATE             = PASS_WITH_WARNINGS (2 warnings)
+COMPOSER_DRY_RUN              = FAIL (EXIT 2), blockers = {ext-gd, ext-gmp}, other = 0
+LOCAL_RUNTIME_LEDGER_TEST     = VERIFIED_PASS (pass=67 fail=0, EXIT_CODE=0)
+REPRODUCIBLE_CLEAN_INSTALL_GATE = PENDING_DEPENDENCY_FREEZE
+EXISTING_BASELINE_LOCK_IMPORTED_UNCHANGED = NOT_INDEPENDENTLY_VERIFIABLE (no pre-add copy kept;
+  but git add -f only, no composer update; content-hash consistency corroborates no re-resolution)
+
+LEGACY_COMPOSER_MANIFEST_IMPORT = YES
+RUNTIME_DEPENDENCY_NEWLY_ADDED  = NO
+REPOSITORY_MANIFEST_NEWLY_TRACKED = YES
+KNOWN_PENDING_DEPENDENCY_ITEMS:
+  1. php >=8.1 -> >=8.2
+  2. remove web3p/web3.php
+  3. remove web3p/ethereum-tx
+  4. EXACT_DEPENDENCY_LOCK = TRACKED; SBOM = PENDING; DEPENDENCY_VULNERABILITY_SCAN = PENDING
+  5. clean-install platform extensions (ext-gd, ext-gmp)
