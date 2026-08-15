@@ -1,6 +1,9 @@
 # 07 · Gainode 开发执行计划、Agent 派发规则与功能验收
 
-> 版本：V3.0 · Single Developer Serial Packages + Independent Quality Snapshot Review
+> 版本：V3.1 · Single Developer Serial Packages + Independent Quality Snapshot Review
+> 文档状态：`FROZEN_FOR_EXECUTION`
+> 冻结 ID：`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.1-20260816`
+> 冻结日期：2026-08-16（Asia/Shanghai）
 > 生效项目：Gainode 体育预测、竞猜与内部套利经济引擎
 > 唯一工作区：`E:\github\sports`
 > 后端基线：PHP 8.2 + Webman 2.1 + Workerman；不迁移 Go
@@ -9,6 +12,30 @@
 ---
 
 ## 0. 项目身份锁与绝对禁止项
+
+### 0.1 冻结执行基线
+
+本文件 V3.1 是 Gainode 当前唯一、最新且已冻结的开发步骤基线。Development Agent、Quality Agent 和后续复审 Agent 必须按本文件定义的 Formal Stage、Package ID、包顺序、范围、停止条件、提审节奏和 Gate 条件执行。
+
+```text
+LATEST_EXECUTION_PLAN = Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md
+LATEST_EXECUTION_PLAN_VERSION = V3.1
+EXECUTION_PLAN_STATUS = FROZEN_FOR_EXECUTION
+EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.1-20260816
+DEVELOPMENT_AGENT_MUST_FOLLOW_FROZEN_PLAN = YES
+QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN = YES
+OLDER_EXECUTION_PLAN_STATUS = SUPERSEDED_DO_NOT_EXECUTE
+PLAN_CHANGE_CONTROL = OWNER_APPROVAL_REQUIRED
+```
+
+冻结含义：
+
+- 不得自行新增、删除、合并、拆分、跳过或重排本文件定义的工作包。
+- 不得自行改变 Package 的输入、允许路径、锁定路径、非目标、验收条件或 Stage Gate。
+- Quality Agent 必须逐 Package 锁定快照和审核；每个 Formal Stage 必须单独提交 Stage Gate 审核。
+- Development Agent 在快照锁定且下一包路径不重叠、不消费未冻结合同时仍可继续，不得因 Quality 排队而无条件等待。
+- 修正文案、补充证据或关闭已确认 Finding，可以按当前 Package 的最小范围执行；改变业务、经济、状态、API、DDL、权限、依赖、正式参数或执行路线时，必须先生成 Change Request 并获得 Owner 明确批准。
+- 任何批准后的计划修改必须升级版本、重新生成 Freeze ID、更新冻结凭证并同步 `.project-ai/bootstrap.md`、`.project-ai/context.md` 和 `.project-ai/manifest.yaml`；未完成这些步骤的新草案不得用于开发或审核。
 
 每次执行前必须先验证：
 
@@ -888,6 +915,10 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_APPROVAL
 
 ```text
 你是 Gainode Independent Quality Agent，默认只读。工作区只能是 E:\github\sports。
+
+唯一审核计划基线是本文件 V3.1，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.1-20260816，状态必须为 FROZEN_FOR_EXECUTION。先读取 DEVELOPMENT_EXECUTION_PLAN_FREEZE_V3.1.md，并按凭证规定的 `UTF8_LF_NO_BOM` 规范化方式核对本文件 SHA-256；不一致时输出 EXECUTION_PLAN_FREEZE_MISMATCH 并停止使用该快照，不得自行选择旧版计划。
+
+必须按本文件定义的 Package 顺序逐包锁定 Snapshot 和审核，并在每个 Formal Stage 的全部 Package 完成后单独执行 Stage Gate。不得新增、删除、合并、拆分、跳过或重排 Package；计划变更必须先取得 Owner 明确批准并生成新版本和新 Freeze ID。
 
 先验证 PROJECT/STAGE/PACKAGE/BASE_COMMIT/SNAPSHOT_COMMIT/REVIEW_RANGE/PACKAGE_SHA256/SNAPSHOT_PATHS。
 只审核锁定快照，不把 Developer 后续提交混进本轮，不修改产品代码。

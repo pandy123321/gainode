@@ -56,7 +56,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 - **MC2 当前进度**：Owner 22 项 + 2 项财务裁决已完成；IR 686 的 1 P1 + 3 P2 修复已提交到 `2795e38`，但独立复审尚未返回 APPROVED，当前状态必须写为 `IMPLEMENTED / RE_REVIEW_PENDING`，不得写 FROZEN。
 - 当前执行包：`S01-P01-MC2-REVIEW-LOCK`；其后依次为 2B-1 合同/骨架、2B-2 合同/骨架、投影、Affiliate/Agent、AI Operations 和 STAGE-01 收口。
 - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
-- 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.0。
+- 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.1；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.1-20260816`。Development、Quality 和复审 Agent 必须按该文件的 Formal Stage、Package 顺序、范围、提审节奏和 Gate 执行；旧版路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。
 - 开发采用一个 Development Agent 串行工作包；Quality 锁定快照后，如下一包路径不重叠且不消费未冻结合同，Developer 可继续，不把“继续开发”误写成“当前包审核/合并已通过”。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
 
