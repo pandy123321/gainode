@@ -9,9 +9,9 @@ declare(strict_types=1);
  *   1. Builder injection：AptLedgerEntryModel::query() 必须返回 AptLedgerEntryAppendOnlyBuilder。
  *   2. Mutation matrix：INSERT / read 允许；Model 实例、Eloquent Builder（显式覆写 + __call 兜底）、
  *      DAO 三层的全部 destructive mutation 一律 fail-closed 抛 RunException，且拒绝后数据不变。
- *   3. Dependency mutation-surface contract：以当前锁定 illuminate/database 版本为输入，
- *      枚举 Query\Builder 公开 mutation method 与 disposition 表（DENY / ALLOW_APPEND）对照，
- *      出现未 disposition 的新 write method 即 FAIL（要求人工复核），不假设升级自动安全。
+ *   3. Dependency version gate + disposition contract：锁定 illuminate/database 版本（10.38.1），
+ *      版本一旦变化即 FAIL（要求人工复核 Eloquent/Query Builder mutation surface）；对当前锁定
+ *      版本再校验 deny set 与 disposition 表（DENY / ALLOW_APPEND）一致，不假设升级自动安全。
  *
  * 运行：php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php
  *
@@ -59,8 +59,9 @@ const LEDGER_ALLOW_APPEND = [
     'insertusing',
 ];
 
-// Query\Builder mutation-surface contract 的 write 前缀（用于检测未来升级新增的 write method）。
-const QUERY_WRITE_PREFIXES = ['insert', 'update', 'upsert', 'delete', 'increment', 'decrement', 'truncate'];
+// 锁定并审核的 illuminate/database 版本（以 composer.lock 为准）。
+// 版本一旦变化，dependency version gate 直接 FAIL，要求人工复核 mutation surface。
+const LOCKED_ILLUMINATE_DATABASE_VERSION = '10.38.1';
 
 // ---------------------------------------------------------------------------
 // 最小引导：SQLite in-memory（命名 'mysql'）
@@ -128,11 +129,37 @@ function expectReject(string $label, callable $fn): void
     }
 }
 
+function normalizeVersion(string $v): string
+{
+    $v = trim($v);
+    $v = ltrim($v, 'vV');
+    // composer 可能把版本规范化为 4 段（如 10.38.1.0），去掉尾部多余的 .0 段便于比较
+    $v = preg_replace('/(\.0)+$/', '', $v);
+    return $v;
+}
+
 function snapshot(): array
 {
     return AptLedgerEntryModel::query()
         ->orderBy('ledger_entry_id')
-        ->get(['ledger_entry_id', 'quantity', 'entry_direction', 'state'])
+        ->get([
+            'ledger_entry_id',
+            'account_id',
+            'asset',
+            'quantity',
+            'entry_direction',
+            'entry_type',
+            'state',
+            'source_object_type',
+            'source_object_id',
+            'journal_batch_id',
+            'reversal_of',
+            'idempotency_key',
+            'rule_version',
+            'snapshot_id',
+            'audit_event_id',
+            'created_time',
+        ])
         ->toArray();
 }
 
@@ -142,7 +169,7 @@ function assertUnchanged(array $before, string $label): void
     $after = snapshot();
     if ($before === $after) {
         $pass++;
-        echo "PASS: {$label} — 数据未变（ROW_COUNT_DELTA=0，经济字段不变）\n";
+        echo "PASS: {$label} — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）\n";
     } else {
         $fail++;
         echo "FAIL: {$label} — 数据被修改！\n";
@@ -233,27 +260,39 @@ foreach (LEDGER_ALLOW_APPEND as $allow) {
 echo "\n";
 
 // ---------------------------------------------------------------------------
-// 4. dependency mutation-surface contract（Query\Builder 前缀枚举 vs disposition）
+// 4. dependency version gate（fail-closed 升级护栏）
 // ---------------------------------------------------------------------------
-echo "[4] dependency mutation-surface contract（未来升级护栏）\n";
-$disposition = array_fill_keys(LEDGER_DENY, 'DENY') + array_fill_keys(LEDGER_ALLOW_APPEND, 'ALLOW_APPEND');
-$undispositioned = [];
-foreach ((new ReflectionClass(QueryBuilder::class))->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
-    if ($m->getDeclaringClass()->getName() !== QueryBuilder::class) {
-        continue;
-    }
-    $name = strtolower($m->getName());
-    foreach (QUERY_WRITE_PREFIXES as $prefix) {
-        if (strpos($name, $prefix) === 0 && !isset($disposition[$name])) {
-            $undispositioned[] = $m->getName();
-            break;
+echo "[4] dependency version gate（fail-closed 升级护栏）\n";
+
+// 读取实际 illuminate/database 版本（InstalledVersions，兜底 composer.lock）
+$actualVersion = null;
+if (class_exists(\Composer\InstalledVersions::class)) {
+    $actualVersion = \Composer\InstalledVersions::getPrettyVersion('illuminate/database')
+        ?? \Composer\InstalledVersions::getVersion('illuminate/database');
+}
+if (empty($actualVersion)) {
+    $lockPath = dirname(__DIR__, 2) . '/composer.lock';
+    if (is_file($lockPath)) {
+        $lock = json_decode((string) file_get_contents($lockPath), true);
+        foreach (($lock['packages'] ?? []) as $pkg) {
+            if (($pkg['name'] ?? '') === 'illuminate/database') {
+                $actualVersion = $pkg['version'] ?? null;
+                break;
+            }
         }
     }
 }
+$actualVersion = normalizeVersion((string) $actualVersion);
+$versionMatch = $actualVersion === LOCKED_ILLUMINATE_DATABASE_VERSION;
 check(
-    $undispositioned === [],
-    'Query\Builder 公开 mutation method 已全部 disposition' . ($undispositioned ? ' — 未 disposition: ' . implode(', ', $undispositioned) : '')
+    $versionMatch,
+    'dependency version gate：锁定 ' . LOCKED_ILLUMINATE_DATABASE_VERSION
+        . '，实际 ' . ($actualVersion !== '' ? $actualVersion : 'UNKNOWN')
+        . ($versionMatch ? '（一致）' : '（不一致 → ILLUMINATE_DATABASE_VERSION_CHANGED / MANUAL_MUTATION_SURFACE_REVIEW_REQUIRED）')
 );
+if (!$versionMatch) {
+    echo "      依赖版本已变化，必须人工复核 Eloquent/Query Builder mutation surface 并更新 disposition 后方可解除 FAIL。\n";
+}
 echo "\n";
 
 // ---------------------------------------------------------------------------

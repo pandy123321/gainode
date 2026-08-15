@@ -71,6 +71,43 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
   的新 write method 即 FAIL 要求人工复核）。
 - `acceptance.md`：`append-only 机制完整实现` 仍保持 `[ ]`，仅记录 `ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS`。
 
+### 2026-08-15 — P2 修复（第二轮）：regression test 的 mutation-surface contract 改为 fail-closed version gate（回复 IR 记录 614）
+
+独立审核（记录 614，commit `0a43d42`）判定上轮 P2 修复方向正确，但 `tests/ledger/LedgerAppendOnlyMutationMatrixTest.php`
+里的「dependency mutation-surface contract」仍有 3 个 P2：
+
+1. **P2-1**：contract 声称 `VERIFIED_PASS`，但该 contract（prefix 启发式）在已提交的测试里从未真正执行/验证；
+   且测试运行时在 version gate 处即 FAIL（`10.38.1` vs `10.38.1.0`），结论与代码/运行时证据不符。
+2. **P2-2**：mutation-surface contract 用 `QUERY_WRITE_PREFIXES` 前缀启发式枚举 `Query\Builder` 的 write method，
+   无法可靠覆盖未来新增 API / 继承方法变化；且文档引用了一个不存在的 `LedgerMutationContractTest.php`。
+3. **P2-3**：`acceptance.md` 写 `ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 缺乏运行时证据背书
+   （`VERIFIED_PASS` 需真实通过的测试结果，而非「测试文件存在」）。
+
+本轮修复（不改 MC1 Frozen DDL、不改共用基类、不改其他业务 Model、不重写 Builder 方案）：
+- `LedgerAppendOnlyMutationMatrixTest.php`：删除 prefix 启发式 `QUERY_WRITE_PREFIXES`，改为 fail-closed **version gate**：
+  `LOCKED_ILLUMINATE_DATABASE_VERSION = '10.38.1'`；实际版本经 `Composer\InstalledVersions::getPrettyVersion()`
+  （兜底 `getVersion()`，再兜底 `composer.lock`）读取，`normalizeVersion()` 归一化（去 `v/V` 前缀、去尾部多余 `.0`
+  段，如 `10.38.1.0` → `10.38.1`）后比对；版本不一致即 FAIL，要求人工复核 Eloquent/Query Builder mutation surface 并
+  disposition 后方可解除。不再假设升级自动安全。
+- 修正 `snapshot()`：拒绝后数据完整性改为校验全部 16 个 immutable 字段（此前仅 4 个），每个 REJECT 后输出
+  `ROW_COUNT_DELTA=0` + `IMMUTABLE_FIELD_DELTA=0`。
+- 保留独立 CLI 而非改 PHPUnit test case 的正式原因（evidence-first）：经核查代码，本后端**当前未安装 PHPUnit**——
+  `composer.json` 无 `require-dev phpunit`、`vendor/bin/` 无 `phpunit`、项目根无 `phpunit.xml`（仅 vendor 依赖包自带）。
+  `context.md`/`rules/coding.md` 声明的「PHPUnit 10+，tests/Unit|Integration|Feature」属目标治理标准，尚未在本后端落地；
+  落地 PHPUnit 需新增依赖 + `phpunit.xml` + CI Test Gate 接线，属独立基础设施任务，且「引入未经批准依赖」被本轮禁止事项
+  明确排除。故本轮以 CLI 接入默认测试命令：`composer.json` 新增 `"test": "php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php"`
+  （`composer test` 或直接 `php tests/ledger/...` 均可执行），并在下方记录运行时证据；PHPUnit 落地列入后续 TODO（见 通用验收）。
+- 运行时验证结果（真实执行，exit code=0）：
+  - `php -l`：`LedgerAppendOnlyMutationMatrixTest.php` 与 `AptLedgerEntryAppendOnlyBuilder.php` 均无语法错误。
+  - `php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php` → `RESULT: pass=67 fail=0`，`ALL PASS`。
+  - 覆盖：[1] 类加载 4 PASS；[2] Builder injection 3 PASS（`Model::query()` instanceof `AptLedgerEntryAppendOnlyBuilder`）；
+    [3] deny set 与 disposition 契约（`DESTRUCTIVE_METHODS` ≡ `LEDGER_DENY`，含 `updatefrom`；每个 DENY 映射到真实框架方法；
+    ALLOW_APPEND 未被 deny）；[4] version gate PASS（锁定 `10.38.1` / 实际 `10.38.1`）；[5] mutation matrix 全部 PASS
+    （INSERT/READ 允许；Model/Builder/DAO 全部 destructive mutation REJECT，且每个 REJECT 后 `ROW_COUNT_DELTA=0`、
+    `IMMUTABLE_FIELD_DELTA=0`、全 16 字段）。
+- `acceptance.md`：`append-only 机制完整实现` 仍保持 `[ ]`；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 现以
+  已提交测试的运行时结果 `pass=67 fail=0`（exit code=0）背书；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED）。
+
 ## 验收方法
 
 - 代码审查（Code Review）：逐模块检查分层约定、状态机完整性
@@ -172,6 +209,7 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
 - [ ] 业务状态常量定义在 Model 类中（非 Service 硬编码）
 - [ ] 所有写操作含 idempotency_key
 - [ ] `php -l` 语法检查全通过
+- [ ] 后端测试框架落地 PHPUnit 10+（`tests/Unit|Integration|Feature`）—— 当前 Ledger append-only 回归测试以独立 CLI 接入 `composer test`（`tests/ledger/LedgerAppendOnlyMutationMatrixTest.php`，runtime `pass=67 fail=0`）；PHPUnit 依赖、`phpunit.xml` 与 CI Test Gate 落地待独立基础设施任务（本轮禁止「引入未经批准依赖」）
 - [ ] 无跨层调用（Controller → DAO/Model 直接操作）
 - [ ] DDL 文件遵循日期命名约定（`YYYYMMDD_description.sql`）
 - [ ] DDL 文件顶部有变更原因和影响范围注释
