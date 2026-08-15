@@ -24,7 +24,7 @@ use support\extend\Service;
  *   - AptLedgerEntryModel::newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，
  *     阻断 Eloquent Builder 的 update/upsert/increment/decrement/touch/delete/forceDelete，
  *     并经其 __call() 兜底阻断 Query Builder 层的 updateOrInsert/truncate/incrementEach/
- *     decrementEach。
+ *     decrementEach/updateFrom（deny set 为「当前锁定版本已审核」清单，升级需 contract 测试复核）。
  *   - AptLedgerEntryDao 覆写 delete/deleteAll/update/updateAll/updateOrCreate 全部 fail-closed。
  *   - 因此 ORM 正常路径（Model 实例 + Eloquent Builder 含 __call 兜底 + DAO）仅允许追加（INSERT）；
  *     显式取得底层 Query Builder（toBase()/getQuery()）与 DB::table() / PDO raw SQL 直连属

@@ -13,14 +13,24 @@ use support\exception\RunException;
  *
  * 阻断所有 destructive mutation，只保留 INSERT（追加）与只读查询。
  *
- * 单一事实来源：DESTRUCTIVE_METHODS 覆盖 Illuminate/Database v10.38.1 的两层 mutation 面：
+ * 单一事实来源：DESTRUCTIVE_METHODS 覆盖「当前锁定 Illuminate/Database v10.38.1 已审核的
+ * ORM destructive mutation」，分为两层：
  *   - Eloquent Builder 层（本类显式覆写）：update / upsert / increment / decrement / touch /
  *     delete / forceDelete
  *   - Query Builder 层（经 Eloquent Builder __call() 转发，本类显式覆写 + __call() 兜底）：
- *     updateOrInsert / truncate / incrementEach / decrementEach
+ *     updateOrInsert / truncate / incrementEach / decrementEach / updateFrom
  *
  * __call() 兜底：任何未显式定义但落入 DESTRUCTIVE_METHODS 的方法名，在转发到底层 Query
- * Builder 之前一律 fail-closed，避免 Illuminate 升级新增 mutation API 后静默绕过。
+ * Builder 之前一律 fail-closed。
+ *
+ * 安全声明边界（不夸大）：
+ *   - DESTRUCTIVE_METHODS 是「当前已审核的锁定版本」deny set。静态清单本身无法自动识别
+ *     Illuminate 未来升级新增的 mutation API；依赖升级必须经
+ *     tests/ledger/LedgerAppendOnlyMutationMatrixTest.php 的 dependency mutation-surface
+ *     contract 检查（出现未 disposition 的新 write method 即 FAIL，要求人工复核），
+ *     不得假设「升级自动安全」。
+ *   - updateFrom 属 PostgreSQL 的 UPDATE ... FROM ...，当前 Gainode 冻结库为 MySQL，
+ *     不可形成实际 MySQL 修改路径；为语义完整仍纳入 deny。
  *
  * Protection boundary（本类只覆盖 ORM 正常路径）：
  *   - Model::query() / Model::where() / Model::find() / newQuery() / DAO / Model 实例
@@ -32,8 +42,13 @@ use support\exception\RunException;
 class AptLedgerEntryAppendOnlyBuilder extends Builder
 {
     /**
-     * apt_ledger_entries 的 destructive mutation 全量 deny set（小写方法名）。
-     * 供 __call() 兜底拦截与回归测试共用，是「不可变账本禁写」的机械单一事实来源。
+     * apt_ledger_entries 的 destructive mutation deny set（小写方法名）。
+     *
+     * 覆盖范围 = 当前锁定 Illuminate/Database v10.38.1 已审核的 ORM destructive mutation，
+     * 供 __call() 兜底拦截与 dependency mutation-surface contract 回归测试共用。
+     *
+     * 注意：这是「当前已审核」清单，不是「全量 / 未来升级自动安全」承诺。Illuminate 升级
+     * 新增 mutation API 时，必须由 tests/ledger 的 contract 测试检测并人工 disposition。
      */
     public const DESTRUCTIVE_METHODS = [
         'update',
@@ -47,6 +62,7 @@ class AptLedgerEntryAppendOnlyBuilder extends Builder
         'truncate',
         'incrementeach',
         'decrementeach',
+        'updatefrom',
     ];
 
     public function __construct(QueryBuilder $query)
@@ -153,6 +169,17 @@ class AptLedgerEntryAppendOnlyBuilder extends Builder
     public function updateOrInsert(array $attributes, array $values = [])
     {
         throw new RunException('apt_ledger_entries 为 append-only 账本：禁止 Query Builder updateOrInsert');
+    }
+
+    /**
+     * append-only：禁止 Query Builder updateFrom（PostgreSQL UPDATE ... FROM ...；
+     * 当前 Gainode 冻结库为 MySQL 不可执行，为语义完整仍 deny）。
+     *
+     * @throws RunException
+     */
+    public function updateFrom(array $values)
+    {
+        throw new RunException('apt_ledger_entries 为 append-only 账本：禁止 Query Builder updateFrom');
     }
 
     /**

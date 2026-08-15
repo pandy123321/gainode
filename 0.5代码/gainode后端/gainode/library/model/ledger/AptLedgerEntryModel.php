@@ -26,7 +26,9 @@ use support\exception\RunException;
  *   - newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，阻断 Eloquent Builder 层
  *     的 update/upsert/increment/decrement/touch/delete/forceDelete，并经其 __call() 兜底
  *     阻断经 Eloquent Builder 转发到底层 Query Builder 的 updateOrInsert/truncate/
- *     incrementEach/decrementEach（deny set 见 AptLedgerEntryAppendOnlyBuilder::DESTRUCTIVE_METHODS）。
+ *     incrementEach/decrementEach/updateFrom（deny set 见
+ *     AptLedgerEntryAppendOnlyBuilder::DESTRUCTIVE_METHODS；其为「当前锁定版本已审核」清单，
+ *     Illuminate 升级新增 mutation API 需经 tests/ledger 的 contract 测试人工复核）。
  *   - 配合 AptLedgerEntryDao 对 delete/deleteAll/update/updateAll/updateOrCreate 的覆写，
  *     阻断 DAO 层的删除/覆盖路径。
  *   - 本骨架因此仅允许 INSERT（追加）；state 流转与 reversal 仍为 CONTRACT GAP，FAIL_CLOSED。

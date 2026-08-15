@@ -40,13 +40,36 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
 - `AptLedgerEntryAppendOnlyBuilder`（新增，注入自 `AptLedgerEntryModel::newEloquentBuilder()`）：显式阻断
   Eloquent Builder 的 `update/upsert/increment/decrement/touch/delete/forceDelete`，并显式阻断 Query Builder 的
   `updateOrInsert/truncate/incrementEach/decrementEach`；同时以 `DESTRUCTIVE_METHODS` deny set + `__call()` 兜底，
-  任何落入 deny set 的方法在转发到底层 Query Builder 前一律 fail-closed，防止 Illuminate 升级新增 mutation API 后静默绕过。
+  任何落入 deny set 的方法在转发到底层 Query Builder 前一律 fail-closed。
 - `AptLedgerEntryDao`：覆写 `delete/deleteAll/update/updateAll/updateOrCreate`，全部 fail-closed 抛 `RunException`。
 - 结果：ORM 正常路径（Model 实例 + Eloquent Builder 含 `__call` 兜底 + DAO）仅允许 INSERT（追加）；reversal 反向分录与未冻结
   state 流转仍为 CONTRACT GAP（FAIL_CLOSED）。
 - Protection boundary：显式取得底层 Query Builder（`toBase()`/`getQuery()`）与 `DB::table()` / PDO raw SQL 直连属
   DB 层边界，应用层不封堵；需数据库级硬约束时另走 Change Request（DB Trigger / DB Role）。
 - 未修改 MC1 Frozen DDL。
+
+### 2026-08-15 — P2 修复：deny set 安全声明准确性 + Ledger 回归测试（回复 IR 记录 609/610）
+
+独立审核（记录 609/610，commit `f6871bb`）判定上一轮 `__call()` 绕过 P1 已 CLOSED（P0=0、P1=0），
+但给出 2 个 P2：
+
+1. **P2-1**：`DESTRUCTIVE_METHODS` 被描述为「全量」并声称可「防止未来 Illuminate 升级新增 mutation API
+   静默绕过」——实际上静态 deny set 做不到，且 v10.38.1 的 `Query\Builder` 已存在未列入的 destructive API
+   `updateFrom()`（PostgreSQL `UPDATE ... FROM ...`；当前 Gainode MySQL 不可执行，但已证明 deny set ≠ 全量）。
+2. **P2-2**：高风险 Ledger immutable guard 连续三轮靠人工枚举才逐步发现绕过，仍缺少已提交的 regression test 证据。
+
+本轮修复（不改 MC1 Frozen DDL、不改共用基类、不改其他业务 Model、不重写现有 Builder 方案）：
+- `AptLedgerEntryAppendOnlyBuilder`：`DESTRUCTIVE_METHODS` 新增 `updatefrom`，并新增 `updateFrom(array $values)`
+  显式覆写 fail-closed；更正 docblock，明确 deny set 为「当前锁定 v10.38.1 已审核」清单、**不再声称静态 deny set
+  可自动识别未来升级新增 API**，改为依赖 `tests/ledger` 的 dependency mutation-surface contract 测试人工 disposition。
+- `AptLedgerEntryModel` / `LedgerService`：同步更正 Protection boundary 与 deny set 表述（不再夸大）。
+- 新增可执行回归测试 `0.5代码/gainode后端/gainode/tests/ledger/LedgerAppendOnlyMutationMatrixTest.php`（独立 CLI，
+  无需 PHPUnit），覆盖：Builder injection（`AptLedgerEntryModel::query()` instanceof `AptLedgerEntryAppendOnlyBuilder`）、
+  mutation matrix（INSERT/read 允许，Model 实例 / Eloquent Builder 显式覆写与 `__call` 兜底 / DAO 覆写全部 destructive
+  mutation REJECT）、拒绝后数据完整性（`ROW_COUNT_DELTA=0`、经济字段不变）、以及 dependency mutation-surface contract
+  （以锁定 illuminate 版本为输入，枚举 `Query\Builder` 公开 mutation method 与 disposition 表对照，出现未 disposition
+  的新 write method 即 FAIL 要求人工复核）。
+- `acceptance.md`：`append-only 机制完整实现` 仍保持 `[ ]`，仅记录 `ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS`。
 
 ## 验收方法
 
@@ -85,7 +108,7 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
 - [ ] API 路由已插入 `sys_route` 表
 
 ### APT Ledger 改造
-- [ ] append-only 机制完整实现（reversal 追加反向分录，不删不覆盖原文）— ORM 正常路径（Model 实例 `save()/delete()` + `AptLedgerEntryAppendOnlyBuilder` 显式阻断 Eloquent Builder `update/upsert/increment/decrement/touch/delete/forceDelete` 与 Query Builder `updateOrInsert/truncate/incrementEach/decrementEach`，并以 `DESTRUCTIVE_METHODS` deny set + `__call()` 兜底 + `AptLedgerEntryDao` 覆写 `delete/deleteAll/update/updateAll/updateOrCreate`）已机械阻断删除/覆盖；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED，待 Ledger Mutation Contract 冻结）；DB 层硬约束（Trigger/Role）待 Change Request
+- [ ] append-only 机制完整实现（reversal 追加反向分录，不删不覆盖原文）— ORM 正常路径（Model 实例 `save()/delete()` + `AptLedgerEntryAppendOnlyBuilder` 显式阻断 Eloquent Builder `update/upsert/increment/decrement/touch/delete/forceDelete` 与 Query Builder `updateOrInsert/truncate/incrementEach/decrementEach/updateFrom`，并以 `DESTRUCTIVE_METHODS` deny set（当前锁定 v10.38.1 已审核清单）+ `__call()` 兜底 + `AptLedgerEntryDao` 覆写 `delete/deleteAll/update/updateAll/updateOrCreate`）已机械阻断删除/覆盖，并有 `tests/ledger/LedgerAppendOnlyMutationMatrixTest.php` 回归测试背书（`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS`）；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED，待 Ledger Mutation Contract 冻结）；DB 层硬约束（Trigger/Role）待 Change Request
 - [ ] 四账分离模型（05 AptAccount）: 1.APT数量账(balance_apt_i/c + frozen_apt_i/c) 2.参考估值账 3.功能货币收入账 4.Reward/预算账 — 仅第 1 项「数量账」骨架已建（`AptAccountModel`）
 - [ ] 现有 wallet 表的迁移计划已制定（不直接破坏现有数据）
 - [x] `sql/` 对应 DDL 文件已创建（`apt_accounts` / `apt_ledger_entries` 已由 MC1 batch1 DDL 覆盖）
