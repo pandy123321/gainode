@@ -129,6 +129,45 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
   以及 exit code `0`。
 - `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 现以已提交的原始运行证据文件背书。
 
+### 2026-08-15 — P2 修复（第四轮）：composer.lock 入库 + 遗留依赖 disposition（回复 IR 记录 618）
+
+独立审核（记录 618，commit `2b37b87`）判定上一轮两个 P2（`composer test` 接线、Runtime Evidence）已 CLOSED
+（P0=0、P1=0），Ledger ORM append-only guard 已获真实运行证据背书（`pass=67 fail=0` / `EXIT_CODE=0`）。本轮 2 个 P2
+转向 Composer/Dependency Governance：
+
+1. **P2-1**：`composer.json` 首次入库但未提交 `composer.lock`，而 Ledger 测试锁定 `illuminate/database=10.38.1`，
+   干净 checkout 后 `composer install` 无法保证仍解析到该精确版本，形成自相矛盾的 Test Gate。
+2. **P2-2**：首次纳入 Git 的完整 `composer.json`（`[A]` 新文件，非 `[M]`）带入已知与 V2 冻结方向不一致的遗留配置：
+   `"php": ">=8.1"`（V2 正式目标 `>=8.2`）、`web3p/web3.php` / `web3p/ethereum-tx`（V2 已冻结为无 blockchain/signer，
+   应移除）。
+
+本轮修复（不改 Ledger guard、不 `composer update`、不做大规模依赖清理、不扩大 Scope）：
+- **Dependency Freeze 决策（Disposition，非代码变更）**：经核查 `.project-ai` 治理文档，当前 STAGE-01 未禁止
+  `composer.lock` 入库，且 `composer.json` `"type": "project"`（应用型）本应提交 lock。故按 review 优先方案，
+  以 `git add -f` 将**现有 baseline `composer.lock` 原样纳入 Git**（不 `composer update`、不改任何 dependency resolution）。
+- **`composer.lock` 核查事实**：
+  - `illuminate/database = v10.38.1`（精确匹配 `LOCKED_ILLUMINATE_DATABASE_VERSION = '10.38.1'`）；
+  - `webman/database = v2.1.7`（间接引入 Illuminate Database 的来源）；
+  - lock 共 400 个包，content-hash 与 `composer.json` 一致（`composer install` 未报 "out of date"）。
+- **`composer validate`**：PASS（仅 2 个既有 warning：无 license、autoload psr-4 空命名空间——均非本轮引入）。
+- **可重复性边界（诚实记录，不夸大）**：本开发机 `composer install --dry-run` 因本地缺失平台扩展
+  `ext-gd`（phpoffice/phpspreadsheet 4.5.0 依赖）与 `ext-gmp`（simplito/elliptic-php 1.0.12 依赖，经
+  web3p/ethereum-util 间接引入）而 FAIL（EXIT=2）。这属**本地 PHP 平台扩展缺失 + 遗留 Web3/spreadsheet 依赖耦合**，
+  非 lock 缺陷、也非 Ledger 逻辑问题。故：
+  - `LOCAL_RUNTIME_LEDGER_TEST = VERIFIED_PASS`（`pass=67 fail=0`，已提交证据文件）
+  - `REPRODUCIBLE_CLEAN_INSTALL_GATE = PENDING_DEPENDENCY_FREEZE`（待独立 Dependency Governance Task 处置遗留依赖与平台扩展后，方可在干净环境验证 `composer install && composer test`）
+- **遗留依赖 disposition（`LEGACY_COMPOSER_MANIFEST_IMPORT = YES`）**，绑定后续 Dependency Governance Task/CR：
+  - `RUNTIME_DEPENDENCY_NEWLY_ADDED = NO`（这些依赖本已存在于被忽略的本地 backend，非本轮新装）；
+  - `REPOSITORY_MANIFEST_NEWLY_TRACKED = YES`（`composer.json`/`composer.lock` 本轮首次进入 Git 版本控制）；
+  - `KNOWN_PENDING_DEPENDENCY_ITEMS`：
+    1. `php >=8.1` → `>=8.2`（对齐 V2 正式 PHP target）；
+    2. remove `web3p/web3.php`；
+    3. remove `web3p/ethereum-tx`；
+    4. exact dependency lock / SBOM；
+    5. dependency vulnerability scan。
+- `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 维持，`append-only 机制完整实现`
+  仍保持 `[ ]`。
+
 ## 验收方法
 
 - 代码审查（Code Review）：逐模块检查分层约定、状态机完整性
