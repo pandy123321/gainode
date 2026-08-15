@@ -104,6 +104,7 @@ OWNER_DECISION_REQUIRED =
 | Ledger 回归入口 | `composer test` → 67 pass / 0 fail 的已记录证据 | PASS_AT_RECORDED_REVISION |
 | MC2 Owner 裁决 | 22 项 + 2 项财务硬骨头 | COMPLETE |
 | IR 686 修复 | 实现修订 `2795e38` | IMPLEMENTED / RE-REVIEW_PENDING |
+| S01-P02 2B-1 状态合同补齐 | commit `2707938`，task `TASK-20260816-001` | DESIGNED（Result/Settlement 矩阵待 gate；6 实体 enum 待 Owner 裁决） |
 
 已完成的 8 个实体：
 
@@ -123,7 +124,8 @@ power_positions
 ### 2.2 当前未完成
 
 - MC2 的最终独立复审与正式 `FROZEN` 标记。
-- 2B-1 非核心实体的状态补充、DDL、Model/DAO/Service。
+- 2B-1 非核心实体的 DDL、Model/DAO/Service（Result/Settlement enum 已冻结可建；6 缺 enum 实体 SettlementBatch/RefundCase/CorrectionCase/OtcTrade/RobotUpgradeOrder/ConsentReceipt 待 Owner 裁决 enum，FAIL_CLOSED 不建表）。
+- 2B-1 Result/Settlement 转移矩阵的 Independent Review（State Machine gate）。
 - 2B-2 审批、参数、通知、会话、KYC、风险、工单合同与骨架。
 - 未落表投影的服务端计算层。
 - Affiliate/Agent、AI Operations 的正式机器合同与结构。
@@ -137,9 +139,10 @@ power_positions
 
 ```text
 CURRENT_FORMAL_STAGE = STAGE-01_BACKEND_DOMAIN_OBJECTS
-CURRENT_DEVELOPER_PACKAGE = S01-P01-MC2-REVIEW-LOCK
+CURRENT_DEVELOPER_PACKAGE = S01-P02-2B1-STATE-CONTRACT
 CURRENT_REVIEW_REVISION = 2795e38abd9bfff0383992f98ce01193e7fe1a5f
 CURRENT_REVIEW_RESULT = PENDING
+S01_P02_STATUS = COMPLETED_DESIGNED（Result/Settlement 矩阵 DESIGNED + 6 实体 Owner Decision Matrix，commit 2707938）
 ```
 
 不得把 commit message 中的“close IR 686 findings”写成“Independent Review 已通过”。
