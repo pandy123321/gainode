@@ -18,7 +18,11 @@
 --   1. 主键：Snowflake ID（bigint unsigned），不使用 AUTO_INCREMENT。
 --   2. append-only：无 updated_time 列；一事件一行，顺序可重建。
 --   3. 独立表：不与 V1.x 遗留 `sys_operation_logs` 合并（语义不同）。
---   4. before/after_snapshot_id 引用 parameter_snapshots（复用参数快照，非独立 diff 机制）。
+--   4. 快照引用：before/after_snapshot 采用 snapshot_type + snapshot_id 类型化引用
+--      （IR 629 P1-6）。parameter_snapshots 仅作为其中一种 type，不再滥用为通用业务对象快照。
+--
+-- 状态：CANDIDATE（冻结候选，已落盘 sql/ 日期文件，未 FROZEN）。
+--   冻结前可修改（同日期文件内改，或按变更控制新增日期文件）。
 --
 -- 执行方式：forward-only migration（一次性建表，禁止内置 DROP/CREATE）。
 --   - 首次执行创建 1 张新表。
@@ -35,8 +39,10 @@ CREATE TABLE `audit_events` (
   `actor_role` varchar(32) NOT NULL DEFAULT '' COMMENT '操作者角色(05 §8 RBAC)',
   `target_object_type` varchar(64) NOT NULL DEFAULT '' COMMENT '目标对象类型(如 apt_ledger_entries)',
   `target_object_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '目标对象ID',
-  `before_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更前快照ID(引用 parameter_snapshots.snapshot_id)',
-  `after_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更后快照ID(引用 parameter_snapshots.snapshot_id)',
+  `before_snapshot_type` varchar(64) NOT NULL DEFAULT '' COMMENT '变更前快照类型(typed reference，如 parameter_snapshots；空=无显式快照)',
+  `before_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更前快照ID(在 before_snapshot_type 命名空间内)',
+  `after_snapshot_type` varchar(64) NOT NULL DEFAULT '' COMMENT '变更后快照类型(typed reference)',
+  `after_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更后快照ID(在 after_snapshot_type 命名空间内)',
   `outcome` varchar(32) NOT NULL DEFAULT '' COMMENT '结果(SUCCESS/FAILED/REJECTED)',
   `reason_code` varchar(64) NOT NULL DEFAULT '' COMMENT '原因码',
   `request_id` varchar(64) NOT NULL DEFAULT '' COMMENT '请求ID',

@@ -1,7 +1,7 @@
 # Acceptance: Machine Contract 第二批
 
-> 本文件定义**冻结前**的验收标准。当前状态：**冻结候选已产出（2026-08-15），待 Owner Signoff**。
-> 冻结流程剩余：Owner Signoff → Independent Review（State Machine gate）→ 置 FROZEN。
+> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 629），修复中**。
+> 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 候选交付物：
 > - `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
 > - `0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
@@ -12,8 +12,8 @@
 
 ### A. Ledger Mutation Contract
 
-- [x] 1. Ledger `dispute` 仲裁规则 → **运营发起，超级管理员裁决**（A.1 L4–L7）。
-- [x] 2. Ledger `reversal` 触发条件与审批流 → **运营发起，超级管理员审批**（A.1 L2/L3）。
+- [x] 1. Ledger `dispute` 仲裁规则 → **运营发起，RISK_APPROVER 裁决**（A.1 L4–L7）。
+- [x] 2. Ledger `reversal` 触发条件与审批流 → **运营发起，RISK_APPROVER 审批**（A.1 L2/L3）。
 - [x] 3. `disputed` 期间余额是否冻结 → **要冻住；方案 A（不改原账数字，`state=disputed` 标记 + 业务层排除冻结）**。
 - [x] 4. `pending` 分录长驻策略 → **允许长驻，不删不清理，stale 报 RiskCase**。
 
@@ -27,14 +27,14 @@
 ### C. Market / Prediction Order
 
 - [x] 9. Market `void` 原因清单 → **四类（赛事取消/延期超期/数据不可用/监管），reason_code 承载**。
-- [x] 10. `exception→settled` 是否人工审批 → **必须运营 + 超级管理员确认**。
+- [x] 10. `exception→settled` 是否人工审批 → **必须运营 + RISK_APPROVER 确认**。
 - [x] 11. Result corrected 是否重开结算 → **是，`settled→settlement`，仅一次**。
 - [x] 12. `corrected` 是否回 settled → **不回，终态，重新结算走新对象**。
 
 ### D. OTC
 
 - [x] 13. `review_required` 触发 / 有效期 → **大额卖出、单人高频异常需人工确认；有效期 TBC**。
-- [x] 14. OTC 争议处置目标态 → **超级管理员判 `cancelled`（退钱）或 `completed`（维持成交），不回 partial**。
+- [x] 14. OTC 争议处置目标态 → **RISK_APPROVER 判 `cancelled`（退钱）或 `completed`（维持成交），不回 partial**。
 
 ### E. Event Catalog
 
@@ -55,27 +55,42 @@
 - [x] 财务 1（争议冻结会计）→ **方案 A**（不改原账数字，`state=disputed` 标记 + 业务层排除）。
 - [x] 财务 2（投注结算会计）→ **下注先扣钱；赢=本金+盈利入账；输=不追加；走盘=退本金**。
 
-### 角色裁决
+### 角色裁决（05 canonical，IR 629 P1-5 修订）
 
-- [x] **财务审核人 = 超级管理员（ADMIN_SECURITY）**；争议/冲正/结算异常/OTC 争议/纠错等涉财审批统一由超级管理员承担，发起方为运营或系统。
-- ⚠️ 单人项目职责分离（OPS_OPERATOR↔ADMIN_SECURITY）执行时须遵守 `p1_010_override_contract`。
+- [x] **财务裁决/审批 = 05 canonical 分工**：争议裁决/冲正审批/结算异常确认/OTC 争议处置/纠错审批 → **RISK_APPROVER**（批准风险处置）；对账差异发现/发起争议 → **FINANCE_REVIEWER**（读 Ledger/对账，不可写）；发起方 = OPS_OPERATOR 或系统。ADMIN_SECURITY 不涉财。
+- ⚠️ 单人项目职责分离（OPS_OPERATOR↔RISK_APPROVER）执行时须遵守 `p1_010_override_contract`。
 
-## 冻结时的硬性验收标准（Owner Signoff 后触发）
+## IR 629 修复项核查（Independent Review 返回 CHANGES_REQUIRED）
 
-- [ ] 状态转移矩阵（A.1–A.6）经 Owner 逐条确认，无自创状态（枚举全部来自 05 §4）。
-- [ ] Event Catalog 事件码与 `entry_type`/`entry_direction` 对齐，DDL 中 `entry_type` 由 `varchar(64)` 改为可冻结的枚举或引用。
-- [ ] `audit_events` 表 DDL 定义（append-only，支持 MC1 §3.6 审计不变量）。
+| # | 修复项 | 状态 |
+|---|---|---|
+| P1-1 | Event Catalog 补全（A.1–A.6 全部 transition → event_code）+ 删除 W6 引用 | ✅ 已修复（design.md Part B） |
+| P1-2 | Market void 源状态补 closing/locked + Order 新增 P10/P11/P12 refund 路径 | ✅ 已修复（design.md A.4/A.5） |
+| P1-3 | ORDER_SETTLED 结算会计矩阵消歧（WIN/LOSS/PUSH） | ✅ 已修复（design.md B.3） |
+| P1-4 | Ledger Mutation Field Contract + Accounting Delta Matrix（方案 A） | ✅ 已修复（design.md A.1.1/A.1.2） |
+| P1-5 | 角色改 05 canonical（RISK_APPROVER/FINANCE_REVIEWER，ADMIN_SECURITY 不涉财） | ✅ 已修复（design.md A.0.1/D.0） |
+| P1-6 | audit snapshot 改 typed reference（snapshot_type + snapshot_id） | ✅ 已修复（design.md Part E + DDL） |
+| P2-1 | 终态三档拆分（TRUE_TERMINAL / STABLE_WITH_EXCEPTION / NON_REVERSIBLE） | ✅ 已修复（design.md A.0 + 各实体） |
+| P2-2 | Owner Signoff/Freeze 状态统一 + 落盘表述修正 | ✅ 已修复（本文件 + design.md 头部） |
+
+## 冻结时的硬性验收标准（Independent Review 通过后触发）
+
+- [ ] 状态转移矩阵（A.1–A.6）经 Owner 逐条确认 + IR 通过，无自创状态（枚举全部来自 05 §4）。
+- [ ] Event Catalog 覆盖 A.1–A.6 全部 transition ID（MISSING=0 / ORPHAN=0），事件码与 `entry_type`/`entry_direction` 对齐。
+- [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id 受控可变）+ Accounting Delta Matrix 无二次入账/二次冲正。
+- [ ] `audit_events` 表 DDL（append-only + typed reference 快照）支持 MC1 §3.6 审计不变量。
 - [ ] 非核心实体 DDL 以日期命名文件（`sql/YYYYMMDD_*.sql`）提交，forward-only，无 DROP。
 - [ ] 变更 DDL 走 `rules/coding.md` 数据库规则第 6 条（新增日期文件，不改历史）。
 - [ ] 冻结后更新 MC1 Freeze 文档的 CONTRACT GAP 状态（由「待冻结」→「已冻结，见第二批」）。
-- [ ] 重新触发 Independent Review（State Machine gate）。
+- [ ] 重新触发 Independent Review（State Machine gate）且结论为 APPROVE。
 
 ## 明确不做（本 task 边界）
 
-- [ ] 不落正式 DDL 到 `sql/`（仅草案）。
+- [ ] 不冻结、不发布（冻结需 IR 通过后另走 AI Code Review Assistant 发布流程）。
 - [ ] 不改业务代码、不解除 STAGE-01 骨架的 FAIL_CLOSED。
-- [ ] 不冻结、不发布（发布需 Owner 确认后另走 AI Code Review Assistant 流程）。
 - [ ] 不涉及 OpenAPI 3.1 与 Environment Freeze（另属 STAGE-02 / 独立任务）。
+
+> 说明：`audit_events` DDL 已作为**冻结候选**落盘日期命名文件 `sql/20260815_machine_contract_batch2_audit_events.sql`（与 MC1 一致：先落 DDL，再 Signoff + IR，最后置 FROZEN）。该文件**未 FROZEN**，冻结前可修改。
 
 ## 信息来源
 

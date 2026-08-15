@@ -1,9 +1,10 @@
 # Design: Machine Contract 第二批
 
-> **Owner 已裁决（2026-08-15），冻结候选已收敛** — 本文件内容已由 Owner 逐项裁决（见 Part D），含 6 个尾巴默认答案；Contract 内容收敛，为 FROZEN 候选。
-> 冻结流程剩余：Owner Signoff → Independent Review（State Machine gate）→ 置 FROZEN。
-> 冻结前，8 个核心实体的状态流转保持 **FAIL_CLOSED**。
-> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【待确认】` = 仍未决（06 TBC 处理）。
+> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 629，2026-08-15），修复中**。
+> IR 629 返回 6 P1 + 2 P2。本文件已按 Owner 二次裁决修复（角色改 05 canonical、Ledger 采用方案 A、快照改 typed reference、终态拆分、Event Catalog 补全、void→refund 断路修复、ORDER_SETTLED 消歧）。
+> 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
+> 正式 FROZEN 前，8 个核心实体的状态流转保持 **FAIL_CLOSED**。
+> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【IR修复】` = 针对 IR 629 的修复；`【待确认】` = 仍未决（06 TBC 处理）。
 
 ---
 
@@ -16,22 +17,26 @@
   1. 每个 transfer 必须由该实体唯一 **Authoritative Writer**（Service）执行。
   2. 每个 transfer 必须附带 `object_version` 乐观锁校验（If-Match）。
   3. 每个 transfer 必须追加一条 append-only 审计事件并回写 `audit_event_id`（同事务原子）。
-  4. 终端态不可回退到前一态（具体终端态清单见各实体）。
+  4. 状态不可任意流转：只能走本文件定义的合法出边（allowed outgoing transitions），无授权转移 FAIL_CLOSED。
   5. 超级管理员不得绕过状态机（05 §11.2）。
-- **表头说明**：`可逆性` 列 = 该转移是否允许被后续转移「退回」源状态（`终态` 表示进入后不可再变）。
+- **终态概念拆分（消除歧义，`【IR修复】` P2-1）**：废弃模糊的「终态」一词，改用三档精确概念：
+  - **TRUE_TERMINAL（真终态）**：无任何出边，进入后不可再变。如 Ledger `reversed`、Reward `expired_returned`、Order `refunded`/`corrected`、Market `void`、OTC `cancelled`/`expired`/`rejected`。
+  - **STABLE_WITH_EXCEPTION_TRANSITIONS（稳定态 + 例外转移）**：有出边，但仅限冲正/纠错/争议例外，不能回到业务前序态。如 Ledger `posted`、Order `settled`、Market `settled`、OTC `completed`。
+  - **NON_REVERSIBLE_TO_PREVIOUS_STATE（不可回退到前一态）**：单条转移方向不可逆（回退须走冲正/纠错），但不等于无出边。
+- **表头说明**：`可逆性` 列 = 该转移是否允许被后续转移「退回」源状态（`TRUE_TERMINAL` = 无出边；`STABLE` = 仅例外转移可离开）。
 
-### A.0.1 角色映射（Owner 裁决 2026-08-15）
+### A.0.1 角色映射（05 canonical，Owner 裁决 2026-08-15 修订）
 
-> 本批涉财角色经 Owner 明确：**财务审核人 = 超级管理员（ADMIN_SECURITY）**。
-> 因此原草案中标注 `FINANCE_REVIEWER` / `RISK_APPROVER` 的审批/裁决职责，统一由超级管理员承担；发起方为运营（OPS_OPERATOR）或系统。
+> **本批涉财角色改为 05 canonical 分工**（`【IR修复】` P1-5，Owner 二次裁决 2026-08-15）：不再把财务裁决职责压给 ADMIN_SECURITY（05 定义 ADMIN_SECURITY 仅管角色/权限/安全配置，不可接触资产或业务数据）。财务裁决/审批映射到 05 canonical 的 **RISK_APPROVER**（批准风险处置）；对账/差异发现映射到 **FINANCE_REVIEWER**（读 Ledger/对账，不可写）。发起方为运营（OPS_OPERATOR）或系统。
 
-| 原角色 | 裁决后职责 | 说明 |
+| 05 canonical 角色 | 职责（05 §8） | 本批承担 |
 |---|---|---|
-| FINANCE_REVIEWER | 超级管理员（ADMIN_SECURITY）兼任 | 争议裁决、冲正审批、结算异常确认 |
-| RISK_APPROVER | 超级管理员（ADMIN_SECURITY）兼任 | 高风险处置批准 |
-| 发起方 | 运营（OPS_OPERATOR）或系统 | 争议发起、冲正发起 |
+| OPS_OPERATOR | 运营操作 | 争议发起、冲正发起、结算异常确认（参与方之一） |
+| FINANCE_REVIEWER | 读 Ledger / 对账（不可写） | 对账差异发现、发起争议 |
+| RISK_APPROVER | 批准风险处置 | 争议裁决、冲正审批、结算异常确认、OTC 争议处置、纠错审批 |
+| ADMIN_SECURITY | 管理角色/权限/安全配置（不可接触资产） | **不承担财务裁决**（保持 05 canonical 语义） |
 
-> **⚠️ 职责分离提醒（诚实边界，非阻碍）**：本项目 11 角色由 OWNER 单人兼任（manifest `p1_004_owner_freeze`）。系统层面 `OPS_OPERATOR(发起) ≠ ADMIN_SECURITY(审批)` 的角色分离仍成立；但若同一自然人同时持有两角色并自审自批，须满足 `p1_010_override_contract`（非紧急 SELF_APPROVAL=FORBIDDEN；紧急单人需 MFA + 事后 48h 审计）。此约束不影响本契约冻结，但执行时须遵守。
+> **⚠️ 职责分离提醒（诚实边界，非阻碍）**：本项目 11 角色由 OWNER 单人兼任（manifest `p1_004_owner_freeze`）。系统层面 `OPS_OPERATOR(发起) ≠ RISK_APPROVER(审批)` 的角色分离仍成立；但若同一自然人同时持有两角色并自审自批，须满足 `p1_010_override_contract`（非紧急 SELF_APPROVAL=FORBIDDEN；紧急单人需 MFA + 事后 48h 审计）。此约束不影响本契约冻结，但执行时须遵守。
 
 ### A.1 Ledger Entry — `pending / posted / reversed / disputed`
 
@@ -39,19 +44,43 @@
 
 | # | 从 → 到 | 触发事件 | 触发者 | 前置（guard） | 副作用 | 可逆性 |
 |---|---|---|---|---|---|---|
-| L1 | `pending` → `posted` | 日记账批次原子过账 | 系统 / 运营 | 批次内分录借贷平衡；账户余额校验通过 | 更新 `apt_accounts` 余额；追加审计事件 | 可逆（仅经 L3 冲正，不能退回 pending） |
-| L2 | `pending` → `reversed` | 入账前冲正 | 运营发起 + 超级管理员审批 | 分录尚未 posted | 追加 reversal 分录（`reversal_of` 指向原分录） | 终态 |
-| L3 | `posted` → `reversed` | 入账后冲正 | 运营发起 + 超级管理员审批 | 冲正审批通过 | 追加 reversal 分录；反向更新 `apt_accounts` 余额 | 终态 |
-| L4 | `pending` → `disputed` | 对账不符/异常标记 | 运营 / 系统 | 对账差异记录 | 冻结（不计入可用余额，见 L4 注） | 可逆（L6/L7 处置） |
-| L5 | `posted` → `disputed` | 入账后发现争议 | 运营 / 系统 | 对账差异记录 | 冻结该笔影响（见 L5 注） | 可逆（L6/L7 处置） |
-| L6 | `disputed` → `posted` | 仲裁确认有效 | 超级管理员裁决 | 裁决通过 | 解除冻结，按结果过账/保持 | 可逆 |
-| L7 | `disputed` → `reversed` | 仲裁判定冲正 | 超级管理员裁决 | 裁决冲正 | 追加 reversal 分录 | 终态 |
+| L1 | `pending` → `posted` | 日记账批次原子过账 | 系统 / OPS_OPERATOR | 批次内分录借贷平衡；账户余额校验通过 | 更新 `apt_accounts` 余额；追加审计事件 | 不可逆（仅经 L3 冲正，不能退回 pending） |
+| L2 | `pending` → `reversed` | 入账前冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 分录尚未 posted | 追加 reversal 分录（`reversal_of` 指向原分录） | TRUE_TERMINAL |
+| L3 | `posted` → `reversed` | 入账后冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 冲正审批通过 | 追加 reversal 分录；反向更新 `apt_accounts` 余额 | TRUE_TERMINAL |
+| L4 | `pending` → `disputed` | 对账不符/异常标记 | OPS_OPERATOR / FINANCE_REVIEWER / 系统 | 对账差异记录 | 冻结（见 A.1.2 Accounting Delta Matrix） | 可逆（L6/L7 处置） |
+| L5 | `posted` → `disputed` | 入账后发现争议 | OPS_OPERATOR / FINANCE_REVIEWER / 系统 | 对账差异记录 | 冻结该笔影响（见 A.1.2） | 可逆（L6/L7 处置） |
+| L6 | `disputed` → `posted` | 仲裁确认有效 | RISK_APPROVER 裁决 | 裁决通过 | 按 origin 入账或保持（见 A.1.2） | STABLE（可再经 L3/L5） |
+| L7 | `disputed` → `reversed` | 仲裁判定冲正 | RISK_APPROVER 裁决 | 裁决冲正 | 追加 reversal 分录（见 A.1.2） | TRUE_TERMINAL |
 
-- **终端态**：`reversed`（进入后不可再变）。`posted` 为稳定态，可经 L3/L5 流转，不可退回 `pending`。
+- **状态分类（`【IR修复】` P2-1）**：`reversed` = TRUE_TERMINAL（无出边）；`posted` = STABLE_WITH_EXCEPTION_TRANSITIONS（可经 L3/L5 例外离开，不可退回 `pending`）；`pending`/`disputed` = 中间态。
 - **禁止**：`posted → pending`（反过账禁止，须走冲正）、任何态的物理删除/覆盖（append-only）。
-- **争议冻结实现（Owner 裁决 #3 + 财务硬骨头 1 = 方案 A）**：`state=disputed` 作为冻结标记，**不追加反向分录、不改原账数字**；业务层在计算可用余额/支取时，将 `disputed` 分录的影响排除（视为冻结）。仲裁后：L6 解除（转 posted，余额恢复可用）或 L7 正式冲正（转 reversed）。
-- **L4 注**：`pending` 阶段本就不计余额，进入 `disputed` 只是标记，无余额影响。
+- **争议冻结实现（Owner 裁决 #3 + 财务硬骨头 1 = 方案 A）**：`state=disputed` 作为冻结标记，**不追加反向分录、不改原账数字**；业务层计算可用余额/支取时排除 `disputed` 分录影响。
 - **pending 长驻策略（Owner 裁决 #4）**：允许长驻，不删除不清理；对账任务标记 stale pending 并生成 RiskCase。
+
+#### A.1.1 Ledger Mutation Field Contract（`【IR修复】` P1-4，方案 A：受控 metadata mutation）
+
+`apt_ledger_entries` 采用**受控 metadata mutation**（与 MC1 DDL 注释一致：`state` 为「唯一可变列，仅 Authoritative Writer 流转」）。仅以下两列允许状态机控制更新：
+
+| 字段 | 可变更性 | 规则 |
+|---|---|---|
+| `state` | **受控可变**（唯一可变列） | 仅 Authoritative Writer 按 A.1 合法转移更新；任何未授权流转 FAIL_CLOSED |
+| `audit_event_id` | **受控可变** | 每次 state 流转同事务回写「最新审计事件指针」 |
+
+其余全部字段**永久 immutable**（一旦 INSERT 永不 UPDATE/DELETE）：`ledger_entry_id`、`account_id`、`asset`、`quantity`、`entry_direction`、`entry_type`、`source_object_type`、`source_object_id`、`journal_batch_id`、`reversal_of`、`idempotency_key`、`rule_version`、`snapshot_id`、`created_time`。
+
+> 实现约束：状态机更新 `state`/`audit_event_id` 时**不得放宽** STAGE-01 已验证的 append-only 防线（Model/DAO/Builder 三级 fail-closed）。必须走**显式受控 update 路径**（仅白名单两列 + `object_version` 乐观锁 + transition guard），而非通用 `update()`。
+
+#### A.1.2 Ledger Accounting Delta Matrix（`【IR修复】` P1-4）
+
+`disputed` 合并了 `pending` 与 `posted` 两个来源，仲裁时的账户 delta 因 **origin_state** 而异。origin_state 由**审计事件链**确定：该分录最近一次进入 `disputed` 的审计事件（L4 vs L5，`event_code=LEDGER_ENTRY_DISPUTED`）其 `before` 快照即 origin。
+
+| 路径 | origin_state | 到 `posted`（L6）的账户 delta | 到 `reversed`（L7）的账户 delta |
+|---|---|---|---|
+| L4（pending → disputed） | `pending` | **+quantity 入账**（此前未计入余额） | **0**（此前未入账，仅取消标记，不追加反向分录） |
+| L5（posted → disputed） | `posted` | **0 保持**（余额已计入，无需重复） | **-quantity 反向冲正**（扣回已计入余额，追加 reversal 分录） |
+
+- **不变量**：任何争议分录「冻结期净影响」恒为 0（冻结期间不产生余额变化）；仲裁后每个 origin 恰好产生一次正确的余额效果，**不二次入账、不二次冲正**。
+- **`available/frozen` 变化**：`disputed` 分录在可用余额计算中被排除（视为冻结，不改 `frozen_*` 账本字段本身）；L6/L7 后按上表恢复或冲正。
 
 ### A.2 Robot — `inactive / active / cooling / review / restricted / paused`
 
@@ -72,7 +101,7 @@
 | R11 | `review` → `inactive` | 风控确认违规停用 | RISK_ANALYST | 风控处置结论 | 停用 | 可逆（R1 重启，Owner 裁决允许） |
 | R12 | `cooling`/`review`/`restricted` → `paused` | 管理员强制暂停 | OPS_OPERATOR | 授权 | 暂停 | 可逆 |
 
-- **终端态**：无严格终态（`paused`/`inactive` 均可回到 `active`）；`review`/`cooling`/`restricted` 为中间锁定态。
+- **状态分类（`【IR修复】` P2-1）**：无 TRUE_TERMINAL（`paused`/`inactive` 均可回到 `active`）；`review`/`cooling`/`restricted` 为中间锁定态。
 - **冷却阈值 / review 触发（Owner 裁决 #5）**：冷却阈值 = 生产参数 TBC（矩阵只定义「连续运行超阈值 → cooling」规则，不硬编码值）；review 触发 = 风控引擎标记 TBC。
 - **restricted 范围 / `inactive→paused`（Owner 裁决 #6）**：restricted 禁哪些功能由 `allowed_actions` 动态下发（不枚举具体功能）；**`inactive→paused` 不合法**（paused 仅作用于运行态）。
 
@@ -84,15 +113,15 @@
 |---|---|---|---|---|---|---|
 | W1 | `candidate` → `held` | 奖励记账确认 | 系统 | 预算内；资格快照通过 | 生成 ledger entry（CREDIT）；回填 `ledger_entry_id` | 可逆（仅经 W9 冲正） |
 | W2 | `held` → `pending_claim` | 进入领取窗口 | 系统 | 窗口时长 = 生产参数 TBC | 设置 `expires_at` | 可逆（W5 过期） |
-| W3 | `pending_claim` → `claiming` | 用户发起领取 | END_USER | 幂等防重 | 冻结领取 | 可逆（W5 完成 / W6 过期） |
-| W4 | `claiming` → `claimed` | 领取完成 | 系统 | 账户状态正常 | 更新 `apt_accounts`；回填 `claim_id` | 可逆（仅经 W10 冲正） |
-| W5 | `pending_claim` → `expired_returned` | 领取窗口过期 | 系统 | 超过 `expires_at` | 退回预算池；追加 ledger entry（DEBIT） | 终态 |
-| W7 | `candidate` → `review` | 风控冻结 | 系统 / 风控引擎 | 风控标记（TBC） | 冻结 | 可逆（W8/W9） |
-| W8 | `review` → `held` | 风控解除 | 超级管理员 / 系统 | 解除条件满足 | 恢复可领 | 可逆 |
-| W9 | `held`/`review` → `reversed` | 财务冲正 | 运营发起 + 超级管理员审批 | 冲正审批通过 | 追加 reversal ledger entry | 终态 |
-| W10 | `claimed` → `reversed` | 领取后冲正 | 运营发起 + 超级管理员审批 | 冲正审批通过 | 追加 reversal；扣回账户余额 | 终态 |
+| W3 | `pending_claim` → `claiming` | 用户发起领取 | END_USER | 幂等防重 | 冻结领取 | 不可逆（claiming 仅经 W4 → claimed） |
+| W4 | `claiming` → `claimed` | 领取完成 | 系统 | 账户状态正常 | 更新 `apt_accounts`；回填 `claim_id` | STABLE（仅经 W10 冲正） |
+| W5 | `pending_claim` → `expired_returned` | 领取窗口过期 | 系统 | 超过 `expires_at` | 退回预算池；追加 ledger entry（DEBIT） | TRUE_TERMINAL |
+| W7 | `candidate` → `review` | 风控冻结 | 系统 / RISK_ANALYST | 风控标记（TBC） | 冻结 | 可逆（W8/W9） |
+| W8 | `review` → `held` | 风控解除 | RISK_APPROVER / 系统 | 解除条件满足 | 恢复可领 | 可逆 |
+| W9 | `held`/`review` → `reversed` | 财务冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 冲正审批通过 | 追加 reversal ledger entry | TRUE_TERMINAL |
+| W10 | `claimed` → `reversed` | 领取后冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 冲正审批通过 | 追加 reversal；扣回账户余额 | TRUE_TERMINAL |
 
-- **终端态**：`expired_returned`、`reversed`、`claimed`（claimed 仅可经 W10 冲正，不回退）。
+- **状态分类（`【IR修复】` P2-1）**：`expired_returned`、`reversed` = TRUE_TERMINAL（无出边）；`claimed` = STABLE_WITH_EXCEPTION_TRANSITIONS（仅可经 W10 冲正离开，不回退到 held/pending_claim）。
 - **`held→expired_returned` 直接路径不合法（Owner 裁决 #8）**：held 必须先经 W2（`held→pending_claim`）进入领取窗口，才能经 W5 过期退回，禁止跳过窗口的状态跳跃。
 - **领取窗口时长（Owner 裁决 #7）**：= 生产参数 TBC（不硬编码）；过期退回目标 = 原预算池（`budget_snapshot_id` 指向 pool）；review 触发 = 风控标记 TBC。
 
@@ -104,21 +133,22 @@
 |---|---|---|---|---|---|---|
 | M1 | `draft` → `open` | 发布市场 | OPS_OPERATOR | 参数/策略版本已冻结 | 开放投注 | 可逆（仅 M8 void） |
 | M2 | `open` → `closing` | 临近锁定 | 系统 | 达到 `lock_at - t` | 促使用户行动 | 可逆 |
-| M3 | `closing` → `locked` | 到达锁定时间 | 系统 | 时间到 | 禁止新投注 | 终态（可 M5/M8） |
-| M4 | `open` → `locked` | 直接锁定 | OPS_OPERATOR / 系统 | 允许跳过 closing（运营兜底锁定，Owner 裁决） | 禁止新投注 | 终态（可 M5/M8） |
-| M5 | `locked` → `awaiting_result` | 赛事开始/等待结果 | 系统 | 已锁定 | 等待 Result | 可逆 |
+| M3 | `closing` → `locked` | 到达锁定时间 | 系统 | 时间到 | 禁止新投注 | STABLE（可 M5/M8） |
+| M4 | `open` → `locked` | 直接锁定 | OPS_OPERATOR / 系统 | 允许跳过 closing（运营兜底锁定，Owner 裁决） | 禁止新投注 | STABLE（可 M5/M8） |
+| M5 | `locked` → `awaiting_result` | 赛事开始/等待结果 | 系统 | 已锁定 | 等待 Result | 可逆（可 M6/M8） |
 | M6 | `awaiting_result` → `settlement` | 结果确认 | 系统 | Result = `official` | 开始结算 | 可逆（M9 exception） |
-| M7 | `settlement` → `settled` | 结算完成 | 系统 | Settlement = `paid` | 订单批量 settled | 终态 |
-| M8 | `awaiting_result`/`open`/`draft` → `void` | 赛事取消/作废 | OPS_OPERATOR / 系统 | 四类原因（赛事取消/延期超期/数据不可用/监管，reason_code 承载） | 触发订单退款 | 终态 |
+| M7 | `settlement` → `settled` | 结算完成 | 系统 | Settlement = `paid` | 订单批量 settled | STABLE（可 M12） |
+| M8 | `draft`/`open`/`closing`/`locked`/`awaiting_result` → `void` | 赛事取消/作废 | OPS_OPERATOR / 系统 | 四类原因（赛事取消/延期超期/数据不可用/监管，reason_code 承载） | 触发订单退款 | TRUE_TERMINAL |
 | M9 | `settlement` → `exception` | 结算异常 | 系统 | 结算失败 | 冻结结算 | 可逆（M10/M11） |
 | M10 | `exception` → `settlement` | 异常处理后重试 | OPS_OPERATOR / 系统 | 恢复条件满足 | 重试结算 | 可逆 |
-| M11 | `exception` → `settled` | 异常处理直接完成 | 运营 + 超级管理员确认 | 双人确认通过（涉及资金） | 标记完成 | 终态 |
+| M11 | `exception` → `settled` | 异常处理直接完成 | OPS_OPERATOR + RISK_APPROVER 确认 | 双人确认通过（涉及资金） | 标记完成 | STABLE（可 M12） |
+| M12 | `settled` → `settlement` | Result corrected 重开结算 | 系统 | 仅一次 | 重开结算；关联 Order 走 correcting | 可逆（M7/M9） |
 
-- **终端态**：`settled`、`void`。
+- **状态分类（`【IR修复】` P2-1）**：`void` = TRUE_TERMINAL（无出边）；`settled` = STABLE_WITH_EXCEPTION_TRANSITIONS（仅可经 M12 重开）；`locked` = STABLE（可 M5/M8，不可退回 open/closing）。
+- **`void` 源状态（`【IR修复】` P1-2）**：`draft`/`open`/`closing`/`locked`/`awaiting_result`（结算前所有状态）均可 void；结算开始后（`settlement`/`settled`/`exception`）不 void，改走 exception/refund 路径。
 - **关键区分**（`【已确认】`，05 §4）：`settlement`（处理中）≠ `settled`（已完成）；`void` 原因之一是赛事取消，但非唯一。
-- **`exception→settled` 双人确认（Owner 裁决 #10）**：必须运营（OPS_OPERATOR）+ 超级管理员（ADMIN_SECURITY）确认，不可自动完成；`exception→settlement` 重试可自动。
-- **Result corrected 重开结算（Owner 裁决 #11）**：Result corrected 时，已 settled 的 Market 走 `settled → settlement` 重开；关联 Order 走 `settled → correcting → corrected`；Result corrected 仅允许一次。此路径补入转移矩阵如下：
-  - M12：`settled → settlement`（Result corrected 触发，仅一次）
+- **`exception→settled` 双人确认（Owner 裁决 #10）**：必须运营（OPS_OPERATOR）+ 风险审批人（RISK_APPROVER）确认，不可自动完成；`exception→settlement` 重试可自动。
+- **Result corrected 重开结算（Owner 裁决 #11）**：Result corrected 时，已 settled 的 Market 走 `settled → settlement` 重开（M12）；关联 Order 走 `settled → correcting → corrected`；Result corrected 仅允许一次。
 - **void 原因清单（Owner 裁决 #9）**：赛事取消 / 赛事延期超期 / 源数据不可用 / 监管要求，用 `reason_code` 承载，不新增状态。
 
 ### A.5 Prediction Order — `submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected`
@@ -127,17 +157,21 @@
 
 | # | 从 → 到 | 触发事件 | 触发者 | 前置（guard） | 副作用 | 可逆性 |
 |---|---|---|---|---|---|---|
-| P1 | `submitted` → `locked` | 市场锁定联动 | 系统 | Market 进入 `locked` | 锁定订单 | 终态（可 P3+） |
-| P2 | `locked` → `awaiting_result` | 等待结果 | 系统 | 赛事开始 | 等待 | 可逆 |
+| P1 | `submitted` → `locked` | 市场锁定联动 | 系统 | Market 进入 `locked` | 锁定订单 | STABLE（可 P2/P11） |
+| P2 | `locked` → `awaiting_result` | 等待结果 | 系统 | 赛事开始 | 等待 | 可逆（可 P3/P12） |
 | P3 | `awaiting_result` → `settling` | 开始结算 | 系统 | Result official + Market settlement | 进入结算 | 可逆 |
-| P4 | `settling` → `settled` | 结算完成 | 系统 | 结算计算完成 | 更新账户/ledger | 终态（可 P7 纠错） |
-| P5 | `settling` → `refunding` | 结算异常需退款 | 系统 | 仅 `Market void` 触发（Owner 裁决） | 冻结待退 | 可逆（P6） |
-| P6 | `refunding` → `refunded` | 退款完成 | 系统 | 退款入账 | 更新账户 | 终态 |
-| P7 | `settled` → `correcting` | 结算错误纠错 | 运营发起 + 超级管理员审批 | 仅 settlement error；审批通过 | 冻结 | 可逆（P8） |
-| P8 | `correcting` → `corrected` | 纠错完成 | 超级管理员审批 | 纠错审批通过 | 生成 reversal + new ledger | 终态 |
-| P9 | `settling` → `correcting` | 结算中发现错误 | 运营发起 | 发现错误 | 冻结纠错 | 可逆（P8） |
+| P4 | `settling` → `settled` | 结算完成 | 系统 | 结算计算完成 | 更新账户/ledger | STABLE（可 P7 纠错） |
+| P5 | `settling` → `refunding` | 结算中 Market void 需退款 | 系统 | 仅 `Market void` 触发（Owner 裁决） | 冻结待退 | 可逆（P6） |
+| P6 | `refunding` → `refunded` | 退款完成 | 系统 | 退款入账 | 更新账户 | TRUE_TERMINAL |
+| P7 | `settled` → `correcting` | 结算错误纠错 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 仅 settlement error；审批通过 | 冻结 | 可逆（P8） |
+| P8 | `correcting` → `corrected` | 纠错完成 | RISK_APPROVER 审批 | 纠错审批通过 | 生成 reversal + new ledger | TRUE_TERMINAL |
+| P9 | `settling` → `correcting` | 结算中发现错误 | OPS_OPERATOR 发起 | 发现错误 | 冻结纠错 | 可逆（P8） |
+| P10 | `submitted` → `refunding` | Market void 退款（未锁定） | 系统 | 仅 `Market void` 触发（`【IR修复】` P1-2） | 冻结待退 | 可逆（P6） |
+| P11 | `locked` → `refunding` | Market void 退款（已锁定） | 系统 | 仅 `Market void` 触发（`【IR修复】` P1-2） | 冻结待退 | 可逆（P6） |
+| P12 | `awaiting_result` → `refunding` | Market void 退款（等结果中） | 系统 | 仅 `Market void` 触发（`【IR修复】` P1-2） | 冻结待退 | 可逆（P6） |
 
-- **终端态**：`settled`、`refunded`、`corrected`。
+- **状态分类（`【IR修复】` P2-1）**：`refunded`、`corrected` = TRUE_TERMINAL（无出边）；`settled` = STABLE_WITH_EXCEPTION_TRANSITIONS（仅可经 P7 纠错）；`locked`/`awaiting_result` = STABLE（可继续结算或经 P11/P12 退款）。
+- **void→refund 断路修复（`【IR修复】` P1-2）**：Market void 时，结算前的任意订单状态（`submitted`/`locked`/`awaiting_result`/`settling`）均可进入 `refunding`（P5/P10/P11/P12）；退款范围 = 全额本金；`idempotency_key` 防重。
 - `【已确认】`：`RESULT_UNKNOWN` 不混入订单状态；`correcting/corrected` 仅在 settlement error 触发。
 - **`corrected` 不回 `settled`（Owner 裁决 #12）**：`corrected` 为终态；重新结算产生新 Order/新分录（用 CorrectionCase 追踪），不改旧订单状态。
 
@@ -150,79 +184,122 @@
 | O1 | `draft` → `review` | 提交审核 | END_USER | `review_required=1` | 进入审核队列 | 可逆（O3/O4） |
 | O2 | `draft` → `matching` | 提交撮合 | END_USER | `review_required=0`；资格通过 | 进入撮合 | 可逆（O6/O7） |
 | O3 | `review` → `matching` | 审核通过 | KYC_REVIEWER / OPS_OPERATOR | 审核通过 | 进入撮合 | 可逆 |
-| O4 | `review` → `rejected` | 审核驳回 | KYC_REVIEWER / OPS_OPERATOR | 审核驳回 | 保留历史 | 终态 |
+| O4 | `review` → `rejected` | 审核驳回 | KYC_REVIEWER / OPS_OPERATOR | 审核驳回 | 保留历史 | TRUE_TERMINAL |
 | O5 | `matching` → `partial` | 部分成交 | 系统 | 成交部分 | 更新 filled/remaining | 可逆（继续 O5 或 O6/O7） |
-| O6 | `matching` → `completed` | 全部成交 | 系统 | 全部成交 | 生成 Trade + Ledger | 终态（可 O11 disputed） |
-| O7 | `matching` → `cancelled` | 用户取消 | END_USER | 未成交部分可取消 | 释放 remaining | 终态 |
-| O8 | `matching` → `expired` | 有效期到期 | 系统 | 超过有效期 | 释放 remaining | 终态 |
-| O9 | `partial` → `completed` | 剩余全部成交 | 系统 | 剩余成交 | 生成 Trade + Ledger | 终态（可 O11） |
-| O10 | `partial` → `cancelled`/`expired` | 取消剩余 / 到期 | END_USER / 系统 | 仅释放 remaining | 释放 remaining | 终态 |
+| O6 | `matching` → `completed` | 全部成交 | 系统 | 全部成交 | 生成 Trade + Ledger | STABLE（可 O11 争议） |
+| O7 | `matching` → `cancelled` | 用户取消 | END_USER | 未成交部分可取消 | 释放 remaining | TRUE_TERMINAL |
+| O8 | `matching` → `expired` | 有效期到期 | 系统 | 超过有效期 | 释放 remaining | TRUE_TERMINAL |
+| O9 | `partial` → `completed` | 剩余全部成交 | 系统 | 剩余成交 | 生成 Trade + Ledger | STABLE（可 O11） |
+| O10 | `partial` → `cancelled`/`expired` | 取消剩余 / 到期 | END_USER / 系统 | 仅释放 remaining | 释放 remaining | TRUE_TERMINAL |
 | O11 | `completed` → `disputed` | 成交后争议 | END_USER / 系统 | 争议触发 | 冻结 | 可逆（O12） |
-| O12 | `disputed` → `cancelled`/`completed` | 争议处置 | 超级管理员裁决 | 裁决二选一 | 取消退钱 或 维持成交；反向冲正走 ledger reversal | 终态 |
+| O12 | `disputed` → `cancelled`/`completed` | 争议处置 | RISK_APPROVER 裁决 | 裁决二选一 | 取消退钱 或 维持成交；反向冲正走 ledger reversal | TRUE_TERMINAL |
 
-- **终端态**：`completed`、`cancelled`、`expired`、`rejected`（`completed` 可经 O11 争议）。
+- **状态分类（`【IR修复】` P2-1）**：`cancelled`、`expired`、`rejected` = TRUE_TERMINAL（无出边）；`completed` = STABLE_WITH_EXCEPTION_TRANSITIONS（可经 O11 争议）；`disputed` = 中间态（仅可经 O12 处置）。
 - `【已确认】`（05 §4）：`cancelled`=主动取消，`expired`=自然到期（非取消）；`partial+cancelled/expired` 只释放 remaining；`disputed` 保持冻结直到处置；不删除/覆盖历史 Trade/Ledger/Power Ledger。
 - **review_required 触发条件（Owner 裁决 #13）**：大额卖出、单人高频异常需人工确认；有效期 = 生产参数 TBC。
-- **争议处置（Owner 裁决 #14）**：超级管理员判成 `cancelled`（退钱）或 `completed`（维持成交）二选一，**不允许回到 `partial`** 中间态。
+- **争议处置（Owner 裁决 #14）**：RISK_APPROVER 判成 `cancelled`（退钱）或 `completed`（维持成交）二选一，**不允许回到 `partial`** 中间态。
 
 ### A.7 跨实体协同
 
-以下跨实体联动，部分已被 Owner 裁决确认，部分仍待确认：
+以下跨实体联动均已由 Owner 裁决确认（其中 void→refund 路径经 `【IR修复】` P1-2 补全）：
 
 | 联动 | 推断依据 | 状态 |
 |---|---|---|
-| Market `void` → Prediction Order `refunding → refunded` | 05 §4「已作废/已取消 → Market void + reason_code」 | ✅ Owner 裁决（05 语义自然推论） |
-| Result `corrected` → Market 重开结算 → Order `correcting → corrected` | 05 §3 Result + CorrectionCase 对象 | ✅ Owner #11（`settled→settlement` 重开，仅一次） |
+| Market `void` → Prediction Order `submitted`/`locked`/`awaiting_result`/`settling` → `refunding` → `refunded` | 05 §4「已作废/已取消 → Market void + reason_code」 | ✅ Owner 裁决（05 语义自然推论 + `【IR修复】` P1-2） |
+| Result `corrected` → Market `settled → settlement` 重开 → Order `correcting → corrected` | 05 §3 Result + CorrectionCase 对象 | ✅ Owner #11（仅一次） |
 | AI Reward `held` → Ledger `pending → posted` | 05 §3 AIReward.ledger_entry_id + Ledger 四账 | ✅ Owner 裁决（05 语义自然推论） |
 | OTC `completed` → Ledger 分录 → Power 释放 | 05 §3 OtcTrade.ledger_entry_ids + power_consumed | ✅ Owner 裁决（05 语义自然推论） |
 
 ---
 
-## Part B — Event Catalog（事件目录草案）
+## Part B — Event Catalog
 
 ### B.0 总则
 
 - 05 §4 **未定义事件码**；`apt_ledger_entries.entry_type`（varchar(64)）与 `entry_direction`（tinyint）「与 Event Catalog 对齐后冻结」（MC1 §4）。
-- 事件码命名 `ENTITY_ACTION` 大写下划线风格（与 `sys_operation_logs` 风格一致），**Owner 已采纳（#15）**，全集以「8 核心实体所有状态转移 + 账本分录」为边界。
+- 事件码命名 `ENTITY_ACTION` 大写下划线风格，**Owner 已采纳（#15）**。
+- **全集边界（`【IR修复】` P1-1）**：覆盖 8 核心实体 A.1–A.6 的**每一个 transition ID**。一个 event_code 可映射多个 transition，但必须显式列出全部 transition ID。
 - **规则**：每个业务事件可能 (a) 触发一个状态转移，(b) 生成 ledger entry（含 entry_type/entry_direction），(c) 产生 Power 影响，(d) 要求审计事件。四者相互独立，需分别声明。
+- **一致性检查（冻结前 gate，`【IR修复】` P1-1）**：`MISSING_EVENT_FOR_TRANSITION = 0`；`UNKNOWN_TRANSITION_REFERENCE = 0`；`DUPLICATE_AMBIGUOUS_MAPPING = 0`。
 
-### B.1 事件目录表（草案）
+### B.1 事件目录表（完整 1:1 / 显式多对一）
 
 | event_code | 来源实体 | 触发转移 | ledger entry_type | entry_direction | Power 影响 | 审计 |
 |---|---|---|---|---|---|---|
-| ROBOT_STARTED | robots | R1 inactive→active | — | — | consume | 是 |
-| ROBOT_STOPPED | robots | R3 active→inactive | — | — | release | 是 |
-| ROBOT_COOLING_ENTERED | robots | R2 active→cooling | — | — | — | 是 |
-| ROBOT_REVIEW_LOCKED | robots | R4 active→review | — | — | — | 是 |
-| ROBOT_PAUSED | robots | R9 active→paused | — | — | — | 是 |
-| REWARD_HELD | robot_rewards | W1 candidate→held | REWARD_ACCRUAL | 1 (CREDIT) | — | 是 |
-| REWARD_CLAIMED | robot_rewards | W4 claiming→claimed | REWARD_CLAIM | -1 (DEBIT) | — | 是 |
-| REWARD_EXPIRED_RETURNED | robot_rewards | W5/W6 →expired_returned | REWARD_EXPIRY_RETURN | -1 (DEBIT) | — | 是 |
-| REWARD_REVERSED | robot_rewards | W9/W10 →reversed | REWARD_REVERSAL | -1 (DEBIT) | — | 是 |
-| LEDGER_ENTRY_POSTED | apt_ledger_entries | L1 pending→posted | — | — | — | 是 |
-| LEDGER_ENTRY_REVERSED | apt_ledger_entries | L2/L3 →reversed | LEDGER_REVERSAL | 反向 | — | 是 |
-| LEDGER_ENTRY_DISPUTED | apt_ledger_entries | L4/L5 →disputed | — | — | — | 是 |
-| MARKET_PUBLISHED | prediction_markets | M1 draft→open | — | — | — | 是 |
-| MARKET_LOCKED | prediction_markets | M3/M4 →locked | — | — | — | 是 |
-| MARKET_VOIDED | prediction_markets | M8 →void | — | — | — | 是 |
-| MARKET_SETTLED | prediction_markets | M7 →settled | — | — | — | 是 |
-| ORDER_SUBMITTED | prediction_orders | (创建 submitted) | ORDER_STAKE | -1 (DEBIT) | — | 是 |
-| ORDER_SETTLED | prediction_orders | P4 →settled | ORDER_SETTLEMENT | 1/-1 视结果 | — | 是 |
-| ORDER_REFUNDED | prediction_orders | P6 →refunded | ORDER_REFUND | 1 (CREDIT) | — | 是 |
-| ORDER_CORRECTED | prediction_orders | P8 →corrected | ORDER_CORRECTION | 双向 | — | 是 |
-| OTC_ORDER_CREATED | otc_orders | (创建 draft) | — | — | freeze | 是 |
-| OTC_ORDER_COMPLETED | otc_orders | O6/O9 →completed | OTC_TRADE | 双向 | consume | 是 |
-| OTC_ORDER_CANCELLED | otc_orders | O7/O10 →cancelled | — | — | release | 是 |
-| OTC_ORDER_EXPIRED | otc_orders | O8/O10 →expired | — | — | release | 是 |
-| OTC_ORDER_DISPUTED | otc_orders | O11 →disputed | — | — | — | 是 |
+| ROBOT_STARTED | robots | R1 | — | — | consume | 是 |
+| ROBOT_STOPPED | robots | R3 | — | — | release | 是 |
+| ROBOT_COOLING_ENTERED | robots | R2 | — | — | — | 是 |
+| ROBOT_COOLING_EXITED | robots | R6 | — | — | — | 是 |
+| ROBOT_REVIEW_LOCKED | robots | R4 | — | — | — | 是 |
+| ROBOT_REVIEW_CLEARED | robots | R5 | — | — | — | 是 |
+| ROBOT_DISABLED | robots | R11 | — | — | — | 是 |
+| ROBOT_RESTRICTED | robots | R7 | — | — | — | 是 |
+| ROBOT_RESTRICTION_LIFTED | robots | R8 | — | — | — | 是 |
+| ROBOT_PAUSED | robots | R9, R12 | — | — | — | 是 |
+| ROBOT_RESUMED | robots | R10 | — | — | — | 是 |
+| REWARD_HELD | robot_rewards | W1 | REWARD_ACCRUAL | 1 (CREDIT) | — | 是 |
+| REWARD_CLAIM_WINDOW_OPENED | robot_rewards | W2 | — | — | — | 是 |
+| REWARD_CLAIMING | robot_rewards | W3 | — | — | — | 是 |
+| REWARD_CLAIMED | robot_rewards | W4 | REWARD_CLAIM | -1 (DEBIT) | — | 是 |
+| REWARD_EXPIRED_RETURNED | robot_rewards | W5 | REWARD_EXPIRY_RETURN | -1 (DEBIT) | — | 是 |
+| REWARD_REVIEW_LOCKED | robot_rewards | W7 | — | — | — | 是 |
+| REWARD_REVIEW_CLEARED | robot_rewards | W8 | — | — | — | 是 |
+| REWARD_REVERSED | robot_rewards | W9, W10 | REWARD_REVERSAL | -1 (DEBIT) | — | 是 |
+| LEDGER_ENTRY_POSTED | apt_ledger_entries | L1 | — | — | — | 是 |
+| LEDGER_ENTRY_REVERSED | apt_ledger_entries | L2, L3 | LEDGER_REVERSAL | 反向 | — | 是 |
+| LEDGER_ENTRY_DISPUTED | apt_ledger_entries | L4, L5 | — | — | — | 是 |
+| LEDGER_ENTRY_DISPUTE_RESOLVED | apt_ledger_entries | L6 | — | — | — | 是 |
+| LEDGER_ENTRY_DISPUTE_REVERSED | apt_ledger_entries | L7 | LEDGER_REVERSAL | 反向 | — | 是 |
+| MARKET_PUBLISHED | prediction_markets | M1 | — | — | — | 是 |
+| MARKET_CLOSING | prediction_markets | M2 | — | — | — | 是 |
+| MARKET_LOCKED | prediction_markets | M3, M4 | — | — | — | 是 |
+| MARKET_AWAITING_RESULT | prediction_markets | M5 | — | — | — | 是 |
+| MARKET_SETTLEMENT_STARTED | prediction_markets | M6 | — | — | — | 是 |
+| MARKET_SETTLED | prediction_markets | M7 | — | — | — | 是 |
+| MARKET_VOIDED | prediction_markets | M8 | — | — | — | 是 |
+| MARKET_SETTLEMENT_EXCEPTION | prediction_markets | M9 | — | — | — | 是 |
+| MARKET_SETTLEMENT_RETRY | prediction_markets | M10 | — | — | — | 是 |
+| MARKET_SETTLEMENT_COMPLETED | prediction_markets | M11 | — | — | — | 是 |
+| MARKET_SETTLEMENT_REOPENED | prediction_markets | M12 | — | — | — | 是 |
+| ORDER_SUBMITTED | prediction_orders | 创建 submitted | ORDER_STAKE | -1 (DEBIT) | — | 是 |
+| ORDER_LOCKED | prediction_orders | P1 | — | — | — | 是 |
+| ORDER_AWAITING_RESULT | prediction_orders | P2 | — | — | — | 是 |
+| ORDER_SETTLING | prediction_orders | P3 | — | — | — | 是 |
+| ORDER_SETTLED | prediction_orders | P4 | ORDER_SETTLEMENT | 见 B.3 结算会计矩阵 | — | 是 |
+| ORDER_REFUNDING | prediction_orders | P5, P10, P11, P12 | — | — | — | 是 |
+| ORDER_REFUNDED | prediction_orders | P6 | ORDER_REFUND | 1 (CREDIT) | — | 是 |
+| ORDER_CORRECTING | prediction_orders | P7, P9 | — | — | — | 是 |
+| ORDER_CORRECTED | prediction_orders | P8 | ORDER_CORRECTION | 双向 | — | 是 |
+| OTC_ORDER_CREATED | otc_orders | 创建 draft | — | — | freeze | 是 |
+| OTC_ORDER_SUBMITTED_REVIEW | otc_orders | O1 | — | — | freeze | 是 |
+| OTC_ORDER_SUBMITTED_MATCHING | otc_orders | O2 | — | — | freeze | 是 |
+| OTC_ORDER_REVIEW_APPROVED | otc_orders | O3 | — | — | — | 是 |
+| OTC_ORDER_REJECTED | otc_orders | O4 | — | — | release | 是 |
+| OTC_ORDER_PARTIAL_FILLED | otc_orders | O5 | — | — | — | 是 |
+| OTC_ORDER_COMPLETED | otc_orders | O6, O9 | OTC_TRADE | 双向 | consume | 是 |
+| OTC_ORDER_CANCELLED | otc_orders | O7, O10, O12(cancelled) | — | — | release | 是 |
+| OTC_ORDER_EXPIRED | otc_orders | O8, O10 | — | — | release | 是 |
+| OTC_ORDER_DISPUTED | otc_orders | O11 | — | — | — | 是 |
+| OTC_ORDER_DISPUTE_RESOLVED | otc_orders | O12 | — | — | — | 是 |
 
 ### B.2 已确认 / 待确认（Event Catalog）
 
-- **事件码命名与全集（Owner 裁决 #15）**：采用 Part B 表，命名 `ENTITY_ACTION`，覆盖 8 核心实体，本次不扩到非核心实体。
+- **事件码命名与全集（Owner 裁决 #15）**：采用 B.1 表，命名 `ENTITY_ACTION`，覆盖 8 核心实体 A.1–A.6 全部 transition ID。
 - **`entry_direction` 语义（Owner 裁决 #16）**：`1=CREDIT(入账)`、`-1=DEBIT(出账)`，与 DDL 注释一致。
-- **`ORDER_SETTLED` 区分赢/输/走盘（Owner 裁决 #17）**：赢=本金+盈利 CREDIT；输=不追加（stake 已由 ORDER_STAKE DEBIT 扣减）；走盘=本金退回 CREDIT。
 - **审计事件表 schema（Owner 裁决 #18）**：见 Part E `audit_events` 表 DDL 草案（字段对齐 05 §3 AuditLog）。
-- **审计表两个细节（Owner 裁决，冻结默认答案）**：① `audit_events` 与 `sys_operation_logs` **不合并**（`sys_operation_logs` 是 V1.x 遗留操作日志，`audit_events` 是 V2.0 领域审计，语义不同）；② `before/after_snapshot_id` **引用 `parameter_snapshots`**（复用现有参数快照，不发明 diff 机制）。
+- **审计表细节（`【IR修复】` P1-6）**：① `audit_events` 与 `sys_operation_logs` **不合并**；② `before/after_snapshot_id` 采用 **snapshot_type + snapshot_id typed reference**（见 Part E），`parameter_snapshots` 仅作为其中一种 type，不再滥用为通用业务对象快照。
+
+### B.3 结算会计矩阵（`【IR修复】` P1-3，ORDER_SETTLED 消歧）
+
+`ORDER_SETTLED` 的 ledger 效果不再使用「1/-1 视结果」这种不可执行定义，改为按结果显式声明（对齐 Owner #17 / 财务 2）：
+
+| Result | Settlement ledger effect | entry_direction |
+|---|---|---|
+| WIN | CREDIT = principal + profit | 1 (CREDIT) |
+| LOSS | NO_LEDGER_ENTRY（stake 已由 ORDER_STAKE DEBIT 扣减，不追加） | — |
+| PUSH | CREDIT = principal（本金退回） | 1 (CREDIT) |
+
+> **不变量**：任一订单的净 ledger 效果仅发生一次且方向确定——下注 `ORDER_STAKE(-本金)`；赢 `+本金+盈利`；输 `不追加`；走盘 `+本金`；void 走 `ORDER_REFUND(+本金)` 而非 `ORDER_SETTLED`。**不存在二次扣款**。
 
 ---
 
@@ -279,18 +356,18 @@
 > 本节记录 Owner 对 22 项待确认 + 2 项财务硬骨头的**最终裁决**。裁决结果已同步回 Part A（转移矩阵）、Part B（Event Catalog）、Part C（非核心实体清单）正文。
 > 状态：**Owner 已裁决，契约内容已收敛**；但**尚未 FROZEN** —— 正式冻结仍需走 Independent Review（State Machine gate）。
 
-### D.0 角色裁决
+### D.0 角色裁决（05 canonical，IR 629 P1-5 修订）
 
-- **财务审核人 = 超级管理员（ADMIN_SECURITY）**。
-- 争议、冲正、结算异常、OTC 争议处置、纠错等涉财审批/裁决，统一由超级管理员承担；发起方为运营（OPS_OPERATOR）或系统。
+- **财务裁决/审批 = 05 canonical 角色分工**：争议裁决、冲正审批、结算异常确认、OTC 争议处置、纠错审批 → **RISK_APPROVER**（批准风险处置）；对账差异发现、发起争议 → **FINANCE_REVIEWER**（读 Ledger/对账，不可写）；发起方 = OPS_OPERATOR（运营）或系统。
+- **ADMIN_SECURITY 不承担财务裁决**（05 定义其仅管角色/权限/安全配置，不可接触资产）。
 - ⚠️ 单人项目下角色分离见 Part A.0.1 提醒（`p1_010_override_contract` 兜底）。
 
 ### D.1 逐项裁决
 
 | # | 裁决 | 落点 |
 |---|---|---|
-| 1 | 争议由**运营发起**，**超级管理员裁决**；用户不能自行发起 | A.1 L4/L5/L6/L7 |
-| 2 | 冲正由**运营发起**，**超级管理员审批** | A.1 L2/L3 |
+| 1 | 争议由**运营发起**，**RISK_APPROVER 裁决**；用户不能自行发起 | A.1 L4/L5/L6/L7 |
+| 2 | 冲正由**运营发起**，**RISK_APPROVER 审批** | A.1 L2/L3 |
 | 3 | 争议期间**钱要冻住**（方案 A：不改原账数字，`state=disputed` 标记 + 业务层排除冻结） | A.1 争议冻结实现 |
 | 4 | pending 长驻，不删不清理，stale 报 RiskCase | A.1 pending 长驻策略 |
 | 5 | 冷却阈值/review 触发 = 生产参数 TBC，只定义规则 | A.2 |
@@ -298,11 +375,11 @@
 | 7 | 领取窗口时长 TBC；退回原预算池；review 触发 TBC | A.3 |
 | 8 | `held→expired_returned` 直接路径不合法 | A.3 |
 | 9 | void 四类原因（赛事取消/延期超期/数据不可用/监管），reason_code 承载 | A.4 |
-| 10 | `exception→settled` 必须**运营 + 超级管理员**确认；`exception→settlement` 可自动 | A.4 |
+| 10 | `exception→settled` 必须**运营 + RISK_APPROVER**确认；`exception→settlement` 可自动 | A.4 |
 | 11 | Result corrected 重开 Market 结算（`settled→settlement`），仅一次 | A.4 M12 |
 | 12 | `corrected` 为终态，不回 settled，重新结算走新对象 | A.5 |
 | 13 | 大额卖出、单人高频异常需人工确认；有效期 TBC | A.6 |
-| 14 | OTC 争议：超级管理员判 `cancelled`（退钱）或 `completed`（维持成交），不回 partial | A.6 O12 |
+| 14 | OTC 争议：RISK_APPROVER 判 `cancelled`（退钱）或 `completed`（维持成交），不回 partial | A.6 O12 |
 | 15 | 采用 Part B 事件码，覆盖 8 核心实体 | Part B |
 | 16 | `1=CREDIT 入账`，`-1=DEBIT 出账` | Part B |
 | 17 | 赢=本金+盈利入账；输=不追加；走盘=退本金 | Part B #17 |
@@ -321,15 +398,15 @@
 
 ---
 
-## Part E — audit_events 表 DDL 草案
+## Part E — audit_events 表 DDL（冻结候选，已落盘 `sql/`）
 
-> **DRAFT，不落 `sql/`**。字段对齐 05 §3 AuditLog 对象 + MC1 §3.6 审计不变量（append-only、`ledger_entry_id` 关联、顺序可重建）。
-> 本表为 MC1 §3.6「审计事件表 schema 待冻结」的落地方案，供 Owner 审阅。
+> **CANDIDATE（冻结候选，已落盘日期命名文件 `sql/20260815_machine_contract_batch2_audit_events.sql`，未 FROZEN）**。字段对齐 05 §3 AuditLog 对象 + MC1 §3.6 审计不变量（append-only、`ledger_entry_id` 关联、顺序可重建）。
+> 落盘方式与 MC1 一致（先落日期命名 DDL，再 Owner Signoff + Independent Review，最后置 FROZEN）；冻结前可修改（同日期文件内改，或按变更控制新增日期文件）。
 
 ```sql
 -- =============================================================================
--- audit_events — 审计事件表（append-only，Machine Contract 第二批草案）
--- 状态：DRAFT（未冻结，未落 sql/）
+-- audit_events — 审计事件表（append-only，Machine Contract 第二批冻结候选）
+-- 状态：CANDIDATE（已落盘 sql/ 日期文件，未 FROZEN）
 -- 依据：05 §3 AuditLog 对象 + MC1 §3.6 审计不变量
 -- 规则：append-only（无 UPDATE/DELETE），一事件一行，顺序可重建
 -- =============================================================================
@@ -340,8 +417,10 @@ CREATE TABLE `audit_events` (
   `actor_role` varchar(32) NOT NULL DEFAULT '' COMMENT '操作者角色(05 §8 RBAC)',
   `target_object_type` varchar(64) NOT NULL DEFAULT '' COMMENT '目标对象类型(如 apt_ledger_entries)',
   `target_object_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '目标对象ID',
-  `before_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更前快照ID',
-  `after_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更后快照ID',
+  `before_snapshot_type` varchar(64) NOT NULL DEFAULT '' COMMENT '变更前快照类型(typed reference，如 parameter_snapshots)',
+  `before_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更前快照ID(在 before_snapshot_type 命名空间内)',
+  `after_snapshot_type` varchar(64) NOT NULL DEFAULT '' COMMENT '变更后快照类型(typed reference)',
+  `after_snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '变更后快照ID(在 after_snapshot_type 命名空间内)',
   `outcome` varchar(32) NOT NULL DEFAULT '' COMMENT '结果(SUCCESS/FAILED/REJECTED)',
   `reason_code` varchar(64) NOT NULL DEFAULT '' COMMENT '原因码',
   `request_id` varchar(64) NOT NULL DEFAULT '' COMMENT '请求ID',
@@ -360,7 +439,7 @@ CREATE TABLE `audit_events` (
 
 **关联回写**：`apt_ledger_entries.audit_event_id` 是「最新审计事件指针」；完整时间线由 `audit_events`（`target_object_id = ledger_entry_id`，按 `created_time` + `audit_event_id` 排序重建）保留，满足 MC1 §3.6「不会退化为只剩最后一次」。
 
-**已确认（Owner 裁决，冻结默认答案）**：① `audit_events.event_code` 与 `sys_operation_logs` **不合并**（独立表）；② `before/after_snapshot_id` **引用 `parameter_snapshots`**。
+**快照引用（`【IR修复】` P1-6，typed reference）**：`before/after_snapshot` 采用 **`snapshot_type` + `snapshot_id` 类型化引用**。`snapshot_type` 指明快照归属（如 `parameter_snapshots` = 参数快照；`ledger_entry`/`robot`/`market`/`order`/`otc_order` = 目标对象状态快照）；`snapshot_type=''` 表示无显式快照，此时 before/after 状态由目标对象当前值 + 审计事件链重建。**`parameter_snapshots` 不再被滥用为通用业务对象快照**，仍只负责参数版本回算。
 
 ---
 
@@ -373,8 +452,9 @@ CREATE TABLE `audit_events` (
 - `.project-ai/manifest.yaml` — `p1_003_two_phase_freeze`（两批冻结决策）。
 - `.project-ai/context.md` — API Freeze 推迟至 STAGE-02。
 
-## 已确认信息 / Owner 裁决 / 待确认事项
+## 已确认信息 / Owner 裁决 / IR 修复 / 待确认事项
 
 - **已确认信息**：8 核心实体状态枚举（05 §4 canonical，MC1 已冻结）；账本 append-only 语义（MC1 §3.6）；`entry_type`/`entry_direction`/`audit_event_id` 字段存在且待冻结（MC1 DDL + §4）；状态转移矩阵是 CONTRACT GAP（MC1 §3.6）。
-- **Owner 裁决（2026-08-15）**：Part D 的 22 项 + 2 项财务硬骨头全部已裁决；角色映射（财务审核人=超级管理员）；转移矩阵、Event Catalog、非核心实体清单、`audit_events` DDL 均已收敛。
-- **待确认事项（不阻塞契约收敛，冻结后由 06 处理）**：① 生产参数数值（冷却阈值、领取窗口、OTC 有效期等，06 TBC）；② 单人项目下 OPS_OPERATOR↔ADMIN_SECURITY 职责分离的落地（`p1_010_override_contract` 兜底，执行时遵守）。
+- **Owner 裁决（2026-08-15）**：Part D 的 22 项 + 2 项财务硬骨头全部已裁决；角色映射采用 05 canonical 分工（RISK_APPROVER/FINANCE_REVIEWER/OPS_OPERATOR，ADMIN_SECURITY 不涉财）；转移矩阵、Event Catalog、非核心实体清单、`audit_events` DDL 均已收敛。
+- **IR 修复（IR 629，2026-08-15）**：P1-1 Event Catalog 补全 + 删 W6；P1-2 void→refund 断路修复；P1-3 ORDER_SETTLED 结算会计矩阵消歧；P1-4 Ledger Mutation Field Contract + Accounting Delta Matrix（方案 A）；P1-5 角色改 05 canonical；P1-6 快照改 typed reference；P2-1 终态三档拆分；P2-2 状态统一 + 落盘表述修正。
+- **待确认事项（不阻塞契约收敛，冻结后由 06 处理）**：① 生产参数数值（冷却阈值、领取窗口、OTC 有效期等，06 TBC）；② 单人项目下 OPS_OPERATOR↔RISK_APPROVER 职责分离的落地（`p1_010_override_contract` 兜底，执行时遵守）。

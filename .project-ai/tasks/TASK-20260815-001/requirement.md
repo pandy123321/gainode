@@ -2,10 +2,10 @@
 
 ## 状态
 
-> **冻结候选已产出（2026-08-15），待 Owner Signoff + Independent Review**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D），Contract 内容收敛，冻结候选已落盘：
+> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 629），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已按 Owner 二次裁决修复。冻结候选已落盘：
 > - 候选文档：`0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
 > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
-> 冻结前仍须：Owner Signoff → Independent Review（State Machine gate）→ 置 FROZEN。
+> 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 在正式 FROZEN 前，所有依赖这些契约的状态流转保持 **FAIL_CLOSED**。
 
 ## 背景
@@ -37,7 +37,7 @@ STAGE-01 已落地的 8 个 Model/DAO/Service 骨架因此全部处于 FAIL_CLOS
 
 ## 强制要求
 
-1. **不冻结、不越权**：本 task 只出草案，不写 FROZEN，不落正式 DDL 到 `sql/`，不改业务代码。
+1. **不冻结、不越权**：本 task 产出冻结候选（`audit_events` DDL 已落盘日期命名候选文件，未 FROZEN），不写 FROZEN，不改业务代码、不解除 FAIL_CLOSED。
 2. **来源可追溯**：每个转移/事件码/实体都标注 05 §4 出处或明确标注【待确认】。
 3. **诚实边界**：05 未定义的内容一律标【待确认】，不自行发明并当作既成事实。
 4. **不解除 FAIL_CLOSED**：在 Owner Signoff + Independent Review 通过前，任何状态流转实现仍 MUST FAIL_CLOSED。
