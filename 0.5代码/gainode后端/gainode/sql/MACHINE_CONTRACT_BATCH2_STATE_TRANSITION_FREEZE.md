@@ -1,9 +1,10 @@
 # Machine Contract 第二批 — State Transition Freeze（候选）
 
-> 状态：**FROZEN CANDIDATE（候选，Owner Signoff ✅；Independent Review = CHANGES_REQUIRED，IR 638，修复中）**
-> 说明：本文件为 Machine Contract 第二批的**冻结候选**。状态转移矩阵 + Event Catalog 已由 Owner 逐项裁决（2026-08-15，22 项 + 2 财务硬骨头，见本文件 §4）。IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（针对修复后 commit）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）。正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
+> 状态：**FROZEN CANDIDATE（候选，Owner Signoff ✅；Independent Review = CHANGES_REQUIRED，IR 659，修复中）**
+> 说明：本文件为 Machine Contract 第二批的**冻结候选**。状态转移矩阵 + Event Catalog 已由 Owner 逐项裁决（2026-08-15，22 项 + 2 财务硬骨头，见本文件 §4）。IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复。正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
 > 起草日期：2026-08-15
 > 关联 DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`；`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`
+> 关联 Change Request：`0.5代码/gainode后端/gainode/sql/CHANGE_REQUEST_CR-20260815-001.md`（object_version 加列，IR 659 P2-2）
 > 权威契约：`Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§4 统一状态机）
 > 前置冻结：`MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`（MC1，本文件关闭其 §3.6 CONTRACT GAP）
 > 治理依据：`manifest.yaml` decisionSources `p1_003_two_phase_freeze`（两批冻结决策）
@@ -25,15 +26,16 @@
 
 ## 2. 角色映射（05 canonical，Owner 裁决 2026-08-15 修订）
 
-- **财务裁决/审批 = 05 canonical 角色分工**：争议裁决、冲正审批、结算异常确认、OTC 争议处置、纠错审批 → **RISK_APPROVER**（批准风险处置）；对账差异发现、提交 DisputeCase/RiskCase → **FINANCE_REVIEWER**（读 Ledger/对账，不可写，**不直接改 `apt_ledger_entries.state`**）；发起方 = OPS_OPERATOR（运营）或系统。
+- **财务裁决/审批 = 05 canonical 角色分工**：争议裁决、冲正审批、结算异常确认、OTC 争议处置、纠错审批 → **RISK_APPROVER**（批准风险处置）；对账差异发现、提交 RiskCase（`risk_type=LEDGER_RECONCILIATION_DISPUTE`）→ **FINANCE_REVIEWER**（读 Ledger/对账，不可写，**不直接改 `apt_ledger_entries.state`**）；发起方 = OPS_OPERATOR（运营）或系统。
 - **ADMIN_SECURITY 不承担财务裁决**（05 定义其仅管角色/权限/安全配置，不可接触资产）。
 - **角色与状态写入分离（IR 638 P1-3）**：FINANCE_REVIEWER 只读，不是任何 `apt_ledger_entries` 状态转移的直接执行者。L4/L5 的 `state` 写入由 Authoritative Writer（Ledger Service）/系统在合法工作流条件满足后执行；审批角色（RISK_APPROVER）批准 ≠ 执行（`approval actor != execution authority`）。
+- **争议案件载体（IR 659 P2-1）**：已冻结领域对象中**不存在 `DisputeCase` 实体**。争议/对账差异一律复用已冻结的 **`RiskCase`**（`risk_type = LEDGER_RECONCILIATION_DISPUTE`），不得自行发明新实体。
 
 > ⚠️ 职责分离提醒：本项目 11 角色由 OWNER 单人兼任（manifest `p1_004_owner_freeze`）。系统层面 `OPS_OPERATOR(发起) ≠ RISK_APPROVER(审批)` 的角色分离仍成立；若同一自然人同时持有两角色并自审自批，须满足 `p1_010_override_contract`（非紧急 SELF_APPROVAL=FORBIDDEN；紧急单人需 MFA + 事后 48h 审计）。
 
 ## 3. 状态转移矩阵
 
-> 通用不变量（对所有状态机成立）：① 每个 transfer 由该实体唯一 Authoritative Writer（Service）执行；② 附带 `object_version` 乐观锁校验（8 核心实体均含 object_version，`apt_ledger_entries` 经 dated migration `20260815_..._ledger_object_version.sql` 补齐，IR 638 P1-2 方案 A）；③ 追加 append-only 审计事件并回写 `audit_event_id`（同事务原子）；④ 状态不可任意流转（仅本文件定义的合法出边）；⑤ 超级管理员不得绕过状态机。
+> 通用不变量（对所有状态机成立）：① 每个 transfer 由该实体唯一 Authoritative Writer（Service）执行；② 附带 `object_version` 乐观锁校验（8 核心实体均含 object_version，`apt_ledger_entries` 经 dated migration `20260815_..._ledger_object_version.sql` 补齐，IR 638 P1-2 方案 A）；③ 追加 append-only 审计事件并回写 `audit_event_id`（同事务原子）；④ 状态不可任意流转（仅本文件定义的合法出边）；⑤ 超级管理员不得绕过状态机；⑥ 高风险涉财 transition 必须绑定真实 `ApprovalRequest`（`approval.status=approved` + `request_type`/`request_object_type`/`request_object_id` 匹配 + `initiating_actor != approved_actor` + 未消费/过期），`ApprovalRequest` 契约未冻结 → 涉财 transition FAIL_CLOSED（IR 659 STEP 6）。
 > 终态三档（IR 629 P2-1）：**TRUE_TERMINAL**（真终态，无出边）/ **STABLE_WITH_EXCEPTION_TRANSITIONS**（稳定态，仅冲正/纠错/争议例外可离开）/ **NON_REVERSIBLE_TO_PREVIOUS_STATE**（单条转移方向不可逆）。
 > `direct_reverse` 列（IR 638 P2-1）：是否存在从目标态**直接回到源态**的合法转移，取值仅 `YES`（列反向转移 ID）/`NO`。终态/稳定态分类由各表「状态分类」bullet 承载，不用自由文本「可逆/不可逆」。
 
@@ -42,29 +44,39 @@
 | # | 从 → 到 | 触发事件 | 触发者 | 前置（guard） | 副作用 | direct_reverse |
 |---|---|---|---|---|---|---|
 | L1 | `pending` → `posted` | 日记账批次原子过账 | 系统 / OPS_OPERATOR | 批次内分录借贷平衡；账户余额校验通过 | 更新 `apt_accounts` 余额；追加审计事件 | NO（`posted↛pending`） |
-| L2 | `pending` → `reversed` | 入账前冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 分录尚未 posted | 追加 reversal 分录 | NO |
-| L3 | `posted` → `reversed` | 入账后冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 冲正审批通过 | 追加 reversal 分录；反向更新 `apt_accounts` | NO |
-| L4 | `pending` → `disputed` | 对账不符/异常标记 | Authoritative Writer / 系统（OPS_OPERATOR 发起；FINANCE_REVIEWER 仅提交差异 Case） | 对账差异记录 | 冻结标记（见 Accounting Delta Matrix） | NO（`disputed↛pending`） |
-| L5 | `posted` → `disputed` | 入账后发现争议 | Authoritative Writer / 系统（OPS_OPERATOR 发起；FINANCE_REVIEWER 仅提交差异 Case） | 对账差异记录 | 冻结该笔影响 | YES（L6） |
-| L6 | `disputed` → `posted` | 仲裁确认有效 | Authoritative Writer（RISK_APPROVER 裁决后执行） | 裁决通过 | 按 origin 入账或保持 | YES（L5） |
-| L7 | `disputed` → `reversed` | 仲裁判定冲正 | Authoritative Writer（RISK_APPROVER 裁决后执行） | 裁决冲正 | 追加 reversal 分录 | NO |
+| L2 | `pending` → `reversed` | 入账前取消（未过账冲正） | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 分录尚未 posted | **仅取消未生效 entry**：改 state + 审计事件；`ACCOUNT_DELTA=0`、`ECONOMIC_REVERSAL_ENTRY=NO`（IR 659 P1-2） | NO |
+| L3 | `posted` → `reversed` | 入账后冲正 | OPS_OPERATOR 发起 + RISK_APPROVER 审批 | 冲正审批通过 | 追加经济 reversal 分录（`entry_direction=-原`、`quantity=原`、`reversal_of=原`）；反向更新 `apt_accounts` | NO |
+| L4 | `pending` → `disputed` | 对账不符/异常标记 | Authoritative Writer / 系统（OPS_OPERATOR 发起；FINANCE_REVIEWER 仅提交 RiskCase） | 对账差异记录（RiskCase） | 冻结标记（见 Dispute Hold Matrix） | NO（`disputed↛pending`） |
+| L5 | `posted` → `disputed` | 入账后发现争议 | Authoritative Writer / 系统（OPS_OPERATOR 发起；FINANCE_REVIEWER 仅提交 RiskCase） | 对账差异记录（RiskCase） | 冻结该笔影响（见 Dispute Hold Matrix） | YES（L6） |
+| L6 | `disputed` → `posted` | 仲裁确认有效 | Authoritative Writer（RISK_APPROVER 裁决后执行） | 裁决通过 | 按 origin 入账或保持（见 Dispute Hold Matrix） | YES（L5） |
+| L7 | `disputed` → `reversed` | 仲裁判定冲正 | Authoritative Writer（RISK_APPROVER 裁决后执行） | 裁决冲正 | 按 origin 区分：pending-origin 仅取消标记；posted-origin 追加经济 reversal（见 Dispute Hold Matrix） | NO |
 
 - **状态分类（IR 629 P2-1）**：`reversed` = TRUE_TERMINAL；`posted` = STABLE_WITH_EXCEPTION_TRANSITIONS（可经 L3/L5，不可退回 pending）；`pending`/`disputed` = 中间态。
 - **禁止**：`posted → pending`、任何态的物理删除/覆盖（append-only）。
-- **争议冻结实现（方案 A，Owner 裁决）**：`state=disputed` 作为冻结标记，不追加反向分录、不改原账数字；业务层计算可用余额时排除 `disputed` 分录影响。
+- **争议冻结实现（方案 A，Owner 裁决 + IR 659 P1-1 精确化）**：`state=disputed` 作为冻结标记，**不改原账数字（stored balance）、不改 `frozen_*` 字段**；冻结语义由下方 **Dispute Hold Matrix** 按 `origin × entry_direction` 精确给出。**禁止统一「排除 disputed 分录影响」**（对 DEBIT 会错误释放已扣资金）。
 - **pending 长驻策略（Owner 裁决）**：允许长驻，不删除不清理；对账任务标记 stale pending 并生成 RiskCase。
-- **角色写入（IR 638 P1-3）**：FINANCE_REVIEWER 只读，仅提交 DisputeCase/RiskCase，不直接改 `state`；L4–L7 的 state 写入归 Authoritative Writer/系统。
+- **角色写入（IR 638 P1-3 + IR 659 P2-1）**：FINANCE_REVIEWER 只读，仅提交 RiskCase（`risk_type=LEDGER_RECONCILIATION_DISPUTE`），不直接改 `state`；L4–L7 的 state 写入归 Authoritative Writer/系统。
 
-**Ledger Mutation Field Contract（IR 629 P1-4 + IR 638 P1-2 方案 A）**：仅 `state`、`audit_event_id`、`object_version` 三列受 Authoritative Writer 控制更新；其余字段（`ledger_entry_id`/`account_id`/`asset`/`quantity`/`entry_direction`/`entry_type`/`source_object_type`/`source_object_id`/`journal_batch_id`/`reversal_of`/`idempotency_key`/`rule_version`/`snapshot_id`/`created_time`）永久 immutable。`object_version` 经 dated migration `20260815_machine_contract_batch2_ledger_object_version.sql` 补列（不改 MC1 历史 SQL）。状态机更新走显式受控 update 路径（白名单三列 + object_version 乐观锁 + transition guard），不放宽 append-only 防线。乐观锁：`UPDATE ... SET state=?, audit_event_id=?, object_version=object_version+1 WHERE ledger_entry_id=? AND object_version=? AND state=?`；`affected_rows ≠ 1` = `OBJECT_VERSION_CONFLICT`（fail-closed）。
+**Ledger Mutation Field Contract（IR 629 P1-4 + IR 638 P1-2 方案 A + IR 659 P2-2 补 CR）**：仅 `state`、`audit_event_id`、`object_version` 三列受 Authoritative Writer 控制更新；其余字段（`ledger_entry_id`/`account_id`/`asset`/`quantity`/`entry_direction`/`entry_type`/`source_object_type`/`source_object_id`/`journal_batch_id`/`reversal_of`/`idempotency_key`/`rule_version`/`snapshot_id`/`created_time`）永久 immutable。`object_version` 经 dated migration `20260815_machine_contract_batch2_ledger_object_version.sql` 补列（不改 MC1 历史 SQL），配套正式 Change Request **`CR-20260815-001`**（见 `sql/CHANGE_REQUEST_CR-20260815-001.md`）。状态机更新走显式受控 update 路径（白名单三列 + object_version 乐观锁 + transition guard），不放宽 append-only 防线。乐观锁：`UPDATE ... SET state=?, audit_event_id=?, object_version=object_version+1 WHERE ledger_entry_id=? AND object_version=? AND state=?`；`affected_rows ≠ 1` = `OBJECT_VERSION_CONFLICT`（fail-closed）。
 
-**Accounting Delta Matrix（IR 629 P1-4 + IR 638 P1-1：方向机械公式）**：`quantity` 恒为正数，方向由 `entry_direction`（`1=CREDIT`、`-1=DEBIT`）决定。统一 `signed_delta = quantity × entry_direction`。origin 由审计事件链确定（该分录最近一次进入 disputed 的 L4/L5 事件 before 快照）。
+**Dispute Hold & Accounting Delta Matrix（IR 629 P1-4 + IR 638 P1-1 + IR 659 P1-1/P1-2）**：`quantity` 恒为正数，方向由 `entry_direction`（`1=CREDIT`、`-1=DEBIT`）决定，统一 `signed_delta = quantity × entry_direction`。origin 由审计事件链确定（该分录最近一次进入 disputed 的 L4/L5 事件 before 快照）。冻结模型：`stored_available`（dispute 期间不变，不改 frozen_*）+ `dispute_hold` 投影 → `effective_available = stored_available - dispute_hold`。
 
-| 路径 | origin | L6 到 posted 账户 delta | L7 到 reversed 账户 delta |
-|---|---|---|---|
-| L4 | pending | `+signed_delta`（此前未入账，现入账） | `0`（未入账，仅取消标记） |
-| L5 | posted | `0`（已入账，不重复） | `-signed_delta`（反向冲正） |
+**进 dispute 四格 Hold Matrix**：
 
-CREDIT/DEBIT 双套示例（禁止只验证 CREDIT）：pending+DEBIT → L6=`-100`、L7=`0`；posted+DEBIT → L6=`0`、L7=`+100`（冲正 DEBIT 恢复余额，不二次扣款）。reversal 分录字段：`entry_direction = -(原)`、`quantity = 原`、`reversal_of = 原 ledger_entry_id`、`entry_type = LEDGER_REVERSAL`。不变量：冻结期净影响恒为 0；仲裁后每个 origin 恰好一次正确余额效果，不二次入账/冲正。
+| origin | direction | `dispute_hold_delta` | `stored_balance_delta` | 语义 |
+|---|---|---|---|---|
+| pending | CREDIT | `0` | `0` | 未入账，无需额外冻结 |
+| pending | DEBIT | `+quantity` | `0` | **预留冻结**，防消费后无法扣款 |
+| posted | CREDIT | `+quantity` | `0` | 冻结已入账部分，不可支取 |
+| posted | DEBIT | `0` | `0` | 已扣款，保持扣款，**绝不恢复 available** |
+
+**L6 `disputed → posted`**：pending+CREDIT → balance `+quantity`、hold `0`；pending+DEBIT → balance `-quantity`、hold `-quantity`；posted+CREDIT → balance `0`、hold `-quantity`；posted+DEBIT → balance `0`、hold `0`。
+
+**L7 `disputed → reversed`**：pending+CREDIT → balance `0`、hold `0`、**无经济 reversal**；pending+DEBIT → balance `0`、hold `-quantity`、**无经济 reversal**；posted+CREDIT → balance `-quantity`、hold `-quantity`、**追加 reversal**；posted+DEBIT → balance `+quantity`、hold `0`、**追加 reversal**。
+
+**pending vs posted reversal 语义（IR 659 P1-2）**：未过账取消（`pending → reversed` L2、`pending-origin disputed → reversed` L7）= `ACCOUNT_DELTA=0`、`ECONOMIC_REVERSAL_ENTRY=NO`、`AUDIT_EVENT=YES`（不追加经济 reversal，杜绝 phantom credit/debit）。仅已发生经济效果的冲正（`posted → reversed` L3、`posted-origin disputed → reversed` L7）才 `ECONOMIC_REVERSAL_ENTRY=YES`，reversal 字段：`entry_direction = -(原)`、`quantity = 原`、`reversal_of = 原 ledger_entry_id`、`entry_type = LEDGER_REVERSAL`。
+
+验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`、`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`。不变量：dispute 期间 `stored_balance` 恒不变（冻结只通过 `dispute_hold` 作用于 `effective_available`）；仲裁后每个 origin×direction 恰好一次正确余额效果与 hold 释放，不二次入账/冲正/扣款。
 
 ### 3.2 Robot — `inactive / active / cooling / review / restricted / paused`
 
@@ -144,6 +156,7 @@ CREDIT/DEBIT 双套示例（禁止只验证 CREDIT）：pending+DEBIT → L6=`-1
 - **状态分类（IR 629 P2-1）**：`refunded`、`corrected` = TRUE_TERMINAL；`settled` = STABLE_WITH_EXCEPTION_TRANSITIONS（仅经 P7）；`locked`/`awaiting_result` = STABLE（可继续结算或经 P11/P12 退款）。
 - **void→refund 断路修复（IR 629 P1-2）**：Market void 时，结算前订单状态（`submitted`/`locked`/`awaiting_result`）进入 `refunding`（P10/P11/P12）；退款范围 = 全额本金；`idempotency_key` 防重。
 - **settling→refunding 触发（IR 638 P1-4 方案 A）**：结算开始后不再走 `Market void` 退款（与「结算开始后不 void」自洽），改由**结算失败/异常（Market 进入 `exception`）+ RefundCase 审批通过**触发 P5；退款范围 = 全额本金；走 `ORDER_REFUND(+本金)` 分录。
+- **P5 审批依赖 FAIL_CLOSED（IR 659 STEP 5）**：`RefundCase`（`refund_cases`）当前**未冻结**（归属 2B-2/2B-1）。其 Authoritative Writer、状态机、DDL、`refund_scope`（全额本金）/`fee_treatment`/`idempotency_key` 字段契约冻结前，**P5（及 P10/P11/P12 退款）FAIL_CLOSED**（`REFUND_CASE_CONTRACT_FROZEN = REQUIRED`）。
 - **`corrected` 不回 `settled`**（Owner 裁决 #12）：重新结算产生新 Order/新分录（CorrectionCase 追踪）。
 - **`RESULT_UNKNOWN` 不混入订单状态**（05 §4）。
 
@@ -188,11 +201,11 @@ CREDIT/DEBIT 双套示例（禁止只验证 CREDIT）：pending+DEBIT → L6=`-1
 | 角色 | 财务裁决/审批 = 05 canonical（RISK_APPROVER/FINANCE_REVIEWER/OPS_OPERATOR；ADMIN_SECURITY 不涉财）；发起方 = 运营/系统 |
 | 1 | 争议由运营发起，RISK_APPROVER 裁决 |
 | 2 | 冲正由运营发起，RISK_APPROVER 审批 |
-| 3 | 争议期间钱冻住（方案 A：不改原账数字，标记 + 业务层排除） |
+| 3 | 争议期间钱冻住（方案 A：不改原账数字，标记 + `dispute_hold` 投影四格冻结） |
 | 10 | `exception→settled` 运营 + RISK_APPROVER 确认 |
 | 13 | 大额卖出、单人高频异常需人工确认 |
 | 14 | OTC 争议判 cancelled/completed 二选一，不回 partial |
-| 财务 1 | 争议冻结 = 方案 A |
+| 财务 1 | 争议冻结 = 方案 A（`dispute_hold` 投影四格，IR 659 P1-1 精确化） |
 | 财务 2 | 投注结算 = 下注先扣；赢=本金+盈利入账；输=不追加；走盘=退本金 |
 
 ## 5. Event Catalog（对齐 `entry_type`/`entry_direction`）
@@ -282,15 +295,18 @@ CREDIT/DEBIT 双套示例（禁止只验证 CREDIT）：pending+DEBIT → L6=`-1
 1. 走 05 契约变更流程（先改 05 §3/§4，再改 DDL/矩阵）；
 2. 更新本 Freeze 文档版本号；
 3. 变更 DDL 以新增日期文件提交（不改历史 dated SQL）；
-4. 重新触发 Independent Review（State Machine gate）。
+4. 凡变更**已冻结实体的有效 Schema**（如新增列）必须附带正式 **Change Request（CR-YYYYMMDD-NNN）**，至少记录 `BASE_FREEZE`/`CHANGE`/`REASON`/`MIGRATION`/`OWNER_DECISION`/`INDEPENDENT_REVIEW_REQUIRED`/`NEW_FREEZE_TARGET`（本批 `object_version` 加列即 `CR-20260815-001`，IR 659 P2-2）；
+5. 重新触发 Independent Review（State Machine gate）。
 
 ## 8. 验收对照
 
 - [ ] 状态转移矩阵（3.1–3.6）经 Owner 逐条裁决 + IR 通过，无自创状态（枚举全部来自 05 §4）
 - [ ] Event Catalog 覆盖 A.1–A.6 全部 transition ID（MISSING=0 / ORPHAN=0），事件码与 `entry_type`/`entry_direction` 对齐
-- [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id + object_version 受控可变）+ Accounting Delta Matrix（`signed_delta = quantity × entry_direction`）无二次入账/冲正
-- [ ] `apt_ledger_entries` 已补齐 `object_version`（dated migration `20260815_..._ledger_object_version.sql`，不改 MC1 历史 SQL），CAS 乐观锁 DETERMINISTIC
-- [ ] FINANCE_REVIEWER 只读（对账差异发现/提交 Case），不直接写 `apt_ledger_entries.state`
+- [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id + object_version 受控可变）+ **Dispute Hold Matrix**（四格 `origin × entry_direction`，`signed_delta = quantity × entry_direction`）无二次入账/冲正/扣款
+- [ ] Dispute Hold 验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`
+- [ ] Reversal 验收断言：`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`（pending 取消不生成经济 reversal，仅 posted 冲正生成）
+- [ ] `apt_ledger_entries` 已补齐 `object_version`（dated migration `20260815_..._ledger_object_version.sql`，不改 MC1 历史 SQL），并附 **Change Request `CR-20260815-001`**，CAS 乐观锁 DETERMINISTIC
+- [ ] FINANCE_REVIEWER 只读（对账差异发现/提交 RiskCase `risk_type=LEDGER_RECONCILIATION_DISPUTE`），不直接写 `apt_ledger_entries.state`；无未冻结的 `DisputeCase` 实体引用（UNKNOWN_ENTITY_REFERENCE=0）
 - [ ] settling→refunding（P5）可达（结算异常 + RefundCase 审批），无 unreachable transition
 - [ ] `audit_events` 表 DDL 定义（append-only + typed reference 快照，支持 MC1 §3.6 审计不变量）
 - [ ] 关闭 MC1 Freeze 文档 §3.6 CONTRACT GAP（「待冻结」→「已冻结，见第二批」）

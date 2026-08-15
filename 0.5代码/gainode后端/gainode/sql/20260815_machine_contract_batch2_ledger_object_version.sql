@@ -13,6 +13,8 @@
 --   .project-ai/tasks/TASK-20260815-001/design.md A.0（通用不变量 #2）+ A.1.1（Ledger
 --   Mutation Field Contract，白名单三列：state / audit_event_id / object_version）。
 --   Independent Review IR 638 P1-2（方案 A：Ledger 自身使用 object_version）。
+--   Change Request：CR-20260815-001（见 CHANGE_REQUEST_CR-20260815-001.md，
+--   BASE_FREEZE=MC1，NEW_FREEZE_TARGET=MC2，IR 659 P2-2 补）。
 --
 -- 影响范围：
 --   仅对 `apt_ledger_entries` 执行一次 ADD COLUMN。不改动任何已有数据；不改 MC1 已冻结
