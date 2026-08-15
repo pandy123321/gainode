@@ -113,15 +113,34 @@ class XxxService extends Service
 }
 
 // DAO: 数据库查询封装，必须 extends support\extend\Dao
-class XxxDao extends Dao { ... }
+class XxxDao extends Dao
+{
+    public function __construct()
+    {
+        $this->model = XxxModel::class;
+    }
+}
 
-// Model: 数据表映射，必须 extends support\extend\Model
+// Model: 数据表映射，必须 extends support\extend\Model（属性均为 public，非 protected）
 class XxxModel extends Model
 {
-    protected string $table = 'xxx_table';
-    protected string $pk = 'id';
+    public $table = 'xxx_table';
+    public $primaryKey = 'xxx_id';      // Snowflake 主键（bigint unsigned）
+    public $connection = 'mysql';
+
+    public $incrementing = false;        // 禁用 AUTO_INCREMENT
+    public $keyType = 'string';          // 主键 string 键，避免 64 位溢出
+    public $delete_field = '';           // V2.0 用 ENUM 冻结领域状态，不用软删
+
+    public $fields = ['xxx_id', /* ... */];  // 字段白名单 → 基类自动并入 $fillable
+
+    // 领域状态常量（05 §4 canonical，冻结，禁止自创）
+    public const STATUS_A = 'a';
+    public const STATUSES = [self::STATUS_A, /* ... */];
 }
 ```
+
+> **append-only 表（仅 `apt_ledger_entries`）**：另设 `public $timestamps = false;` + `public const UPDATED_AT = null;`（本表无 `updated_time` 列，杜绝 ORM/Dao 误写）。经济字段禁止 UPDATE/DELETE，更正走 `reversal_of` 追加。
 
 5. **Service 调用 DAO**：通过 `$this->getNewDao()` 获取 DAO 实例，基类自动代理 `create/update/get/find/fetch/fetchAll` 等方法。
 6. **禁止**：Controller 中直接 new DAO 或 Model；不允许 Controller 绕过 Service 执行业务逻辑。

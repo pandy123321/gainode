@@ -57,27 +57,27 @@
 
 | 实体 | 类型 | 说明 |
 |---|---|---|
-| **User** | 持久领域实体 | 用户身份 `active / restricted / suspended / closed` |
-| **AuthSession** | 持久领域实体 | 登录会话 `active / expired / revoked` |
-| **KycCase** | 工作流对象 | KYC 审核 `pending / under_review / approved / rejected / expired` |
+| **User** | 持久领域实体 | 用户身份状态 `active / restricted / suspended / closed`（05 §4） |
+| **AuthSession** | 持久领域实体 | 登录会话 `active / expired / revoked`（来源待确认：非 05 §4 统一状态机） |
+| **KycCase** | 工作流对象 | KYC 审核 `not_started / pending / needs_info / approved / rejected / review`（05 §4） |
 | **FeatureEntitlement** | 投影/聚合 | 功能是否允许，服务端统一返回 `allowed / reason_code / next_action` |
-| **Robot** | 持久领域实体 | Robot 等级与状态 `idle / running / upgrading / paused / disabled` |
+| **Robot** | 持久领域实体 | Robot 等级与状态 `inactive / active / cooling / review / restricted / paused`（05 §4，已 FROZEN） |
 | **RobotUpgradeOrder** | 工作流对象 | 升级订单，含 current/target level、apt_cost、power_cap_after |
-| **AIReward** | 领域实体 | Reward `candidate / held / pending_claim / claimed / expired_returned / reversed` |
-| **AptAccount** | 持久领域实体 | APT-I 数量账（available/frozen/pending） |
-| **AptLedgerEntry** | 持久领域实体 | 每笔 APT 变化 `pending / posted / reversed / disputed` |
+| **AIReward** | 领域实体 | Reward `candidate / held / pending_claim / claiming / claimed / expired_returned / review / reversed`（05 §4，已 FROZEN） |
+| **AptAccount** | 持久领域实体 | APT-I 数量账（balance_apt_i / balance_apt_c / frozen_apt_i / frozen_apt_c / total_earned_apt / total_spent_apt，MC1 冻结，无状态机） |
+| **AptLedgerEntry** | 持久领域实体 | 每笔 APT 变化 `pending / posted / reversed / disputed`（05 §4，已 FROZEN） |
 | **PowerPosition** | 聚合/投影 | Power 余额/冻结/消耗/释放/Cap |
-| **Market** | 领域实体 | 预测市场 `scheduled / open / locked / in_settlement / settled / cancelled` |
-| **PredictionOrder** | 领域实体 | 用户预测订单 `pending / confirmed / settled / refunded / corrected` |
+| **Market** | 领域实体 | 预测市场 `draft / open / closing / locked / awaiting_result / settlement / settled / void / exception`（05 §4，已 FROZEN） |
+| **PredictionOrder** | 领域实体 | 用户预测订单 `submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected`（05 §4，已 FROZEN） |
 | **Result** | 工作流对象 | 赛果 `provisional / official / disputed / corrected` |
 | **Settlement** | 工作流对象 | 单笔结算 `queued / calculating / review / payable / paid / failed` |
-| **OtcOrder** | 领域实体 | OTC 挂单 `open / partial_filled / filled / cancelled / expired / disputed` |
+| **OtcOrder** | 领域实体 | OTC 挂单 `draft / review / matching / partial / completed / cancelled / expired / rejected / disputed`（05 §4，已 FROZEN） |
 | **OtcTrade** | 持久领域实体 | OTC 成交记录 |
-| **ApprovalRequest** | 工作流对象 | 高风险审批 `draft / pending_review / approved / rejected / executed / rolled_back` |
-| **ParameterRelease** | 工作流对象 | 参数发布版本 `draft / pending_approval / published / rolled_back` |
+| **ApprovalRequest** | 工作流对象 | 高风险审批 `draft / pending / changes_requested / approved / rejected / executing / executed / failed`（05 §4） |
+| **ParameterRelease** | 工作流对象 | 参数发布版本 `draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived`（05:854-865） |
 | **ParameterSnapshot** | 只读投影 | 参数快照，历史订单用于回算 |
 | **RiskCase** | 工作流对象 | 风控案件 |
-| **Ticket** | 工作流对象 | 工单 `submitted / in_progress / waiting_user / under_review / resolved / closed` |
+| **Ticket** | 工作流对象 | 工单 `submitted / in_progress / waiting_user / under_review / resolved / closed`（05 §4） |
 | **AuditLog** | 只读投影 | 审计日志 |
 | **Notice** | 只读投影 | 用户通知（read_state、priority、关联对象深链） |
 | **NotificationDelivery** | 工作流对象 | 通知投递记录（channel、delivery_status、retry） |
@@ -91,21 +91,25 @@
 | **AIRecommendation** | 领域实体 | AI 运营建议。05: NOT DEFINED — 状态枚举 TBC |
 | **SimulationRun** | 工作流对象 | AI 策略模拟。05: NOT DEFINED — 状态枚举 TBC |
 
-### 状态定义（所有 Domain State 依法来自 05 §4）
+### 状态定义（所有 Domain State 依法来自 05 §4 统一状态机）
 
 | 域 | Canonical State | 05 行号 |
 |------|------|------|
-| Robot | inactive / active / cooling / review / restricted / paused | 05:740 |
-| AI Reward | candidate / held / pending_claim / claiming / claimed / expired_returned / review / reversed | 05:743 |
-| Ledger Entry | pending / posted / reversed / disputed | 05:746 |
-| Market | draft / open / closing / locked / awaiting_result / settlement / settled / void / exception | 05:749 |
-| Prediction Order | submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected | 05:758 |
-| OTC Order | draft / review / matching / partial / completed / cancelled / expired / rejected / disputed | 05:761 |
+| User | active / restricted / suspended / closed | 05:735 |
+| KYC | not_started / pending / needs_info / approved / rejected / review | 05:738 |
+| Robot | inactive / active / cooling / review / restricted / paused | 05:741 |
+| AI Reward | candidate / held / pending_claim / claiming / claimed / expired_returned / review / reversed | 05:744 |
+| Ledger Entry | pending / posted / reversed / disputed | 05:747 |
+| Market | draft / open / closing / locked / awaiting_result / settlement / settled / void / exception | 05:750 |
+| Result | provisional / official / disputed / corrected | 05:753 |
+| Settlement | queued / calculating / review / payable / paid / failed | 05:756 |
+| Prediction Order | submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected | 05:759 |
+| OTC Order | draft / review / matching / partial / completed / cancelled / expired / rejected / disputed | 05:762 |
+| Ticket | submitted / in_progress / waiting_user / under_review / resolved / closed | 05:773 |
+| Approval | draft / pending / changes_requested / approved / rejected / executing / executed / failed | 05:776 |
+| Parameter Release | draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived | 05:779 |
 | Power | 无 canonical status enum — 05 使用 scalar fields: available, frozen, consumed_period | 05:151 |
-| KYC | TBC — 不在 05 canon。需从 Admin Governance 或独立 Contract 定义 | — |
-| Auth Session | active / expired / revoked | — |
-| Approval | sub_draft_submitted / pending_review / approved_awaiting_execution / rejected / executed / rolled_back | 05:reusable-def |
-| Parameter Release | draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived | 05:854-865 |
+| Auth Session | active / expired / revoked（**待确认**：非 05 §4 统一状态机，来源需确认） | — |
 | Affiliate/Agent | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
 | AI Signal/Rec./Sim. | **05: NOT DEFINED** — 状态枚举 TBC，等待 Contract Freeze | — |
 
@@ -122,6 +126,16 @@
 | **mapped_apt_budget** | reference_profit 转换的 APT 预算 |
 | **daily_ai_budget** | 当日 AI Reward 预算上限（取多项 cap 的最小值） |
 | **APT_MAX_SUPPLY** | 100,000,000,000 APT（1000 亿） |
+
+### 工程术语（STAGE-01 新增）
+
+| 术语 | 含义 |
+|---|---|
+| **Snowflake ID** | 分布式唯一 ID（`godruoyi/php-snowflake`），V2.0 主键 `bigint unsigned`，应用层生成，禁用 AUTO_INCREMENT；Model 层 `$incrementing=false` + `$keyType='string'` |
+| **Authoritative Writer** | 每个数据实体有且仅有一个 Service 作为唯一写入方，Service 声明 `@authoritative_writer <table>` 注解 |
+| **FAIL_CLOSED** | 状态转移矩阵未冻结时，Service 拒绝任何未授权的 state transition（默认拒绝写入），不自行发明转移规则 |
+| **append-only 账本** | `apt_ledger_entries` 经济字段一经写入永不覆盖/删除，更正通过 `reversal_of` 追加反向分录；无 `updated_time` 列（Model `$timestamps=false` + `UPDATED_AT=null`） |
+| **MC1 Freeze** | Machine Contract 第一批冻结：8 核心实体 DDL + Canonical State Freeze（2026-08-13 FROZEN，Owner Signoff） |
 
 ### 技术缩写
 
@@ -163,13 +177,16 @@
 - ORM 层使用 illuminate/database（Laravel Eloquent），非 ThinkPHP（来源：`composer.json` 依赖清单）
 
 ## 待确认事项
-- 正式开发的技术栈选型（现有 PHP/Webman + illuminate/database + MySQL；详见 TASK-20260812-001 #1-#3）
-- Power 的精确消耗规则（由 Active Rule/Parameter 决定）
-- AI Robot 引擎的技术实现方案（现有 arbitrage 引擎；详见 TASK-20260812-001 #5）
-- 60 张遗留表的迁移/重构策略（现有代码基础上升级 vs 完全重写；详见 TASK-20260812-001 #6）
+- Power 的精确消耗/恢复规则（由 Active Rule/Parameter 决定，生产参数未批准）
+- AI Robot 引擎的技术实现方案（现有 arbitrage 引擎改造为内部 AI 经济引擎，具体算法/模型 TBC）
+- Auth Session 状态枚举来源（`active / expired / revoked` 非 05 §4 统一状态机，需确认定义位置）
+- Affiliate/Agent、AI Signal/Rec./Sim. 状态枚举（05: NOT DEFINED，待 Contract Freeze）
+- manifest `contextVersion` 与 AI Code Review Assistant 已发布上下文版本号（当前 v17）的映射关系
 
 ## 信息来源
 - `01_PRODUCT_FUNCTIONAL_BASELINE.md` §2 — 用户角色
 - `05_DATA_STATE_PERMISSION_API_CONTRACT.md` §1-8 — API 契约、状态机、RBAC
 - `README.md` — 关键决策与术语
 - `0.5代码/gainode后端/gainode/sql/database.sql` — 遗留数据库
+- `0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql` — MC1 8 核心实体 DDL
+- `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md` — MC1 状态冻结

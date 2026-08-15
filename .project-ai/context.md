@@ -51,6 +51,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 - V1.x → V2.0 迁移策略：**增量升级**（非重写）。后端在现有代码上扩展新模块；前端 H5/Admin 基于 V1.x 代码重构升级。
 - STAGE-01 Backend Domain Objects：已创建 task（TASK-20260812-002），10 模块 Model/DAO/Service 骨架搭建。
 - Machine Contract 第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze — **FROZEN（2026-08-13，Owner Signoff）**。独立审核 GAINODE-MC1-IR 三轮通过（记录 541/542/543，最终建议合并 0 P0/P1/P2）。8 核心实体 DDL 已落盘 `0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`，Freeze 文档 `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`。
+- **STAGE-01 第一批已落地（2026-08-14，commit `5fb3d01`）**：8 个 MC1 冻结核心实体的 Model/DAO/Service 骨架（24 文件）已创建，目录 `library/{model,dao,service}/{robot,ledger,prediction,otc,power}/`。状态枚举严格取自 MC1 Freeze；主键 Snowflake（`$incrementing=false` + `$keyType='string'`）；`apt_ledger_entries` append-only（`$timestamps=false` + `UPDATED_AT=null`）。状态转移矩阵未实现，一律 FAIL_CLOSED，待 Machine Contract 第二批（Event Catalog + Ledger Mutation Contract）。
 - Machine Contract 第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
 
@@ -103,9 +104,11 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 ```text
 app/                # 控制器层（admin / api / command / queue）
 library/            # 业务逻辑层（model/ dao/ service/ dict/ event/）
+                    #   STAGE-01 已新增模块子目录：model|dao|service/{robot,ledger,prediction,otc,power}
 support/            # 框架基础设施（arbitrage/ extend/ utils/ middleware/）
 process/            # Workerman 长驻进程（ArbitrageTask、CrontabTask、ChannelServer、Pusher）
-sql/database.sql    # 全量数据库结构（60+ 张表）
+sql/database.sql    # V1.x 全量数据库结构（60+ 张表）
+sql/YYYYMMDD_*.sql  # V2.0 增量 DDL（MC1 8 核心实体：20260813_machine_contract_batch1_8_core_entities.sql）
 ```
 
 ### 产品核心领域
@@ -217,7 +220,8 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 
 - [ ] 正式生产参数的具体数值（分三批人工批准：开发→集成→上线前）
 - [ ] 敏感文案的最终法律审核签核（不阻塞原型开发）
-- [ ] PHP 版本在 `composer.json` 中正式改为 `>=8.2`
+- [ ] PHP 版本在 `composer.json` 中正式改为 `>=8.2`（当前 `composer.json` 仍为 `>=8.1`，Dockerfile 为 `php:8.2-cli`，两者不一致）
+- [ ] `composer.json` 中 `web3p/web3.php`、`web3p/ethereum-tx` 依赖清理（Web3 移除决策已定，但依赖尚未从 composer.json 移除，与「V2.0 不保留链上能力」的目标状态仍有差距）
 - [ ] CI/CD 管线的具体配置（GitHub Actions / GitLab CI 选型）
 - [ ] H5 Vant 4 集成方案（按需引入、CSS Variables 主题映射到 V1.x 暗色配色）
 - [ ] Admin Element Plus 迁移方案（Schema 驱动组件 `<lay-*>` → `<el-*>` 改造、#009688 色彩映射、v-permission 指令适配）
@@ -227,7 +231,7 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 - [ ] 结果源、通知渠道、汇率源、KYC 证据服务商选定
 - [ ] V1.x 生产数据库连接信息（用于 Schema 提取和迁移计划）
 - [ ] V1.x 生产环境 URL（H5/Admin/API 域名）
-- [ ] 开发启动时间
+- [x] 开发启动时间（STAGE-01 已授权启动，状态 = IN_PROGRESS，2026-08-13）
 
 ## 信息来源
 

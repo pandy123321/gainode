@@ -92,6 +92,18 @@
 - [ ] OTC expired 和 cancelled 有明确语义区分
 - [ ] OtcEligibility 实现为非状态机（每次请求动态计算）
 
+#### STAGE-01 骨架（Model/DAO/Service）
+- [ ] Model 用 `public $table` / `public $primaryKey`（非 `TABLE` 常量 / 非 `$pk`）
+- [ ] 主键 Snowflake：`$incrementing=false` + `$keyType='string'`（`bigint unsigned`，禁 AUTO_INCREMENT）
+- [ ] `$delete_field=''`（V2.0 用 ENUM 冻结领域状态，不用 V1.x 软删）
+- [ ] 领域状态常量为 `public const STATUS_*`/`STATE_*` + `STATUSES`/`STATES` 数组，值逐字对齐 05 §4 canonical / MC1 Freeze，无自创状态
+- [ ] 状态枚举与冻结 DDL `ENUM(...)` 完全一致
+- [ ] append-only 表（`apt_ledger_entries`）设 `$timestamps=false` + `const UPDATED_AT=null`；经济字段禁止 UPDATE/DELETE
+- [ ] Service 声明 `@authoritative_writer <table>`，一个实体仅一个写入方
+- [ ] 状态转移矩阵未冻结（Event Catalog / Ledger Mutation Contract 未出）时，Service 对任何 state transition FAIL_CLOSED
+- [ ] DAO 仅做查询封装；append-only 表 DAO 不得暴露物理删除
+- [ ] namespace/目录：`library\{model,dao,service}\{module}\Xxx{Model,Dao,Service}.php`
+
 #### 资格与参数
 - [ ] 资格/参数/Policy 在服务端解析后返回
 - [ ] TBC 生产值保持 null/closed，无本地默认值补齐
@@ -170,8 +182,8 @@
 
 ## 待确认事项
 
-- [ ] 审核工具与流程（AI Code Review Assistant 或其他）
-- [ ] Stage/Gate 治理流程的具体方式
+- [x] 审核工具与流程：AI Code Review Assistant（MCP：list_projects / review_latest_commit / get_review_result 等）已确认并在用
+- [x] Stage/Gate 治理流程：Stage Gate 已实施（STAGE-00 完成、STAGE-01 IN_PROGRESS）
 - [ ] 外部审核的频率和时机
 - [ ] 代码审查的审批人指派规则和门禁策略
 - [ ] 安全渗透测试的范围和周期

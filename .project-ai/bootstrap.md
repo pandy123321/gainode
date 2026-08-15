@@ -308,9 +308,9 @@ PENDING_DEPENDENCIES = H5/Admin/App exact version lock + SBOM, 测试框架（Vi
 [x] README / INDEX (.project-ai/context.md ≈ README+INDEX)
 [x] Existing Baseline Review (V1.x 生产代码分析 — 本次 task 完成)
 [x] Architecture Freeze (.project-ai/architecture.md — V1.x→V2.0 migration architecture documented)
-[ ] Database/Data Freeze — 第一批（STAGE-01 前）：从 05 提取 8 核心实体 DDL；第二批：非核心实体
+[x] Database/Data Freeze — 第一批（STAGE-01 前）已 FROZEN（2026-08-13，MC1：8 核心实体 DDL + Canonical State Freeze）；第二批：非核心实体 DDL
 [ ] API Freeze (需补充 OpenAPI 3.1 契约文件 + Admin Schema 契约 — 推迟至 STAGE-02，STAGE-01 不定义 API)
-[ ] Event/State Freeze — 第一批（STAGE-01 前）：05 §4 7 个实体的 canonical enum 已对齐到 TASK-20260811；第二批：Event Catalog 异步补
+[x] Event/State Freeze — 第一批（STAGE-01 前）已 FROZEN（MC1 Canonical State Freeze：8 核心实体 = 6 状态机 + 2 scalar，枚举与 05 §4 一致）；第二批：Event Catalog 异步补
 [x] Business Rules (V6.1 05_DATA_STATE_PERMISSION_API_CONTRACT.md)
 [ ] Environment Freeze — STAGE-01 并行配置 dev container + .env template
 [x] Framework/Dependencies (H5: Vant 4, Admin: Element Plus; exact versions pending)
@@ -430,7 +430,7 @@ IMPLEMENTATION_REQUIREMENTS =
 
 VALIDATION_REQUIREMENTS =
 - php -l 语法检查通过
-- 所有 Model 有 TABLE 常量
+- 所有 Model 有 public $table / $primaryKey 属性（非 TABLE 常量 / 非 $pk）
 - 所有 DAO 有 docblock 类型提示
 - 所有 Service 有 @authoritative_writer 注解
 

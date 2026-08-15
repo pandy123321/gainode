@@ -164,7 +164,7 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
     2. remove `web3p/web3.php`；
     3. remove `web3p/ethereum-tx`；
     4. `EXACT_DEPENDENCY_LOCK = TRACKED`（`composer.lock` 已入库）；`SBOM = PENDING`；`DEPENDENCY_VULNERABILITY_SCAN = PENDING`；
-    5. clean-install 环境平台扩展（`ext-gd`/`ext-gmp`）补齐（供未来干净环境 `composer install` 验证）。
+    5. `CLEAN_INSTALL_PLATFORM_BLOCKERS = {ext-gd, ext-gmp}`；`FINAL_RESOLUTION = PENDING_DEPENDENCY_GOVERNANCE`（`ext-gd` 需确认目标运行环境是否必须安装；`ext-gmp` 优先结合 Web3 dependency removal 判断是否仍需安装，而非直接「补齐」）。
 - `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 维持，`append-only 机制完整实现`
   仍保持 `[ ]`。
 

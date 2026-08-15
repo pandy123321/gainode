@@ -189,28 +189,45 @@ V1.x Backend (线上运行)                   V2.0 Backend (目标)
 |---|---|---|---|
 | **Controller** | `support\extend\Controller` | 请求解析、参数校验、调用 Service、组装响应 | 不变 |
 | **Service** | `support\extend\Service` | 业务逻辑编排、事务管理、调用 DAO。每个 Service 声明 `@authoritative_writer` 注解 | 新增注解 |
-| **DAO** | `support\extend\Dao` | 数据库查询封装 | 不变 |
-| **Model** | `support\extend\Model` | 数据表映射、ActiveRecord 风格 CRUD。定义 `TABLE` 常量 | 新增常量规范 |
+| **DAO** | `support\extend\Dao` | 数据库查询封装（`fetch/fetchAll/selector/create/update` 等） | 不变 |
+| **Model** | `support\extend\Model` | 数据表映射（`public $table` / `public $primaryKey`）、领域状态常量（`public const STATUS_*` + `STATUSES` 数组）、字段白名单 `public $fields` | 新增 Snowflake 主键 + ENUM 状态约定 |
 
-Service 通过 `$this->dao = XxxDao::class` 注入 DAO，基类自动提供代理调用方法。
+Service 通过 `$this->dao = XxxDao::class` 注入 DAO，基类自动提供代理调用方法（`getNewDao()` + `__call` 魔术方法）。
 
-### V2.0 新模块目录约定
+### Model 属性约定（STAGE-01 已落实，与 MC1 冻结一致）
 
-```
+| 属性 | 约定 | 说明 |
+|---|---|---|
+| `$table` | `public` | 表名（如 `robots`）。**非** `TABLE` 常量 |
+| `$primaryKey` | `public` | 主键列（如 `robot_id`）。**非** `$pk` |
+| `$incrementing` | `false` | Snowflake 主键，禁用 AUTO_INCREMENT |
+| `$keyType` | `'string'` | 主键为 `bigint unsigned`，用 string 键避免 64 位溢出 |
+| `$delete_field` | `''` | V2.0 核心实体用 ENUM 冻结领域状态，不用 V1.x 的软删 |
+| `$fields` | `array` | 字段白名单，基类自动并入 `$fillable`（防 Mass Assignment） |
+| 状态常量 | `public const STATUS_*` / `STATE_*` + `STATUSES`/`STATES` 数组 | 领域状态定义在 Model，禁止 Service 硬编码 |
+| append-only 表 | `$timestamps = false` + `const UPDATED_AT = null` | 仅 `apt_ledger_entries`；本表无 `updated_time` 列 |
+
+### V2.0 新模块目录约定（STAGE-01 已按此落地）
+
+每个模块按「模块子目录 + `XxxModel`/`XxxDao`/`XxxService` 后缀」组织，namespace 为 `library\{model,dao,service}\{module}`：
+
+```text
 library/
-├── model/
-│   ├── Robot.php, RobotLevel.php, RobotClaim.php      # Robot 模块
-│   ├── Prediction*.php                                  # Prediction 模块
-│   ├── AptLedger*.php, PowerAccount*.php                # APT/Power 模块
-│   ├── OtcOrder.php, OtcMatch.php                       # OTC 模块
-│   ├── Agent.php, AgentEarning.php, Referral.php        # Affiliate 模块
-│   └── AiSignal.php, AiRecommendation.php               # AI 运营模块
-├── dao/
-│   └── (同名 Dao 类，继承 support\extend\Dao)
-├── service/
-│   └── (同名 Service 类，继承 support\extend\Service)
-└── dict/  (枚举/常量定义)
+├── model/{module}/     # 如 library/model/robot/RobotModel.php（namespace library\model\robot）
+├── dao/{module}/       # 如 library/dao/robot/RobotDao.php（namespace library\dao\robot）
+├── service/{module}/   # 如 library/service/robot/RobotService.php（namespace library\service\robot）
+└── dict/               # 枚举/常量定义（ErrorDict / QueueDict 等）
 ```
+
+已落地模块（8 个 MC1 冻结核心实体，24 个骨架文件，commit `5fb3d01`）：
+
+| 模块目录 | 实体（表） |
+|---|---|
+| `robot/` | `robots`、`robot_rewards` |
+| `ledger/` | `apt_accounts`、`apt_ledger_entries` |
+| `prediction/` | `prediction_markets`、`prediction_orders` |
+| `otc/` | `otc_orders` |
+| `power/` | `power_positions` |
 
 ## 5. 路由机制
 
@@ -322,7 +339,11 @@ V2.0 扩展：
 - `0.5代码/gainode后端/gainode/config/process.php`（进程拓扑）
 - `0.5代码/gainode后端/gainode/config/database.php`（数据库连接）
 - `0.5代码/gainode后端/gainode/config/arbitrage.php`（套利引擎配置）
-- `0.5代码/gainode后端/gainode/sql/database.sql`（数据表结构）
+- `0.5代码/gainode后端/gainode/sql/database.sql`（V1.x 数据表结构，60+ 表）
+- `0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql`（MC1 8 核心实体 DDL）
+- `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`（MC1 状态冻结）
+- `0.5代码/gainode后端/gainode/library/{model,dao,service}/{robot,ledger,prediction,otc,power}/`（STAGE-01 第一批骨架，24 文件）
+- `0.5代码/gainode后端/gainode/support/extend/{Model,Service,Dao}.php`（基类约定）
 - `_existing_prod/gainode_h5/src/`（V1.x H5 架构分析）
 - `_existing_prod/gainode_admin/src/`（V1.x Admin 架构分析）
 - `Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`
@@ -344,4 +365,6 @@ V2.0 扩展：
 - [ ] Admin Element Plus 迁移方案（Schema 组件 `<lay-*>` → `<el-*>` 改造、#009688 色彩映射）
 - [ ] 迁移沙盒演练计划（至少 3 次全量迁移 + 回滚验证）
 - [ ] V1.x 生产数据库 Schema 完整提取与 V2.0 DDL 审计
-- [ ] 开发启动时间
+- [ ] `composer.json` 中 `web3p/web3.php`、`web3p/ethereum-tx` 依赖清理（Web3 移除决策已定 OWNER_DIRECTIVE 2026-08-12，但依赖尚未从 composer.json 移除）
+- [x] 开发启动时间（STAGE-01 IN_PROGRESS，2026-08-13）
+- [x] STAGE-01 第一批：8 个 MC1 冻结核心实体 Model/DAO/Service 骨架已落地（24 文件，commit `5fb3d01`，2026-08-14）
