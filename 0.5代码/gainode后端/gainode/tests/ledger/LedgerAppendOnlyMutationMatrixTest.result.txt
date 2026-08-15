@@ -1,0 +1,174 @@
+No syntax errors detected in tests\ledger\LedgerAppendOnlyMutationMatrixTest.php
+No syntax errors detected in library\model\ledger\AptLedgerEntryAppendOnlyBuilder.php
+=====================================================
+Ledger append-only mutation matrix regression test
+=====================================================
+
+[1] 类加载
+PASS: class_exists AptLedgerEntryModel
+PASS: class_exists AptLedgerEntryAppendOnlyBuilder
+PASS: class_exists AptLedgerEntryDao
+PASS: class_exists RunException
+
+[2] Builder injection
+PASS: Model::query() 返回 AptLedgerEntryAppendOnlyBuilder
+PASS: Model::where() 返回 AptLedgerEntryAppendOnlyBuilder
+PASS: newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder
+
+[3] deny set 与 disposition 契约
+PASS: DESTRUCTIVE_METHODS 与 LEDGER_DENY disposition 完全一致（含 updatefrom）
+PASS: DENY `update` 映射到真实框架方法
+PASS: DENY `upsert` 映射到真实框架方法
+PASS: DENY `touch` 映射到真实框架方法
+PASS: DENY `increment` 映射到真实框架方法
+PASS: DENY `decrement` 映射到真实框架方法
+PASS: DENY `delete` 映射到真实框架方法
+PASS: DENY `forcedelete` 映射到真实框架方法
+PASS: DENY `updateorinsert` 映射到真实框架方法
+PASS: DENY `truncate` 映射到真实框架方法
+PASS: DENY `incrementeach` 映射到真实框架方法
+PASS: DENY `decrementeach` 映射到真实框架方法
+PASS: DENY `updatefrom` 映射到真实框架方法
+PASS: ALLOW_APPEND `insert` 未被 deny
+PASS: ALLOW_APPEND `insertgetid` 未被 deny
+PASS: ALLOW_APPEND `insertorignore` 未被 deny
+PASS: ALLOW_APPEND `insertusing` 未被 deny
+
+[4] dependency version gate（fail-closed 升级护栏）
+PASS: dependency version gate：锁定 10.38.1，实际 10.38.1（一致）
+
+[5] mutation matrix
+PASS: INSERT 允许：new Model->save()
+PASS: INSERT 允许：Builder->insert()
+PASS: READ 允许：Builder->where()->first()
+PASS: READ 允许：Builder->count() == 2
+PASS: REJECT：existing Model->save()（UPDATE 路径） — RunException: apt_ledger_entries 为 append-only 账本：禁止 UPDATE 已落盘分
+PASS:   完整性：existing Model->save()（UPDATE 路径） — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Model->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止物理删除分录
+PASS:   完整性：Model->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->update() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder UP
+PASS:   完整性：Builder->update() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->upsert() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder up
+PASS:   完整性：Builder->upsert() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->increment() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder in
+PASS:   完整性：Builder->increment() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->decrement() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder de
+PASS:   完整性：Builder->decrement() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->touch() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder to
+PASS:   完整性：Builder->touch() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder DE
+PASS:   完整性：Builder->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->forceDelete() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder fo
+PASS:   完整性：Builder->forceDelete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->updateOrInsert() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder updat
+PASS:   完整性：Builder->updateOrInsert() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->incrementEach() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder incre
+PASS:   完整性：Builder->incrementEach() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->decrementEach() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder decre
+PASS:   完整性：Builder->decrementEach() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->truncate() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder trunc
+PASS:   完整性：Builder->truncate() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->updateFrom() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder updat
+PASS:   完整性：Builder->updateFrom() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->update() — RunException: apt_ledger_entries 为 append-only 账本：禁止 UPDATE 分录，更
+PASS:   完整性：DAO->update() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->updateAll() — RunException: apt_ledger_entries 为 append-only 账本：禁止批量 UPDATE 分录
+PASS:   完整性：DAO->updateAll() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->updateOrCreate() — RunException: apt_ledger_entries 为 append-only 账本：禁止 updateOrCreate，�
+PASS:   完整性：DAO->updateOrCreate() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止删除分录
+PASS:   完整性：DAO->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->deleteAll() — RunException: apt_ledger_entries 为 append-only 账本：禁止批量删除分录
+PASS:   完整性：DAO->deleteAll() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+
+=====================================================
+RESULT: pass=67 fail=0
+=====================================================
+ALL PASS
+===COMPOSER_TEST===  
+=====================================================
+Ledger append-only mutation matrix regression test
+=====================================================
+
+[1] 类加载
+PASS: class_exists AptLedgerEntryModel
+PASS: class_exists AptLedgerEntryAppendOnlyBuilder
+PASS: class_exists AptLedgerEntryDao
+PASS: class_exists RunException
+
+[2] Builder injection
+PASS: Model::query() 返回 AptLedgerEntryAppendOnlyBuilder
+PASS: Model::where() 返回 AptLedgerEntryAppendOnlyBuilder
+PASS: newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder
+
+[3] deny set 与 disposition 契约
+PASS: DESTRUCTIVE_METHODS 与 LEDGER_DENY disposition 完全一致（含 updatefrom）
+PASS: DENY `update` 映射到真实框架方法
+PASS: DENY `upsert` 映射到真实框架方法
+PASS: DENY `touch` 映射到真实框架方法
+PASS: DENY `increment` 映射到真实框架方法
+PASS: DENY `decrement` 映射到真实框架方法
+PASS: DENY `delete` 映射到真实框架方法
+PASS: DENY `forcedelete` 映射到真实框架方法
+PASS: DENY `updateorinsert` 映射到真实框架方法
+PASS: DENY `truncate` 映射到真实框架方法
+PASS: DENY `incrementeach` 映射到真实框架方法
+PASS: DENY `decrementeach` 映射到真实框架方法
+PASS: DENY `updatefrom` 映射到真实框架方法
+PASS: ALLOW_APPEND `insert` 未被 deny
+PASS: ALLOW_APPEND `insertgetid` 未被 deny
+PASS: ALLOW_APPEND `insertorignore` 未被 deny
+PASS: ALLOW_APPEND `insertusing` 未被 deny
+
+[4] dependency version gate（fail-closed 升级护栏）
+PASS: dependency version gate：锁定 10.38.1，实际 10.38.1（一致）
+
+[5] mutation matrix
+PASS: INSERT 允许：new Model->save()
+PASS: INSERT 允许：Builder->insert()
+PASS: READ 允许：Builder->where()->first()
+PASS: READ 允许：Builder->count() == 2
+PASS: REJECT：existing Model->save()（UPDATE 路径） — RunException: apt_ledger_entries 为 append-only 账本：禁止 UPDATE 已落盘分
+PASS:   完整性：existing Model->save()（UPDATE 路径） — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Model->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止物理删除分录
+PASS:   完整性：Model->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->update() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder UP
+PASS:   完整性：Builder->update() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->upsert() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder up
+PASS:   完整性：Builder->upsert() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->increment() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder in
+PASS:   完整性：Builder->increment() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->decrement() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder de
+PASS:   完整性：Builder->decrement() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->touch() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder to
+PASS:   完整性：Builder->touch() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder DE
+PASS:   完整性：Builder->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->forceDelete() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Eloquent Builder fo
+PASS:   完整性：Builder->forceDelete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->updateOrInsert() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder updat
+PASS:   完整性：Builder->updateOrInsert() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->incrementEach() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder incre
+PASS:   完整性：Builder->incrementEach() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->decrementEach() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder decre
+PASS:   完整性：Builder->decrementEach() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->truncate() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder trunc
+PASS:   完整性：Builder->truncate() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：Builder->updateFrom() — RunException: apt_ledger_entries 为 append-only 账本：禁止 Query Builder updat
+PASS:   完整性：Builder->updateFrom() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->update() — RunException: apt_ledger_entries 为 append-only 账本：禁止 UPDATE 分录，更
+PASS:   完整性：DAO->update() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->updateAll() — RunException: apt_ledger_entries 为 append-only 账本：禁止批量 UPDATE 分录
+PASS:   完整性：DAO->updateAll() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->updateOrCreate() — RunException: apt_ledger_entries 为 append-only 账本：禁止 updateOrCreate，�
+PASS:   完整性：DAO->updateOrCreate() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->delete() — RunException: apt_ledger_entries 为 append-only 账本：禁止删除分录
+PASS:   完整性：DAO->delete() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+PASS: REJECT：DAO->deleteAll() — RunException: apt_ledger_entries 为 append-only 账本：禁止批量删除分录
+PASS:   完整性：DAO->deleteAll() — 数据未变（ROW_COUNT_DELTA=0，IMMUTABLE_FIELD_DELTA=0，全 16 字段）
+
+=====================================================
+RESULT: pass=67 fail=0
+=====================================================
+ALL PASS
+===EXIT===0 

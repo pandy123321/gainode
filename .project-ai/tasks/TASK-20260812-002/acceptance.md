@@ -108,6 +108,27 @@ Builder 可绕过 Model/DAO 覆写直接 UPDATE/DELETE；记录 607 进一步指
 - `acceptance.md`：`append-only 机制完整实现` 仍保持 `[ ]`；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 现以
   已提交测试的运行时结果 `pass=67 fail=0`（exit code=0）背书；reversal 反向分录与未冻结 state 流转仍为 CONTRACT GAP（FAIL_CLOSED）。
 
+### 2026-08-15 — P2 修复（第三轮）：composer test 接线入 Commit + 原始 Runtime Evidence（回复 IR 记录 615）
+
+独立审核（记录 615，commit `23d6d8b`）判定 dependency version gate 与 16-field snapshot 代码方向已 CLOSED（P0=0、P1=0），
+但仍有 2 个 P2：
+
+1. **P2-1**：`acceptance.md` 声称已修改 `composer.json` 接入 `composer test`，但 Commit `23d6d8b` 的 changed files
+   与完整 Diff 均无 `composer.json`——根因是 `0.5代码/gainode后端/` 整体被 `.gitignore` 忽略，`composer.json` 未纳入提交，
+   故 `COMPOSER_TEST_WIRING` 在上一 Commit 不可判定为已实现。
+2. **P2-2**：`VERIFIED_PASS` 的运行证据仍只有 acceptance 自述（`pass=67 fail=0`），缺少原始 Runtime Evidence
+   （控制台原始输出 / test log / exit code），属「记录/陈述」而非 L1 证据。
+
+本轮修复（不改 MC1 Frozen DDL、不改 Ledger production guard、不重写 Builder、不装 PHPUnit）：
+- `composer.json`：以 `git add -f` 纳入提交（`0.5代码/gainode后端/` 被 `.gitignore` 整体忽略，仅选择性 force-add 业务文件）。
+  `scripts.test` = `php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php`，未覆盖任何既有 script；`composer test` 实测通过。
+- 新增原始运行证据文件 `tests/ledger/LedgerAppendOnlyMutationMatrixTest.result.txt`（UTF-8），逐字记录：
+  `php -l`（2 文件均无语法错误）、`php tests/ledger/...`（`RESULT: pass=67 fail=0` / `ALL PASS`，覆盖 [1] 类加载 /
+  [2] Builder injection / [3] deny set 契约 / [4] version gate PASS（锁定 `10.38.1`=实际 `10.38.1`）/ [5] mutation matrix
+  全部 destructive mutation REJECT 且 `ROW_COUNT_DELTA=0`、`IMMUTABLE_FIELD_DELTA=0`）、`composer test`（同 67 PASS / 0 FAIL）、
+  以及 exit code `0`。
+- `acceptance.md`：新增本记录；`ORM_NORMAL_PATH_APPEND_ONLY_GUARD = VERIFIED_PASS` 现以已提交的原始运行证据文件背书。
+
 ## 验收方法
 
 - 代码审查（Code Review）：逐模块检查分层约定、状态机完整性
