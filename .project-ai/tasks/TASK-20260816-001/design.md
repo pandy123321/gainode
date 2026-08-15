@@ -195,6 +195,100 @@ SAFE_WORK_CONTINUING = 不受阻塞
 RESUME_CONDITION = Owner 裁决后补 05 §4，再 S01-P03 建 DDL
 ```
 
+### D.7 候选状态合同摘要（依赖 enum 裁决，非冻结）
+
+> 依据 S01-P02 步骤 3：每项 Owner Decision 表必须列初态、合法转移、终态、触发者、Authoritative Writer、失败态、重试、幂等、审计、账本副作用。以下为 6 缺 enum 实体的**候选摘要**（enum 待 Owner 裁决，转移为候选，不冻结；未裁决前全部 FAIL_CLOSED）。触发者仅用 05 §8 已有角色。
+
+#### D.7.1 SettlementBatch
+
+```text
+初态 = created
+合法转移（候选）= created→processing→completed / processing→partially_failed / partially_failed→processing(重试) / *→failed
+终态 = completed / failed
+触发者 = 系统；异常人工复核 = OPS_OPERATOR + RISK_APPROVER
+Writer = SettlementBatchService
+失败态 = failed / partially_failed
+重试 = partially_failed→processing
+幂等 = idempotency_key
+审计 = append audit_events
+账本副作用 = 无直接（聚合 Settlement；Settlement=paid 才写账）
+```
+
+#### D.7.2 RefundCase
+
+```text
+初态 = pending
+合法转移（候选）= pending→approved→executing→completed / pending→rejected / executing→failed
+终态 = completed / rejected
+触发者 = OPS_OPERATOR 发起 + RISK_APPROVER 审批
+Writer = RefundCaseService
+失败态 = failed
+重试 = failed→executing
+幂等 = idempotency_key
+审计 = append audit_events
+账本副作用 = ORDER_REFUND（+本金 CREDIT，退款范围 = 全额本金，对齐 MC2 P5/P10/P11/P12）
+```
+
+#### D.7.3 CorrectionCase
+
+```text
+初态 = pending
+合法转移（候选）= pending→approved→executing→completed / pending→rejected / executing→failed
+终态 = completed / rejected
+触发者 = OPS_OPERATOR 发起 + RISK_APPROVER 审批
+Writer = CorrectionCaseService
+失败态 = failed
+重试 = failed→executing
+幂等 = idempotency_key
+审计 = append audit_events
+账本副作用 = ORDER_CORRECTION（双向，reversal 旧 + 新增，对齐 MC2 P7/P8 + 结算会计矩阵）
+```
+
+#### D.7.4 OtcTrade
+
+```text
+初态 = completed（单态，见 D.4 推荐 OPTION_B）
+合法转移 = 无（append-only 成交事实）；争议/冲正走 RiskCase + ledger reversal，不覆盖 Trade
+终态 = completed
+触发者 = 系统（撮合成交自动生成）；争议裁决 = RISK_APPROVER
+Writer = OtcTradeService
+失败态 = 无
+重试 = 无
+幂等 = idempotency_key
+审计 = append audit_events
+账本副作用 = OTC_TRADE（buyer DEBIT + seller CREDIT）+ Power 消耗，对齐 MC2 O6/O9
+```
+
+#### D.7.5 RobotUpgradeOrder
+
+```text
+初态 = pending
+合法转移（候选）= pending→processing→completed / pending→cancelled / processing→failed
+终态 = completed / cancelled / failed
+触发者 = END_USER 发起；大额人工确认 = OPS_OPERATOR + RISK_APPROVER（MC2 Owner 裁决 #13）
+Writer = RobotUpgradeOrderService
+失败态 = failed
+重试 = failed→processing
+幂等 = idempotency_key
+审计 = append audit_events
+账本副作用 = ROBOT_UPGRADE（DEBIT apt_cost）+ Power Cap 更新
+```
+
+#### D.7.6 ConsentReceipt
+
+```text
+初态 = active
+合法转移（候选）= active→expired / active→withdrawn / active→superseded（后两项取决于 OPTION_A/B 裁决）
+终态 = expired
+触发者 = END_USER 同意（active）；系统（到期 expired）
+Writer = ConsentReceiptService
+失败态 = 无
+重试 = 无
+幂等 = idempotency_key（consent_type + consent_version 去重）
+审计 = append audit_events
+账本副作用 = 无（consent 不产生账本分录）
+```
+
 ---
 
 ## Part E — AuditEvent（`audit_events`）复用声明
