@@ -1,0 +1,3 @@
+A	.project-ai/tasks/TASK-20260816-001/requirement.md
+A	.project-ai/tasks/TASK-20260816-001/design.md
+A	.project-ai/tasks/TASK-20260816-001/acceptance.md
