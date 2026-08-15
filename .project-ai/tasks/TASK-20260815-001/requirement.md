@@ -2,9 +2,10 @@
 
 ## 状态
 
-> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 629），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已按 Owner 二次裁决修复。冻结候选已落盘：
+> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 638），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）。冻结候选已落盘：
 > - 候选文档：`0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
 > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
+> - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`
 > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 在正式 FROZEN 前，所有依赖这些契约的状态流转保持 **FAIL_CLOSED**。
 

@@ -1,10 +1,11 @@
 # Acceptance: Machine Contract 第二批
 
-> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 629），修复中**。
+> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 638），修复中**。
 > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
 > 候选交付物：
 > - `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
 > - `0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
+> - `0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`
 
 ## 冻结前必须完成的确认（Owner 决策项）
 
@@ -73,11 +74,27 @@
 | P2-1 | 终态三档拆分（TRUE_TERMINAL / STABLE_WITH_EXCEPTION / NON_REVERSIBLE） | ✅ 已修复（design.md A.0 + 各实体） |
 | P2-2 | Owner Signoff/Freeze 状态统一 + 落盘表述修正 | ✅ 已修复（本文件 + design.md 头部） |
 
+## IR 638 修复项核查（复审，Independent Review 返回 CHANGES_REQUIRED）
+
+> 说明：以下「✅ 已修复」**不是闭环证据**，验证以实际契约/DDL 为准（IR 638 P2-2 要求）。权威验证源：`design.md` 正文 + `MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md` + 两个 DDL 文件。
+
+| # | 修复项 | 修复落点 |
+|---|---|---|
+| P1-1 | Accounting Delta Matrix 改 `signed_delta = quantity × entry_direction` 机械公式 + CREDIT/DEBIT 双套示例 + reversal 分录字段（entry_direction 反向、reversal_of 指向原分录） | design.md A.1.2；Freeze §3.1 |
+| P1-2 | 方案 A：Ledger 新增 `object_version` 列（dated migration `20260815_..._ledger_object_version.sql`），白名单三列（state/audit_event_id/object_version）+ CAS 乐观锁（`affected_rows≠1`=OBJECT_VERSION_CONFLICT）；不改 MC1 历史 SQL | design.md A.0/A.1.1；Freeze §3.1；新增 DDL |
+| P1-3 | FINANCE_REVIEWER 只读：L4/L5/L6/L7 的 state 写入归 Authoritative Writer/系统；FINANCE_REVIEWER 仅提交 DisputeCase/RiskCase；审批 ≠ 执行 | design.md A.0.1/A.1；Freeze §2/§3.1 |
+| P1-4 | 方案 A：P5 `settling→refunding` 触发改为结算异常（Market=exception）+ RefundCase 审批；不再依赖 Market void；void→refund 仅 P10/P11/P12 | design.md A.5/A.7；Freeze §3.5/§3.7 |
+| P2-1 | 删除自由文本「可逆性」列，改 `direct_reverse`（YES/NO + 反向转移 ID），终态分类归「状态分类」bullet | design.md A.0 + A.1–A.6；Freeze §3 各表 |
+| P2-2 | 修复项以 design.md + Freeze 文档 + DDL 为权威验证源；本核查表仅作索引 | 本文件 |
+
 ## 冻结时的硬性验收标准（Independent Review 通过后触发）
 
 - [ ] 状态转移矩阵（A.1–A.6）经 Owner 逐条确认 + IR 通过，无自创状态（枚举全部来自 05 §4）。
 - [ ] Event Catalog 覆盖 A.1–A.6 全部 transition ID（MISSING=0 / ORPHAN=0），事件码与 `entry_type`/`entry_direction` 对齐。
-- [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id 受控可变）+ Accounting Delta Matrix 无二次入账/二次冲正。
+- [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id + object_version 受控可变）+ Accounting Delta Matrix（`signed_delta = quantity × entry_direction`）无二次入账/二次冲正。
+- [ ] `apt_ledger_entries` 已补齐 `object_version`（dated migration，不改 MC1 历史 SQL），CAS 乐观锁 DETERMINISTIC。
+- [ ] FINANCE_REVIEWER 只读（对账差异发现/提交 Case），不直接写 `apt_ledger_entries.state`。
+- [ ] settling→refunding（P5）可达（结算异常 + RefundCase 审批），无 unreachable transition。
 - [ ] `audit_events` 表 DDL（append-only + typed reference 快照）支持 MC1 §3.6 审计不变量。
 - [ ] 非核心实体 DDL 以日期命名文件（`sql/YYYYMMDD_*.sql`）提交，forward-only，无 DROP。
 - [ ] 变更 DDL 走 `rules/coding.md` 数据库规则第 6 条（新增日期文件，不改历史）。
