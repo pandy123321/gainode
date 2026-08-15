@@ -1,0 +1,239 @@
+schemaVersion: 1
+projectName: Gainode
+contextVersion: 25
+status: ACTIVE
+STAGE_00_COMPLETE: true
+STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
+STAGE_01_STATUS: IN_PROGRESS
+MC1_FREEZE_STATUS: FROZEN
+enabledDocuments:
+  - bootstrap.md
+  - context.md
+  - review-context.md
+  - glossary.md
+excludedPaths:
+  - .env
+  - application-prod.yml
+  - '**/secrets/**'
+  - Gainode_Development_Ready_V6.1_Latest/i18n/sensitive-copy-review.json
+  - 0.5代码/gainode后端/gainode/.env
+  - '0.5代码/gainode后端/gainode/vendor/**'
+  - '_existing_prod/**/.env'
+  - '_existing_prod/**/vendor/**'
+  - '_existing_prod/**/node_modules/**'
+governanceBaselineCommit: 08b0836
+governanceBaseline: "V2.4.1 Admin Governance + V1.x Production Code Baseline Audit"
+projectionBuiltAt: "2026-08-12"
+note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), CODE_ANALYSIS (from V1.x production code audit), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). All 30 decisionSources owner=OWNER (single-owner project, Owner Freeze completed 2026-08-12)."
+decisionSources:
+  # --- 技术栈决策 ---
+  backend_framework:
+    value: "PHP >=8.2, Webman (Workerman)"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — composer.json + Dockerfile in 0.5代码/gainode后端/gainode"
+  php_version:
+    value: "8.2"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "INFERRED_FROM_ARTIFACT — Dockerfile uses php:8.2-cli"
+  database:
+    value: "MySQL 8.4.9, illuminate/database ORM"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — composer.json + config/database.php"
+  frontend_h5:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  frontend_admin:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11; scope: Admin Web"
+  frontend_app:
+    value: "Flutter"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 开发策略决策 ---
+  dev_strategy:
+    value: "Backend-first: all module domain objects (Model/DAO/Service) built before frontend integration. True frontend/backend separation with OpenAPI 3.1 contract alignment."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  codebase_basis:
+    value: "Upgrade on existing PHP/Webman backend at 0.5代码/gainode后端/gainode; new V6.1 modules embed into existing library/{model,dao,service}/ structure. Frontend H5 and Admin upgrade from V1.x production repos (gainode_h5, gainode_admin) at _existing_prod/."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11/12; repos provided 2026-08-12"
+  arbitrage_disposition:
+    value: "Plan B — retained as AI economic engine foundation; BetBurger signals not exposed to users"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 基础设施决策 ---
+  db_migration:
+    value: "Two-phase: SQL files (YYYYMMDD_description.sql) → Phinx after 10+ DDL changes"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  test_framework:
+    value: "PHPUnit 10+, tests/Unit|Integration|Feature"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  openapi_strategy:
+    value: "Manual openapi.yaml + sys_route table scan for validation"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ci_strategy:
+    value: "Three-stage progressive: lint → php-cs-fixer + DDL discipline → PHPUnit + i18n scan"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- V1.x 生产代码基线 ---
+  v1_h5_baseline:
+    value: "Vue 3.5 + TS 6.0 + Vite 8, custom reactive stores (no Pinia), custom i18n (~260 keys), dark theme only, 19 views across 17+ routes, hand-built UI (no component library), Web3 wallet integration (V2.0 removed). Repo: _existing_prod/gainode_h5"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_h5.git on 2026-08-12"
+  v1_admin_baseline:
+    value: "Vue 3.3 + TS 4.5 + Vite 4, Pinia 2 + persistedstate, Layui Vue 2.23 + JSON Schema Form, schema-driven architecture (backend controls table/form), hash history, 46 routes across ~64 .vue files, 3 languages (zh_CN/en_US/ko), v-permission directive, ECharts. Repo: _existing_prod/gainode_admin"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_admin.git on 2026-08-12"
+  v1_backend_baseline:
+    value: "PHP 8.2 + Webman, MySQL 8.4.9, 60+ tables, arbitrage engine with BetBurger/API-Football integration, JWT + Casbin RBAC, DB-driven routing (sys_route table), Redis queue + crontab, Docker Compose deployment. V1.x 曾含 Web3 能力（BSC/ETH/TRON），V2.0 已移除（OWNER_DIRECTIVE 2026-08-12）。Code at: 0.5代码/gainode后端/gainode"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — existing code in 0.5代码/gainode后端/gainode. Updated 2026-08-12: Web3 dropped"
+  v1_api_signing:
+    value: "MD5-based request signing with shared key 'projectApi'. Headers: Timestamp, Version=1.0, Language, TraceId, Token, Sign. V2.0 to migrate key to env var / Secret Manager."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — src/api/http.ts in both V1.x frontends"
+
+  # --- 业务范围决策 ---
+  affiliate_scope:
+    value: "INCLUDED in V6.1. Agent/Affiliate module (4 Admin pages + 7 Agent Portal pages) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  api_football_contract:
+    value: "SIGNED. API-Football provider contract confirmed."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  betburger_contract:
+    value: "SIGNED. BetBurger provider contract confirmed."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ai_strategy_scope:
+    value: "INCLUDED in V6.1. AI strategy simulation (A-AI-004) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ai_suggestion_scope:
+    value: "INCLUDED in V6.1. AI suggestion pipeline (A-AI-001/2/3/5/6) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 治理/操作决策 ---
+  admin_proto_phase:
+    value: "Interactive HTML prototype at 0.5代码/admin-proto/ : 8-Root sidebar, collapsible nav, 17 interactive modals, full Chinese UI, V2.4.1 governance alignment (58 Page IDs, 35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE). Product scope confirmed for 16 additional pages via Owner directive 2026-08-11; 05/06 Machine Contract NOT frozen for those 16 — blocked from development. Audit finding IR-001 P1-007."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "COMMIT — series of commits ca2486d through 08b0836 after reviews #491-#507"
+  admin_proto_governance_docs:
+    value: "0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/ : canonical Page Map, Contract Gap Register, Permission Matrix, Navigation Migration, HIFI Interaction Spec"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "COMMIT — 4106b82 initial package + subsequent revisions"
+  asset_adjustment_policy:
+    value: "Only super admin (ADMIN_SECURITY role) can execute. A-USER-004 unblocked."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  owner_override_policy:
+    value: "Super admin determines override scope. Formal Override Contract (trigger, eligible actor, SoD exception, MFA, case_id, reason, evidence, expiry, post-review, ledger/audit) NOT YET FROZEN — blocked by GAP-015. Current status: FAIL_CLOSED until contract finalized per Admin V2.4.1."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-11. Re-evaluated 2026-08-12 per IR-001 P1-010: Override Contract formalized 2026-08-12 per OWNER_DIRECTIVE."
+
+  p0_001_s3_remediated:
+    value: "FULLY CLOSED 2026-08-12. OWNER_DIRECTIVE: V2.0 改用后端预签名 URL（POST /api/upload/presigned-url → S3 presigned PUT）。旧 Access Key AKIAWNHTHADXNYVAT74S 已在 AWS IAM 控制台完成轮换（Owner confirmed 2026-08-12 15:58 UTC+8）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE + RUNTIME_EVIDENCE — user confirmed key rotation completed 2026-08-12"
+  p0_002_web3_dropped:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: V2.0 APT 改为纯中心化账本，不保留任何链上能力（BSC/ETH/TRON）。RBAC_OR_SIGNER_OWNER = N/A。web3.php 依赖移除。P0-002 signer contract 不需要。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: 'V2.0 先砍掉链上能力，APT 纯中心化账本'"
+  p1_003_two_phase_freeze:
+    value: "Machine Contract Freeze 分两批。第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze。第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意分两批'"
+  p1_004_owner_freeze:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: 11 角色全部由 OWNER（单人）兼任。RBAC_OR_SIGNER_OWNER=N/A（无链上资产）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: implicit from single-person project"
+  p1_010_override_contract:
+    value: "CLOSED. Owner Override 正式 Contract：「ADMIN_SECURITY 发起 Override 时，自身不得同时充当唯一审批人。紧急 Override 需 MFA + 事后 48 小时内向独立审计方提交 case_id/reason/evidence。」SELF_APPROVAL = FORBIDDEN（非紧急）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意。紧急可单人 + 事后审计通知'"
+  h5_component_library:
+    value: "Vant 4 — mobile-first Vue 3 component library. 70+ mobile-specific components (Tabbar, ActionSheet, PullRefresh, Swipe). Lightweight (~50KB gzip), CSS Variables theming, tree-shakeable. V1.x 19 pages all have 1:1 Vant equivalents."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  admin_component_library:
+    value: "Element Plus — migrate from Layui Vue. Vue 3 native, 100+ components, ~24K GitHub stars, ProTable/ProForm built-in, CSS Variables theming. Layui Vue (1.2K stars, slow maintenance) abandoned. Schema-driven components (TableSearchSchema, FormOpenSchema, etc.) to be re-rendered with <el-*> elements while preserving the schema-driven architecture."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  data_migration_strategy:
+    value: "Big Bang (one-shot) migration. V1.x wallet (flat table: balance+frozen) → V2.0 four-ledger (append-only: available/frozen/pending/held/payable) is structurally incompatible for dual-write. V1.x Mining (hashrate/cycle) → V2.0 Robot (56-level AI agent) is semantically incompatible. ~4-hour planned downtime, full-snapshot migration, 3+ sandbox rehearsals required before production."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  v1_api_repo:
+    value: "https://github.com/Xfd100/gainode_api.git — 8188 files, identical to 0.5代码/gainode后端/gainode (Webman PHP backend). No Dockerfile in Git repo (Docker files exist only in local 0.5代码/副本)."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned and compared byte-by-byte on 2026-08-12"
+
+  # --- 独立审核注册 ---
+  stg00_ir_20260812_001:
+    value: "REVIEW_ID=GAINODE-STAGE00-IR-20260812-001. VERDICT=CHANGES_REQUIRED. P0_OPEN=0 (ALL CLOSED via OWNER_DIRECTIVE 2026-08-12). P1_OPEN=0. P2_OPEN=0. Remediation complete as of contextVersion 15. Ready for re-review."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "INDEPENDENT_REVIEW — cloud review agent against Commit 0188276, PACKAGE_SHA256=94d1f849fbbadb9db516b11566fce7722a85fed59546c40898722359b49ede5f. Remediation follow-up 2026-08-12."
+  ir_findings_remediated:
+    value: "ALL 15 FINDINGS CLOSED. STAGE-00 Remediation VERIFIED by IR-002.
+      VERDICT=CONDITIONAL_APPROVAL. 0 P0 open. 0 P1 open. 0 blocking P2.
+      1 documentation note (P2-002 route count alignment)."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "REMEDIATION — 2-round fix cycle against IR GAINODE-STAGE00-IR-20260812-001. contextVersion 14: 13 P1+P2 closed. contextVersion 15: 2 P0 closed via OWNER_DIRECTIVE. contextVersion 16: P0-001 RUNTIME_EVIDENCE (key rotation confirmed). contextVersion 17: IR-002 CONDITIONAL_APPROVAL, all 15 findings closed."
+  machine_contract_batch1_freeze:
+    value: "FROZEN 2026-08-13 — Independent Review（GAINODE-MC1-IR）三轮复审通过，最终记录 543 结论=建议合并（0 P0 / 0 P1 / 0 P2）。Machine Contract 第一批（8 核心实体 DDL + Canonical State Freeze）正式冻结。8 表：apt_accounts / apt_ledger_entries / robots / robot_rewards / prediction_markets / prediction_orders / otc_orders / power_positions。6 个状态机枚举与 05 §4 canonical 严格一致（Robot / AI Reward / Ledger / Market / Prediction Order / OTC）；apt_accounts + power_positions 为 scalar（无状态机）。主键 Snowflake(bigint unsigned，禁 AUTO_INCREMENT)；金额 string decimal；账本 append-only（经济字段不可改，仅 state 流转，reversal_of 追加）。DDL: 0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql；Freeze: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md。STAGE-01 各模块骨架（Model/DAO/Service）为后续任务。"
+    decision_date: "2026-08-13"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-13 (Owner Signoff: MC1 → FROZEN) ← EXECUTOR_DELIVERY 2026-08-13 ← INDEPENDENT_REVIEW GAINODE-MC1-IR 记录 541/542/543"
+  machine_contract_batch2_freeze:
+    value: "CANDIDATE 2026-08-15 — Machine Contract 第二批（State Transition Freeze）冻结候选。范围：8 核心实体的状态转移矩阵（Ledger/Robot/AI Reward/Market/Prediction Order/OTC 6 个状态机）+ Event Catalog（entry_type/entry_direction 对齐）+ audit_events 表 DDL（append-only，对齐 05 §3 AuditLog）。22 项待确认 + 2 项财务硬骨头已由 Owner 逐项裁决（2026-08-15）。角色裁决（IR 629 P1-5 / IR 638 P1-3 / IR 659 P2-1 修订）：财务裁决/审批=05 canonical 分工（RISK_APPROVER 批准风险处置 + FINANCE_REVIEWER 对账只读、仅提交 RiskCase risk_type=LEDGER_RECONCILIATION_DISPUTE，ADMIN_SECURITY 不涉财），state 写入归 Authoritative Writer/系统；无未冻结 DisputeCase 实体。争议冻结=方案 A 精确化（Ledger Mutation Field Contract：state+audit_event_id+object_version 三列受控可变，object_version 经 dated migration 补列 + CAS 乐观锁，附 Change Request CR-20260815-001）；Dispute Hold Matrix 四格（origin×entry_direction）：stored_balance 不变 + dispute_hold 投影，posted DEBIT 保持扣款不恢复、pending DEBIT 预留冻结。pending reversal 语义：pending→reversed / pending-origin disputed→reversed = ACCOUNT_DELTA=0 无经济 reversal（仅 posted 冲正才生成 reversal）。DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2）：PRE_HOLD_MUTATION_GUARD（shortfall=max(0, projected_aggregate_hold-stored_available)，projected_effective_available<0 → L4/L5=DENY，只写 REJECTED 审计）；dispute_hold=ACCOUNT-LEVEL AGGREGATE，effective_available=stored_available-aggregate_dispute_hold；账户级并发=统一 Economic Mutation Lock（apt_accounts.object_version CAS，覆盖所有改 balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold 的操作，11 步同事务原子，ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION=0 / ACCOUNT_ECONOMIC_OVERSUBSCRIPTION=0 / CONCURRENT_L5_CAPACITY_GUARD=PASS / L5_WITHDRAWAL_CONCURRENCY=PASS / L5_PREDICTION_STAKE_CONCURRENCY=PASS / NEGATIVE_EFFECTIVE_AVAILABLE=0）；并发错误码统一 OBJECT_VERSION_CONFLICT(409)（ACCOUNT_LOCK_CONFLICT 仅 INTERNAL_ONLY）。禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2。RiskCase 冻结状态（IR 679 P2-1）= object schema DEFINED + machine contract CONTRACT_GAP + TARGET_BATCH 2B-2；risk_type=LEDGER_RECONCILIATION_DISPUTE 标 CANDIDATE/PENDING_2B2_FREEZE，L4/L5 dependency gate=RISK_CASE_CONTRACT_FROZEN。投注结算=下注先扣/赢本金+盈利入账/输不追加/走盘退本金。settling→refunding（P5）改由结算异常+RefundCase 审批触发（不依赖 void）。快照引用=typed reference（snapshot_type+snapshot_id）。非核心实体 DDL（19 表）拆 2B-1/2B-2 两小批另交付。Freeze 候选: MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md；DDL: 20260815_..._audit_events.sql + 20260815_..._ledger_object_version.sql；CR: CHANGE_REQUEST_CR-20260815-001.md。状态: Owner Signoff ✅ 2026-08-15；IR 629 = CHANGES_REQUIRED（6 P1 + 2 P2）已修复；IR 638（复审）= CHANGES_REQUIRED（4 P1 + 2 P2）已按 Owner 二次裁决修复；IR 659（三审）= CHANGES_REQUIRED（2 P1 + 3 P2）已修复；IR 679（四审）= CHANGES_REQUIRED（1 P1 + 2 P2：posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断）已修复；IR 682（五审）= CHANGES_REQUIRED（2 P1 + 1 P2：shortfall 检查时机 / dispute_hold 账户级并发 / 证据完整性）已修复；IR 686（六审）= CHANGES_REQUIRED（1 P1 + 3 P2：账户级统一经济锁域 / PRE_HOLD_MUTATION_GUARD 通用化 / 并发错误码统一 / 证据截断）修复中，待重提。"
+    decision_date: "2026-08-15"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-15 (Owner Signoff: MC2 候选 → 提交提审) ← Owner 逐项裁决 22 项 + 2 财务硬骨头 2026-08-15 ← 草案 EXECUTOR_DELIVERY 2026-08-15（.project-ai/tasks/TASK-20260815-001）。INDEPENDENT_REVIEW IR 629（2026-08-15）= CHANGES_REQUIRED（6 P1 + 2 P2）→ Owner 二次裁决（P1-4 方案 A / P1-5 改 05 canonical）→ 修复。INDEPENDENT_REVIEW IR 638（2026-08-15，复审）= CHANGES_REQUIRED（4 P1 + 2 P2）→ Owner 二次裁决（P1-2 方案 A：Ledger 新增 object_version / P1-4 方案 A：settling 退款走结算异常+RefundCase）→ 修复。INDEPENDENT_REVIEW IR 659（2026-08-15，三审）= CHANGES_REQUIRED（2 P1 + 3 P2：P1-1 dispute hold 四格 / P1-2 pending reversal 语义 / P2-1 DisputeCase→RiskCase / P2-2 object_version 补 CR / P2-3 证据完整性）→ 修复。INDEPENDENT_REVIEW IR 679（2026-08-15，四审）= CHANGES_REQUIRED（1 P1 + 2 P2：P1-1 posted CREDIT shortfall 边界 → DISPUTE_SHORTFALL_POLICY / P2-1 RiskCase 冻结状态矛盾 → CONTRACT_GAP 统一 + L4/L5 dependency gate / P2-2 证据截断 → max_diff_chars 25000→100000）→ 修复。INDEPENDENT_REVIEW IR 682（2026-08-15，五审）= CHANGES_REQUIRED（2 P1 + 1 P2：P1-1 shortfall 检查时机 → SHORTFALL_CHECK_PHASE=PRE_L5 / P1-2 dispute_hold 账户级并发 → apt_accounts.object_version CAS + ACCOUNT-LEVEL AGGREGATE / P2-1 证据完整性 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。INDEPENDENT_REVIEW IR 686（2026-08-15，六审）= CHANGES_REQUIRED（1 P1 + 3 P2：P1-1 账户级统一经济锁域 → APT_ACCOUNT_ECONOMIC_MUTATION_LOCK=apt_accounts.object_version / P2-1 PRE_L5→PRE_HOLD_MUTATION_GUARD（L4+L5）/ P2-2 并发错误码统一 OBJECT_VERSION_CONFLICT(409) / P2-3 证据截断 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。状态: 待重提 Independent Review 通过后置 FROZEN。"

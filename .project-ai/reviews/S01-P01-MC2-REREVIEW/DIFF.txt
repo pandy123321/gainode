@@ -1,0 +1,286 @@
+diff --git a/.project-ai/manifest.yaml b/.project-ai/manifest.yaml
+index 450d515..d096756 100644
+--- a/.project-ai/manifest.yaml
++++ b/.project-ai/manifest.yaml
+@@ -1,6 +1,6 @@
+ schemaVersion: 1
+ projectName: Gainode
+-contextVersion: 24
++contextVersion: 25
+ status: ACTIVE
+ STAGE_00_COMPLETE: true
+ STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
+@@ -233,7 +233,7 @@ decisionSources:
+     owner: OWNER
+     provenance: "OWNER_DIRECTIVE 2026-08-13 (Owner Signoff: MC1 → FROZEN) ← EXECUTOR_DELIVERY 2026-08-13 ← INDEPENDENT_REVIEW GAINODE-MC1-IR 记录 541/542/543"
+   machine_contract_batch2_freeze:
+-    value: "CANDIDATE 2026-08-15 — Machine Contract 第二批（State Transition Freeze）冻结候选。范围：8 核心实体的状态转移矩阵（Ledger/Robot/AI Reward/Market/Prediction Order/OTC 6 个状态机）+ Event Catalog（entry_type/entry_direction 对齐）+ audit_events 表 DDL（append-only，对齐 05 §3 AuditLog）。22 项待确认 + 2 项财务硬骨头已由 Owner 逐项裁决（2026-08-15）。角色裁决（IR 629 P1-5 / IR 638 P1-3 / IR 659 P2-1 修订）：财务裁决/审批=05 canonical 分工（RISK_APPROVER 批准风险处置 + FINANCE_REVIEWER 对账只读、仅提交 RiskCase risk_type=LEDGER_RECONCILIATION_DISPUTE，ADMIN_SECURITY 不涉财），state 写入归 Authoritative Writer/系统；无未冻结 DisputeCase 实体。争议冻结=方案 A 精确化（Ledger Mutation Field Contract：state+audit_event_id+object_version 三列受控可变，object_version 经 dated migration 补列 + CAS 乐观锁，附 Change Request CR-20260815-001）；Dispute Hold Matrix 四格（origin×entry_direction）：stored_balance 不变 + dispute_hold 投影，posted DEBIT 保持扣款不恢复、pending DEBIT 预留冻结。pending reversal 语义：pending→reversed / pending-origin disputed→reversed = ACCOUNT_DELTA=0 无经济 reversal（仅 posted 冲正才生成 reversal）。DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2）：SHORTFALL_CHECK_PHASE=PRE_L5，shortfall=max(0, projected_dispute_hold_after-stored_available)，projected_effective_available<0 → L5=DENY（state 保持 posted，只写 REJECTED 审计）；dispute_hold=ACCOUNT-LEVEL AGGREGATE，effective_available=stored_available-aggregate_dispute_hold；账户级并发=apt_accounts.object_version CAS（ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION=0 / CONCURRENT_L5_CAPACITY_GUARD=PASS / NEGATIVE_EFFECTIVE_AVAILABLE=0），禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2。RiskCase 冻结状态（IR 679 P2-1）= object schema DEFINED + machine contract CONTRACT_GAP + TARGET_BATCH 2B-2；risk_type=LEDGER_RECONCILIATION_DISPUTE 标 CANDIDATE/PENDING_2B2_FREEZE，L4/L5 dependency gate=RISK_CASE_CONTRACT_FROZEN。投注结算=下注先扣/赢本金+盈利入账/输不追加/走盘退本金。settling→refunding（P5）改由结算异常+RefundCase 审批触发（不依赖 void）。快照引用=typed reference（snapshot_type+snapshot_id）。非核心实体 DDL（19 表）拆 2B-1/2B-2 两小批另交付。Freeze 候选: MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md；DDL: 20260815_..._audit_events.sql + 20260815_..._ledger_object_version.sql；CR: CHANGE_REQUEST_CR-20260815-001.md。状态: Owner Signoff ✅ 2026-08-15；IR 629 = CHANGES_REQUIRED（6 P1 + 2 P2）已修复；IR 638（复审）= CHANGES_REQUIRED（4 P1 + 2 P2）已按 Owner 二次裁决修复；IR 659（三审）= CHANGES_REQUIRED（2 P1 + 3 P2）已修复；IR 679（四审）= CHANGES_REQUIRED（1 P1 + 2 P2：posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断）已修复；IR 682（五审）= CHANGES_REQUIRED（2 P1 + 1 P2：shortfall 检查时机 PRE_L5 / dispute_hold 账户级并发 CAS / 证据完整性）修复中，待重提。"
++    value: "CANDIDATE 2026-08-15 — Machine Contract 第二批（State Transition Freeze）冻结候选。范围：8 核心实体的状态转移矩阵（Ledger/Robot/AI Reward/Market/Prediction Order/OTC 6 个状态机）+ Event Catalog（entry_type/entry_direction 对齐）+ audit_events 表 DDL（append-only，对齐 05 §3 AuditLog）。22 项待确认 + 2 项财务硬骨头已由 Owner 逐项裁决（2026-08-15）。角色裁决（IR 629 P1-5 / IR 638 P1-3 / IR 659 P2-1 修订）：财务裁决/审批=05 canonical 分工（RISK_APPROVER 批准风险处置 + FINANCE_REVIEWER 对账只读、仅提交 RiskCase risk_type=LEDGER_RECONCILIATION_DISPUTE，ADMIN_SECURITY 不涉财），state 写入归 Authoritative Writer/系统；无未冻结 DisputeCase 实体。争议冻结=方案 A 精确化（Ledger Mutation Field Contract：state+audit_event_id+object_version 三列受控可变，object_version 经 dated migration 补列 + CAS 乐观锁，附 Change Request CR-20260815-001）；Dispute Hold Matrix 四格（origin×entry_direction）：stored_balance 不变 + dispute_hold 投影，posted DEBIT 保持扣款不恢复、pending DEBIT 预留冻结。pending reversal 语义：pending→reversed / pending-origin disputed→reversed = ACCOUNT_DELTA=0 无经济 reversal（仅 posted 冲正才生成 reversal）。DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2）：PRE_HOLD_MUTATION_GUARD（shortfall=max(0, projected_aggregate_hold-stored_available)，projected_effective_available<0 → L4/L5=DENY，只写 REJECTED 审计）；dispute_hold=ACCOUNT-LEVEL AGGREGATE，effective_available=stored_available-aggregate_dispute_hold；账户级并发=统一 Economic Mutation Lock（apt_accounts.object_version CAS，覆盖所有改 balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold 的操作，11 步同事务原子，ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION=0 / ACCOUNT_ECONOMIC_OVERSUBSCRIPTION=0 / CONCURRENT_L5_CAPACITY_GUARD=PASS / L5_WITHDRAWAL_CONCURRENCY=PASS / L5_PREDICTION_STAKE_CONCURRENCY=PASS / NEGATIVE_EFFECTIVE_AVAILABLE=0）；并发错误码统一 OBJECT_VERSION_CONFLICT(409)（ACCOUNT_LOCK_CONFLICT 仅 INTERNAL_ONLY）。禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2。RiskCase 冻结状态（IR 679 P2-1）= object schema DEFINED + machine contract CONTRACT_GAP + TARGET_BATCH 2B-2；risk_type=LEDGER_RECONCILIATION_DISPUTE 标 CANDIDATE/PENDING_2B2_FREEZE，L4/L5 dependency gate=RISK_CASE_CONTRACT_FROZEN。投注结算=下注先扣/赢本金+盈利入账/输不追加/走盘退本金。settling→refunding（P5）改由结算异常+RefundCase 审批触发（不依赖 void）。快照引用=typed reference（snapshot_type+snapshot_id）。非核心实体 DDL（19 表）拆 2B-1/2B-2 两小批另交付。Freeze 候选: MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md；DDL: 20260815_..._audit_events.sql + 20260815_..._ledger_object_version.sql；CR: CHANGE_REQUEST_CR-20260815-001.md。状态: Owner Signoff ✅ 2026-08-15；IR 629 = CHANGES_REQUIRED（6 P1 + 2 P2）已修复；IR 638（复审）= CHANGES_REQUIRED（4 P1 + 2 P2）已按 Owner 二次裁决修复；IR 659（三审）= CHANGES_REQUIRED（2 P1 + 3 P2）已修复；IR 679（四审）= CHANGES_REQUIRED（1 P1 + 2 P2：posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断）已修复；IR 682（五审）= CHANGES_REQUIRED（2 P1 + 1 P2：shortfall 检查时机 / dispute_hold 账户级并发 / 证据完整性）已修复；IR 686（六审）= CHANGES_REQUIRED（1 P1 + 3 P2：账户级统一经济锁域 / PRE_HOLD_MUTATION_GUARD 通用化 / 并发错误码统一 / 证据截断）修复中，待重提。"
+     decision_date: "2026-08-15"
+     owner: OWNER
+-    provenance: "OWNER_DIRECTIVE 2026-08-15 (Owner Signoff: MC2 候选 → 提交提审) ← Owner 逐项裁决 22 项 + 2 财务硬骨头 2026-08-15 ← 草案 EXECUTOR_DELIVERY 2026-08-15（.project-ai/tasks/TASK-20260815-001）。INDEPENDENT_REVIEW IR 629（2026-08-15）= CHANGES_REQUIRED（6 P1 + 2 P2）→ Owner 二次裁决（P1-4 方案 A / P1-5 改 05 canonical）→ 修复。INDEPENDENT_REVIEW IR 638（2026-08-15，复审）= CHANGES_REQUIRED（4 P1 + 2 P2）→ Owner 二次裁决（P1-2 方案 A：Ledger 新增 object_version / P1-4 方案 A：settling 退款走结算异常+RefundCase）→ 修复。INDEPENDENT_REVIEW IR 659（2026-08-15，三审）= CHANGES_REQUIRED（2 P1 + 3 P2：P1-1 dispute hold 四格 / P1-2 pending reversal 语义 / P2-1 DisputeCase→RiskCase / P2-2 object_version 补 CR / P2-3 证据完整性）→ 修复。INDEPENDENT_REVIEW IR 679（2026-08-15，四审）= CHANGES_REQUIRED（1 P1 + 2 P2：P1-1 posted CREDIT shortfall 边界 → DISPUTE_SHORTFALL_POLICY / P2-1 RiskCase 冻结状态矛盾 → CONTRACT_GAP 统一 + L4/L5 dependency gate / P2-2 证据截断 → max_diff_chars 25000→100000）→ 修复。INDEPENDENT_REVIEW IR 682（2026-08-15，五审）= CHANGES_REQUIRED（2 P1 + 1 P2：P1-1 shortfall 检查时机 → SHORTFALL_CHECK_PHASE=PRE_L5 / P1-2 dispute_hold 账户级并发 → apt_accounts.object_version CAS + ACCOUNT-LEVEL AGGREGATE / P2-1 证据完整性 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。状态: 待重提 Independent Review 通过后置 FROZEN。"
++    provenance: "OWNER_DIRECTIVE 2026-08-15 (Owner Signoff: MC2 候选 → 提交提审) ← Owner 逐项裁决 22 项 + 2 财务硬骨头 2026-08-15 ← 草案 EXECUTOR_DELIVERY 2026-08-15（.project-ai/tasks/TASK-20260815-001）。INDEPENDENT_REVIEW IR 629（2026-08-15）= CHANGES_REQUIRED（6 P1 + 2 P2）→ Owner 二次裁决（P1-4 方案 A / P1-5 改 05 canonical）→ 修复。INDEPENDENT_REVIEW IR 638（2026-08-15，复审）= CHANGES_REQUIRED（4 P1 + 2 P2）→ Owner 二次裁决（P1-2 方案 A：Ledger 新增 object_version / P1-4 方案 A：settling 退款走结算异常+RefundCase）→ 修复。INDEPENDENT_REVIEW IR 659（2026-08-15，三审）= CHANGES_REQUIRED（2 P1 + 3 P2：P1-1 dispute hold 四格 / P1-2 pending reversal 语义 / P2-1 DisputeCase→RiskCase / P2-2 object_version 补 CR / P2-3 证据完整性）→ 修复。INDEPENDENT_REVIEW IR 679（2026-08-15，四审）= CHANGES_REQUIRED（1 P1 + 2 P2：P1-1 posted CREDIT shortfall 边界 → DISPUTE_SHORTFALL_POLICY / P2-1 RiskCase 冻结状态矛盾 → CONTRACT_GAP 统一 + L4/L5 dependency gate / P2-2 证据截断 → max_diff_chars 25000→100000）→ 修复。INDEPENDENT_REVIEW IR 682（2026-08-15，五审）= CHANGES_REQUIRED（2 P1 + 1 P2：P1-1 shortfall 检查时机 → SHORTFALL_CHECK_PHASE=PRE_L5 / P1-2 dispute_hold 账户级并发 → apt_accounts.object_version CAS + ACCOUNT-LEVEL AGGREGATE / P2-1 证据完整性 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。INDEPENDENT_REVIEW IR 686（2026-08-15，六审）= CHANGES_REQUIRED（1 P1 + 3 P2：P1-1 账户级统一经济锁域 → APT_ACCOUNT_ECONOMIC_MUTATION_LOCK=apt_accounts.object_version / P2-1 PRE_L5→PRE_HOLD_MUTATION_GUARD（L4+L5）/ P2-2 并发错误码统一 OBJECT_VERSION_CONFLICT(409) / P2-3 证据截断 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。状态: 待重提 Independent Review 通过后置 FROZEN。"
+diff --git a/.project-ai/tasks/TASK-20260815-001/acceptance.md b/.project-ai/tasks/TASK-20260815-001/acceptance.md
+index 56d4cf8..877bb4d 100644
+--- a/.project-ai/tasks/TASK-20260815-001/acceptance.md
++++ b/.project-ai/tasks/TASK-20260815-001/acceptance.md
+@@ -1,6 +1,6 @@
+ # Acceptance: Machine Contract 第二批
+ 
+-> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 682），修复中**。
++> 本文件定义**冻结前**的验收标准。当前状态：**Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686），修复中**。
+ > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
+ > 候选交付物：
+ > - `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
+@@ -120,6 +120,17 @@
+ | P1-2 | `dispute_hold` 账户级并发：定义 `dispute_hold` = ACCOUNT-LEVEL AGGREGATE（`effective_available = stored_available - aggregate_dispute_hold`）；账户级并发控制 = `apt_accounts.object_version` CAS（真实 schema 已含该列，MC1 DDL 第 54 列）；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = FORBIDDEN`、`CONCURRENT_L5_CAPACITY_GUARD = PASS` | design.md A.1.2（D 节）；Freeze §3.1/§8 |
+ | P2-1 | 证据完整性不再过度宣称：删除「`max_diff_chars` 已修复截断」的 CLOSED 声明（config 在仓库外、需重启、本 commit 不含 settings.json）；真实验收门禁改为 `REVIEW_PACKAGE_TRUNCATED = NO`（下轮以实际未截断为准） | 本文件（IR 679 P2-2 行改写）；Freeze §8 |
+ 
++## IR 686 修复项核查（六审，Independent Review 返回 CHANGES_REQUIRED：P0=0 / P1=1 / P2=3）
++
++> 说明：以下「✅ 已修复」**不是闭环证据**，验证以实际契约/DDL 为准。权威验证源：`design.md` 正文 + `MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md` + DDL/CR 文件。
++
++| # | 修复项 | 修复落点 |
++|---|---|---|
++| P1-1 | 将 `apt_accounts.object_version` CAS 从「dispute hold 锁」升级为**整个 AptAccount economic mutation 的统一并发锁域**：冻结 `APT_ACCOUNT_ECONOMIC_MUTATION_LOCK = apt_accounts.object_version` + `ALL_ACCOUNT_ECONOMIC_MUTATIONS_REQUIRE_ACCOUNT_CAS = YES`，凡改变 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 的操作（Ledger posting/reversal/L4-L7、Prediction stake/settlement/refund、OTC debit/credit、Withdrawal、Robot/Reward 等）同域 CAS；统一 11 步同事务顺序 + 跨操作串行（`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = FORBIDDEN`、`L5_WITHDRAWAL_CONCURRENCY = PASS`、`L5_PREDICTION_STAKE_CONCURRENCY = PASS`） | design.md A.1.2（D 节）；Freeze §3.1/§8 |
++| P2-1 | `PRE_L5` → 通用 **`PRE_HOLD_MUTATION_GUARD`**，显式适用 L4（pending DEBIT→disputed）+ L5（posted CREDIT→disputed）及未来正向 hold transition；新增 `PENDING_DEBIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_PRECHECK = PASS` | design.md A.1.2（D 节）；Freeze §3.1/§8 |
++| P2-2 | 并发错误码统一：不新增 `ACCOUNT_LOCK_CONFLICT` 公共错误码，对外统一 `OBJECT_VERSION_CONFLICT`（HTTP 409）；`ACCOUNT_LOCK_CONFLICT` 若保留仅 `INTERNAL_ONLY=YES` + `API_ERROR_MAPPING=OBJECT_VERSION_CONFLICT`；`ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT` | design.md A.1.2（D 节）；Freeze §3.1/§8 |
++| P2-3 | Review 证据完整性：门禁保持 `REVIEW_PACKAGE_TRUNCATED = NO`；本轮仍受工具 `max_diff_chars` 未重载（25000）影响，需重启 AI Code Review Assistant 后以实际未截断为准 | 本文件（下轮重提验收） |
++
+ ## 冻结时的硬性验收标准（Independent Review 通过后触发）
+ 
+ - [ ] 状态转移矩阵（A.1–A.6）经 Owner 逐条确认 + IR 通过，无自创状态（枚举全部来自 05 §4）。
+@@ -127,7 +138,7 @@
+ - [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id + object_version 受控可变）+ Dispute Hold Matrix（四格 `origin × entry_direction`，`signed_delta = quantity × entry_direction`）无二次入账/冲正/扣款。
+ - [ ] Dispute Hold 验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`。
+ - [ ] Reversal 验收断言：`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`（pending 取消不生成经济 reversal，仅 posted 冲正生成）。
+-- [ ] **DISPUTE_SHORTFALL_POLICY**：`SHORTFALL_CHECK_PHASE = PRE_L5`（`shortfall = max(0, projected_dispute_hold_after - stored_available)`；`projected_effective_available < 0 → L5 = DENY`）；`dispute_hold` = ACCOUNT-LEVEL AGGREGATE，账户级并发用 `apt_accounts.object_version` CAS；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`SHORTFALL_UNDECIDED_EXECUTION = 0`。
++- [ ] **DISPUTE_SHORTFALL_POLICY**：`PRE_HOLD_MUTATION_GUARD`（`shortfall = max(0, projected_aggregate_hold - stored_available)`；`projected_effective_available < 0 → L4/L5 = DENY`）；`dispute_hold` = ACCOUNT-LEVEL AGGREGATE；账户级并发 = 统一 Economic Mutation Lock（`apt_accounts.object_version` CAS，覆盖所有改 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 的操作）；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`L5_WITHDRAWAL_CONCURRENCY = PASS`、`L5_PREDICTION_STAKE_CONCURRENCY = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`、`PENDING_DEBIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`SHORTFALL_UNDECIDED_EXECUTION = 0`、`ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT`。
+ - [ ] **RiskCase 冻结状态一致**：`object schema = DEFINED` + `machine contract = CONTRACT_GAP` + `TARGET_BATCH = 2B-2`；L4/L5 dependency gate = RISK_CASE_CONTRACT_FROZEN（未冻结 → FAIL_CLOSED）。
+ - [ ] `apt_ledger_entries` 已补齐 `object_version`（dated migration，不改 MC1 历史 SQL），并附 Change Request `CR-20260815-001`；CAS 乐观锁 DETERMINISTIC。
+ - [ ] FINANCE_REVIEWER 只读（对账差异发现/提交 RiskCase `risk_type=LEDGER_RECONCILIATION_DISPUTE`），不直接写 `apt_ledger_entries.state`；无未冻结 `DisputeCase` 引用（UNKNOWN_ENTITY_REFERENCE=0）。
+diff --git a/.project-ai/tasks/TASK-20260815-001/design.md b/.project-ai/tasks/TASK-20260815-001/design.md
+index 70e1d7b..28262c4 100644
+--- a/.project-ai/tasks/TASK-20260815-001/design.md
++++ b/.project-ai/tasks/TASK-20260815-001/design.md
+@@ -1,11 +1,11 @@
+ # Design: Machine Contract 第二批
+ 
+-> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 682，2026-08-15），修复中**。
+-> IR 629 返回 6 P1 + 2 P2，已修复并重提。IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复。IR 659（三审）返回 **2 P1 + 3 P2**（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复。IR 679（四审）返回 **1 P1 + 2 P2**（posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断），已修复。IR 682（五审）返回 **2 P1 + 1 P2**：P1-1 shortfall 检查时机自相矛盾（L5 前阻断 vs L5 后只锁 L6/L7）；P1-2 dispute_hold 账户级并发控制缺失（单条 `object_version` 无法阻止并发 L5 超额冻结）；P2-1 证据截断未闭环（settings.json 不在 commit 且实际 diff 仍截断）。
+-> 本文件已修复 IR 682 全部 2 P1 + 1 P2（`SHORTFALL_CHECK_PHASE = PRE_L5` 消除歧义 / `dispute_hold` 账户级聚合 + `apt_accounts.object_version` CAS 并发锁 / 证据验收改为 `REVIEW_PACKAGE_TRUNCATED = NO`）。
++> **状态：Owner Signoff 完成，Independent Review = CHANGES_REQUIRED（IR 686，2026-08-15），修复中**。
++> IR 629 返回 6 P1 + 2 P2，已修复并重提。IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复。IR 659（三审）返回 **2 P1 + 3 P2**（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复。IR 679（四审）返回 **1 P1 + 2 P2**（posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断），已修复。IR 682（五审）返回 **2 P1 + 1 P2**（shortfall 检查时机 / dispute_hold 账户级并发 / 证据截断），已修复。IR 686（六审）返回 **1 P1 + 3 P2**：P1-1 AptAccount CAS 只锁 hold mutation、未锁全部 `stored_available` mutation（跨业务并发可负余额）；P2-1 `PRE_L5` 名称 transition-specific（L4 pending DEBIT 同样增 hold）；P2-2 新增 `ACCOUNT_LOCK_CONFLICT` 与已冻结 `OBJECT_VERSION_CONFLICT` 冲突；P2-3 Review Package 仍截断。
++> 本文件已修复 IR 686 全部 1 P1 + 3 P2（账户级统一 Economic Mutation Lock + 11 步事务顺序 + 跨操作串行 / `PRE_HOLD_MUTATION_GUARD` 覆盖 L4+L5 / 错误码统一 `OBJECT_VERSION_CONFLICT(409)` / 证据验收保持 `REVIEW_PACKAGE_TRUNCATED = NO`）。
+ > 冻结流程：Owner Signoff ✅ → Independent Review（CHANGES_REQUIRED，修复后重提）→ 置 FROZEN。
+ > 正式 FROZEN 前，8 个核心实体的状态流转保持 **FAIL_CLOSED**。
+-> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【IR修复】` = 针对 IR 629/IR 638/IR 659/IR 679/IR 682 的修复；`【待确认】` = 仍未决（06 TBC 处理）。
++> 标注约定：`【已确认】` = 05 §4 / MC1 已冻结内容；`【Owner裁决】` = Owner 2026-08-15 拍板内容；`【IR修复】` = 针对 IR 629/IR 638/IR 659/IR 679/IR 682/IR 686 的修复；`【待确认】` = 仍未决（06 TBC 处理）。
+ 
+ ---
+ 
+@@ -146,30 +146,36 @@ effective_available  : = stored_available - dispute_hold（业务层支取/可
+ | posted | CREDIT (+1) | +100 | hold +100 | 0 / -100 | -100 / -100 / YES |
+ | posted | DEBIT (-1) | -100 | hold 0 | 0 / 0 | +100 / 0 / YES |
+ 
+-**D. DISPUTE_SHORTFALL_POLICY（`【IR修复】` IR 679 P1-1 + IR 682 P1-1/P1-2，安全默认 = FAIL_CLOSED，PRE_L5）**：
++**D. DISPUTE_SHORTFALL_POLICY（`【IR修复】` IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2，安全默认 = FAIL_CLOSED，PRE_HOLD_MUTATION_GUARD）**：
+ 
+ `posted CREDIT` 已被部分消费后再 dispute/reversal，会出现余额不足以支撑冻结或冲正的 shortfall。本批**不自行发明经济政策**（不采用「允许负余额 / 部分冲正 / 自动债务 / 自动吞差额」任一种），采用审核建议的安全默认。
+ 
+-**shortfall 检查阶段（`【IR修复】` IR 682 P1-1，消除「L5 前 / L5 后」歧义）**：
++**shortfall / hold capacity 检查阶段（`【IR修复】` IR 682 P1-1 + IR 686 P2-1，通用 hold 守卫，消除「L5 前 / L5 后」歧义，并覆盖 L4）**：
+ 
+ ```text
+-SHORTFALL_CHECK_PHASE = PRE_L5      # shortfall 在 L5 前置守卫内、进入 disputed 之前判定
+-shortfall = max(0, projected_dispute_hold_after - stored_available)
++PRE_HOLD_MUTATION_GUARD     # 任何正向增加 dispute_hold 的 transition 在进入目标态前判定
++shortfall = max(0, projected_aggregate_hold - stored_available)
+ ```
+ 
+-- **L5 前置守卫（PRE_L5）**：在 L5 事务内先计算
++- **适用 transition（显式列出，IR 686 P2-1）**：
+   ```text
+-  projected_dispute_hold_after = aggregate_dispute_hold + quantity   # 本 entry 进 dispute 的 hold
+-  projected_effective_available = stored_available - projected_dispute_hold_after
++  L4  pending DEBIT → disputed    （hold += quantity；PENDING_DEBIT_SHORTFALL_PRECHECK）
++  L5  posted CREDIT → disputed    （hold += quantity；POSTED_CREDIT_SHORTFALL_PRECHECK）
++  未来任何正向增加 dispute_hold 的 transition 自动纳入
++  ```
++- **前置守卫（PRE_HOLD_MUTATION_GUARD）**：在 transition 事务内先计算
++  ```text
++  projected_aggregate_hold = aggregate_dispute_hold + quantity   # 本 entry 进 dispute 的 hold
++  projected_effective_available = stored_available - projected_aggregate_hold
+   ```
+   若 `projected_effective_available < 0`（即 shortfall > 0）：
+   ```text
+-  L5 = DENY
+-  ledger state remains posted
++  transition = DENY（L4 / L5 均拒绝）
++  ledger state 保持原态（posted / pending）
+   balance unchanged / hold unchanged
+   append REJECTED audit event（reason_code = SHORTFALL_FAIL_CLOSED）only
+   ```
+-  **禁止 L5 成功进入 disputed 后产生负 effective_available**（`NEGATIVE_EFFECTIVE_AVAILABLE = 0`）。
++  **禁止 transition 成功后产生负 effective_available**（`NEGATIVE_EFFECTIVE_AVAILABLE = 0`）。
+ 
+ **dispute_hold 账户级聚合（`【IR修复】` IR 682 P1-2）**：
+ 
+@@ -179,28 +185,53 @@ aggregate_dispute_hold(account_id) = Σ 该账户所有 active disputed/reserved
+ effective_available = stored_available - aggregate_dispute_hold
+ ```
+ 
+-**账户级并发控制（`【IR修复】` IR 682 P1-2，基于真实 schema：`apt_accounts.object_version` 已存在，MC1 DDL 第 54 列）**：单条 `apt_ledger_entries.object_version` 只能锁单条分录，**不能阻止同一账户两条不同分录并发 L5 共同超额冻结**。因此冻结 **AptAccount object_version CAS** 作为账户级 reservation 权威锁：
++**账户级并发控制 —— 统一 Economic Mutation Lock（`【IR修复】` IR 682 P1-2 + IR 686 P1-1，基于真实 schema：`apt_accounts.object_version` 已存在，MC1 DDL 第 54 列）**：单条 `apt_ledger_entries.object_version` 只能锁单条分录，**不能阻止同一账户并发经济写操作共同超额**。账户不变量 `effective_available = stored_available - aggregate_dispute_hold` 可被两类写操作破坏：① 改 `aggregate_dispute_hold`；② 改 `stored_available`（`balance_apt_i`）。若契约只强制第①类走账户级 CAS，则 L5 与 Withdrawal / OTC Sell / Prediction stake / 普通 posted DEBIT 等第②类并发仍可组合出负余额（IR 686 P1-1）。
++
++因此冻结 **AptAccount object_version 作为整个账户所有经济写操作的统一并发锁域**：
++
++```text
++APT_ACCOUNT_ECONOMIC_MUTATION_LOCK = apt_accounts.object_version
++ALL_ACCOUNT_ECONOMIC_MUTATIONS_REQUIRE_ACCOUNT_CAS = YES
++```
++
++凡是改变以下任一字段/经济容量的操作，都必须在同一 AptAccount CAS/transaction domain 中执行：
++
++```text
++balance_apt_i / balance_apt_c / frozen_apt_i / frozen_apt_c / aggregate_dispute_hold
++```
++
++覆盖范围（非穷尽，任何其它 AptAccount writer 同规）：Ledger posting（L1）、Ledger reversal（L2/L3）、L4/L5/L6/L7、Prediction stake、Prediction settlement/refund、OTC debit/credit、Withdrawal、Robot/Reward 账户变动。Authoritative Writer 仍唯一。
++
++**统一事务顺序（每次 AptAccount economic mutation 同事务原子）**：
++
++```text
++1.  acquire / check apt_accounts.object_version（affected_rows≠1 → OBJECT_VERSION_CONFLICT，重试或拒绝）
++2.  lock account-level economic mutation domain
++3.  read stored balance for target asset（balance_apt_i / balance_apt_c）
++4.  calculate aggregate dispute hold（Σ active disputed/reserved entries 的 hold）
++5.  calculate effective_available
++6.  validate business guard
++7.  CAS apt_ledger_entries.state / append ledger entry（object_version 乐观锁）
++8.  mutate account balance / hold projection
++9.  append audit event
++10. object_version + 1
++11. commit
++任何步骤失败全部 rollback；禁止「balance 更新成功但 Ledger rollback」或「hold 成功但 account 更新 rollback」
++```
++
++**跨操作并发（IR 686 P1-1）**：不仅 L5 vs L5 要串行，以下组合也必须同域串行：L5 vs Withdrawal、L5 vs Prediction ORDER_STAKE、L5 vs OTC debit、L5 vs Ledger L1 debit、L6/L7 vs 新增 debit、hold release vs 新增 spending。
+ 
+ ```text
+-L5（及任何改变 aggregate_dispute_hold 的操作）必须同事务原子完成：
+-1. CAS apt_accounts.object_version（锁定账户级 reservation authority；affected_rows≠1 → ACCOUNT_LOCK_CONFLICT，重试或拒绝）
+-2. read stored_available（apt_accounts.balance_apt_i）
+-3. read aggregate_dispute_hold（Σ active disputed/reserved entries 的 hold）
+-4. calculate projected_hold
+-5. calculate projected_effective_available
+-6. shortfall guard（PRE_L5，projected_effective_available < 0 → DENY）
+-7. CAS apt_ledger_entries.state（object_version 乐观锁）
+-8. reservation/hold 生效
+-9. append audit event
+-10. commit
+-任何步骤失败全部 rollback
++ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = FORBIDDEN
++NEGATIVE_EFFECTIVE_AVAILABLE = 0
+ ```
+ 
++- **并发冲突对外错误码（IR 686 P2-2）**：账户级 CAS 冲突**不新增公共错误码**，对外统一返回已冻结的 `OBJECT_VERSION_CONFLICT`（HTTP 409）。`ACCOUNT_LOCK_CONFLICT` 若保留，仅作 `INTERNAL_ONLY = YES` 的 Service 内部异常名，且 `API_ERROR_MAPPING = OBJECT_VERSION_CONFLICT`。
+ - **不变量**：`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = FORBIDDEN`（`aggregate_dispute_hold <= available_capacity`、`effective_available >= 0`，除非未来 Owner 另行冻结负余额政策）。
+ - **禁止（不得自行实现）**：允许负 `stored_balance` / 负 `effective_available`；部分冲正；自动债务（debt/liability）；自动吞掉差额；后续 CREDIT/Reward 自动抵扣 deficit。
+ - **未定义（deferred 至 2B-2 RiskCase 冻结 / Owner 最终经济裁决）**：shortfall 被 DENY 后账户后续风险处置（是否生成 RiskCase、账户是否 restricted、OTC/Withdrawal/Robot Start 是否禁止、是否需要 ApprovalRequest）。**这些维度在 2B-2 冻结前一律不执行**（`SHORTFALL_UNDECIDED_EXECUTION = 0`）。
+ - **审计**：FAIL_CLOSED/DENY 的拒绝尝试写 `outcome=REJECTED`、`reason_code=SHORTFALL_FAIL_CLOSED` 审计事件（不改任何余额/分录）。
+-- **机械断言**：`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`；`SHORTFALL_UNDECIDED_EXECUTION = 0`；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`；`CONCURRENT_L5_CAPACITY_GUARD = PASS`；`NEGATIVE_EFFECTIVE_AVAILABLE = 0`。
++- **机械断言**：`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`；`SHORTFALL_UNDECIDED_EXECUTION = 0`；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`；`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = 0`；`CONCURRENT_L5_CAPACITY_GUARD = PASS`；`L5_WITHDRAWAL_CONCURRENCY = PASS`；`L5_PREDICTION_STAKE_CONCURRENCY = PASS`；`NEGATIVE_EFFECTIVE_AVAILABLE = 0`；`ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT`。
+ 
+ **机械字段全集（实现/测试必须逐一覆盖）**：
+ 
+@@ -212,9 +243,9 @@ L6_balance_delta
+ L6_hold_release
+ L7_balance_delta
+ L7_hold_release
+-shortfall                          # = max(0, projected_dispute_hold_after - stored_available)，PRE_L5 >0 即 DENY
++shortfall                          # = max(0, projected_aggregate_hold - stored_available)，PRE_HOLD_MUTATION_GUARD >0 即 DENY
+ aggregate_dispute_hold             # 账户级聚合，Σ active disputed/reserved entries 的 hold
+-projected_effective_available      # = stored_available - projected_dispute_hold_after（PRE_L5 守卫）
++projected_effective_available      # = stored_available - projected_aggregate_hold（PRE_HOLD_MUTATION_GUARD 守卫）
+ ```
+ 
+ **验收断言（IR 659 STEP 1/2/9）**：
+@@ -224,11 +255,17 @@ POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0      # posted DEBIT 进 dispute 后
+ PENDING_DEBIT_DISPUTE_RESERVATION = PASS         # pending DEBIT 进 dispute 后必须产生 reservation/hold
+ PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0        # pending 取消不得生成经济 reversal 分录
+ POSTED_REVERSAL_DIRECTION = PASS                 # posted 冲正方向必须 = -original.entry_direction
+-POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC   # posted CREDIT 被部分消费后再 dispute → shortfall>0 → L5 DENY（PRE_L5）
++POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC   # posted CREDIT 被部分消费后再 dispute → shortfall>0 → DENY（PRE_HOLD_MUTATION_GUARD）
++PENDING_DEBIT_SHORTFALL_PRECHECK = PASS          # pending DEBIT L4 进 dispute 前容量校验（IR 686 P2-1）
++POSTED_CREDIT_SHORTFALL_PRECHECK = PASS          # posted CREDIT L5 进 dispute 前容量校验（IR 686 P2-1）
+ SHORTFALL_UNDECIDED_EXECUTION = 0                # shortfall 的未定义维度（RiskCase/restricted/Approval）不得执行
+ ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0          # 账户级 dispute_hold 聚合不得超额（aggregate_hold <= available）
++ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = 0            # 账户级所有经济写操作不得组合超额（IR 686 P1-1）
+ CONCURRENT_L5_CAPACITY_GUARD = PASS              # 并发 L5 账户级 CAS 串行，第二条 reservation 必须 CONFLICT/FAIL_CLOSED
++L5_WITHDRAWAL_CONCURRENCY = PASS                 # L5 vs Withdrawal 同域串行，不得同时成功（IR 686 P1-1）
++L5_PREDICTION_STAKE_CONCURRENCY = PASS           # L5 vs Prediction ORDER_STAKE 同域串行，不得超额（IR 686 P1-1）
+ NEGATIVE_EFFECTIVE_AVAILABLE = 0                 # 任何 transition 不得产生负 effective_available
++ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT  # 账户级 CAS 冲突对外错误码统一 409（IR 686 P2-2）
+ ```
+ 
+ - **不变量**：dispute 期间 `stored_balance` 恒不变（冻结只通过 `dispute_hold` 投影作用于 `effective_available`）；仲裁后每个 origin×direction 恰好产生一次正确的余额效果与 hold 释放，**不二次入账、不二次冲正、不二次扣款**。
+@@ -617,4 +654,5 @@ CREATE TABLE `audit_events` (
+ - **IR 修复（IR 659，2026-08-15，三审）**：P1-1 删除统一「排除 disputed 分录影响」，改为四格 Dispute Hold Matrix（`origin × entry_direction`，`stored_balance` 不变 + `dispute_hold` 投影 + `effective_available`，posted DEBIT 保持扣款、pending DEBIT 预留冻结，A.1.2/Freeze §3.1）；P1-2 统一 pending reversal 语义（`pending→reversed`/`pending-origin disputed→reversed` = `ACCOUNT_DELTA=0` + `ECONOMIC_REVERSAL_ENTRY=NO`，仅 posted 冲正才追加 reversal，A.1/A.1.2/Freeze §3.1）；P2-1 删除未冻结 `DisputeCase`，统一为 `RiskCase`（`risk_type=LEDGER_RECONCILIATION_DISPUTE`，A.0.1/A.1/Freeze §2）；P2-2 为 `object_version` 补 Change Request `CR-20260815-001`（A.1.1/Freeze §3.1/§7/§8）；P2-3 内嵌 Dispute Hold/Reversal 验收断言 + 聚焦本 Commit 证据（acceptance IR 659 核查表）；另按 STEP 5 补 P5 RefundCase 未冻结 FAIL_CLOSED、STEP 6 补涉财 transition 绑定 ApprovalRequest（A.0/A.5）。
+ - **IR 修复（IR 679，2026-08-15，四审）**：P1-1 新增 `DISPUTE_SHORTFALL_POLICY`（posted CREDIT 已被部分消费后再 dispute/reversal 的 shortfall 边界：`shortfall = max(0, dispute_hold - stored_available)`，`shortfall > 0 → FAIL_CLOSED` 安全默认，禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2，A.1.2/Freeze §3.1）；P2-1 统一 RiskCase 冻结状态（`object schema = DEFINED` + `machine contract = CONTRACT_GAP` + `TARGET_BATCH = 2B-2`），`risk_type=LEDGER_RECONCILIATION_DISPUTE` 标 `CANDIDATE/PENDING_2B2_FREEZE`，新增 L4/L5 dependency gate = RISK_CASE_CONTRACT_FROZEN（A.0.1/A.1/Freeze §2/§3.1）；P2-2 提升 AI Code Review Assistant `max_diff_chars`（25000→100000，工具配置在仓库外，需审核助手重启后生效），并新增机械断言 `POSTED_CREDIT_SHORTFALL_POLICY=DETERMINISTIC`/`SHORTFALL_UNDECIDED_EXECUTION=0`（acceptance IR 679 核查表）。
+ - **IR 修复（IR 682，2026-08-15，五审）**：P1-1 冻结 `SHORTFALL_CHECK_PHASE = PRE_L5`（shortfall 在 L5 前置守卫内、进入 disputed 之前判定，`projected_effective_available < 0 → L5 = DENY`，state 保持 posted，禁止 L5 成功后产生负 effective_available，A.1.2/Freeze §3.1）；P1-2 冻结 `dispute_hold` 为 **ACCOUNT-LEVEL AGGREGATE**（`aggregate_dispute_hold = Σ active disputed/reserved entries 的 hold`），并冻结账户级并发控制 = **AptAccount object_version CAS**（基于真实 schema，MC1 DDL 第 54 列；L5 十步同事务原子，`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = FORBIDDEN`，A.1.2/Freeze §3.1）；P2-1 证据验收改 `REVIEW_PACKAGE_TRUNCATED = NO`（不再以「调大 max_diff_chars」为验收条件，acceptance IR 682 核查表）。
++- **IR 修复（IR 686，2026-08-15，六审）**：P1-1 将 **AptAccount object_version CAS 升级为统一 Economic Mutation Lock**（`APT_ACCOUNT_ECONOMIC_MUTATION_LOCK = apt_accounts.object_version`、`ALL_ACCOUNT_ECONOMIC_MUTATIONS_REQUIRE_ACCOUNT_CAS = YES`，覆盖 Ledger posting/reversal/L4-L7、Prediction stake/settlement/refund、OTC debit/credit、Withdrawal、Robot/Reward 及任何其它 AptAccount writer；凡改变 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 均须同域 CAS，11 步同事务原子，`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = FORBIDDEN`，A.1.2/Freeze §3.1）；P2-1 将 `PRE_L5` 改为通用 **`PRE_HOLD_MUTATION_GUARD`**，显式覆盖 L4（pending DEBIT→disputed）+ L5（posted CREDIT→disputed）及未来任何正向 hold transition，新增 `PENDING_DEBIT_SHORTFALL_PRECHECK`/`POSTED_CREDIT_SHORTFALL_PRECHECK`（A.1.2/Freeze §3.1）；P2-2 并发错误码统一对外 **`OBJECT_VERSION_CONFLICT`（HTTP 409）**，`ACCOUNT_LOCK_CONFLICT` 仅 `INTERNAL_ONLY=YES`（A.1.2/Freeze §3.1）；P2-3 证据验收保持 `REVIEW_PACKAGE_TRUNCATED = NO`（acceptance IR 686 核查表）。
+ - **待确认事项（不阻塞契约收敛，冻结后由 06 处理）**：① 生产参数数值（冷却阈值、领取窗口、OTC 有效期等，06 TBC）；② 单人项目下 OPS_OPERATOR↔RISK_APPROVER 职责分离的落地（`p1_010_override_contract` 兜底，执行时遵守）。
+diff --git a/.project-ai/tasks/TASK-20260815-001/requirement.md b/.project-ai/tasks/TASK-20260815-001/requirement.md
+index fb1e094..68bfd3d 100644
+--- a/.project-ai/tasks/TASK-20260815-001/requirement.md
++++ b/.project-ai/tasks/TASK-20260815-001/requirement.md
+@@ -2,7 +2,7 @@
+ 
+ ## 状态
+ 
+-> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 682），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结、pending reversal 语义、DisputeCase→RiskCase、object_version 补 CR、证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界、RiskCase 冻结状态矛盾、证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机、账户级并发、证据完整性），修复中。冻结候选已落盘：
++> **Owner Signoff 完成（2026-08-15）；Independent Review = CHANGES_REQUIRED（IR 686），修复中**。本 task 已由 Owner 逐项裁决（22 项 + 2 财务硬骨头 + 6 个尾巴默认答案，见 `design.md` Part D）；IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结、pending reversal 语义、DisputeCase→RiskCase、object_version 补 CR、证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界、RiskCase 冻结状态矛盾、证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机、账户级并发、证据完整性），已修复；IR 686（六审）返回 1 P1 + 3 P2（账户级统一经济锁域、PRE_HOLD_MUTATION_GUARD 通用化、并发错误码统一、证据截断），修复中。冻结候选已落盘：
+ > - 候选文档：`0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`
+ > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`
+ > - DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`
+diff --git a/0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md b/0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md
+index 7bceca7..df40751 100644
+--- a/0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md
++++ b/0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md
+@@ -1,7 +1,7 @@
+ # Machine Contract 第二批 — State Transition Freeze（候选）
+ 
+-> 状态：**FROZEN CANDIDATE（候选，Owner Signoff ✅；Independent Review = CHANGES_REQUIRED，IR 682，修复中）**
+-> 说明：本文件为 Machine Contract 第二批的**冻结候选**。状态转移矩阵 + Event Catalog 已由 Owner 逐项裁决（2026-08-15，22 项 + 2 财务硬骨头，见本文件 §4）。IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机 / 账户级并发 / 证据截断），修复中。正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
++> 状态：**FROZEN CANDIDATE（候选，Owner Signoff ✅；Independent Review = CHANGES_REQUIRED，IR 686，修复中）**
++> 说明：本文件为 Machine Contract 第二批的**冻结候选**。状态转移矩阵 + Event Catalog 已由 Owner 逐项裁决（2026-08-15，22 项 + 2 财务硬骨头，见本文件 §4）。IR 629 返回 6 P1 + 2 P2，已修复并重提；IR 638（复审）返回 4 P1 + 2 P2，已按 Owner 二次裁决修复（P1-2 方案 A：Ledger 新增 object_version；P1-4 方案 A：settling 退款改走结算异常 + RefundCase）；IR 659（三审）返回 2 P1 + 3 P2（dispute hold 四格冻结 / pending reversal 语义 / DisputeCase→RiskCase / object_version 补 CR / 证据完整性），已修复；IR 679（四审）返回 1 P1 + 2 P2（posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断），已修复；IR 682（五审）返回 2 P1 + 1 P2（shortfall 检查时机 / 账户级并发 / 证据截断），已修复；IR 686（六审）返回 1 P1 + 3 P2（账户级统一经济锁域 / PRE_HOLD_MUTATION_GUARD 通用化 / 并发错误码统一 / 证据截断），修复中。正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
+ > 起草日期：2026-08-15
+ > 关联 DDL：`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_audit_events.sql`；`0.5代码/gainode后端/gainode/sql/20260815_machine_contract_batch2_ledger_object_version.sql`
+ > 关联 Change Request：`0.5代码/gainode后端/gainode/sql/CHANGE_REQUEST_CR-20260815-001.md`（object_version 加列，IR 659 P2-2）
+@@ -76,11 +76,11 @@
+ 
+ **pending vs posted reversal 语义（IR 659 P1-2）**：未过账取消（`pending → reversed` L2、`pending-origin disputed → reversed` L7）= `ACCOUNT_DELTA=0`、`ECONOMIC_REVERSAL_ENTRY=NO`、`AUDIT_EVENT=YES`（不追加经济 reversal，杜绝 phantom credit/debit）。仅已发生经济效果的冲正（`posted → reversed` L3、`posted-origin disputed → reversed` L7）才 `ECONOMIC_REVERSAL_ENTRY=YES`，reversal 字段：`entry_direction = -(原)`、`quantity = 原`、`reversal_of = 原 ledger_entry_id`、`entry_type = LEDGER_REVERSAL`。
+ 
+-**DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2，安全默认 = FAIL_CLOSED，PRE_L5）**：`posted CREDIT` 已被部分消费后再 dispute/reversal，余额不足以支撑冻结或冲正时产生 shortfall。**shortfall 检查阶段 = PRE_L5**（在 L5 前置守卫内、进入 disputed 之前判定，IR 682 P1-1）：`shortfall = max(0, projected_dispute_hold_after - stored_available)`；L5 事务内先算 `projected_dispute_hold_after = aggregate_dispute_hold + quantity`、`projected_effective_available = stored_available - projected_dispute_hold_after`，若 `< 0` 则 **L5 = DENY**（state 保持 posted、balance/hold 不变、只写 REJECTED 审计事件），禁止 L5 成功后产生负 effective_available（`NEGATIVE_EFFECTIVE_AVAILABLE = 0`）。**dispute_hold 是 ACCOUNT-LEVEL AGGREGATE**（`aggregate_dispute_hold(account_id) = Σ active disputed/reserved entries 的 hold`，`effective_available = stored_available - aggregate_dispute_hold`，IR 682 P1-2）。**账户级并发控制 = AptAccount object_version CAS**（基于真实 schema：`apt_accounts.object_version` 已存在，MC1 DDL 第 54 列）：L5 必须同事务原子完成「CAS apt_accounts.object_version → read stored_available → read aggregate_dispute_hold → 算 projected → shortfall guard → CAS ledger state → hold 生效 → audit event → commit」，任何步骤失败全 rollback，`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = FORBIDDEN`。禁止自行实现：负 `stored_balance` / 负 `effective_available` / 部分冲正 / 自动债务 / 自动吞差额 / 后续 CREDIT 自动抵扣 deficit。未定义维度（是否生成 RiskCase、账户是否 restricted、OTC/Withdrawal/Robot 是否禁启、是否需要 ApprovalRequest）deferred 至 2B-2，冻结前不执行（`SHORTFALL_UNDECIDED_EXECUTION = 0`）。拒绝尝试写 `outcome=REJECTED` + `reason_code=SHORTFALL_FAIL_CLOSED` 审计事件。
++**DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2，安全默认 = FAIL_CLOSED，PRE_HOLD_MUTATION_GUARD）**：`posted CREDIT` 已被部分消费后再 dispute/reversal，余额不足以支撑冻结或冲正时产生 shortfall。**hold capacity 检查阶段 = PRE_HOLD_MUTATION_GUARD**（通用正向 hold 守卫，进入目标态之前判定，IR 686 P2-1）：`shortfall = max(0, projected_aggregate_hold - stored_available)`；适用 transition 显式列出 **L4（pending DEBIT→disputed，`PENDING_DEBIT_SHORTFALL_PRECHECK`）+ L5（posted CREDIT→disputed，`POSTED_CREDIT_SHORTFALL_PRECHECK`）**及未来任何正向 hold transition。transition 事务内先算 `projected_aggregate_hold = aggregate_dispute_hold + quantity`、`projected_effective_available = stored_available - projected_aggregate_hold`，若 `< 0` 则 **L4/L5 = DENY**（state 保持原态、balance/hold 不变、只写 REJECTED 审计事件），禁止 transition 成功后产生负 effective_available（`NEGATIVE_EFFECTIVE_AVAILABLE = 0`）。**dispute_hold 是 ACCOUNT-LEVEL AGGREGATE**（`aggregate_dispute_hold(account_id) = Σ active disputed/reserved entries 的 hold`，`effective_available = stored_available - aggregate_dispute_hold`，IR 682 P1-2）。**账户级并发控制 = 统一 Economic Mutation Lock（IR 686 P1-1）**：`APT_ACCOUNT_ECONOMIC_MUTATION_LOCK = apt_accounts.object_version`、`ALL_ACCOUNT_ECONOMIC_MUTATIONS_REQUIRE_ACCOUNT_CAS = YES`。账户不变量 `effective_available = stored_available - aggregate_dispute_hold` 可被两类写操作破坏：① 改 `aggregate_dispute_hold`；② 改 `stored_available`（`balance_apt_i`），故**凡改变 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 的操作都必须在同一 AptAccount CAS/transaction domain 执行**（覆盖 Ledger posting/reversal/L4-L7、Prediction stake/settlement/refund、OTC debit/credit、Withdrawal、Robot/Reward 及任何其它 AptAccount writer；Authoritative Writer 仍唯一）。每次 mutation 同事务原子完成 11 步：① acquire/check `apt_accounts.object_version`（affected_rows≠1 → `OBJECT_VERSION_CONFLICT`）→ ② lock account-level domain → ③ read stored balance → ④ calculate aggregate hold → ⑤ calculate effective_available → ⑥ validate guard → ⑦ CAS ledger state / append entry → ⑧ mutate balance/hold projection → ⑨ append audit → ⑩ object_version+1 → ⑪ commit；任何步骤失败全 rollback（禁止「balance 成功但 Ledger rollback」）。跨操作并发同域串行（L5 vs Withdrawal / Prediction ORDER_STAKE / OTC debit / Ledger L1 debit / L6-L7 vs 新增 debit / hold release vs 新增 spending），`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = FORBIDDEN`、`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = FORBIDDEN`。**并发冲突对外错误码（IR 686 P2-2）**：不新增公共错误码，对外统一 `OBJECT_VERSION_CONFLICT`（HTTP 409）；`ACCOUNT_LOCK_CONFLICT` 若保留仅 `INTERNAL_ONLY=YES` + `API_ERROR_MAPPING=OBJECT_VERSION_CONFLICT`。禁止自行实现：负 `stored_balance` / 负 `effective_available` / 部分冲正 / 自动债务 / 自动吞差额 / 后续 CREDIT 自动抵扣 deficit。未定义维度（是否生成 RiskCase、账户是否 restricted、OTC/Withdrawal/Robot 是否禁启、是否需要 ApprovalRequest）deferred 至 2B-2，冻结前不执行（`SHORTFALL_UNDECIDED_EXECUTION = 0`）。拒绝尝试写 `outcome=REJECTED` + `reason_code=SHORTFALL_FAIL_CLOSED` 审计事件。
+ 
+ **L4/L5 dependency gate（IR 679 P2-1）**：`L4_DEPENDENCY_GATE = RISK_CASE_CONTRACT_FROZEN`、`L5_DEPENDENCY_GATE = RISK_CASE_CONTRACT_FROZEN`；RiskCase 2B-2 未冻结 → L4/L5 相关流转 FAIL_CLOSED。
+ 
+-验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`、`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`SHORTFALL_UNDECIDED_EXECUTION = 0`、`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`。不变量：dispute 期间 `stored_balance` 恒不变（冻结只通过 `dispute_hold` 作用于 `effective_available`）；仲裁后每个 origin×direction 恰好一次正确余额效果与 hold 释放，不二次入账/冲正/扣款；shortfall > 0（PRE_L5）一律 L5 DENY；账户级 dispute_hold 聚合不得超额。
++验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`、`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`PENDING_DEBIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_PRECHECK = PASS`、`SHORTFALL_UNDECIDED_EXECUTION = 0`、`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`L5_WITHDRAWAL_CONCURRENCY = PASS`、`L5_PREDICTION_STAKE_CONCURRENCY = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`、`ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT`。不变量：dispute 期间 `stored_balance` 恒不变（冻结只通过 `dispute_hold` 作用于 `effective_available`）；仲裁后每个 origin×direction 恰好一次正确余额效果与 hold 释放，不二次入账/冲正/扣款；shortfall > 0（PRE_HOLD_MUTATION_GUARD）一律 L4/L5 DENY；账户级 dispute_hold 聚合不得超额；账户级所有经济写操作同域串行不得组合超额。
+ 
+ ### 3.2 Robot — `inactive / active / cooling / review / restricted / paused`
+ 
+@@ -309,9 +309,9 @@
+ - [ ] Ledger Mutation Field Contract（方案 A：仅 state + audit_event_id + object_version 受控可变）+ **Dispute Hold Matrix**（四格 `origin × entry_direction`，`signed_delta = quantity × entry_direction`）无二次入账/冲正/扣款
+ - [ ] Dispute Hold 验收断言：`POSTED_DEBIT_DISPUTE_AVAILABLE_INCREASE = 0`、`PENDING_DEBIT_DISPUTE_RESERVATION = PASS`
+ - [ ] Reversal 验收断言：`PENDING_REVERSAL_ECONOMIC_ENTRY_COUNT = 0`、`POSTED_REVERSAL_DIRECTION = PASS`（pending 取消不生成经济 reversal，仅 posted 冲正生成）
+-- [ ] **DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2）**：`SHORTFALL_CHECK_PHASE = PRE_L5`（`shortfall = max(0, projected_dispute_hold_after - stored_available)`；`projected_effective_available < 0 → L5 = DENY`）；`dispute_hold` = ACCOUNT-LEVEL AGGREGATE；账户级并发 = `apt_accounts.object_version` CAS；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`SHORTFALL_UNDECIDED_EXECUTION = 0`，禁止负余额/部分冲正/自动债务
++- [ ] **DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2）**：`PRE_HOLD_MUTATION_GUARD`（`shortfall = max(0, projected_aggregate_hold - stored_available)`；`projected_effective_available < 0 → L4/L5 = DENY`）；`dispute_hold` = ACCOUNT-LEVEL AGGREGATE；账户级并发 = 统一 Economic Mutation Lock（`apt_accounts.object_version` CAS，覆盖所有改 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 的操作，11 步同事务原子）；`ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION = 0`、`ACCOUNT_ECONOMIC_OVERSUBSCRIPTION = 0`、`CONCURRENT_L5_CAPACITY_GUARD = PASS`、`L5_WITHDRAWAL_CONCURRENCY = PASS`、`L5_PREDICTION_STAKE_CONCURRENCY = PASS`、`NEGATIVE_EFFECTIVE_AVAILABLE = 0`、`PENDING_DEBIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_PRECHECK = PASS`、`POSTED_CREDIT_SHORTFALL_POLICY = DETERMINISTIC`、`SHORTFALL_UNDECIDED_EXECUTION = 0`、`ACCOUNT_CONFLICT_API_CODE = OBJECT_VERSION_CONFLICT`，禁止负余额/部分冲正/自动债务
+ - [ ] **RiskCase 冻结状态一致（IR 679 P2-1）**：`object schema = DEFINED` + `machine contract = CONTRACT_GAP` + `TARGET_BATCH = 2B-2`；`risk_type=LEDGER_RECONCILIATION_DISPUTE = CANDIDATE/PENDING_2B2_FREEZE`；L4/L5 dependency gate = RISK_CASE_CONTRACT_FROZEN（未冻结 → FAIL_CLOSED）
+-- [ ] **Review 证据完整性（IR 682 P2-1）**：`REVIEW_PACKAGE_TRUNCATED = NO`（下轮实际未截断为准，不以「调大 max_diff_chars」为验收条件）
++- [ ] **Review 证据完整性（IR 682 P2-1 + IR 686 P2-3）**：`REVIEW_PACKAGE_TRUNCATED = NO`（下轮实际未截断为准，不以「调大 max_diff_chars」为验收条件）
+ - [ ] `apt_ledger_entries` 已补齐 `object_version`（dated migration `20260815_..._ledger_object_version.sql`，不改 MC1 历史 SQL），并附 **Change Request `CR-20260815-001`**，CAS 乐观锁 DETERMINISTIC
+ - [ ] FINANCE_REVIEWER 只读（对账差异发现/提交 RiskCase `risk_type=LEDGER_RECONCILIATION_DISPUTE`），不直接写 `apt_ledger_entries.state`；无未冻结的 `DisputeCase` 实体引用（UNKNOWN_ENTITY_REFERENCE=0），RiskCase 冻结状态描述无矛盾
+ - [ ] settling→refunding（P5）可达（结算异常 + RefundCase 审批），无 unreachable transition

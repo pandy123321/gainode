@@ -1,0 +1,5 @@
+M	.project-ai/manifest.yaml
+M	.project-ai/tasks/TASK-20260815-001/acceptance.md
+M	.project-ai/tasks/TASK-20260815-001/design.md
+M	.project-ai/tasks/TASK-20260815-001/requirement.md
+M	0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md

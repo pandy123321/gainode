@@ -1,0 +1,6 @@
+path,git_status,sha256,bytes
+.project-ai/manifest.yaml,M,1ec816820785193617b5a2b3e70e21c565648fc5b612c72a24209fd91cd382ec,21119
+.project-ai/tasks/TASK-20260815-001/acceptance.md,M,93a581f709a0ed05151890b2c9f3fd7408e079964e2fb01d7faf586bb6a3c5d0,19025
+.project-ai/tasks/TASK-20260815-001/design.md,M,a0f173fb409474224f3b70bd04ebd404566fb91bb00d7e2e633d8ba6a18803cf,69293
+.project-ai/tasks/TASK-20260815-001/requirement.md,M,9c81d3c0b9bd07aeacefe4c0616c0d11b71341cbe7bc55de5642bb4ed7e50bfd,4616
+0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md,M,91ce07adc3d4342d353ee96afa6a38ebe14044bab775366ed45d541143c95f55,41273
