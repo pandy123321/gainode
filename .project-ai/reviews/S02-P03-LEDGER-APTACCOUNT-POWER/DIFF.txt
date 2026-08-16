@@ -1,0 +1,1500 @@
+diff --git a/.project-ai/context.md b/.project-ai/context.md
+index c33c487..a9c5cfd 100644
+--- a/.project-ai/context.md
++++ b/.project-ai/context.md
+@@ -55,7 +55,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
+ - Ledger append-only 的 Model/Builder/DAO 防护与 CLI 回归已落地；已记录测试证据为 `67 pass / 0 fail`。这是已完成成果，除有效 Finding 外不得重写。
+ - **MC2 当前进度**：Owner 22 项 + 2 项财务裁决已完成；IR 686 的 1 P1 + 3 P2 修复提交到 `2795e38`，独立复审 Round 7（IR `GAINODE-S01P01-MC2-IR-20260816-001`）已返回 **APPROVED**（0 P0 / 0 P1 / 0 blocking P2；1 非阻塞 P3 = `aggregate_dispute_hold` 标注 DERIVED，后续顺带修正）。MC2 已置 **FROZEN（2026-08-16）**。
+ - **S01-P02（2B-1 状态合同补齐）已完成（2026-08-16，commit `2707938`）**：9 对象状态合同已产出（task `TASK-20260816-001`）。Result/Settlement 复制 05 §4 canonical enum + 转移矩阵（RS1-RS5 / ST1-ST7，候选，待 State Machine gate）；AuditEvent 复用 MC2 `audit_events` DDL；6 缺 enum 实体（SettlementBatch/RefundCase/CorrectionCase/OtcTrade/RobotUpgradeOrder/ConsentReceipt）仅生成 Owner Decision Matrix（2B1-ENUM-01..06），未自创状态，FAIL_CLOSED 不建表。Result `official` ≠ Settlement `paid`；Result confirmer ≠ Settlement approver。
+-- 当前执行包：`S02-P02-AUTH-KYC-USER-ELIGIBILITY`（Auth/KYC/User/Eligibility 六子流程实现，已完成，Dev 一开到底不 push）。已完成（Dev 一开到底，不 push）：S01-P01 MC2 FROZEN；S01-P02 2B-1 状态合同；S01-P03 2B-1 DDL；S01-P04 2B-2 状态合同（IR APPROVED）；S01-P05 2B-2 DDL+骨架（13 对象）；S01-P06 非持久投影（7 对象）；S01-P07 Affiliate/Agent P1 合同盘点（候选 Freeze + 11 Owner Decision，commit `4f01bad`/`f1b28c4`）；S01-P08 AI Operations P1 合同盘点（候选 Freeze + 9 Owner Decision + 1 LOCKED，commit `799d588`/`cf50829`）；S01-P09 STAGE-01 全量收口（`STAGE-01-OBJECT-COVERAGE-MATRIX.md`，43 对象 = 30 持久 + 7 投影 + 6 盘点未建表，commit `5e75ade`/`678b61a`）。【QUALITY-01 本地独立审核 2026-08-16：S01-P05~P09 全部 APPROVED（0 P0/P1/P2；P3×2 非阻塞）；至此 STAGE-01 S01-P01~P09 本地全 APPROVED，待统一 push + 外部审核 + 合并后输出 STAGE-01-QUALITY-GATE-V3.md】。S02-P01 已落地（不建表、不写业务，纯可执行内核）：`.env.example` 环境契约（安全关闭值 fail-closed）、`ErrorDict` 05 §7 16 项错误分类 + `httpStatus()` 映射、`Envelope` 统一 success/error 响应信封（含 8 数据新鲜度元数据）、`RequestContext` 六请求头中间件（写操作强制 Idempotency-Key，缺失 fail-closed）、`IdempotencyStore`/`OutboxStore` 接口 + Null fail-closed 实现、`TransactionBoundary`（事务 + object_version CAS 乐观锁）、OpenAPI 3.1 拆分（`gainode-v2.yaml` 入口 + 6 P0 路径骨架 + common schema/headers/responses）、Contract/Integration 测试入口（41 断言全过）。后续 S02-P02 起逐 P0 写路径落地 request/response schema。S02-P02 已落地（Auth/KYC/User/Eligibility 六子流程，复用 V1.x 认证 + 桥接 V2 AuthSession/MfaEnrollment/KycCase 状态机，commit `1c37f6b` + 测试/复审包）：`app/api/controller/{Auth,Kyc,User}Controller.php`（`support\controller\ApiV2` 基类统一 envelope 输出）、`library/service/auth/{AuthApplicationService,SessionApplicationService,MfaApplicationService}.php` + `library/service/kyc/KycApplicationService.php` + `library/service/user/UserApplicationService.php` + `library/service/entitlement/EligibilityApplicationService.php`（global_p/AI/Prediction 三分支资格聚合，默认 deny）、`library/dict/SecurityReasonMap.php`（防枚举安全文案映射）+ `support/exception/DomainException.php`（05 §7 字符串码 + HTTP 映射）、`library/validator/{Auth,Kyc,Eligibility}Validation.php`、OpenAPI 补齐 auth/user/kyc/eligibility schema + paths（11 权威接口 + 5 只读路径）。MFA confirm/challenge 因 secret 存储 DDL 未冻结 FAIL_CLOSED（DEPENDENCY_UNAVAILABLE）；FeatureEntitlement 因 06 参数未冻结默认 deny；新增测试 69 断言全过（23 Contract + 46 Integration，含 SQLite 内存库状态机测试）。S01-P07/P08 快照 2（建 DDL）阻塞在 Owner 签署决策；2B-1/2B-2 21 写路径仍 CANDIDATE/FAIL_CLOSED。
++- 当前执行包：`S02-P02-AUTH-KYC-USER-ELIGIBILITY`（Auth/KYC/User/Eligibility 六子流程实现，已完成，Dev 一开到底不 push）。已完成（Dev 一开到底，不 push）：S01-P01 MC2 FROZEN；S01-P02 2B-1 状态合同；S01-P03 2B-1 DDL；S01-P04 2B-2 状态合同（IR APPROVED）；S01-P05 2B-2 DDL+骨架（13 对象）；S01-P06 非持久投影（7 对象）；S01-P07 Affiliate/Agent P1 合同盘点（候选 Freeze + 11 Owner Decision，commit `4f01bad`/`f1b28c4`）；S01-P08 AI Operations P1 合同盘点（候选 Freeze + 9 Owner Decision + 1 LOCKED，commit `799d588`/`cf50829`）；S01-P09 STAGE-01 全量收口（`STAGE-01-OBJECT-COVERAGE-MATRIX.md`，43 对象 = 30 持久 + 7 投影 + 6 盘点未建表，commit `5e75ade`/`678b61a`）。【QUALITY-01 本地独立审核 2026-08-16：S01-P05~P09 全部 APPROVED（0 P0/P1/P2；P3×2 非阻塞）；至此 STAGE-01 S01-P01~P09 本地全 APPROVED，待统一 push + 外部审核 + 合并后输出 STAGE-01-QUALITY-GATE-V3.md】。S02-P01 已落地（不建表、不写业务，纯可执行内核）：`.env.example` 环境契约（安全关闭值 fail-closed）、`ErrorDict` 05 §7 16 项错误分类 + `httpStatus()` 映射、`Envelope` 统一 success/error 响应信封（含 8 数据新鲜度元数据）、`RequestContext` 六请求头中间件（写操作强制 Idempotency-Key，缺失 fail-closed）、`IdempotencyStore`/`OutboxStore` 接口 + Null fail-closed 实现、`TransactionBoundary`（事务 + object_version CAS 乐观锁）、OpenAPI 3.1 拆分（`gainode-v2.yaml` 入口 + 6 P0 路径骨架 + common schema/headers/responses）、Contract/Integration 测试入口（41 断言全过）。后续 S02-P02 起逐 P0 写路径落地 request/response schema。S02-P02 已落地（Auth/KYC/User/Eligibility 六子流程，复用 V1.x 认证 + 桥接 V2 AuthSession/MfaEnrollment/KycCase 状态机，commit `1c37f6b` + 测试/复审包）：`app/api/controller/{Auth,Kyc,User}Controller.php`（`support\controller\ApiV2` 基类统一 envelope 输出）、`library/service/auth/{AuthApplicationService,SessionApplicationService,MfaApplicationService}.php` + `library/service/kyc/KycApplicationService.php` + `library/service/user/UserApplicationService.php` + `library/service/entitlement/EligibilityApplicationService.php`（global_p/AI/Prediction 三分支资格聚合，默认 deny）、`library/dict/SecurityReasonMap.php`（防枚举安全文案映射）+ `support/exception/DomainException.php`（05 §7 字符串码 + HTTP 映射）、`library/validator/{Auth,Kyc,Eligibility}Validation.php`、OpenAPI 补齐 auth/user/kyc/eligibility schema + paths（11 权威接口 + 5 只读路径）。MFA confirm/challenge 因 secret 存储 DDL 未冻结 FAIL_CLOSED（DEPENDENCY_UNAVAILABLE）；FeatureEntitlement 因 06 参数未冻结默认 deny；新增测试 69 断言全过（23 Contract + 46 Integration，含 SQLite 内存库状态机测试）。S01-P07/P08 快照 2（建 DDL）阻塞在 Owner 签署决策；2B-1/2B-2 21 写路径仍 CANDIDATE/FAIL_CLOSED。S02-P03 已落地（APT 数量账经济写路径统一事务模板，Ledger/AptAccount/Power 基础）：`library/service/ledger/LedgerService.php`（append/post/cancel/reverse + dispute/resolveDispute fail-closed，白名单三列受控状态转移 + appendAudit）、`library/service/ledger/AptAccountService.php`（getAggregateDisputeHold=0 / getEffectiveAvailable / applyEntryEffect CAS 乐观锁 + 负余额保护 INSUFFICIENT_APT）、`library/service/power/PowerPositionService.php`（consume/recover/previewImpact 全部 DEPENDENCY_UNAVAILABLE fail-closed）、`library/model/ledger/AptLedgerEntryModel.php`（补 object_version + ENTRY_DIRECTION_CREDIT/DEBIT + ENTRY_TYPE_LEDGER_REVERSAL + ASSET_APT_I 常量）、OpenAPI `components/schemas/ledger.yaml`（LedgerEntry/AssetBalance/PowerPosition）+ `paths/ledger.yaml`（3 只读路径 me/asset、me/ledger-entries、me/power）+ gainode-v2.yaml 注册。测试 48 断言全过（18 Contract + 30 Integration，含守恒/exactly-once/CAS 冲突/负余额/L2 取消无经济 reversal/L3 冲正 LEDGER_REVERSAL/fail-closed）。
+ - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
+ - 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.3；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816`。40 个工作包均具备目标、固定步骤、验证、停止条件和验收；Development、Quality 和复审 Agent 必须按该文件执行，V3.2 及更早路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。
+ - 开发采用一个 Development Agent 串行工作包，一开到底：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate 关闭。唯一硬停止 = §0.1 永久禁止项 + 「包未在本文件定义」。所有 Package 的「前置」「停止条件」「Stage Gate」降级为 Quality Agent 审核时的验证项；未冻结合同/未决 Owner 决策按 best-effort 继续并在交接声明，Quality 审核时逐项验证并记为 Finding（CR-20260816-003）。
+diff --git a/.project-ai/manifest.yaml b/.project-ai/manifest.yaml
+index c9321c1..bb5fc99 100644
+--- a/.project-ai/manifest.yaml
++++ b/.project-ai/manifest.yaml
+@@ -1,6 +1,6 @@
+ schemaVersion: 1
+ projectName: Gainode
+-contextVersion: 27
++contextVersion: 28
+ status: PUBLISHED
+ STAGE_00_COMPLETE: true
+ STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
+@@ -300,3 +300,8 @@ decisionSources:
+     decision_date: "2026-08-16"
+     owner: OWNER
+     provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P02 六子流程实现，commit 1c37f6b）← 07 §S02-P02 固定步骤 1-6 ← 05 §1/§2.2/§3/§4/§7/§10/§11.1 ← machine_contract_batch2b2_state_contract ← stage02_p01_general_kernel"
++  stage02_p03_ledger_aptaccount_power:
++    value: "COMPLETE 2026-08-16 — S02-P03 Ledger/AptAccount/Power 基础（APT 数量账经济写路径统一事务模板，不新增 DDL）。交付：library/service/ledger/LedgerService.php（append/post/cancel/reverse + dispute/resolveDispute FAIL_CLOSED DEPENDENCY_UNAVAILABLE，白名单三列 state/audit_event_id/object_version 受控状态转移 + appendAudit 追加审计 + getByIdempotencyKey 幂等去重 IDEMPOTENCY_CONFLICT）；library/service/ledger/AptAccountService.php（getAggregateDisputeHold=0 因 dispute fail-closed、getEffectiveAvailable、applyEntryEffect 11 步 CAS 乐观锁 object_version + 负余额保护 INSUFFICIENT_APT 422 + 冲突 OBJECT_VERSION_CONFLICT 409，金额全 bcmath decimal string）；library/service/power/PowerPositionService.php（consume/recover/previewImpact 全部 DEPENDENCY_UNAVAILABLE 503 fail-closed，规则未冻结）；library/model/ledger/AptLedgerEntryModel.php（补 object_version 字段 + ENTRY_DIRECTION_CREDIT=1/DEBIT=-1 + ENTRY_TYPE_LEDGER_REVERSAL + ASSET_APT_I 常量，append-only 未放宽）；OpenAPI components/schemas/ledger.yaml（LedgerEntry/AssetBalance/PowerPosition）+ paths/ledger.yaml（3 只读路径 me/asset、me/ledger-entries、me/power）+ gainode-v2.yaml 注册。测试 48 断言全过（18 Contract 领域常量/append-only 机械强制/append 输入校验/错误码 HTTP 映射 + 30 Integration 守恒/exactly-once/CAS 冲突/负余额/L2 取消无经济 reversal/L3 冲正 LEDGER_REVERSAL/fail-closed）。L1 pending→posted、L2 pending→reversed（ACCOUNT_DELTA=0）、L3 posted→reversed（追加 LEDGER_REVERSAL 反向分录）；L4-L7 dispute 因 RiskCase machine contract CONTRACT_GAP（2B-2 未冻结）FAIL_CLOSED；Power 变更因 Active Rule/Parameter TBC FAIL_CLOSED。任务: .project-ai/tasks/TASK-20260816-010/。"
++    decision_date: "2026-08-16"
++    owner: OWNER
++    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P03 经济写路径）← 07 §S02-P03 固定步骤 1-7 ← 05 §3/§10 ← machine_contract_batch1_freeze（MC1 DDL）← machine_contract_batch2_freeze（MC2 State Transition + Ledger Mutation Field Contract + Dispute Hold Matrix + DISPUTE_SHORTFALL_POLICY）← stage02_p01_general_kernel（TransactionBoundary）"
+diff --git a/.project-ai/tasks/TASK-20260816-010/acceptance.md b/.project-ai/tasks/TASK-20260816-010/acceptance.md
+new file mode 100644
+index 0000000..3238cbb
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-010/acceptance.md
+@@ -0,0 +1,36 @@
++# S02-P03 · Ledger / AptAccount / Power 基础 — 验收
++
++> 项目：Gainode　工作区：`E:\github\sports`　阶段：STAGE-02　包：`S02-P03`
++
++## 1. 机械断言（静态/一致性）
++
++- [ ] `apt_ledger_entries` / `audit_events` 经济字段无 UPDATE/DELETE 路径（append-only 机械强制未放宽）。
++- [ ] `LedgerService` 是 `apt_ledger_entries` 唯一 Authoritative Writer；余额变更仅经 `AptAccountService`。
++- [ ] 所有经济写路径复用同一 `TransactionBoundary` 事务模板；`applyEntryEffect` 带 `object_version` CAS。
++- [ ] 金额运算全部 `bcmath`，无 float；`quantity > 0`、`entry_direction ∈ {1,-1}`、`asset = APT-I` 校验。
++- [ ] `php -l` 全部通过；OpenAPI `$ref` 全解析；`gainode-v2.yaml` 注册新 path/schema。
++
++## 2. 行为断言（测试证明）
++
++- [ ] **守恒**：任一账户 `balance_apt_i == Σ signed_delta(posted 分录)`；reversal 后归位。
++- [ ] **exactly-once**：同 `idempotency_key` 二次写 → `IDEMPOTENCY_CONFLICT`。
++- [ ] **CAS 冲突**：陈旧 `object_version` → `OBJECT_VERSION_CONFLICT`（affected≠1 统一）。
++- [ ] **负余额**：DEBIT 使 `effective_available < 0` → `INSUFFICIENT_APT`；不产生负 stored_balance。
++- [ ] **L2 pending reversal**：`ACCOUNT_DELTA=0`、`ECONOMIC_REVERSAL_ENTRY=NO`（无经济 reversal 分录）、`AUDIT_EVENT=YES`。
++- [ ] **L3 posted reversal**：追加 `entry_type=LEDGER_REVERSAL`、`entry_direction=-(原)`、`quantity=原`、`reversal_of=原`；余额反向。
++- [ ] **FAIL_CLOSED**：`dispute`/`resolveDispute`/Power `consume`/`recover` → `DEPENDENCY_UNAVAILABLE`。
++- [ ] **超级管理员无旁路**：无任何「跳过状态机直接改余额/账本」的方法。
++
++## 3. 停止条件核对（07 §S02-P03）
++
++- [ ] 任何写路径需要直接 update ledger **经济列** → 拒绝写入（本包仅白名单三列受控转移）。
++- [ ] 无 Active Snapshot → 拒绝写入（本包不 mock snapshot，后续 Robot/Reward 由 snapshot 供给）。
++- [ ] 跨账户锁顺序未定义 → 本包仅单账户 CAS，跨账户锁顺序 deferred 至 S02-P04/P06，记录于 KNOWN_LIMITATIONS。
++
++## 4. 交付物核对
++
++- [ ] `library/service/ledger/LedgerService.php` / `AptAccountService.php` / `library/service/power/PowerPositionService.php`
++- [ ] `library/model/ledger/AptLedgerEntryModel.php`（`object_version` + 常量）
++- [ ] `openapi/components/schemas/ledger.yaml` + `openapi/paths/ledger.yaml` + `openapi/gainode-v2.yaml`
++- [ ] `tests/Contract/` + `tests/Integration/` 测试（全 PASS）
++- [ ] `.project-ai/context.md` + `manifest.yaml` 更新；本地 commit（不 push）+ 复审快照包
+diff --git a/.project-ai/tasks/TASK-20260816-010/design.md b/.project-ai/tasks/TASK-20260816-010/design.md
+new file mode 100644
+index 0000000..c1e76ff
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-010/design.md
+@@ -0,0 +1,87 @@
++# S02-P03 · Ledger / AptAccount / Power 基础 — 设计
++
++> 项目：Gainode　工作区：`E:\github\sports`　阶段：STAGE-02　包：`S02-P03`
++> 权威契约：`05_DATA_STATE_PERMISSION_API_CONTRACT.md` §3/§4；MC1 / MC2（候选）
++
++## 1. 架构分层
++
++```
++LedgerService（Authoritative Writer: apt_ledger_entries）
++  ├── 事务模板（TransactionBoundary）
++  ├── append/post/cancel/reverse（L1/L2/L3）
++  ├── dispute/resolveDispute（L4–L7 → FAIL_CLOSED）
++  └── 受控 state 转移（raw Query Builder，白名单三列 + 乐观锁）
++        │
++        ├── AptAccountService（Authoritative Writer: apt_accounts）
++        │     ├── applyEntryEffect()  ← CAS 余额变更（object_version）
++        │     ├── getAggregateDisputeHold()  ← 账户级聚合投影（S02-P03 恒 0）
++        │     └── getEffectiveAvailable()
++        │
++        ├── AuditEventService（Authoritative Writer: audit_events）
++        │     └── appendAudit()
++        │
++        └── OutboxStore（Null 内核，尽力而为，不回滚业务）
++```
++
++**Authoritative Writer 唯一性**：`LedgerService` 只写 `apt_ledger_entries`，余额变更委托给 `AptAccountService`（唯一 `apt_accounts` writer），审计委托 `AuditEventService`。三者同事务原子提交。
++
++## 2. 受控 state 转移（关键设计）
++
++`AptLedgerEntryModel` 的 append-only 防线（`save()`/`delete()` 抛异常 + `AptLedgerEntryAppendOnlyBuilder` + `AptLedgerEntryDao` 覆写）覆盖 **ORM 正常路径**，阻断一切「意外」update。但 MC2 Ledger Mutation Field Contract 授权 `state`/`audit_event_id`/`object_version` 三列的**受控转移**。
++
++实现：`LedgerService` 内私有方法 `transitionState()` 使用 **raw Query Builder**（`Db::connection('mysql')->table('apt_ledger_entries')`），显式 `WHERE ledger_entry_id=? AND state=? AND object_version=?`，只更新白名单三列，`affected_rows ≠ 1 → OBJECT_VERSION_CONFLICT`。该路径是「显式受控 update」，不放宽 append-only 防线。
++
++```sql
++UPDATE apt_ledger_entries
++   SET state=?, audit_event_id=?, object_version=object_version+1
++ WHERE ledger_entry_id=? AND state=? AND object_version=?
++```
++
++## 3. 方法契约
++
++### 3.1 AptAccountService
++
++| 方法 | 语义 |
++|---|---|
++| `applyEntryEffect(accountId, quantity, direction, expectedVersion, lastLedgerEntryId)` | 事务内 CAS 更新余额：CREDIT 增 `balance_apt_i`/`total_earned_apt`；DEBIT 减 `balance_apt_i`/增 `total_spent_apt`，负余额先抛 `INSUFFICIENT_APT`；`updateAll` 带 `object_version` 条件，affected≠1 → `OBJECT_VERSION_CONFLICT` |
++| `getAggregateDisputeHold(accountId)` | 返回 `'0'`（dispute fail-closed，恒 0） |
++| `getEffectiveAvailable(account)` | `bcsub(balance_apt_i, aggregate_hold)` |
++
++### 3.2 LedgerService
++
++| 方法 | 状态转移 | 经济效果 |
++|---|---|---|
++| `append(data)` | INSERT `pending` | 无 |
++| `post(entryId, actorId, actorRole)` | `pending → posted`（L1） | 应用分录效果 + 审计 |
++| `cancel(entryId, actorId, actorRole)` | `pending → reversed`（L2） | 无（`ACCOUNT_DELTA=0`）+ 审计 |
++| `reverse(entryId, actorId, actorRole)` | `posted → reversed`（L3） | 追加 `LEDGER_REVERSAL` 反向分录 + 反向余额 + 审计 |
++| `dispute(...)` | L4/L5 | FAIL_CLOSED `DEPENDENCY_UNAVAILABLE` |
++| `resolveDispute(...)` | L6/L7 | FAIL_CLOSED `DEPENDENCY_UNAVAILABLE` |
++
++`post` 与 `reverse` 共用「Economic Mutation Lock」私有步骤：幂等 → 读账户 → 聚合 hold → effective_available → guard → append entry → CAS 余额 → 审计 → commit。
++
++### 3.3 PowerPositionService
++
++`consume()` / `recover()` / `previewImpact()` 一律 FAIL_CLOSED（`DEPENDENCY_UNAVAILABLE`），规则未冻结前禁止任何 Power 变更。
++
++## 4. 幂等设计
++
++- 账本写操作幂等由 `apt_ledger_entries.uk_idempotency` 天然保证：`append()` 先 `getByIdempotencyKey()` 查重，命中抛 `IDEMPOTENCY_CONFLICT`。
++- `IdempotencyStore`（Null 内核）用于无自然幂等列的通用写操作，本包不依赖。
++
++## 5. 审计与 Outbox
++
++- 每次状态流转追加 `audit_events`（`event_code` 对齐 Event Catalog：`LEDGER_ENTRY_POSTED`/`LEDGER_ENTRY_REVERSED`/`LEDGER_ENTRY_DISPUTED`/`LEDGER_ENTRY_DISPUTE_RESOLVED`/`LEDGER_ENTRY_DISPUTE_REVERSED`），回写 `apt_ledger_entries.audit_event_id`。
++- Outbox 用 `OutboxStore` 尽力而为（Null 内核 `isAvailable()=false` 时跳过），通知异步失败不回滚业务。
++
++## 6. 测试设计（SQLite in-memory，命名 `mysql`）
++
++表结构简化对齐模型字段：`apt_accounts` / `apt_ledger_entries`（含 `object_version`）/ `power_positions` / `audit_events`。
++
++覆盖：
++- 守恒：`balance = Σ signed_delta(posted 分录)`。
++- exactly-once：同 idempotency_key 二次 append → `IDEMPOTENCY_CONFLICT`。
++- CAS 冲突：陈旧 `object_version` → `OBJECT_VERSION_CONFLICT`。
++- 负余额：DEBIT 超余额 → `INSUFFICIENT_APT`。
++- reversal：L2 无经济 reversal；L3 追加反向分录 + 余额归位。
++- fail-closed：dispute/resolveDispute/Power consume → `DEPENDENCY_UNAVAILABLE`。
+diff --git a/.project-ai/tasks/TASK-20260816-010/requirement.md b/.project-ai/tasks/TASK-20260816-010/requirement.md
+new file mode 100644
+index 0000000..131a2d1
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-010/requirement.md
+@@ -0,0 +1,76 @@
++# S02-P03 · Ledger / AptAccount / Power 基础 — 需求
++
++> 项目：Gainode　工作区：`E:\github\sports`　阶段：STAGE-02　包：`S02-P03`
++> 权威执行计划：`Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` §S02-P03（V3.3 FROZEN_FOR_EXECUTION）
++> 权威契约：`05_DATA_STATE_PERMISSION_API_CONTRACT.md` §3/§4/§10；`sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md`（MC1）；`sql/MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md`（MC2，候选）
++
++## 1. 目标
++
++落地 **APT 数量账经济写路径的统一事务模板**（11 步 Economic Mutation Lock），实现 `apt_ledger_entries` 的 L1/L2/L3 状态转移、`apt_accounts` 余额 CAS 乐观锁、`audit_events` 追加审计、幂等去重与 negative balance 保护；L4–L7（dispute）与 Power 变更因依赖未冻结契约而 FAIL_CLOSED。
++
++实现顺序固定：**Contract（状态机/字段可变性）→ Domain Service（模板/CAS）→ Model 补充 → OpenAPI → Tests**。
++
++## 2. 冻结范围与 FAIL_CLOSED 边界
++
++### 2.1 可落地（FROZEN / Owner 裁决 + 07 §S02-P03 已列步骤）
++
++| 项 | 内容 |
++|---|---|
++| L1 | `pending → posted`：日记账过账，追加分录 + 更新 `apt_accounts` 余额 + 追加审计，同事务原子 |
++| L2 | `pending → reversed`：入账前取消，`ACCOUNT_DELTA=0`、`ECONOMIC_REVERSAL_ENTRY=NO`、`AUDIT_EVENT=YES` |
++| L3 | `posted → reversed`：入账后冲正，追加 `entry_type=LEDGER_REVERSAL` 反向分录 + 反向更新余额 |
++| 幂等 | `apt_ledger_entries.uk_idempotency` + `getByIdempotencyKey()` 去重，冲突 `IDEMPOTENCY_CONFLICT(409)` |
++| CAS | `apt_accounts.object_version` 乐观锁，affected rows≠1 → `OBJECT_VERSION_CONFLICT(409)` |
++| 负余额 | DEBIT 使 `effective_available < 0` → `INSUFFICIENT_APT(422)`，禁止负 stored_balance |
++| 审计 | `audit_events` append-only，每次状态流转同事务回写 `audit_event_id` |
++
++### 2.2 FAIL_CLOSED（未冻结依赖）
++
++| 项 | 原因 | 行为 |
++|---|---|---|
++| L4/L5（`pending/posted → disputed`） | `RiskCase` machine contract = CONTRACT_GAP（2B-2 未冻结） | 抛 `DEPENDENCY_UNAVAILABLE(503)` |
++| L6/L7（`disputed → posted/reversed`） | 同上 | 抛 `DEPENDENCY_UNAVAILABLE(503)` |
++| Power `consume/recover/convert` | 精确消耗/恢复规则由 Active Rule/Parameter 决定（TBC） | 抛 `DEPENDENCY_UNAVAILABLE(503)` |
++| IdempotencyStore / OutboxStore 具体实现 | 存储表未冻结（Null 内核，fail-closed） | 账本用 `uk_idempotency` 天然幂等；Outbox 尽力而为，不回滚业务 |
++
++## 3. 统一 Economic Mutation Lock（11 步，07 §S02-P03 步骤 1–7）
++
++所有改 `balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold` 的操作，必须：
++
++1. 按 `idempotency_key` 查原结果：已完成返回原响应，冲突 `IDEMPOTENCY_CONFLICT`。
++2. 读取 `apt_accounts`，取得 `object_version`（预期版本）。
++3. 读 stored balance，计算 `aggregate_dispute_hold`（S02-P03 恒为 0，dispute fail-closed）。
++4. 计算 `effective_available = stored_available - aggregate_dispute_hold`。
++5. 校验 guard：DEBIT 且 `quantity > effective_available` → `INSUFFICIENT_APT`。
++6. 追加 immutable LedgerEntry（经济字段禁止 update）。
++7. CAS 更新 `apt_accounts` 投影，affected rows≠1 → `OBJECT_VERSION_CONFLICT`。
++8. 同事务追加 AuditEvent。
++9. `object_version + 1`。
++10. 提交；任何步骤失败全回滚（禁止「余额成功但账本失败」）。
++11. reversal 追加反向分录并引用原 entry，禁止删除/覆盖。
++
++## 4. 关键约束与不变式
++
++- **append-only**：`apt_ledger_entries` / `audit_events` 经济字段不可 UPDATE/DELETE；仅 `state`/`audit_event_id`/`object_version` 三列经「显式受控 update 路径」（白名单三列 + 乐观锁 + transition guard）流转。
++- **Ledger Mutation Field Contract**：`ledger_entry_id/account_id/asset/quantity/entry_direction/entry_type/source_object_type/source_object_id/journal_batch_id/reversal_of/idempotency_key/rule_version/snapshot_id/created_time` 永久 immutable。
++- **decimal string**：金额字段一律 `decimal(36,18)` 字符串 + `bcmath` 运算，禁 float。
++- **entry_direction**：`1=CREDIT`、`-1=DEBIT`；`signed_delta = quantity × entry_direction`；`quantity` 恒正。
++- **资产**：仅 `APT-I`；`APT-C = OUT_OF_SCOPE`，禁止入账。
++- **超级管理员无旁路**：所有经济写路径复用同一事务模板。
++
++## 5. 非目标（NON_GOALS）
++
++- 不落地 L4–L7 dispute 四格矩阵与 Dispute Hold（RiskCase 未冻结 → fail-closed，不 mock）。
++- 不实现 Prediction stake/settlement、OTC debit/credit、Withdrawal、Robot/Reward 等 S02-P04~P08 具体业务写路径。
++- 不实现 Power 精确消耗/恢复（规则 TBC）。
++- 不改 MC1/2B-1/2B-2 已冻结 DDL（`20260813_machine_contract_batch1_8_core_entities.sql` 等）。
++- 不 push、不提审（Development Agent 职责边界）。
++
++## 6. 交付物清单
++
++- `library/service/ledger/LedgerService.php`（append/post/cancel/reverse/dispute/resolveDispute + 事务模板）。
++- `library/service/ledger/AptAccountService.php`（applyEntryEffect CAS + 聚合投影）。
++- `library/service/power/PowerPositionService.php`（consume/recover/previewImpact fail-closed）。
++- `library/model/ledger/AptLedgerEntryModel.php`（补 `object_version` + direction/type 常量）。
++- `openapi/components/schemas/ledger.yaml` + `openapi/paths/ledger.yaml` + `openapi/gainode-v2.yaml` 注册。
++- `tests/Contract/`、`tests/Integration/` 测试（守恒/exactly-once/CAS/负余额/reversal/fail-closed）。
+diff --git a/0.5代码/gainode后端/gainode/library/model/ledger/AptLedgerEntryModel.php b/0.5代码/gainode后端/gainode/library/model/ledger/AptLedgerEntryModel.php
+index 3b036cf..97d791e 100644
+--- a/0.5代码/gainode后端/gainode/library/model/ledger/AptLedgerEntryModel.php
++++ b/0.5代码/gainode后端/gainode/library/model/ledger/AptLedgerEntryModel.php
+@@ -54,6 +54,7 @@ use support\exception\RunException;
+  * @property string $rule_version 生效规则版本号
+  * @property string $snapshot_id 关联参数快照ID
+  * @property string $audit_event_id 关联审计事件ID(state 流转的证据)
++ * @property int $object_version 并发控制版本号(乐观锁，MC2 补列 CR-20260815-001，CANDIDATE)
+  * @property int $created_time 创建时间(Unix秒)
+  */
+ class AptLedgerEntryModel extends Model
+@@ -72,6 +73,13 @@ class AptLedgerEntryModel extends Model
+         self::STATE_DISPUTED,
+     ];
+ 
++    // 分录方向（MC2 Event Catalog，Owner 裁决 #16）
++    public const ENTRY_DIRECTION_CREDIT = 1;   // 入账
++    public const ENTRY_DIRECTION_DEBIT = -1;   // 出账
++
++    // 分录类型（业务事件码，对齐 Event Catalog；S02-P03 仅 reversal 由本模块产生）
++    public const ENTRY_TYPE_LEDGER_REVERSAL = 'LEDGER_REVERSAL';
++
+     // 资产类型（DDL enum 冻结，仅 APT-I；APT-C 为 Future/OUT_OF_SCOPE）
+     public const ASSET_APT_I = 'APT-I';
+ 
+@@ -108,6 +116,7 @@ class AptLedgerEntryModel extends Model
+         'rule_version',
+         'snapshot_id',
+         'audit_event_id',
++        'object_version',
+         'created_time',
+     ];
+ 
+diff --git a/0.5代码/gainode后端/gainode/library/service/ledger/AptAccountService.php b/0.5代码/gainode后端/gainode/library/service/ledger/AptAccountService.php
+index b4c87dc..3856320 100644
+--- a/0.5代码/gainode后端/gainode/library/service/ledger/AptAccountService.php
++++ b/0.5代码/gainode后端/gainode/library/service/ledger/AptAccountService.php
+@@ -5,19 +5,27 @@ declare(strict_types=1);
+ namespace library\service\ledger;
+ 
+ use library\dao\ledger\AptAccountDao;
++use library\dict\ErrorDict;
+ use library\model\ledger\AptAccountModel;
+ use support\extend\Service;
++use support\exception\DomainException;
+ 
+ /**
+- * APT 数量账主账号 Service — apt_accounts 表唯一 Authoritative Writer（STAGE-01 骨架）
++ * APT 数量账主账号 Service — apt_accounts 表唯一 Authoritative Writer（S02-P03）
+  *
+  * @authoritative_writer apt_accounts
+  *
+  * 本表为 scalar 余额模型（无领域状态机）。余额字段（balance_apt_* / frozen_apt_* /
+  * total_*_apt）只能随账本分录在同一事务内由账本模块更新，禁止任何旁路直接改写。
+  *
+- * 本骨架不实现任何余额变更逻辑（属 Ledger Mutation Contract / 记账规则范畴）。
+- * 记账规则 FROZEN 前，任何余额变更操作 MUST FAIL_CLOSED。
++ * S02-P03 落地统一 Economic Mutation Lock 的账户侧 CAS：
++ *   - applyEntryEffect()：CAS 乐观锁（object_version）更新余额，affected rows≠1
++ *     统一抛 OBJECT_VERSION_CONFLICT(409)。
++ *   - 金额一律 bcmath 字符串运算，禁 float。
++ *
++ * 注意：本表无 aggregate_dispute_hold 列（MC1 冻结 DDL 未含该列）。dispute_hold 为
++ * 账户级聚合「投影」（Σ active disputed entries），S02-P03 中 L4/L5 dispute 均
++ * FAIL_CLOSED，故恒为 0；effective_available = stored_available（balance_apt_i）。
+  *
+  * @method AptAccountModel create($data)
+  * @method AptAccountModel get($id, string $field = null)
+@@ -41,4 +49,127 @@ class AptAccountService extends Service
+     {
+         return $this->getNewDao()->getByUser($userId);
+     }
++
++    /**
++     * 账户级 aggregate_dispute_hold 投影（S02-P03 恒为 0）。
++     *
++     * MC2（IR 682 P1-2）：dispute_hold 是 ACCOUNT-LEVEL AGGREGATE
++     * （Σ active disputed/reserved entries 的 hold）。S02-P03 中 L4/L5 未冻结
++     * （RiskCase CONTRACT_GAP），故不存在 disputed 分录，恒为 '0'。
++     *
++     * @param string $accountId
++     * @return string
++     */
++    public function getAggregateDisputeHold(string $accountId): string
++    {
++        return '0';
++    }
++
++    /**
++     * 计算 effective_available = stored_available - aggregate_dispute_hold。
++     *
++     * @param AptAccountModel $account
++     * @return string
++     */
++    public function getEffectiveAvailable(AptAccountModel $account): string
++    {
++        return bcsub(
++            $this->normalize($account->balance_apt_i),
++            $this->getAggregateDisputeHold((string) $account->account_id),
++            18
++        );
++    }
++
++    /**
++     * 事务内应用一条分录的经济效果（CAS 乐观锁）。
++     *
++     * CREDIT(+1)：balance_apt_i += quantity，total_earned_apt += quantity。
++     * DEBIT(-1)：balance_apt_i -= quantity，total_spent_apt += quantity。
++     * DEBIT 使余额 < 0 → INSUFFICIENT_APT(422)（禁止负 stored_balance）。
++     * object_version 不匹配 → OBJECT_VERSION_CONFLICT(409)。
++     *
++     * @param string $accountId
++     * @param string $quantity          正数，decimal string
++     * @param int    $direction         1=CREDIT / -1=DEBIT
++     * @param int    $expectedVersion   调用方读取到的 object_version
++     * @param string $lastLedgerEntryId 最近分录ID（回写 last_ledger_entry_id）
++     * @return AptAccountModel 更新后的账户
++     * @throws DomainException
++     */
++    public function applyEntryEffect(
++        string $accountId,
++        string $quantity,
++        int $direction,
++        int $expectedVersion,
++        string $lastLedgerEntryId
++    ): AptAccountModel {
++        $account = $this->get($accountId);
++        if (empty($account)) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'apt_accounts not found');
++        }
++
++        $quantity = $this->normalize($quantity);
++        if (bccomp($quantity, '0', 18) <= 0) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'quantity must be positive');
++        }
++
++        $balance = $this->normalize($account->balance_apt_i);
++        $earned  = $this->normalize($account->total_earned_apt);
++        $spent   = $this->normalize($account->total_spent_apt);
++
++        if ($direction === -1) {
++            // DEBIT：先做负余额保护
++            if (bccomp($balance, $quantity, 18) < 0) {
++                throw new DomainException(ErrorDict::INSUFFICIENT_APT, 'insufficient APT');
++            }
++            $newBalance = bcsub($balance, $quantity, 18);
++            $newEarned  = $earned;
++            $newSpent   = bcadd($spent, $quantity, 18);
++        } elseif ($direction === 1) {
++            $newBalance = bcadd($balance, $quantity, 18);
++            $newEarned  = bcadd($earned, $quantity, 18);
++            $newSpent   = $spent;
++        } else {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'invalid entry_direction');
++        }
++
++        $affected = $this->getNewDao()->updateAll(
++            ['account_id' => $accountId, 'object_version' => $expectedVersion],
++            [
++                'balance_apt_i'        => $newBalance,
++                'total_earned_apt'     => $newEarned,
++                'total_spent_apt'      => $newSpent,
++                'last_ledger_entry_id' => $lastLedgerEntryId,
++                'object_version'       => $expectedVersion + 1,
++                'updated_time'         => time(),
++            ]
++        );
++
++        if ($affected !== 1) {
++            throw new DomainException(ErrorDict::OBJECT_VERSION_CONFLICT, 'apt_accounts CAS conflict');
++        }
++
++        $updated = $this->get($accountId);
++        if (empty($updated)) {
++            throw new DomainException(ErrorDict::INTERNAL_ERROR, 'apt_accounts reload failed');
++        }
++        return $updated;
++    }
++
++    /**
++     * 归一化金额为 bcmath 可用字符串。
++     *
++     * @param mixed $value
++     * @return string
++     */
++    private function normalize($value): string
++    {
++        if ($value === null || $value === '') {
++            return '0';
++        }
++        if (is_float($value) || is_int($value)) {
++            return (string) $value;
++        }
++        return (string) $value;
++    }
+ }
+diff --git a/0.5代码/gainode后端/gainode/library/service/ledger/LedgerService.php b/0.5代码/gainode后端/gainode/library/service/ledger/LedgerService.php
+index 051d55a..c7c56b3 100644
+--- a/0.5代码/gainode后端/gainode/library/service/ledger/LedgerService.php
++++ b/0.5代码/gainode后端/gainode/library/service/ledger/LedgerService.php
+@@ -5,36 +5,35 @@ declare(strict_types=1);
+ namespace library\service\ledger;
+ 
+ use library\dao\ledger\AptLedgerEntryDao;
++use library\dict\ErrorDict;
++use library\model\audit\AuditEventModel;
+ use library\model\ledger\AptLedgerEntryModel;
++use library\service\audit\AuditEventService;
++use library\service\transaction\TransactionBoundary;
++use support\extend\Db;
+ use support\extend\Service;
++use support\exception\DomainException;
++use support\utils\Random;
+ 
+ /**
+- * APT 账本分录 Service — apt_ledger_entries 表唯一 Authoritative Writer（STAGE-01 骨架）
++ * APT 账本分录 Service — apt_ledger_entries 表唯一 Authoritative Writer（S02-P03）
+  *
+  * @authoritative_writer apt_ledger_entries
+  *
+- * append-only 与状态流转约束（MC1 Freeze §3.6）：
+- *   - 经济字段（除 state / audit_event_id 外）不可 UPDATE/DELETE。
+- *   - state 是唯一可变列，流转必须与「追加 append-only 审计事件 + 更新 audit_event_id」
+- *     在同一 DB 事务内原子完成。
+- *   - 冲正通过新增分录 + reversal_of 指向原分录，不删不覆盖原文。
++ * 落地统一 Economic Mutation Lock（11 步）与 Ledger 状态机 L1/L2/L3：
++ *   L1  pending → posted   日记账过账（经济效果 + 审计，同事务）
++ *   L2  pending → reversed 入账前取消（ACCOUNT_DELTA=0，无经济 reversal）
++ *   L3  posted → reversed  入账后冲正（追加 LEDGER_REVERSAL 反向分录 + 反向余额）
++ *   L4/L5/L6/L7  dispute/resolveDispute  FAIL_CLOSED（RiskCase 未冻结）
+  *
+- * 机械强制（已落实，非仅注释约定）：
+- *   - AptLedgerEntryModel::save() 在已落盘实例抛异常；delete() 抛异常。
+- *   - AptLedgerEntryModel::newEloquentBuilder() 注入 AptLedgerEntryAppendOnlyBuilder，
+- *     阻断 Eloquent Builder 的 update/upsert/increment/decrement/touch/delete/forceDelete，
+- *     并经其 __call() 兜底阻断 Query Builder 层的 updateOrInsert/truncate/incrementEach/
+- *     decrementEach/updateFrom（deny set 为「当前锁定版本已审核」清单，升级需 contract 测试复核）。
+- *   - AptLedgerEntryDao 覆写 delete/deleteAll/update/updateAll/updateOrCreate 全部 fail-closed。
+- *   - 因此 ORM 正常路径（Model 实例 + Eloquent Builder 含 __call 兜底 + DAO）仅允许追加（INSERT）；
+- *     显式取得底层 Query Builder（toBase()/getQuery()）与 DB::table() / PDO raw SQL 直连属
+- *     DB 层边界，需数据库级硬约束时另走 Change Request。
++ * append-only 机械强制（MC1 Freeze §3.6，未放宽）：
++ *   - AptLedgerEntryModel::save()/delete() 在已落盘实例抛异常；
++ *   - AptLedgerEntryAppendOnlyBuilder 阻断 Eloquent Builder 层 update/delete；
++ *   - AptLedgerEntryDao 覆写 delete/deleteAll/update/updateAll/updateOrCreate。
+  *
+- * 重要（FAIL_CLOSED）：
+- *   MC1 只冻结了 Ledger canonical enum、字段可变性与审计不变量，**未授权任何具体 state
+- *   transition**（各 transition 触发条件、dispute 仲裁、reversal 触发条件均为 CONTRACT GAP）。
+- *   在 Event Catalog / Ledger Mutation Contract 正式 FROZEN 前，任何 state 流转操作
+- *   MUST FAIL_CLOSED（拒绝写入），不得自创转移规则。
++ * 受控 state 转移（Ledger Mutation Field Contract，白名单三列 + 乐观锁）：
++ *   仅 state / audit_event_id / object_version 三列可经本服务 transitionState()
++ *   显式 raw Query Builder 更新；其余经济字段永久 immutable。
+  *
+  * @method AptLedgerEntryModel create($data)
+  * @method AptLedgerEntryModel get($id, string $field = null)
+@@ -43,6 +42,13 @@ use support\extend\Service;
+  */
+ class LedgerService extends Service
+ {
++    // Event Catalog（MC2 §5，对齐 entry_type/entry_direction）
++    public const EVENT_POSTED          = 'LEDGER_ENTRY_POSTED';
++    public const EVENT_REVERSED        = 'LEDGER_ENTRY_REVERSED';
++    public const EVENT_DISPUTED        = 'LEDGER_ENTRY_DISPUTED';
++    public const EVENT_DISPUTE_RESOLVED = 'LEDGER_ENTRY_DISPUTE_RESOLVED';
++    public const EVENT_DISPUTE_REVERSED = 'LEDGER_ENTRY_DISPUTE_REVERSED';
++
+     public function __construct()
+     {
+         $this->dao = AptLedgerEntryDao::class;
+@@ -59,4 +65,342 @@ class LedgerService extends Service
+     {
+         return $this->getNewDao()->getByAccount($accountId);
+     }
++
++    /**
++     * 按幂等键查询分录（写操作去重）
++     *
++     * @param string $idempotencyKey
++     * @return AptLedgerEntryModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->getNewDao()->getByIdempotencyKey($idempotencyKey);
++    }
++
++    /**
++     * 追加一条 pending 分录（INSERT，无经济效果）。
++     *
++     * 幂等：非空 idempotency_key 命中已存在分录 → IDEMPOTENCY_CONFLICT。
++     * 校验：asset 仅 APT-I；quantity > 0；entry_direction ∈ {1,-1}。
++     *
++     * @param array $data
++     * @return AptLedgerEntryModel
++     * @throws DomainException
++     */
++    public function append(array $data): AptLedgerEntryModel
++    {
++        $this->validateAppend($data);
++
++        $idempotencyKey = $data['idempotency_key'] ?? null;
++        if ($idempotencyKey !== null && $idempotencyKey !== '') {
++            $existing = $this->getNewDao()->getByIdempotencyKey($idempotencyKey);
++            if (!empty($existing)) {
++                throw new DomainException(ErrorDict::IDEMPOTENCY_CONFLICT, 'duplicate idempotency_key');
++            }
++        }
++
++        $row = [
++            'ledger_entry_id'    => (string) Random::getSnowflakeID(),
++            'account_id'         => $data['account_id'],
++            'asset'              => $data['asset'] ?? AptLedgerEntryModel::ASSET_APT_I,
++            'quantity'           => $this->normalize($data['quantity']),
++            'entry_direction'    => (int) $data['entry_direction'],
++            'entry_type'         => $data['entry_type'] ?? '',
++            'state'              => AptLedgerEntryModel::STATE_PENDING,
++            'source_object_type' => $data['source_object_type'] ?? '',
++            'source_object_id'   => (string) ($data['source_object_id'] ?? '0'),
++            'journal_batch_id'   => (string) ($data['journal_batch_id'] ?? '0'),
++            'reversal_of'        => (string) ($data['reversal_of'] ?? '0'),
++            'idempotency_key'    => $idempotencyKey !== '' ? $idempotencyKey : null,
++            'rule_version'       => $data['rule_version'] ?? '',
++            'snapshot_id'        => (string) ($data['snapshot_id'] ?? '0'),
++            'audit_event_id'     => (string) ($data['audit_event_id'] ?? '0'),
++            'object_version'     => 0,
++            'created_time'       => time(),
++        ];
++
++        return $this->create($row);
++    }
++
++    /**
++     * L1：pending → posted。日记账过账（经济效果 + 审计，同事务原子）。
++     *
++     * 经济效果经 AptAccountService::applyEntryEffect()（object_version CAS）。
++     *
++     * @param string $entryId
++     * @param string $actorId
++     * @param string $actorRole
++     * @return AptLedgerEntryModel
++     * @throws DomainException
++     */
++    public function post(string $entryId, string $actorId, string $actorRole): AptLedgerEntryModel
++    {
++        return (new TransactionBoundary())->run(function () use ($entryId, $actorId, $actorRole) {
++            $entry = $this->mustGetPending($entryId);
++
++            $accountSvc = new AptAccountService();
++            $account = $accountSvc->get((string) $entry->account_id);
++            if (empty($account)) {
++                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'apt_accounts not found');
++            }
++
++            // 经济效果（guard：负余额 + CAS）
++            $accountSvc->applyEntryEffect(
++                (string) $entry->account_id,
++                (string) $entry->quantity,
++                (int) $entry->entry_direction,
++                (int) $account->object_version,
++                $entryId
++            );
++
++            // 审计 + 受控 state 转移
++            $auditId = $this->appendAudit(
++                self::EVENT_POSTED, $actorId, $actorRole, $entryId,
++                AuditEventModel::OUTCOME_SUCCESS, ''
++            );
++            $this->transitionState($entryId, AptLedgerEntryModel::STATE_PENDING, AptLedgerEntryModel::STATE_POSTED, (int) $entry->object_version, $auditId);
++
++            return $this->get($entryId);
++        });
++    }
++
++    /**
++     * L2：pending → reversed（入账前取消，无经济效果，无经济 reversal 分录）。
++     *
++     * @param string $entryId
++     * @param string $actorId
++     * @param string $actorRole
++     * @return AptLedgerEntryModel
++     * @throws DomainException
++     */
++    public function cancel(string $entryId, string $actorId, string $actorRole): AptLedgerEntryModel
++    {
++        return (new TransactionBoundary())->run(function () use ($entryId, $actorId, $actorRole) {
++            $entry = $this->mustGetPending($entryId);
++
++            $auditId = $this->appendAudit(
++                self::EVENT_REVERSED, $actorId, $actorRole, $entryId,
++                AuditEventModel::OUTCOME_SUCCESS, ''
++            );
++            $this->transitionState($entryId, AptLedgerEntryModel::STATE_PENDING, AptLedgerEntryModel::STATE_REVERSED, (int) $entry->object_version, $auditId);
++
++            return $this->get($entryId);
++        });
++    }
++
++    /**
++     * L3：posted → reversed（入账后冲正）。
++     *
++     * 追加 LEDGER_REVERSAL 反向分录（entry_direction=-(原)、quantity=原、reversal_of=原），
++     * 并反向更新余额。禁止删除/覆盖原文。
++     *
++     * @param string $entryId
++     * @param string $actorId
++     * @param string $actorRole
++     * @return AptLedgerEntryModel 返回 reversal 分录
++     * @throws DomainException
++     */
++    public function reverse(string $entryId, string $actorId, string $actorRole): AptLedgerEntryModel
++    {
++        return (new TransactionBoundary())->run(function () use ($entryId, $actorId, $actorRole) {
++            $entry = $this->get($entryId);
++            if (empty($entry)) {
++                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'ledger entry not found');
++            }
++            if ((string) $entry->state !== AptLedgerEntryModel::STATE_POSTED) {
++                throw new DomainException(ErrorDict::OBJECT_VERSION_CONFLICT, 'entry not in posted state');
++            }
++
++            $accountSvc = new AptAccountService();
++            $account = $accountSvc->get((string) $entry->account_id);
++            if (empty($account)) {
++                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'apt_accounts not found');
++            }
++
++            $reversalDirection = (int) $entry->entry_direction === AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT
++                ? AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT
++                : AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT;
++
++            // 审计（原分录）
++            $auditId = $this->appendAudit(
++                self::EVENT_REVERSED, $actorId, $actorRole, $entryId,
++                AuditEventModel::OUTCOME_SUCCESS, ''
++            );
++            // 原分录 posted → reversed
++            $this->transitionState($entryId, AptLedgerEntryModel::STATE_POSTED, AptLedgerEntryModel::STATE_REVERSED, (int) $entry->object_version, $auditId);
++
++            // 追加 reversal 分录（state=posted，立即生效）
++            $reversal = $this->create([
++                'ledger_entry_id'    => (string) Random::getSnowflakeID(),
++                'account_id'         => (string) $entry->account_id,
++                'asset'              => (string) $entry->asset,
++                'quantity'           => $this->normalize($entry->quantity),
++                'entry_direction'    => $reversalDirection,
++                'entry_type'         => AptLedgerEntryModel::ENTRY_TYPE_LEDGER_REVERSAL,
++                'state'              => AptLedgerEntryModel::STATE_POSTED,
++                'source_object_type' => (string) $entry->source_object_type,
++                'source_object_id'   => (string) $entry->source_object_id,
++                'journal_batch_id'   => (string) $entry->journal_batch_id,
++                'reversal_of'        => $entryId,
++                'idempotency_key'    => 'reversal:' . $entryId,
++                'rule_version'       => (string) $entry->rule_version,
++                'snapshot_id'        => (string) $entry->snapshot_id,
++                'audit_event_id'     => $auditId,
++                'object_version'     => 0,
++                'created_time'       => time(),
++            ]);
++
++            // 反向经济效果（reversal 分录的 direction 即反向）
++            $accountSvc->applyEntryEffect(
++                (string) $entry->account_id,
++                (string) $entry->quantity,
++                $reversalDirection,
++                (int) $account->object_version,
++                (string) $reversal->ledger_entry_id
++            );
++
++            return $reversal;
++        });
++    }
++
++    /**
++     * L4/L5：dispute（pending/posted → disputed）。
++     * RiskCase machine contract 未冻结（2B-2 CONTRACT_GAP）→ FAIL_CLOSED。
++     *
++     * @throws DomainException
++     */
++    public function dispute(string $entryId, string $actorId, string $actorRole): void
++    {
++        throw new DomainException(
++            ErrorDict::DEPENDENCY_UNAVAILABLE,
++            'L4/L5 dispute depends on RiskCase contract (2B-2) — not frozen'
++        );
++    }
++
++    /**
++     * L6/L7：dispute 仲裁（disputed → posted/reversed）。
++     * RiskCase machine contract 未冻结 → FAIL_CLOSED。
++     *
++     * @throws DomainException
++     */
++    public function resolveDispute(string $entryId, string $actorId, string $actorRole): void
++    {
++        throw new DomainException(
++            ErrorDict::DEPENDENCY_UNAVAILABLE,
++            'L6/L7 dispute resolution depends on RiskCase contract (2B-2) — not frozen'
++        );
++    }
++
++    // =========================================================================
++    // 私有辅助
++    // =========================================================================
++
++    /**
++     * 读取并断言分录处于 pending（供 L1/L2 使用）。
++     */
++    private function mustGetPending(string $entryId): AptLedgerEntryModel
++    {
++        $entry = $this->get($entryId);
++        if (empty($entry)) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'ledger entry not found');
++        }
++        if ((string) $entry->state !== AptLedgerEntryModel::STATE_PENDING) {
++            throw new DomainException(ErrorDict::OBJECT_VERSION_CONFLICT, 'entry not in pending state');
++        }
++        return $entry;
++    }
++
++    /**
++     * 受控 state 转移（Ledger Mutation Field Contract：白名单三列 + 乐观锁）。
++     *
++     * 使用 raw Query Builder 显式更新，仅改 state / audit_event_id / object_version。
++     * affected rows≠1 → OBJECT_VERSION_CONFLICT（fail-closed）。
++     */
++    private function transitionState(
++        string $entryId,
++        string $fromState,
++        string $toState,
++        int $expectedVersion,
++        string $auditEventId
++    ): void {
++        $affected = Db::connection('mysql')
++            ->table('apt_ledger_entries')
++            ->where('ledger_entry_id', $entryId)
++            ->where('state', $fromState)
++            ->where('object_version', $expectedVersion)
++            ->update([
++                'state'          => $toState,
++                'audit_event_id' => $auditEventId,
++                'object_version' => $expectedVersion + 1,
++            ]);
++
++        if ($affected !== 1) {
++            throw new DomainException(ErrorDict::OBJECT_VERSION_CONFLICT, 'ledger state transition CAS conflict');
++        }
++    }
++
++    /**
++     * 追加 append-only 审计事件，返回 audit_event_id。
++     */
++    private function appendAudit(
++        string $eventCode,
++        string $actorId,
++        string $actorRole,
++        string $targetObjectId,
++        string $outcome,
++        string $reasonCode
++    ): string {
++        $auditId = (string) Random::getSnowflakeID();
++        (new AuditEventService())->create([
++            'audit_event_id'        => $auditId,
++            'event_code'            => $eventCode,
++            'actor_id'              => $actorId,
++            'actor_role'            => $actorRole,
++            'target_object_type'    => 'apt_ledger_entries',
++            'target_object_id'      => $targetObjectId,
++            'before_snapshot_type'  => '',
++            'before_snapshot_id'    => '0',
++            'after_snapshot_type'   => '',
++            'after_snapshot_id'     => '0',
++            'outcome'               => $outcome,
++            'reason_code'           => $reasonCode,
++            'request_id'            => '',
++            'approval_id'           => '0',
++            'case_id'               => '0',
++            'created_time'          => time(),
++        ]);
++        return $auditId;
++    }
++
++    /**
++     * 校验 append 输入。
++     */
++    private function validateAppend(array $data): void
++    {
++        if (empty($data['account_id'])) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'account_id required');
++        }
++        if (empty($data['quantity']) || bccomp($this->normalize($data['quantity']), '0', 18) <= 0) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'quantity must be positive');
++        }
++        $direction = (int) ($data['entry_direction'] ?? 0);
++        if (!in_array($direction, [AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT, AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT], true)) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'entry_direction must be 1 or -1');
++        }
++        $asset = $data['asset'] ?? AptLedgerEntryModel::ASSET_APT_I;
++        if ($asset !== AptLedgerEntryModel::ASSET_APT_I) {
++            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'asset must be APT-I');
++        }
++    }
++
++    /**
++     * 归一化金额为 bcmath 可用字符串。
++     */
++    private function normalize($value): string
++    {
++        if ($value === null || $value === '') {
++            return '0';
++        }
++        return (string) $value;
++    }
+ }
+diff --git a/0.5代码/gainode后端/gainode/library/service/power/PowerPositionService.php b/0.5代码/gainode后端/gainode/library/service/power/PowerPositionService.php
+index 6a23cde..82d602f 100644
+--- a/0.5代码/gainode后端/gainode/library/service/power/PowerPositionService.php
++++ b/0.5代码/gainode后端/gainode/library/service/power/PowerPositionService.php
+@@ -5,19 +5,21 @@ declare(strict_types=1);
+ namespace library\service\power;
+ 
+ use library\dao\power\PowerPositionDao;
++use library\dict\ErrorDict;
+ use library\model\power\PowerPositionModel;
+ use support\extend\Service;
++use support\exception\DomainException;
+ 
+ /**
+- * Power 持仓 Service — power_positions 表唯一 Authoritative Writer（STAGE-01 骨架）
++ * Power 持仓 Service — power_positions 表唯一 Authoritative Writer（S02-P03）
+  *
+  * @authoritative_writer power_positions
+  *
+  * Power 为可消耗、可恢复操作资源，无领域状态机（scalar fields）。
+  * Power 精确消耗/恢复规则由 Active Rule/Parameter 决定，生产参数未批准（TBC）。
+  *
+- * 本骨架不实现任何 Power 变更（consume/recover/convert）逻辑。规则 FROZEN 前，
+- * 任何 Power 变更操作 MUST FAIL_CLOSED。
++ * S02-P03 不实现任何 Power 变更逻辑；变更操作 MUST FAIL_CLOSED
++ * （DEPENDENCY_UNAVAILABLE）直到规则 FROZEN。只读投影可用。
+  *
+  * @method PowerPositionModel create($data)
+  * @method PowerPositionModel get($id, string $field = null)
+@@ -42,4 +44,43 @@ class PowerPositionService extends Service
+     {
+         return $this->getNewDao()->getByUser($userId);
+     }
++
++    /**
++     * 消耗 Power（Robot 启动等）。规则未冻结 → FAIL_CLOSED。
++     *
++     * @throws DomainException
++     */
++    public function consume(string $userId, string $quantity, string $idempotencyKey = ''): void
++    {
++        throw new DomainException(
++            ErrorDict::DEPENDENCY_UNAVAILABLE,
++            'Power consume rules not frozen (Active Rule/Parameter TBC)'
++        );
++    }
++
++    /**
++     * 恢复/释放 Power。规则未冻结 → FAIL_CLOSED。
++     *
++     * @throws DomainException
++     */
++    public function recover(string $userId, string $quantity): void
++    {
++        throw new DomainException(
++            ErrorDict::DEPENDENCY_UNAVAILABLE,
++            'Power recover rules not frozen (Active Rule/Parameter TBC)'
++        );
++    }
++
++    /**
++     * Power 影响预览。规则未冻结 → FAIL_CLOSED（不回退旧值、不 mock）。
++     *
++     * @throws DomainException
++     */
++    public function previewImpact(string $userId, string $action): void
++    {
++        throw new DomainException(
++            ErrorDict::DEPENDENCY_UNAVAILABLE,
++            'PowerImpactPreview unavailable (rules not frozen)'
++        );
++    }
+ }
+diff --git a/0.5代码/gainode后端/gainode/openapi/components/schemas/ledger.yaml b/0.5代码/gainode后端/gainode/openapi/components/schemas/ledger.yaml
+new file mode 100644
+index 0000000..04adee8
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/components/schemas/ledger.yaml
+@@ -0,0 +1,60 @@
++# APT 账本 / 账户 / Power 对象 schema（05 §3；S02-P03 落地）
++
++LedgerEntry:
++  description: APT 账本分录（05 §3 AptLedgerEntry，append-only）
++  type: object
++  required: [ledger_entry_id, account_id, asset, quantity, entry_direction, entry_type, state]
++  properties:
++    ledger_entry_id: { type: string, description: Snowflake 主键 }
++    account_id: { type: string }
++    asset: { type: string, enum: ['APT-I'] }
++    quantity: { type: string, description: 变动数量(decimal(36,18) string，恒正) }
++    entry_direction: { type: integer, enum: [1, -1], description: 1=CREDIT 入账 / -1=DEBIT 出账 }
++    entry_type: { type: string, description: 分录类型(业务事件码) }
++    state: { type: string, enum: [pending, posted, reversed, disputed] }
++    source_object_type: { type: string }
++    source_object_id: { type: string }
++    journal_batch_id: { type: string }
++    reversal_of: { type: string, description: 冲正引用原分录 ID(0=非冲正) }
++    idempotency_key: { type: string, nullable: true }
++    rule_version: { type: string }
++    snapshot_id: { type: string }
++    audit_event_id: { type: string }
++    object_version: { type: integer }
++    created_time: { type: integer }
++
++AssetBalance:
++  description: APT 账户余额（05 §3 AptAccount，scalar 余额 + 聚合投影）
++  type: object
++  required: [account_id, balance_apt_i, effective_available]
++  properties:
++    account_id: { type: string }
++    balance_apt_i: { type: string, description: stored_available(decimal(36,18) string) }
++    balance_apt_c: { type: string, description: Future/OUT_OF_SCOPE }
++    frozen_apt_i: { type: string }
++    frozen_apt_c: { type: string }
++    total_earned_apt: { type: string }
++    total_spent_apt: { type: string }
++    aggregate_dispute_hold: { type: string, description: 账户级 dispute hold 聚合投影(S02-P03 恒 0) }
++    effective_available: { type: string, description: stored_available - aggregate_dispute_hold }
++    rule_version: { type: string }
++    snapshot_id: { type: string }
++    object_version: { type: integer }
++
++PowerPosition:
++  description: Power 持仓（05 §3 PowerPosition，scalar fields，无状态机）
++  type: object
++  required: [user_id, available]
++  properties:
++    user_id: { type: string }
++    available: { type: string }
++    frozen: { type: string }
++    consumed_period: { type: string }
++    released_period: { type: string }
++    recovering: { type: string }
++    limit: { type: string }
++    power_cap_source_robot_level: { type: integer }
++    last_restore_at: { type: integer }
++    next_restore_at: { type: integer }
++    rule_version: { type: string }
++    object_version: { type: integer }
+diff --git a/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml b/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
+index 570dcf8..c357b19 100644
+--- a/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
++++ b/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
+@@ -136,6 +136,13 @@ paths:
+     $ref: './paths/apt_otc.yaml#/otc_trades'
+   /api/v1/otc/users/{id}/orders:
+     $ref: './paths/apt_otc.yaml#/otc_user_orders'
++  # ---- APT 账本 / Power 基础只读（S02-P03，05 §6）----
++  /api/v1/me/asset:
++    $ref: './paths/ledger.yaml#/asset_balance'
++  /api/v1/me/ledger-entries:
++    $ref: './paths/ledger.yaml#/ledger_entries'
++  /api/v1/me/power:
++    $ref: './paths/ledger.yaml#/power_position'
+   # ---- Policy / Parameter（05 §6）----
+   /api/v1/policy/evaluations:
+     $ref: './paths/policy_parameter.yaml#/policy_evaluation_create'
+@@ -207,6 +214,12 @@ components:
+       $ref: './components/schemas/eligibility.yaml#/FeatureEntitlement'
+     EligibilityResponse:
+       $ref: './components/schemas/eligibility.yaml#/EligibilityResponse'
++    LedgerEntry:
++      $ref: './components/schemas/ledger.yaml#/LedgerEntry'
++    AssetBalance:
++      $ref: './components/schemas/ledger.yaml#/AssetBalance'
++    PowerPosition:
++      $ref: './components/schemas/ledger.yaml#/PowerPosition'
+   headers:
+     Authorization:
+       $ref: './components/headers/request.yaml#/Authorization'
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/ledger.yaml b/0.5代码/gainode后端/gainode/openapi/paths/ledger.yaml
+new file mode 100644
+index 0000000..9a23b3f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/ledger.yaml
+@@ -0,0 +1,36 @@
++# APT 账本 / Power 基础只读路径（05 §6；S02-P03 落地）
++# 经济写路径（post/cancel/reverse/dispute）由内部 Authoritative Writer 触发，
++# 不对外暴露直接改写接口（超级管理员无旁路）。
++
++asset_balance:
++  get:
++    operationId: me_asset_balance
++    summary: 我的 APT 余额（含 effective_available 投影）
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++ledger_entries:
++  get:
++    operationId: me_ledger_entries
++    summary: 我的账本分录列表（append-only，按时间倒序）
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++power_position:
++  get:
++    operationId: me_power_position
++    summary: 我的 Power 持仓（规则未冻结，仅只读投影）
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/tests/Contract/S02P03LedgerContractTest.php b/0.5代码/gainode后端/gainode/tests/Contract/S02P03LedgerContractTest.php
+new file mode 100644
+index 0000000..700dc2b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Contract/S02P03LedgerContractTest.php
+@@ -0,0 +1,94 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * S02-P03 Ledger 契约测试（独立 CLI 脚本，无需 PHPUnit，不触数据库）。
++ *
++ * 覆盖纯逻辑：领域常量、append-only 机械强制（Model 实例层）、append 输入校验、
++ * V2 错误码 HTTP 映射。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\dict\ErrorDict;
++use library\model\ledger\AptLedgerEntryModel;
++use library\service\ledger\LedgerService;
++use support\exception\DomainException;
++use support\exception\RunException;
++
++function expectDomainException(callable $fn, string $expectedCode, string $label): void
++{
++    try {
++        $fn();
++        check(false, $label);
++    } catch (DomainException $e) {
++        check($e->resultCode() === $expectedCode, "{$label}（resultCode={$e->resultCode()}）");
++    } catch (\Throwable $e) {
++        check(false, "{$label}（非 DomainException：{$e->getMessage()}）");
++    }
++}
++
++echo "=====================================================\n";
++echo "S02-P03 ledger contract test\n";
++echo "=====================================================\n\n";
++
++// ======================= 1. 领域常量 =======================
++echo "[1] 领域常量（MC1/MC2 对齐）\n";
++check(AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT === 1, 'ENTRY_DIRECTION_CREDIT = 1');
++check(AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT === -1, 'ENTRY_DIRECTION_DEBIT = -1');
++check(AptLedgerEntryModel::ENTRY_TYPE_LEDGER_REVERSAL === 'LEDGER_REVERSAL', 'ENTRY_TYPE_LEDGER_REVERSAL');
++check(AptLedgerEntryModel::ASSET_APT_I === 'APT-I', 'ASSET_APT_I = APT-I');
++check(AptLedgerEntryModel::STATES === ['pending', 'posted', 'reversed', 'disputed'], 'STATES 冻结四态');
++check(in_array('object_version', (new AptLedgerEntryModel())->fields, true), 'object_version 在 $fields 中');
++echo "\n";
++
++// ======================= 2. append-only 机械强制 =======================
++echo "[2] append-only 机械强制（Model 实例层）\n";
++$m = new AptLedgerEntryModel();
++$m->exists = true; // 模拟已落盘实例
++try {
++    $m->save();
++    check(false, 'save() 已落盘实例应抛异常');
++} catch (RunException $e) {
++    check(true, 'save() 已落盘实例 → RunException');
++}
++
++try {
++    (new AptLedgerEntryModel())->delete();
++    check(false, 'delete() 应抛异常');
++} catch (RunException $e) {
++    check(true, 'delete() → RunException');
++}
++echo "\n";
++
++// ======================= 3. append 输入校验 =======================
++echo "[3] append 输入校验（VALIDATION_ERROR，DB 前拦截）\n";
++$ledgerSvc = new LedgerService();
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append(['quantity' => '100', 'entry_direction' => 1]);
++}, ErrorDict::VALIDATION_ERROR, '缺 account_id → VALIDATION_ERROR');
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append(['account_id' => 'A1', 'quantity' => '0', 'entry_direction' => 1]);
++}, ErrorDict::VALIDATION_ERROR, 'quantity=0 → VALIDATION_ERROR');
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append(['account_id' => 'A1', 'quantity' => '-5', 'entry_direction' => 1]);
++}, ErrorDict::VALIDATION_ERROR, 'quantity<0 → VALIDATION_ERROR');
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append(['account_id' => 'A1', 'quantity' => '10', 'entry_direction' => 0]);
++}, ErrorDict::VALIDATION_ERROR, 'entry_direction=0 → VALIDATION_ERROR');
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append(['account_id' => 'A1', 'quantity' => '10', 'entry_direction' => 1, 'asset' => 'APT-C']);
++}, ErrorDict::VALIDATION_ERROR, 'asset=APT-C → VALIDATION_ERROR');
++echo "\n";
++
++// ======================= 4. V2 错误码 HTTP 映射 =======================
++echo "[4] V2 错误码 HTTP 映射（05 §7）\n";
++check(ErrorDict::httpStatus(ErrorDict::INSUFFICIENT_APT) === 422, 'INSUFFICIENT_APT → 422');
++check(ErrorDict::httpStatus(ErrorDict::OBJECT_VERSION_CONFLICT) === 409, 'OBJECT_VERSION_CONFLICT → 409');
++check(ErrorDict::httpStatus(ErrorDict::IDEMPOTENCY_CONFLICT) === 409, 'IDEMPOTENCY_CONFLICT → 409');
++check(ErrorDict::httpStatus(ErrorDict::DEPENDENCY_UNAVAILABLE) === 503, 'DEPENDENCY_UNAVAILABLE → 503');
++check((new DomainException(ErrorDict::INSUFFICIENT_APT))->httpStatus() === 422, 'DomainException(INSUFFICIENT_APT).httpStatus() = 422');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/Integration/S02P03LedgerMutationTest.php b/0.5代码/gainode后端/gainode/tests/Integration/S02P03LedgerMutationTest.php
+new file mode 100644
+index 0000000..44fb204
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Integration/S02P03LedgerMutationTest.php
+@@ -0,0 +1,316 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * S02-P03 Ledger / AptAccount 经济事务集成测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * SQLite in-memory（命名 'mysql'），表结构对齐 MC1 冻结 DDL（apt_accounts /
++ * apt_ledger_entries 含 object_version）+ MC2 audit_events + power_positions。
++ * 覆盖统一 Economic Mutation Lock 的：
++ *   1. L1 post + 守恒（balance == Σ signed_delta(posted)）
++ *   2. exactly-once（idempotency_key）
++ *   3. negative balance（INSUFFICIENT_APT）
++ *   4. CAS 冲突（OBJECT_VERSION_CONFLICT）
++ *   5. L2 cancel（pending→reversed，无经济 reversal）
++ *   6. L3 reverse（posted→reversed，追加 LEDGER_REVERSAL + 余额归位）
++ *   7. fail-closed（dispute / resolveDispute / Power consume）
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use Illuminate\Container\Container;
++use Illuminate\Database\Capsule\Manager as Capsule;
++use library\dict\ErrorDict;
++use library\model\ledger\AptAccountModel;
++use library\model\ledger\AptLedgerEntryModel;
++use library\service\ledger\AptAccountService;
++use library\service\ledger\LedgerService;
++use library\service\power\PowerPositionService;
++use support\exception\DomainException;
++
++// ---- SQLite in-memory（命名 'mysql'，对齐 Model::$connection='mysql'）----
++$capsule = new Capsule(Container::getInstance());
++$capsule->addConnection([
++    'driver'   => 'sqlite',
++    'database' => ':memory:',
++    'prefix'   => '',
++], 'mysql');
++$capsule->setAsGlobal();
++$capsule->bootEloquent();
++
++$schema = Capsule::connection('mysql')->getSchemaBuilder();
++
++if (!$schema->hasTable('apt_accounts')) {
++    $schema->create('apt_accounts', function ($table) {
++        $table->string('account_id', 32)->primary();
++        $table->string('user_id', 32);
++        $table->string('balance_apt_i', 64)->default('0');
++        $table->string('balance_apt_c', 64)->default('0');
++        $table->string('frozen_apt_i', 64)->default('0');
++        $table->string('frozen_apt_c', 64)->default('0');
++        $table->string('total_earned_apt', 64)->default('0');
++        $table->string('total_spent_apt', 64)->default('0');
++        $table->string('last_ledger_entry_id', 32)->default('0');
++        $table->string('rule_version', 64)->default('');
++        $table->string('snapshot_id', 32)->default('0');
++        $table->integer('object_version')->default(0);
++        $table->integer('created_time')->default(0);
++        $table->integer('updated_time')->default(0);
++    });
++}
++
++if (!$schema->hasTable('apt_ledger_entries')) {
++    $schema->create('apt_ledger_entries', function ($table) {
++        $table->string('ledger_entry_id', 32)->primary();
++        $table->string('account_id', 32);
++        $table->string('asset', 16);
++        $table->string('quantity', 64);
++        $table->integer('entry_direction');
++        $table->string('entry_type', 64);
++        $table->string('state', 16);
++        $table->string('source_object_type', 64)->default('');
++        $table->string('source_object_id', 32)->default('0');
++        $table->string('journal_batch_id', 32)->default('0');
++        $table->string('reversal_of', 32)->default('0');
++        $table->string('idempotency_key', 64)->nullable();
++        $table->string('rule_version', 64)->default('');
++        $table->string('snapshot_id', 32)->default('0');
++        $table->string('audit_event_id', 32)->default('0');
++        $table->integer('object_version')->default(0);
++        $table->integer('created_time')->default(0);
++    });
++}
++
++if (!$schema->hasTable('audit_events')) {
++    $schema->create('audit_events', function ($table) {
++        $table->string('audit_event_id', 32)->primary();
++        $table->string('event_code', 64);
++        $table->string('actor_id', 32);
++        $table->string('actor_role', 32);
++        $table->string('target_object_type', 64);
++        $table->string('target_object_id', 32);
++        $table->string('before_snapshot_type', 32)->default('');
++        $table->string('before_snapshot_id', 32)->default('0');
++        $table->string('after_snapshot_type', 32)->default('');
++        $table->string('after_snapshot_id', 32)->default('0');
++        $table->string('outcome', 16);
++        $table->string('reason_code', 64)->default('');
++        $table->string('request_id', 64)->default('');
++        $table->string('approval_id', 32)->default('0');
++        $table->string('case_id', 32)->default('0');
++        $table->integer('created_time')->default(0);
++    });
++}
++
++if (!$schema->hasTable('power_positions')) {
++    $schema->create('power_positions', function ($table) {
++        $table->string('user_id', 32)->primary();
++        $table->string('available', 32)->default('0');
++        $table->string('frozen', 32)->default('0');
++        $table->string('consumed_period', 32)->default('0');
++        $table->string('released_period', 32)->default('0');
++        $table->string('recovering', 32)->default('0');
++        $table->string('limit', 32)->default('0');
++        $table->integer('power_cap_source_robot_level')->default(0);
++        $table->integer('last_restore_at')->default(0);
++        $table->integer('next_restore_at')->default(0);
++        $table->string('rule_version', 64)->default('');
++        $table->string('parameter_release_id', 32)->default('0');
++        $table->integer('object_version')->default(0);
++        $table->integer('created_time')->default(0);
++        $table->integer('updated_time')->default(0);
++    });
++}
++
++/**
++ * 断言闭包抛出 DomainException 且 resultCode 命中。
++ */
++function expectDomainException(callable $fn, string $expectedCode, string $label): void
++{
++    try {
++        $fn();
++        check(false, $label);
++    } catch (DomainException $e) {
++        check($e->resultCode() === $expectedCode, "{$label}（resultCode={$e->resultCode()}）");
++    } catch (\Throwable $e) {
++        check(false, "{$label}（非 DomainException：{$e->getMessage()}）");
++    }
++}
++
++/**
++ * 金额断言（bcmath，忽略 decimal(36,18) 尾零）。
++ */
++function assertBal($actual, string $expected, string $label): void
++{
++    check(bccomp((string) $actual, $expected, 18) === 0, "{$label}（actual={$actual} expected={$expected}）");
++}
++
++echo "=====================================================\n";
++echo "S02-P03 ledger / account economic mutation test\n";
++echo "=====================================================\n\n";
++
++$accountSvc = new AptAccountService();
++$ledgerSvc = new LedgerService();
++
++// 建账户
++$accountSvc->create([
++    'account_id'         => 'A1',
++    'user_id'            => 'U1',
++    'balance_apt_i'      => '0',
++    'balance_apt_c'      => '0',
++    'frozen_apt_i'       => '0',
++    'frozen_apt_c'       => '0',
++    'total_earned_apt'   => '0',
++    'total_spent_apt'    => '0',
++    'last_ledger_entry_id' => '0',
++    'rule_version'       => '',
++    'snapshot_id'        => '0',
++    'object_version'     => 0,
++    'created_time'       => time(),
++    'updated_time'       => time(),
++]);
++
++// ======================= 1. append + post（L1）+ 守恒 =======================
++echo "[1] append + post（L1）+ 守恒\n";
++$e1 = $ledgerSvc->append([
++    'account_id'      => 'A1',
++    'quantity'        => '100',
++    'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT,
++    'entry_type'      => 'TEST_CREDIT',
++    'idempotency_key' => 'IK-1',
++]);
++check((string) $e1->state === AptLedgerEntryModel::STATE_PENDING, 'append → pending');
++check((string) $e1->quantity === '100', 'quantity 归一化为字符串');
++
++$ledgerSvc->post((string) $e1->ledger_entry_id, 'sys', 'SYSTEM');
++$posted = $ledgerSvc->get((string) $e1->ledger_entry_id);
++check((string) $posted->state === AptLedgerEntryModel::STATE_POSTED, 'post → posted');
++check((int) $posted->object_version === 1, 'ledger object_version → 1');
++check((string) $posted->audit_event_id !== '0', 'audit_event_id 已回写');
++
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '100', 'balance=100 后 CREDIT');
++assertBal($acc1->total_earned_apt, '100', 'total_earned=100');
++check((int) $acc1->object_version === 1, 'account object_version → 1');
++
++// 守恒断言
++$sum = '0';
++foreach ($ledgerSvc->getByAccount('A1') as $en) {
++    if ((string) $en->state === AptLedgerEntryModel::STATE_POSTED) {
++        $sum = bcadd($sum, bcmul((string) $en->quantity, (string) $en->entry_direction, 18), 18);
++    }
++}
++check(bccomp($sum, (string) $acc1->balance_apt_i, 18) === 0, '守恒：balance == Σ signed_delta(posted)');
++echo "\n";
++
++// ======================= 2. DEBIT + exactly-once =======================
++echo "[2] DEBIT + exactly-once\n";
++$e2 = $ledgerSvc->append([
++    'account_id'      => 'A1',
++    'quantity'        => '30',
++    'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT,
++    'entry_type'      => 'TEST_DEBIT',
++    'idempotency_key' => 'IK-2',
++]);
++$ledgerSvc->post((string) $e2->ledger_entry_id, 'sys', 'SYSTEM');
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '70', 'balance=70 后 DEBIT 30');
++assertBal($acc1->total_spent_apt, '30', 'total_spent=30');
++
++expectDomainException(function () use ($ledgerSvc) {
++    $ledgerSvc->append([
++        'account_id'      => 'A1',
++        'quantity'        => '5',
++        'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT,
++        'entry_type'      => 'TEST_CREDIT',
++        'idempotency_key' => 'IK-2',
++    ]);
++}, ErrorDict::IDEMPOTENCY_CONFLICT, '同 idempotency_key 二次 append → IDEMPOTENCY_CONFLICT');
++echo "\n";
++
++// ======================= 3. negative balance =======================
++echo "[3] negative balance（INSUFFICIENT_APT）\n";
++$e3 = $ledgerSvc->append([
++    'account_id'      => 'A1',
++    'quantity'        => '200',
++    'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT,
++    'entry_type'      => 'TEST_DEBIT',
++    'idempotency_key' => 'IK-3',
++]);
++expectDomainException(function () use ($ledgerSvc, $e3) {
++    $ledgerSvc->post((string) $e3->ledger_entry_id, 'sys', 'SYSTEM');
++}, ErrorDict::INSUFFICIENT_APT, 'DEBIT 200 超余额 70 → INSUFFICIENT_APT');
++
++$stillPending = $ledgerSvc->get((string) $e3->ledger_entry_id);
++check((string) $stillPending->state === AptLedgerEntryModel::STATE_PENDING, '失败后分录仍 pending（事务回滚）');
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '70', '余额未变（回滚）');
++echo "\n";
++
++// ======================= 4. CAS 冲突 =======================
++echo "[4] CAS 冲突（OBJECT_VERSION_CONFLICT）\n";
++expectDomainException(function () use ($accountSvc) {
++    $accountSvc->applyEntryEffect('A1', '10', AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT, 999, 'E-X');
++}, ErrorDict::OBJECT_VERSION_CONFLICT, '陈旧 object_version=999 → OBJECT_VERSION_CONFLICT');
++echo "\n";
++
++// ======================= 5. L2 cancel（pending→reversed）=======================
++echo "[5] L2 cancel（pending→reversed，无经济 reversal）\n";
++$e4 = $ledgerSvc->append([
++    'account_id'      => 'A1',
++    'quantity'        => '50',
++    'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT,
++    'entry_type'      => 'TEST_CREDIT',
++    'idempotency_key' => 'IK-4',
++]);
++$ledgerSvc->cancel((string) $e4->ledger_entry_id, 'ops', 'OPS_OPERATOR');
++check((string) $ledgerSvc->get((string) $e4->ledger_entry_id)->state === AptLedgerEntryModel::STATE_REVERSED, 'cancel → reversed');
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '70', 'L2 取消无经济效果（余额仍 70）');
++$reversalOf4 = $ledgerSvc->fetch(['reversal_of' => (string) $e4->ledger_entry_id]);
++check(empty($reversalOf4), 'L2 不追加经济 reversal 分录（reversal_of 无引用）');
++echo "\n";
++
++// ======================= 6. L3 reverse（posted→reversed）=======================
++echo "[6] L3 reverse（posted→reversed，追加 LEDGER_REVERSAL）\n";
++$e5 = $ledgerSvc->append([
++    'account_id'      => 'A1',
++    'quantity'        => '50',
++    'entry_direction' => AptLedgerEntryModel::ENTRY_DIRECTION_CREDIT,
++    'entry_type'      => 'TEST_CREDIT',
++    'idempotency_key' => 'IK-5',
++]);
++$ledgerSvc->post((string) $e5->ledger_entry_id, 'sys', 'SYSTEM');
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '120', 'post 后余额 120');
++
++$reversal = $ledgerSvc->reverse((string) $e5->ledger_entry_id, 'ops', 'OPS_OPERATOR');
++check((string) $ledgerSvc->get((string) $e5->ledger_entry_id)->state === AptLedgerEntryModel::STATE_REVERSED, '原分录 → reversed');
++check((string) $reversal->entry_type === AptLedgerEntryModel::ENTRY_TYPE_LEDGER_REVERSAL, 'reversal entry_type=LEDGER_REVERSAL');
++check((int) $reversal->entry_direction === AptLedgerEntryModel::ENTRY_DIRECTION_DEBIT, 'reversal direction=-原（CREDIT→DEBIT）');
++check((string) $reversal->reversal_of === (string) $e5->ledger_entry_id, 'reversal_of 指向原分录');
++check((string) $reversal->state === AptLedgerEntryModel::STATE_POSTED, 'reversal 分录为 posted（立即生效）');
++$acc1 = $accountSvc->get('A1');
++assertBal($acc1->balance_apt_i, '70', 'L3 冲正后余额归位 70');
++echo "\n";
++
++// ======================= 7. fail-closed =======================
++echo "[7] fail-closed（dispute / resolveDispute / Power）\n";
++expectDomainException(function () use ($ledgerSvc, $e2) {
++    $ledgerSvc->dispute((string) $e2->ledger_entry_id, 'ops', 'OPS_OPERATOR');
++}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'dispute → DEPENDENCY_UNAVAILABLE');
++expectDomainException(function () use ($ledgerSvc, $e2) {
++    $ledgerSvc->resolveDispute((string) $e2->ledger_entry_id, 'ops', 'OPS_OPERATOR');
++}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'resolveDispute → DEPENDENCY_UNAVAILABLE');
++
++$powerSvc = new PowerPositionService();
++expectDomainException(function () use ($powerSvc) {
++    $powerSvc->consume('U1', '10');
++}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Power consume → DEPENDENCY_UNAVAILABLE');
++expectDomainException(function () use ($powerSvc) {
++    $powerSvc->recover('U1', '10');
++}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Power recover → DEPENDENCY_UNAVAILABLE');
++echo "\n";
++
++summary();

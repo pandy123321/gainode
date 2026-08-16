@@ -1,0 +1,11 @@
+commit 978ca8a0f7671e5930ae596c77b926c1b4e843dd
+Author:     pandy123321 <131004891+pandy123321@users.noreply.github.com>
+AuthorDate: Sun Aug 16 16:50:02 2026 +0800
+Commit:     pandy123321 <131004891+pandy123321@users.noreply.github.com>
+CommitDate: Sun Aug 16 16:50:02 2026 +0800
+
+    origin:developer stage:STAGE-02 package:S02-P03 Ledger/AptAccount/Power 经济写路径基础
+    
+    统一 Economic Mutation Lock 事务模板：LedgerService append/post/cancel/reverse + dispute fail-closed；AptAccountService applyEntryEffect CAS 乐观锁 + 负余额保护；PowerPositionService 全 fail-closed；补 AptLedgerEntryModel object_version + 方向/类型常量；OpenAPI ledger schema/paths；48 断言测试（18 Contract + 30 Integration）
+    
+    Co-authored-by: Cursor <cursoragent@cursor.com>

@@ -1,0 +1,14 @@
+M	.project-ai/context.md
+M	.project-ai/manifest.yaml
+A	.project-ai/tasks/TASK-20260816-010/acceptance.md
+A	.project-ai/tasks/TASK-20260816-010/design.md
+A	.project-ai/tasks/TASK-20260816-010/requirement.md
+M	0.5代码/gainode后端/gainode/library/model/ledger/AptLedgerEntryModel.php
+M	0.5代码/gainode后端/gainode/library/service/ledger/AptAccountService.php
+M	0.5代码/gainode后端/gainode/library/service/ledger/LedgerService.php
+M	0.5代码/gainode后端/gainode/library/service/power/PowerPositionService.php
+A	0.5代码/gainode后端/gainode/openapi/components/schemas/ledger.yaml
+M	0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
+A	0.5代码/gainode后端/gainode/openapi/paths/ledger.yaml
+A	0.5代码/gainode后端/gainode/tests/Contract/S02P03LedgerContractTest.php
+A	0.5代码/gainode后端/gainode/tests/Integration/S02P03LedgerMutationTest.php
