@@ -84,7 +84,7 @@ AuthTokenResponse:
     expires_in: { type: integer }
     session_id: { type: string }
     mfa_required: { type: boolean }
-    mfa_enrollment: { $ref: 'mfa.yaml#/MfaEnrollment' }
+    mfa_enrollment: { $ref: './user.yaml#/MfaEnrollment' }
 
 SessionListResponse:
   type: object
