@@ -18,8 +18,8 @@ Developer 只执行 07 §S03-P00 步骤 1–3，步骤 4–6 因 Owner 未冻结
 | i18n | 手写 index.ts + en-US/zh-CN（2 语言） | REPLACE（V2 7 语言 + vue-i18n） |
 | stores | 手写 project.ts/user.ts（非 Pinia） | REPLACE（Pinia + persistedstate） |
 | api | http.ts/services.ts（无六请求头/RESULT_UNKNOWN） | REPLACE |
-| views | **空** | NEW（V2 全量页面从零） |
-| 结论 | H5 可复用价值极低，仅 `http.ts` 的请求封装思路可参考 | |
+| views（22 .vue） | Home/login/my/robot/team 五域（含 robot Signals/ArbitrageRecords/Agent） | REPLACE（V2 M-* 重建；robot 套利信号视图不得原样反推） |
+| 结论 | H5 有 22 视图作结构/交互参考，但全部按 V2 契约重写；链上依赖移除 | |
 
 ### gainode_admin（`name=layui-vue-admin` 模板）
 

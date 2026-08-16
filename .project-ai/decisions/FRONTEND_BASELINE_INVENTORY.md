@@ -22,21 +22,34 @@ gainode_api   HEAD=55e266fa26bae5246af8b811a8428dee32b4eabc  TREE=0b20918fad0673
 - `REMOVE_LATER`：V2 阶段暂存、后续删除（如 mock）。
 - `DO_NOT_COPY`：永久禁止复制（链上、旧业务反推、模板演示残留）。
 
-## 1. gainode_h5（`name=quiz`，极早期骨架）
+## 1. gainode_h5（`name=quiz`，V1.x H5 早期实现）
 
 | 路径 | 现状 | 分类 |
 |---|---|---|
 | package.json | Vue3.5+Vite8+TS6；链上依赖 solana/ethers/tronweb | REPLACE（移除链上，加 Vant4/vue-i18n/Pinia/Axios/Vitest/Playwright） |
 | src/components/ConnectWallet.vue | 链上钱包连接 | DO_NOT_COPY |
 | src/components/{BottomNav,ConfirmDialog,CountryPicker,PageHeader,ToastContainer}.vue | 手写基础组件 | REPLACE（Vant4 替代，仅交互参考） |
-| src/i18n/{index,en-US,zh-CN}.ts | 手写 2 语言 | REPLACE（vue-i18n 7 语言） |
-| src/stores/{project,user}.ts | 手写，非 Pinia | REPLACE（Pinia+persistedstate） |
+| src/i18n/{index,en-US,zh-CN}.ts | 手写 2 语言（~260 keys） | REPLACE（vue-i18n 7 语言） |
+| src/stores/{project,user}.ts | 手写 reactive store，非 Pinia | REPLACE（Pinia+persistedstate） |
 | src/api/{http,services}.ts | 无六请求头/RESULT_UNKNOWN | REPLACE |
 | src/router/index.ts | 无 router meta pageId/auth/restricted/feature | REPLACE |
-| src/views | 空 | NEW |
+| src/views（22 个 .vue） | Home/MainLayout + login{3} + my{10} + robot{4} + team{3} | REPLACE（按 V2 Page ID 注册表 M-* 重建） |
 | src/utils、src/assets | 极小 | REPLACE（按 V2 tokens 重建） |
 
-**结论**：H5 几乎无业务实现，仅 `http.ts` 请求封装思路可参考，迁移后基本全新构建。
+H5 views 明细（22 文件）：
+
+```text
+HomeView.vue / MainLayout.vue
+login/{LangView,LoginView,RegisterView}.vue
+my/{ClaimCenterView,DepositRecordsView,DepositView,HelpCenterView,LedgerView,MyView,ProfileEditView,RedemptionRecordsView,WithdrawRecordsView,WithdrawView}.vue
+robot/{AgentView,ArbitrageRecordsView,MyAgentsView,SignalsView}.vue
+team/{InviteView,MyTeamView,TeamView}.vue
+```
+
+**结论**：H5 有 22 个 V1.x 视图（Home/login/my/robot/team 五域），非空。它们仅作 V2 页面的结构/交互参考，
+全部按 V2 Page ID 注册表（M-AUTH/M-KYC/M-HOME/M-NOTICE/M-ROBOT/M-PREDICT/M-ME/M-ASSET/M-POWER/M-OTC/M-SEC/M-SUPPORT/M-SETTINGS）重建。
+特别注意：robot/{SignalsView,ArbitrageRecordsView,AgentView,MyAgentsView} 涉及 V1.x C 端套利信号展示，
+V2 §0.1 禁止向 C 端暴露 BetBurger 信号/利润/仓位，故这些视图**不得原样反推**，仅对应 V2 M-AI-001/M-GROWTH-001（去套利信号）重建。
 
 ## 2. gainode_admin（`name=layui-vue-admin` 模板 + 旧业务残留）
 
