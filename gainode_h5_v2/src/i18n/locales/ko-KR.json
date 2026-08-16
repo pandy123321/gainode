@@ -144,6 +144,21 @@
       "AWAY": "어웨이"
     }
   },
+  "asset": {
+    "direction": { "credit": "입금", "debit": "출금" },
+    "ledger_state": { "pending": "보류", "posted": "반영됨", "reversed": "취소됨", "disputed": "분쟁 중" }
+  },
+  "power": {
+    "available": "사용 가능",
+    "frozen": "동결",
+    "consumed": "기간 내 소비",
+    "released": "기간 내 해제",
+    "recovering": "회복 중",
+    "cap": "상한",
+    "cap_source_robot_level": "상한 출처 Robot 레벨",
+    "next_restore_at": "다음 회복 시각",
+    "last_restore_at": "마지막 회복 시각"
+  },
   "page": {
     "m_auth_001": {
       "title": "로그인",
@@ -336,6 +351,60 @@
       "title": "예측 예외",
       "description": "예외/환불/수정 상세는 아직 사용할 수 없습니다",
       "restricted": "예외 상세는 현재 사용할 수 없습니다"
+    },
+    "m_asset_001": {
+      "title": "APT 자산",
+      "description": "APT 사용 가능/동결/보류 상태 확인",
+      "primary_action": "거래 내역 보기",
+      "available": "사용 가능",
+      "frozen": "동결",
+      "pending_hold": "확인 대기 보류",
+      "total_earned": "누적 획득",
+      "total_spent": "누적 지출",
+      "recent_ledger": "최근 거래 내역",
+      "ledger_empty": "거래 내역이 없습니다",
+      "otc_title": "OTC",
+      "otc_buy": "매수",
+      "otc_sell": "매도",
+      "otc_restricted": "OTC는 아직 사용할 수 없습니다",
+      "power_entry": "Power",
+      "valuation_not_shown": "참조 평가액은 표시되지 않습니다(동결된 출처 없음)"
+    },
+    "m_asset_002": {
+      "title": "APT 거래 내역",
+      "description": "모든 APT 변동 확인",
+      "primary_action": "상세 보기",
+      "empty": "거래 내역이 없습니다"
+    },
+    "m_asset_003": {
+      "title": "거래 내역 상세",
+      "description": "APT 변동의 출처와 상태",
+      "primary_action": "거래 내역으로 돌아가기",
+      "entry_id": "항목 ID",
+      "entry_type": "유형",
+      "direction": "방향",
+      "state": "상태",
+      "source": "출처 객체",
+      "journal_batch": "분개 배치",
+      "reversal_of": "취소 참조",
+      "rule_version": "규칙 버전",
+      "snapshot_id": "스냅샷",
+      "created_time": "시간",
+      "not_found": "항목을 찾을 수 없습니다"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "소비 가능하고 회복 가능한 작업 자원",
+      "primary_action": "새로고침",
+      "trend_title": "최근 7일",
+      "trend_empty": "7일 추이는 아직 사용할 수 없습니다",
+      "usage_title": "Power 사용처",
+      "usage_desc": "중요한 작업은 Power를 소비하며 규칙에 따라 회복됩니다. 임계값과 수량은 서버가 제공합니다.",
+      "usage_withdrawal": "출금",
+      "usage_robot_start": "Robot 시작",
+      "usage_otc_sell": "OTC 매도",
+      "frozen_actions_title": "동결 / 관련 작업",
+      "frozen_actions_empty": "동결 또는 관련 작업이 없습니다"
     }
   }
 }

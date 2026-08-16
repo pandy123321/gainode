@@ -144,6 +144,21 @@
       "AWAY": "Auswärts"
     }
   },
+  "asset": {
+    "direction": { "credit": "Gutschrift", "debit": "Lastschrift" },
+    "ledger_state": { "pending": "Ausstehend", "posted": "Gebucht", "reversed": "Storniert", "disputed": "Beanstandet" }
+  },
+  "power": {
+    "available": "Verfügbar",
+    "frozen": "Eingefroren",
+    "consumed": "Verbraucht (Periode)",
+    "released": "Freigegeben (Periode)",
+    "recovering": "Wiederherstellung",
+    "cap": "Obergrenze",
+    "cap_source_robot_level": "Obergrenze aus Robot-Level",
+    "next_restore_at": "Nächste Wiederherstellung",
+    "last_restore_at": "Letzte Wiederherstellung"
+  },
   "page": {
     "m_auth_001": {
       "title": "Anmelden",
@@ -336,6 +351,60 @@
       "title": "Prognose-Ausnahme",
       "description": "Details zu Ausnahme/Erstattung/Korrektur noch nicht verfügbar",
       "restricted": "Ausnahmedetails derzeit nicht verfügbar"
+    },
+    "m_asset_001": {
+      "title": "APT-Vermögen",
+      "description": "APT verfügbar/eingefroren/ausstehend anzeigen",
+      "primary_action": "Verlauf ansehen",
+      "available": "Verfügbar",
+      "frozen": "Eingefroren",
+      "pending_hold": "Ausstehende Sperre",
+      "total_earned": "Gesamt verdient",
+      "total_spent": "Gesamt ausgegeben",
+      "recent_ledger": "Letzte Buchungen",
+      "ledger_empty": "Keine Buchungen",
+      "otc_title": "OTC",
+      "otc_buy": "Kaufen",
+      "otc_sell": "Verkaufen",
+      "otc_restricted": "OTC ist noch nicht verfügbar",
+      "power_entry": "Power",
+      "valuation_not_shown": "Referenzbewertung wird nicht angezeigt (keine eingefrorene Quelle)"
+    },
+    "m_asset_002": {
+      "title": "APT-Verlauf",
+      "description": "Jede APT-Änderung anzeigen",
+      "primary_action": "Details ansehen",
+      "empty": "Keine Buchungen"
+    },
+    "m_asset_003": {
+      "title": "Buchungsdetail",
+      "description": "Quelle und Status einer APT-Änderung",
+      "primary_action": "Zurück zum Verlauf",
+      "entry_id": "Eintrags-ID",
+      "entry_type": "Typ",
+      "direction": "Richtung",
+      "state": "Status",
+      "source": "Quellobjekt",
+      "journal_batch": "Journal-Batch",
+      "reversal_of": "Stornierung von",
+      "rule_version": "Regelversion",
+      "snapshot_id": "Snapshot",
+      "created_time": "Zeit",
+      "not_found": "Eintrag nicht gefunden"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "Verbrauchbare, wiederherstellbare Betriebsressource",
+      "primary_action": "Aktualisieren",
+      "trend_title": "Letzte 7 Tage",
+      "trend_empty": "7-Tage-Trend noch nicht verfügbar",
+      "usage_title": "Power-Nutzung",
+      "usage_desc": "Wichtige Aktionen verbrauchen Power, die sich nach Regeln wiederherstellt. Schwellen und Mengen liefert der Server.",
+      "usage_withdrawal": "Auszahlung",
+      "usage_robot_start": "Robot-Start",
+      "usage_otc_sell": "OTC-Verkauf",
+      "frozen_actions_title": "Eingefroren / zugehörige Aktionen",
+      "frozen_actions_empty": "Keine eingefrorenen oder zugehörigen Aktionen"
     }
   }
 }

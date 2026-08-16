@@ -144,6 +144,21 @@
       "AWAY": "ทีมเยือน"
     }
   },
+  "asset": {
+    "direction": { "credit": "เข้า", "debit": "ออก" },
+    "ledger_state": { "pending": "รอดำเนินการ", "posted": "บันทึกแล้ว", "reversed": "กลับรายการแล้ว", "disputed": "โต้แย้ง" }
+  },
+  "power": {
+    "available": "ใช้งานได้",
+    "frozen": "ถูกระงับ",
+    "consumed": "ใช้ไป (ช่วงเวลา)",
+    "released": "ปล่อย (ช่วงเวลา)",
+    "recovering": "กำลังฟื้นตัว",
+    "cap": "ขีดจำกัด",
+    "cap_source_robot_level": "ขีดจำกัดจากระดับ Robot",
+    "next_restore_at": "เวลาฟื้นตัวถัดไป",
+    "last_restore_at": "เวลาฟื้นตัวล่าสุด"
+  },
   "page": {
     "m_auth_001": {
       "title": "เข้าสู่ระบบ",
@@ -336,6 +351,60 @@
       "title": "ข้อยกเว้นการทำนาย",
       "description": "รายละเอียดข้อยกเว้น/คืนเงิน/แก้ไขยังไม่เปิดใช้งาน",
       "restricted": "รายละเอียดข้อยกเว้นไม่สามารถใช้งานได้ในขณะนี้"
+    },
+    "m_asset_001": {
+      "title": "สินทรัพย์ APT",
+      "description": "ดูสถานะ APT ที่ใช้งานได้/ถูกระงับ/รอดำเนินการ",
+      "primary_action": "ดูรายการ",
+      "available": "ใช้งานได้",
+      "frozen": "ถูกระงับ",
+      "pending_hold": "รอการยืนยัน",
+      "total_earned": "ได้รับสะสม",
+      "total_spent": "ใช้จ่ายสะสม",
+      "recent_ledger": "รายการล่าสุด",
+      "ledger_empty": "ไม่มีรายการ",
+      "otc_title": "OTC",
+      "otc_buy": "ซื้อ",
+      "otc_sell": "ขาย",
+      "otc_restricted": "OTC ยังไม่เปิดให้บริการ",
+      "power_entry": "Power",
+      "valuation_not_shown": "ไม่แสดงมูลค่าอ้างอิง (ไม่มีแหล่งข้อมูลที่ถูกตรึง)"
+    },
+    "m_asset_002": {
+      "title": "รายการ APT",
+      "description": "ดูทุกการเปลี่ยนแปลง APT",
+      "primary_action": "ดูรายละเอียด",
+      "empty": "ไม่มีรายการ"
+    },
+    "m_asset_003": {
+      "title": "รายละเอียดรายการ",
+      "description": "ที่มาและสถานะของการเปลี่ยนแปลง APT",
+      "primary_action": "กลับไปที่รายการ",
+      "entry_id": "รหัสรายการ",
+      "entry_type": "ประเภท",
+      "direction": "ทิศทาง",
+      "state": "สถานะ",
+      "source": "วัตถุต้นทาง",
+      "journal_batch": "ชุดรายการ",
+      "reversal_of": "อ้างอิงการกลับรายการ",
+      "rule_version": "เวอร์ชันกฎ",
+      "snapshot_id": "สแนปช็อต",
+      "created_time": "เวลา",
+      "not_found": "ไม่พบรายการนี้"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "ทรัพยากรการดำเนินการที่ใช้ได้และฟื้นตัวได้",
+      "primary_action": "รีเฟรช",
+      "trend_title": "7 วันที่ผ่านมา",
+      "trend_empty": "แนวโน้ม 7 วันยังไม่พร้อมใช้งาน",
+      "usage_title": "การใช้งาน Power",
+      "usage_desc": "การดำเนินการสำคัญใช้ Power และฟื้นตัวตามกฎ เกณฑ์และจำนวนมาจากเซิร์ฟเวอร์",
+      "usage_withdrawal": "ถอนเงิน",
+      "usage_robot_start": "เริ่ม Robot",
+      "usage_otc_sell": "ขาย OTC",
+      "frozen_actions_title": "การระงับ / การดำเนินการที่เกี่ยวข้อง",
+      "frozen_actions_empty": "ไม่มีการระงับหรือการดำเนินการที่เกี่ยวข้อง"
     }
   }
 }

@@ -144,6 +144,29 @@
       "AWAY": "Away"
     }
   },
+  "asset": {
+    "direction": {
+      "credit": "Credit",
+      "debit": "Debit"
+    },
+    "ledger_state": {
+      "pending": "Pending",
+      "posted": "Posted",
+      "reversed": "Reversed",
+      "disputed": "Disputed"
+    }
+  },
+  "power": {
+    "available": "Available",
+    "frozen": "Frozen",
+    "consumed": "Consumed (period)",
+    "released": "Released (period)",
+    "recovering": "Recovering",
+    "cap": "Cap",
+    "cap_source_robot_level": "Cap source Robot level",
+    "next_restore_at": "Next restore",
+    "last_restore_at": "Last restore"
+  },
   "page": {
     "m_auth_001": {
       "title": "Sign in",
@@ -336,6 +359,60 @@
       "title": "Prediction exception",
       "description": "Exception/refund/correction details are not yet available",
       "restricted": "Exception details are currently unavailable"
+    },
+    "m_asset_001": {
+      "title": "APT Assets",
+      "description": "View your APT available, frozen and pending status",
+      "primary_action": "View ledger",
+      "available": "Available",
+      "frozen": "Frozen",
+      "pending_hold": "Pending hold",
+      "total_earned": "Total earned",
+      "total_spent": "Total spent",
+      "recent_ledger": "Recent ledger",
+      "ledger_empty": "No ledger entries",
+      "otc_title": "OTC",
+      "otc_buy": "Buy",
+      "otc_sell": "Sell",
+      "otc_restricted": "OTC is not available yet",
+      "power_entry": "Power",
+      "valuation_not_shown": "Reference valuation is not shown (no frozen source)"
+    },
+    "m_asset_002": {
+      "title": "APT Ledger",
+      "description": "View every APT change",
+      "primary_action": "View detail",
+      "empty": "No ledger entries"
+    },
+    "m_asset_003": {
+      "title": "Ledger detail",
+      "description": "Source and status of one APT change",
+      "primary_action": "Back to ledger",
+      "entry_id": "Entry ID",
+      "entry_type": "Type",
+      "direction": "Direction",
+      "state": "State",
+      "source": "Source object",
+      "journal_batch": "Journal batch",
+      "reversal_of": "Reversal of",
+      "rule_version": "Rule version",
+      "snapshot_id": "Snapshot",
+      "created_time": "Time",
+      "not_found": "Entry not found"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "Consumable, recoverable operation resource",
+      "primary_action": "Refresh",
+      "trend_title": "Last 7 days",
+      "trend_empty": "7-day trend is not available yet",
+      "usage_title": "Power usage",
+      "usage_desc": "Important actions consume Power, which recovers per rules. Thresholds and amounts are provided by the server.",
+      "usage_withdrawal": "Withdrawal",
+      "usage_robot_start": "Robot start",
+      "usage_otc_sell": "OTC sell",
+      "frozen_actions_title": "Frozen / related actions",
+      "frozen_actions_empty": "No frozen or related actions"
     }
   }
 }

@@ -144,6 +144,21 @@
       "AWAY": "アウェイ"
     }
   },
+  "asset": {
+    "direction": { "credit": "入金", "debit": "出金" },
+    "ledger_state": { "pending": "保留中", "posted": "計上済み", "reversed": "取消済み", "disputed": "係争中" }
+  },
+  "power": {
+    "available": "利用可能",
+    "frozen": "凍結中",
+    "consumed": "期間内消費",
+    "released": "期間内解放",
+    "recovering": "回復中",
+    "cap": "上限",
+    "cap_source_robot_level": "上限由来 Robot レベル",
+    "next_restore_at": "次回回復時刻",
+    "last_restore_at": "前回回復時刻"
+  },
   "page": {
     "m_auth_001": {
       "title": "ログイン",
@@ -336,6 +351,60 @@
       "title": "予想の例外",
       "description": "例外・返金・修正の詳細はまだ利用できません",
       "restricted": "例外の詳細は現在利用できません"
+    },
+    "m_asset_001": {
+      "title": "APT 資産",
+      "description": "APT の利用可能・凍結・保留ステータスを確認",
+      "primary_action": "取引履歴を見る",
+      "available": "利用可能",
+      "frozen": "凍結",
+      "pending_hold": "保留（確認待ち）",
+      "total_earned": "累計獲得",
+      "total_spent": "累計支出",
+      "recent_ledger": "最近の取引履歴",
+      "ledger_empty": "取引履歴はありません",
+      "otc_title": "OTC",
+      "otc_buy": "買い注文",
+      "otc_sell": "売り注文",
+      "otc_restricted": "OTC はまだ利用できません",
+      "power_entry": "Power",
+      "valuation_not_shown": "参考評価額は表示されません（凍結されたソースがありません）"
+    },
+    "m_asset_002": {
+      "title": "APT 取引履歴",
+      "description": "すべての APT 変動を確認",
+      "primary_action": "詳細を見る",
+      "empty": "取引履歴はありません"
+    },
+    "m_asset_003": {
+      "title": "取引履歴詳細",
+      "description": "APT 変動の由来とステータス",
+      "primary_action": "取引履歴へ戻る",
+      "entry_id": "エントリ ID",
+      "entry_type": "種別",
+      "direction": "方向",
+      "state": "ステータス",
+      "source": "関連オブジェクト",
+      "journal_batch": "仕訳バッチ",
+      "reversal_of": "取消参照",
+      "rule_version": "ルールバージョン",
+      "snapshot_id": "スナップショット",
+      "created_time": "時刻",
+      "not_found": "このエントリが見つかりません"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "消費可能で回復可能な操作リソース",
+      "primary_action": "更新",
+      "trend_title": "直近 7 日",
+      "trend_empty": "7 日間の推移はまだ利用できません",
+      "usage_title": "Power の用途",
+      "usage_desc": "重要な操作は Power を消費し、ルールに従って回復します。閾値と数量はサーバーが提供します。",
+      "usage_withdrawal": "出金",
+      "usage_robot_start": "Robot 起動",
+      "usage_otc_sell": "OTC 売却",
+      "frozen_actions_title": "凍結 / 関連操作",
+      "frozen_actions_empty": "凍結または関連操作はありません"
     }
   }
 }

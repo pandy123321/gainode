@@ -154,6 +154,31 @@ const router = createRouter({
       component: () => import('../views/prediction/m-predict-006/index.vue'),
       meta: { pageId: 'M-PREDICT-006', auth: true },
     },
+    // ---- H5-06 Asset/Power（M-ASSET-001..003 / M-POWER-001）----
+    {
+      path: '/asset',
+      name: 'asset-root',
+      component: () => import('../views/asset/m-asset-001/index.vue'),
+      meta: { pageId: 'M-ASSET-001', auth: true },
+    },
+    {
+      path: '/asset/ledger',
+      name: 'asset-ledger',
+      component: () => import('../views/asset/m-asset-002/index.vue'),
+      meta: { pageId: 'M-ASSET-002', auth: true },
+    },
+    {
+      path: '/asset/ledger/:id',
+      name: 'asset-ledger-detail',
+      component: () => import('../views/asset/m-asset-003/index.vue'),
+      meta: { pageId: 'M-ASSET-003', auth: true },
+    },
+    {
+      path: '/power',
+      name: 'power-root',
+      component: () => import('../views/power/m-power-001/index.vue'),
+      meta: { pageId: 'M-POWER-001', auth: true },
+    },
     {
       path: '/me',
       name: 'me-placeholder',

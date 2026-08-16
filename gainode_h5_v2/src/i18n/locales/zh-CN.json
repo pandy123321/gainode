@@ -144,6 +144,29 @@
       "AWAY": "客胜"
     }
   },
+  "asset": {
+    "direction": {
+      "credit": "入账",
+      "debit": "出账"
+    },
+    "ledger_state": {
+      "pending": "待处理",
+      "posted": "已入账",
+      "reversed": "已冲正",
+      "disputed": "争议中"
+    }
+  },
+  "power": {
+    "available": "可用",
+    "frozen": "冻结",
+    "consumed": "本期已消耗",
+    "released": "本期已释放",
+    "recovering": "恢复中",
+    "cap": "上限",
+    "cap_source_robot_level": "容量来源 Robot 等级",
+    "next_restore_at": "下次恢复时间",
+    "last_restore_at": "上次恢复时间"
+  },
   "page": {
     "m_auth_001": {
       "title": "登录",
@@ -336,6 +359,60 @@
       "title": "竞猜异常处理",
       "description": "异常/退款/更正详情尚未开放",
       "restricted": "异常处理详情暂不可用"
+    },
+    "m_asset_001": {
+      "title": "APT 资产",
+      "description": "查看 APT 可用、冻结与待确认状态",
+      "primary_action": "查看流水",
+      "available": "可用",
+      "frozen": "冻结",
+      "pending_hold": "待确认冻结",
+      "total_earned": "累计获得",
+      "total_spent": "累计支出",
+      "recent_ledger": "最近流水",
+      "ledger_empty": "暂无流水",
+      "otc_title": "挂单",
+      "otc_buy": "挂买",
+      "otc_sell": "挂卖",
+      "otc_restricted": "OTC 尚未开放",
+      "power_entry": "Power",
+      "valuation_not_shown": "参考估值暂不展示（无冻结估值来源）"
+    },
+    "m_asset_002": {
+      "title": "APT 流水",
+      "description": "查看每一笔 APT 变动",
+      "primary_action": "查看详情",
+      "empty": "暂无流水"
+    },
+    "m_asset_003": {
+      "title": "流水详情",
+      "description": "一笔 APT 变动的来源与状态",
+      "primary_action": "返回流水",
+      "entry_id": "流水号",
+      "entry_type": "类型",
+      "direction": "方向",
+      "state": "状态",
+      "source": "来源对象",
+      "journal_batch": "日记账批次",
+      "reversal_of": "冲正引用",
+      "rule_version": "规则版本",
+      "snapshot_id": "快照",
+      "created_time": "时间",
+      "not_found": "未找到该笔流水"
+    },
+    "m_power_001": {
+      "title": "Power",
+      "description": "可消耗、可恢复的操作资源",
+      "primary_action": "刷新",
+      "trend_title": "最近 7 日变化",
+      "trend_empty": "7 日变化暂不可用",
+      "usage_title": "Power 使用场景",
+      "usage_desc": "重要操作会消耗 Power，之后按规则恢复。具体门槛与数量由服务端下发。",
+      "usage_withdrawal": "提现",
+      "usage_robot_start": "Robot 启动",
+      "usage_otc_sell": "OTC 挂卖",
+      "frozen_actions_title": "冻结 / 关联操作",
+      "frozen_actions_empty": "暂无冻结或关联操作"
     }
   }
 }

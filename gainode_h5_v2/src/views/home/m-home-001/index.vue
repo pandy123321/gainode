@@ -147,10 +147,10 @@ onMounted(reloadAll)
 
     <!-- APT/Power/OTC 快捷入口 -->
     <section class="quick-grid" data-testid="home-quick">
-      <RouterLink to="/me" class="quick-card">
+      <RouterLink to="/asset" class="quick-card">
         <span class="quick-name">{{ t('page.m_home_001.quick_apt') }}</span>
       </RouterLink>
-      <RouterLink to="/me" class="quick-card">
+      <RouterLink to="/power" class="quick-card">
         <span class="quick-name">{{ t('page.m_home_001.quick_power') }}</span>
       </RouterLink>
       <RouterLink to="/me" class="quick-card">
