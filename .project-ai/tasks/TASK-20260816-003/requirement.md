@@ -2,7 +2,7 @@
 
 ## 状态
 
-- **Owner Signoff：未完成（本 task 产出 Owner Decision Matrix，待 Owner 裁决）**
+- **Owner Signoff：完成（3 缺 enum 对象已逐项裁决，2026-08-16，全部采纳各 D.x 的 RECOMMENDED_OPTION = OPTION_A，已补入 05 §4 V2.4）**
 - **Independent Review：未开始**
 - **冻结状态：CANDIDATE（未 FROZEN）**
 

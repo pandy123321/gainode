@@ -1,7 +1,7 @@
 # Machine Contract 第二批 2B-2 — State Contract Freeze（候选）
 
-> 状态：**CANDIDATE（未 FROZEN）** — Owner Signoff ⏳（3 缺 enum 对象 NotificationDelivery/MfaEnrollment/RiskCase 待 Owner 裁决）；Independent Review 未开始。
-> 说明：本文件为 Machine Contract 第二批 **2B-2 小批**（13 对象）的状态合同冻结候选。5 个复用对象（ApprovalRequest/ParameterRelease/AuthSession/KycCase/Ticket）enum 复制 05 §4/§2.2（已冻结）；3 缺 enum 对象待 Owner 裁决后补入 05 §4；5 个值对象/只读聚合无状态机。转移矩阵均为**候选**，正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
+> 状态：**CANDIDATE（未 FROZEN）** — Owner Signoff ✅（3 缺 enum 对象 NotificationDelivery/MfaEnrollment/RiskCase 已逐项裁决 2026-08-16，全部采纳 RECOMMENDED_OPTION = OPTION_A，已补入 05 §4 V2.4）；Independent Review 未开始（待 State Machine gate）。
+> 说明：本文件为 Machine Contract 第二批 **2B-2 小批**（13 对象）的状态合同冻结候选。5 个复用对象（ApprovalRequest/ParameterRelease/AuthSession/KycCase/Ticket）enum 复制 05 §4/§2.2（已冻结）；3 缺 enum 对象经 Owner 裁决后补入 05 §4；5 个值对象/只读聚合无状态机。转移矩阵均为**候选**，正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
 > 起草日期：2026-08-16
 > 关联 DDL：无（本批不生成 DDL，属 S01-P05）
 > 权威契约：`Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§2.2 Session 状态 / §3 对象字段 / §4 统一状态机 / §8 RBAC / §11 SoD）
@@ -18,11 +18,11 @@
 | ParameterRelease | 工作流对象 | 复制 05 §4 Parameter Release `draft/pending_approval/approved/scheduled/active/paused/rolled_back/archived` | 候选（转移矩阵待 gate） |
 | ParameterSnapshot | 只读聚合/Projection | 无状态机 | 无状态机 |
 | Notice | 只读聚合/Projection | 无状态机（read_state 为字段） | 无状态机 |
-| NotificationDelivery | 工作流对象 | **待 Owner 裁决（2B2-ENUM-01）** | FAIL_CLOSED（未裁决前不建表） |
+| NotificationDelivery | 工作流对象 | Owner 裁决 2B2-ENUM-01 | 候选（转移矩阵待 gate） |
 | AuthSession | 持久领域实体 | 复制 05 §2.2 `active/mfa_required/restricted/expired/revoked` | 候选（转移矩阵待 gate） |
-| MfaEnrollment | 持久领域实体 | **待 Owner 裁决（2B2-ENUM-02）** | FAIL_CLOSED（未裁决前不建表） |
+| MfaEnrollment | 持久领域实体 | Owner 裁决 2B2-ENUM-02 | 候选（转移矩阵待 gate） |
 | KycCase | 工作流对象 | 复制 05 §4 KYC `not_started/pending/needs_info/approved/rejected/review` | 候选（转移矩阵待 gate） |
-| RiskCase | 工作流对象 | **待 Owner 裁决（2B2-ENUM-03）** | FAIL_CLOSED（未裁决前不建表） |
+| RiskCase | 工作流对象 | Owner 裁决 2B2-ENUM-03 | 候选（转移矩阵待 gate） |
 | Ticket | 工作流对象 | 复制 05 §4 Ticket `submitted/in_progress/waiting_user/under_review/resolved/closed` | 候选（转移矩阵待 gate） |
 | TicketMessage | 值对象 | 无状态机 | 无状态机 |
 | TicketAttachment | 值对象 | 无状态机 | 无状态机 |
@@ -187,47 +187,50 @@
 
 **非法转移（FAIL_CLOSED）**：`closed → *`、`resolved → waiting_user`、`submitted → resolved`（必须经处理）。
 
-## 8. 3 缺 enum 对象状态合同（待 Owner 裁决，FAIL_CLOSED）
+## 8. 3 缺 enum 对象状态合同（enum 已 Owner 裁决，转移候选）
 
-> 依据 S01-P04 步骤 2，只为缺失状态生成 Owner Decision Matrix，不自创。以下 3 对象 enum **待 Owner 裁决**，未裁决前 FAIL_CLOSED 不建表。RECOMMENDED_OPTION 见 design.md Part C。
+> 依据 S01-P04 步骤 2，只为缺失状态生成 Owner Decision Matrix，不自创。以下 3 对象 enum **已 Owner 裁决（2026-08-16，全部采纳 RECOMMENDED_OPTION = OPTION_A）并补入 05 §4（V2.4）**，解除 FAIL_CLOSED，S01-P05 可建表。转移矩阵为候选，未 FROZEN。
 
-### 8.1 NotificationDelivery — 待裁决（2B2-ENUM-01）
+### 8.1 NotificationDelivery — `pending / delivered / failed / cancelled`
 
 ```text
-状态 = FAIL_CLOSED（未 Owner 裁决，不建表）
-RECOMMENDED（候选）= pending / delivered / failed / cancelled（OPTION_A）
-初态（候选）= pending
-终态（候选）= delivered / failed / cancelled
-触发者（候选）= 系统（Outbox/异步投递）
+初态 = pending
+合法转移（候选）= pending→delivered / pending→failed / pending→cancelled / failed→pending(重试)
+终态 = delivered / cancelled
+触发者 = 系统（Outbox/异步投递）
 Writer = NotificationDeliveryService
+失败态 = failed
+重试 = failed→pending（attempt_count + next_retry_at 驱动）
 幂等 = dedupe_key
 审计 = append audit_events
 账本副作用 = 无（通知投递，失败不回滚业务，05 §4 Notice 设计原则 1）
 ```
 
-### 8.2 MfaEnrollment — 待裁决（2B2-ENUM-02）
+### 8.2 MfaEnrollment — `pending / active / revoked`
 
 ```text
-状态 = FAIL_CLOSED（未 Owner 裁决，不建表）
-RECOMMENDED（候选）= pending / active / revoked（OPTION_A）
-初态（候选）= pending（注册未验证）
-终态（候选）= revoked
-触发者（候选）= END_USER（注册/验证/移除）、ADMIN_SECURITY（吊销）
+初态 = pending（注册未验证）
+合法转移（候选）= pending→active（验证通过）/ pending→revoked（取消注册）/ active→revoked（移除/吊销）
+终态 = revoked
+触发者 = END_USER（注册/验证/移除）、ADMIN_SECURITY（吊销）
 Writer = MfaEnrollmentService
+失败态 = 无（验证失败保持 pending）
+重试 = 无（重新发起 challenge）
 幂等 = idempotency_key
 审计 = append audit_events
 账本副作用 = 无
 ```
 
-### 8.3 RiskCase — 待裁决（2B2-ENUM-03）
+### 8.3 RiskCase — `open / investigating / under_review / resolved / closed`
 
 ```text
-状态 = FAIL_CLOSED（未 Owner 裁决，不建表）
-RECOMMENDED（候选）= open / investigating / under_review / resolved / closed（OPTION_A）
-初态（候选）= open（检测到）
-终态（候选）= closed
-触发者（候选）= RISK_ANALYST（分析 investigating）、RISK_APPROVER（处置审批 under_review）
+初态 = open（检测到）
+合法转移（候选）= open→investigating→under_review→resolved→closed / open→closed(误报关闭) / resolved→investigating(申诉重开)
+终态 = closed
+触发者 = RISK_ANALYST（investigating）、RISK_APPROVER（under_review 处置审批）
 Writer = RiskCaseService
+失败态 = 无（处置升级走新 RiskCase 或 Ticket）
+重试 = 无
 幂等 = idempotency_key
 审计 = append audit_events
 账本副作用 = 依 disposition（restrictions 冻结/放行，不直接写账）
@@ -272,8 +275,8 @@ Writer = RiskCaseService
 ## 12. 冻结状态与 gate
 
 ```text
-OWNER_SIGNOFF = PENDING（3 缺 enum 对象待 Owner 裁决）
-05_SECTION4_SUPPLEMENT = NOT_DONE（待 Owner 裁决后补 V2.4）
+OWNER_SIGNOFF = COMPLETE（3 缺 enum 对象 2026-08-16 逐项裁决）
+05_SECTION4_SUPPLEMENT = DONE（V2.4）
 INDEPENDENT_REVIEW = PENDING（State Machine gate）
 FROZEN_STATUS = CANDIDATE
 APPROVAL_ENUM = draft/pending/changes_requested/approved/rejected/executing/executed/failed（复制 05 §4，未新增）
@@ -281,6 +284,9 @@ PARAMETER_RELEASE_ENUM = draft/pending_approval/approved/scheduled/active/paused
 AUTH_SESSION_ENUM = active/mfa_required/restricted/expired/revoked（复制 05 §2.2，未新增）
 KYC_ENUM = not_started/pending/needs_info/approved/rejected/review（复制 05 §4，未新增）
 TICKET_ENUM = submitted/in_progress/waiting_user/under_review/resolved/closed（复制 05 §4，未新增）
+NOTIFICATION_DELIVERY_ENUM = pending/delivered/failed/cancelled（Owner 裁决 2B2-ENUM-01）
+MFA_ENROLLMENT_ENUM = pending/active/revoked（Owner 裁决 2B2-ENUM-02）
+RISK_CASE_ENUM = open/investigating/under_review/resolved/closed（Owner 裁决 2B2-ENUM-03）
 OWNER_DECISION_MATRIX_COUNT = 3（NotificationDelivery/MfaEnrollment/RiskCase）
 NO_SELF_INVENTED_STATE = YES
 NO_SELF_INVENTED_ROLE = YES
@@ -290,7 +296,7 @@ NOTICE_DECOUPLED_FROM_BUSINESS = YES
 PARAM_APPROVED_NOT_EQUAL_ACTIVE = YES
 ```
 
-正式 FROZEN 前须：① 3 缺 enum 对象 Owner 裁决并补入 05 §4（V2.4）；② 重提 Independent Review（State Machine gate）并通过。
+正式 FROZEN 前须：重提 Independent Review（State Machine gate）并通过（3 缺 enum 对象 enum 已 Owner 裁决并补入 05 §4 V2.4）。
 
 ## 信息来源
 

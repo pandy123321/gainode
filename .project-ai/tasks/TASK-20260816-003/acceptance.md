@@ -2,8 +2,8 @@
 
 ## 状态
 
-- **Owner Signoff：未完成（3 缺 enum 对象待 Owner 裁决）**
-- **Independent Review：未开始**
+- **Owner Signoff：完成（3 缺 enum 对象已逐项裁决，2026-08-16，全部采纳 RECOMMENDED_OPTION = OPTION_A，已补入 05 §4 V2.4）**
+- **Independent Review：未开始（5 复用对象转移矩阵 + 3 缺 enum 对象 enum，待 State Machine gate）**
 - **冻结状态：CANDIDATE**
 
 ## 验收范围
@@ -19,7 +19,7 @@
 | 3 | AuthSession 复用 05 §2.2 Session 状态（5 态），未新增状态值 | 待独立审核 |
 | 4 | KycCase 复用 05 §4 KYC enum（6 态），未新增状态值 | 待独立审核 |
 | 5 | Ticket 复用 05 §4 Ticket enum（6 态），未新增状态值 | 待独立审核 |
-| 6 | 3 缺 enum 对象（NotificationDelivery/MfaEnrollment/RiskCase）经 Owner 裁决补入 05 §4（V2.4）为 canonical enum，未自创状态 | 待 Owner 裁决 |
+| 6 | 3 缺 enum 对象（NotificationDelivery/MfaEnrollment/RiskCase）经 Owner 裁决补入 05 §4（V2.4）为 canonical enum，未自创状态 | 待独立审核 |
 | 7 | 每个复用对象转移定义：初态、合法转移、终态、触发者、Writer、幂等、并发、审计、账本效果 | 待独立审核 |
 | 8 | 职责分离明确：`PARAM_EDITOR != PARAM_APPROVER != RELEASE_OPERATOR`；`RISK_ANALYST != RISK_APPROVER`；申请人不得审批本人申请 | 待独立审核 |
 | 9 | Notice 与业务事务解耦；NotificationDelivery 失败不回滚业务；dedupe_key 去重 | 待独立审核 |
@@ -39,7 +39,7 @@ TICKET_ENUM_MATCHES_05 = YES
 NO_SELF_INVENTED_STATE = YES
 NO_SELF_INVENTED_ROLE = YES
 OWNER_DECISION_MATRIX_COUNT = 3
-ENUM_OWNER_CONFIRMED_05_V24 = NO（待 Owner 裁决）
+ENUM_OWNER_CONFIRMED_05_V24 = YES（Owner 裁决 2026-08-16）
 TRANSITION_MATRICES_NOT_FROZEN = YES
 UNFROZEN_STATE_FAIL_CLOSED = YES
 PARAM_ROLE_SEPARATION = YES
@@ -52,7 +52,7 @@ PARAM_APPROVED_NOT_EQUAL_ACTIVE = YES
 
 | 阻塞对象 | 状态 | 恢复条件 |
 |---|---|---|
-| NotificationDelivery/MfaEnrollment/RiskCase enum | BLOCKED | Owner 裁决后补入 05 §4（V2.4） |
+| （已解除）NotificationDelivery/MfaEnrollment/RiskCase enum | RESOLVED | Owner 已裁决并补入 05 §4（V2.4，2026-08-16） |
 | 复用对象转移矩阵 | 待独立审核 | Independent Review（State Machine gate）通过后置 FROZEN |
 
 ## 交付物

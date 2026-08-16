@@ -1,6 +1,6 @@
 # 05 · Gainode 数据、状态、权限与 API 契约
 
-> 版本：V2.3 · 2B-1 canonical enum supplement（Owner 裁决 2026-08-16）
+> 版本：V2.4 · 2B-2 canonical enum supplement（Owner 裁决 2026-08-16）
 > 目标：让前后端不再靠页面截图猜字段；所有 P0 核心对象均有最低字段定义或明确对象类型标注
 
 ## 1. API 全局规则
@@ -799,6 +799,21 @@ updated_at
 
 ### Parameter Release
 `draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived`
+
+### NotificationDelivery
+`pending / delivered / failed / cancelled`
+
+> NotificationDelivery 是 outbox 异步投递：`pending`=待投递；`delivered`=成功；`failed`=失败待重试（`attempt_count`/`next_retry_at` 驱动重试，不新增 processing 态）；`cancelled`=业务对象失效/用户已读不再投递。NotificationDelivery 失败不回滚业务（05 §4 Notice 设计原则 1）。
+
+### MfaEnrollment
+`pending / active / revoked`
+
+> `pending`=已发起注册、尚未验证（`enrolled_at` 与 `last_verified_at` 分离表达）；`active`=已验证生效；`revoked`=用户移除/安全吊销。`backup_codes_active` 为字段非状态。
+
+### RiskCase
+`open / investigating / under_review / resolved / closed`
+
+> `open`=检测到风险；`investigating`=RISK_ANALYST 分析；`under_review`=RISK_APPROVER 审批处置（**RISK_ANALYST ≠ RISK_APPROVER**）；`resolved`=处置措施已执行（申诉窗口内保持此态）；`closed`=案件归档终态。`appeal_eligible` 为字段非状态。
 
 ### OTC 运营/用户展示映射
 

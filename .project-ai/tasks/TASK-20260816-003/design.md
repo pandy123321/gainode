@@ -2,7 +2,7 @@
 
 ## 状态
 
-- **Owner Signoff：未完成（3 缺 enum 对象 Owner Decision Matrix 待裁决）**
+- **Owner Signoff：完成（3 缺 enum 对象已逐项裁决，2026-08-16，全部采纳各 D.x 的 RECOMMENDED_OPTION = OPTION_A，已补入 05 §4 V2.4）**
 - **Independent Review：未开始**
 - **冻结状态：CANDIDATE（未 FROZEN）**
 
@@ -168,7 +168,7 @@
 ## Part C — 3 缺 enum 对象 Owner Decision Matrix
 
 > 依据 Owner 裁决先例（2B1-ENUM-01..06）：缺 enum 对象的 status **冻结前须补进 05 §4**（走 05 变更流程），否则 **FAIL_CLOSED 不建表**。
-> 以下 D.1-D.3 生成 Owner Decision Matrix，`RECOMMENDED_OPTION` 待 Owner 裁决；裁决后补入 05 §4（V2.4），再 S01-P05 建 DDL。
+> **Owner 已于 2026-08-16 逐项裁决（2B2-ENUM-01..03 全部采纳各 D.x 的 RECOMMENDED_OPTION = OPTION_A），已补入 05 §4（V2.4），解除 FAIL_CLOSED，S01-P05 可建表。** 以下 D.1-D.3 保留完整决策矩阵作追溯。
 
 ### D.1 NotificationDelivery（`notification_deliveries`）
 
