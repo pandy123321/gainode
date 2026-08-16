@@ -1,5 +1,8 @@
 # AI / Robot P0 路径骨架（05 §6 AI/Robot）
 # 业务 request/response schema 在 S02-P02/P04 落地。
+# S02-P04：56 级规则/预算/系数/Power/升级成本未 Active → 真实写操作 closed。
+#   - 只读 GET 补 503（DEPENDENCY_UNAVAILABLE，无 Active Release 时 unavailable reason）。
+#   - 写 POST（upgrade-orders / reward-claims / actions）补 503（fail-closed）。
 
 user_summary:
   get:
@@ -11,6 +14,7 @@ user_summary:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 user_eligibility:
@@ -22,6 +26,7 @@ user_eligibility:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 user_capacity:
@@ -33,6 +38,7 @@ user_capacity:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 user_yield_coefficient:
@@ -44,6 +50,7 @@ user_yield_coefficient:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 robots:
@@ -55,6 +62,7 @@ robots:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 robot_detail:
@@ -66,6 +74,7 @@ robot_detail:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 upgrade_eligibility:
@@ -77,12 +86,13 @@ upgrade_eligibility:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 upgrade_orders_create:
   post:
     operationId: robot_upgrade_order_create
-    summary: 创建升级订单
+    summary: 创建升级订单（升级成本/资金去向 TBC → fail-closed）
     tags: [Robot]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -92,6 +102,7 @@ upgrade_orders_create:
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 upgrade_order_detail:
@@ -114,12 +125,13 @@ rewards:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 reward_claim:
   post:
     operationId: robot_reward_claim
-    summary: 领取奖励
+    summary: 领取奖励（claim_enabled 默认 false → fail-closed）
     tags: [Robot]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -129,6 +141,7 @@ reward_claim:
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 reward_claim_detail:
@@ -151,6 +164,7 @@ computing_power:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 computing_power_ledger:
@@ -162,12 +176,13 @@ computing_power_ledger:
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 robot_action:
   post:
     operationId: robot_action
-    summary: 机器人启停动作
+    summary: 机器人启停动作（Power 消耗/释放规则 TBC → fail-closed）
     tags: [Robot]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -179,6 +194,7 @@ robot_action:
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
       '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 robot_action_detail:

@@ -220,6 +220,22 @@ components:
       $ref: './components/schemas/ledger.yaml#/AssetBalance'
     PowerPosition:
       $ref: './components/schemas/ledger.yaml#/PowerPosition'
+    RobotSummary:
+      $ref: './components/schemas/robot.yaml#/RobotSummary'
+    RobotDetail:
+      $ref: './components/schemas/robot.yaml#/RobotDetail'
+    RobotRuleSnapshot:
+      $ref: './components/schemas/robot.yaml#/RobotRuleSnapshot'
+    AIReward:
+      $ref: './components/schemas/robot.yaml#/AIReward'
+    RobotUpgradeOrder:
+      $ref: './components/schemas/robot.yaml#/RobotUpgradeOrder'
+    Robot:
+      $ref: './components/schemas/robot.yaml#/Robot'
+    RobotReward:
+      $ref: './components/schemas/robot.yaml#/RobotReward'
+    RobotUpgradeOrder:
+      $ref: './components/schemas/robot.yaml#/RobotUpgradeOrder'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

@@ -29,6 +29,17 @@ class RobotRewardDao extends Dao
     }
 
     /**
+     * 按用户查询奖励记录（对齐 05 §6 GET /ai/users/{id}/rewards）
+     *
+     * @param string $userId
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getByUser(string $userId)
+    {
+        return $this->fetchAll(['user_id' => $userId], ['created_time' => 'desc']);
+    }
+
+    /**
      * 按周期 + Robot 查询（同周期唯一结算）
      *
      * @param string $robotId

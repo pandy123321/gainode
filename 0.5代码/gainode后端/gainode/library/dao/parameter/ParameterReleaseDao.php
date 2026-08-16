@@ -27,4 +27,20 @@ class ParameterReleaseDao extends Dao
     {
         return $this->fetch(['idempotency_key' => $idempotencyKey]);
     }
+
+    /**
+     * 取当前 Active Release（status='active'，按 activated_at 倒序取最新）。
+     *
+     * 用于 56 级规则读取器（RobotRuleReader）：只有 Active Release 的 snapshot
+     * 才能作为正式规则来源；无则下游能力 fail-closed / UNAVAILABLE。
+     *
+     * @return ParameterReleaseModel|null
+     */
+    public function getActive()
+    {
+        return $this->fetch(
+            ['status' => ParameterReleaseModel::STATUS_ACTIVE],
+            ['activated_at' => 'desc', 'created_time' => 'desc']
+        );
+    }
 }

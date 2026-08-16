@@ -1,0 +1,90 @@
+# AI / Robot 对象 schema（05 §3 Robot/AIReward/RobotUpgradeOrder；S02-P04 落地）
+# decimal 字段一律 string（decimal(36,18)），禁 number/float。
+
+RobotSummary:
+  description: Robot 摘要投影（05 §3 Robot，无 Active Release 时 source_status=UNAVAILABLE）
+  type: object
+  required: [robot_id, level, status]
+  properties:
+    robot_id: { type: string }
+    level: { type: integer, minimum: 1, maximum: 56 }
+    status: { type: string, enum: [inactive, active, cooling, review, restricted, paused] }
+    standard_capacity: { type: string, description: 等级分配容量(decimal string，来自规则快照) }
+    rule_version: { type: string }
+
+RobotDetail:
+  description: Robot 详情投影（05 §3 Robot）
+  type: object
+  required: [robot_id, user_id, level, status]
+  properties:
+    robot_id: { type: string }
+    user_id: { type: string }
+    level: { type: integer, minimum: 1, maximum: 56 }
+    status: { type: string, enum: [inactive, active, cooling, review, restricted, paused] }
+    standard_capacity: { type: string }
+    capabilities: { type: array, items: { type: string }, description: 服务端下发能力列表 }
+    allowed_actions: { type: array, items: { type: string }, description: 服务端下发允许动作(前端只读) }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
+    source_status: { type: string, enum: [AVAILABLE, UNAVAILABLE] }
+    reason_code: { type: string, description: UNAVAILABLE 时的 I18N 安全 reason }
+
+RobotRuleSnapshot:
+  description: 56 级规则读取器投影（RobotRuleReader，无 Active Release 时 source_status=UNAVAILABLE）
+  type: object
+  required: [source_status]
+  properties:
+    source_status: { type: string, enum: [AVAILABLE, UNAVAILABLE] }
+    parameter_release_id: { type: string }
+    snapshot_id: { type: string }
+    rule_version: { type: string, description: AI.standard_capacity_rule_version }
+    power_cap_by_level: { type: object, additionalProperties: { type: string }, description: level(int)→power_cap(decimal string) }
+    upgrade_apt_requirement: { type: object, additionalProperties: true, description: 升级成本/要求(结构随 Release) }
+    ai_reward_budget_cap: { type: string }
+    ai_reward_period_cap: { type: string }
+    ai_reward_hold_period: { type: integer }
+    ai_reward_expiry_period: { type: integer }
+    ai_reward_claim_enabled: { type: boolean }
+    daily_yield_coefficient_source: { type: string }
+    daily_yield_coefficient_precision: { type: string, description: 系数精度(0 是合法值) }
+    reason_code: { type: string, description: UNAVAILABLE 时的 I18N 安全 reason }
+
+AIReward:
+  description: AI Reward 记录（05 §3 AIReward）
+  type: object
+  required: [reward_id, user_id, robot_id, state]
+  properties:
+    reward_id: { type: string }
+    user_id: { type: string }
+    robot_id: { type: string }
+    period: { type: string, description: 结算周期标识 }
+    standard_capacity: { type: string, description: 当期分配容量快照 }
+    daily_reward_coefficient: { type: string, description: 当天服务端系数(可为0) }
+    quantity_apt: { type: string, description: 待领取/已发放 APT 数量 }
+    state: { type: string, enum: [candidate, held, pending_claim, claiming, claimed, expired_returned, review, reversed] }
+    eligibility_snapshot_id: { type: string }
+    budget_snapshot_id: { type: string }
+    claim_id: { type: string }
+    ledger_entry_id: { type: string }
+    expires_at: { type: integer }
+
+RobotUpgradeOrder:
+  description: Robot 升级订单（05 §3 RobotUpgradeOrder，工作流对象）
+  type: object
+  required: [upgrade_order_id, robot_id, user_id, from_level, to_level, status]
+  properties:
+    upgrade_order_id: { type: string }
+    robot_id: { type: string }
+    user_id: { type: string }
+    from_level: { type: integer }
+    to_level: { type: integer }
+    apt_cost: { type: string, description: 升级花费 APT(decimal string) }
+    status: { type: string, enum: [pending, processing, completed, failed, cancelled] }
+    power_cap_after: { type: string }
+    capacities_after: { type: array, items: { type: string } }
+    cooling_end_at: { type: integer }
+    review_case_id: { type: string }
+    approval_id: { type: string }
+    ledger_entry_id: { type: string }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
