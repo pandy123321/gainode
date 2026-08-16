@@ -815,6 +815,36 @@ updated_at
 
 > `open`=检测到风险；`investigating`=RISK_ANALYST 分析；`under_review`=RISK_APPROVER 审批处置（**RISK_ANALYST ≠ RISK_APPROVER**）；`resolved`=处置措施已执行（申诉窗口内保持此态）；`closed`=案件归档终态。`appeal_eligible` 为字段非状态。
 
+### Agent（P1，growth，Owner 签核 2026-08-16）
+`active / suspended / terminated`
+
+> `active`=正常代理；`suspended`=风控暂停（可恢复）；`terminated`=终态封禁。恢复条件由风控合同定义。
+
+### Referral（P1，growth，Owner 签核 2026-08-16）
+`active / revoked / expired`
+
+> `active`=邀请关系有效；`revoked`=撤销/风控解除；`expired`=邀请活动到期。一 invitee 唯一 inviter，禁解绑/更换上级。
+
+### AgentEarning（P1，growth，Owner 签核 2026-08-16）
+`candidate / held / confirmed / reversed`
+
+> `candidate`=待定；`held`=暂扣；`confirmed`=平台收入确认后已确认；`reversed`=已冲正（append-only reversal，不覆盖历史）。Candidate/HELD 不可当成已支付。
+
+### AISignal（P1，internal，Owner 签核 2026-08-16）
+`active / expired / consumed / closed / invalid`
+
+> `active`=有效；`expired`=过期；`consumed`=已用尽；`closed`=管理关闭；`invalid`=数学校验失败。C 端不得返回 signal 明细。
+
+### AIRecommendation（P1，internal，Owner 签核 2026-08-16）
+`draft / active / expired / superseded`
+
+> `draft`=草稿；`active`=生效；`expired`=过期；`superseded`=被新版本取代。C 端不得返回推荐内部解释/供应商数据。
+
+### SimulationRun（P1，internal，Owner 签核 2026-08-16）
+`pending / running / completed / failed / cancelled`
+
+> `pending`=排队；`running`=运行中；`completed`=完成；`failed`=失败（不自动重试）；`cancelled`=已取消。确定性可复现。
+
 ### OTC 运营/用户展示映射
 
 以下展示映射不新增领域状态，canonical enum 以 §4 OTC 为准。

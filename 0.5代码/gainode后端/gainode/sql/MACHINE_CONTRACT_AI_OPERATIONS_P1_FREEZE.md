@@ -1,7 +1,7 @@
 # Machine Contract — AI Operations P1 合同 Freeze（候选）
 
-> 状态：**CANDIDATE（未 FROZEN）** — Owner Signoff 未签（9 项决策 D1~D9 待裁决）；Independent Review 未开始。
-> 说明：本文件为 AI Operations P1（AISignal / AIRecommendation / SimulationRun 三对象）的合同冻结候选。Owner 未签前，三对象 **CONTRACT_GAP/FAIL_CLOSED，不建表、不建 Service**；C 端泄露边界 FORBIDDEN；不继承 V1.x 矿机套利语义、不沿用硬编码 secret。
+> 状态：**OWNER_SIGNED（未 FROZEN）** — Owner Signoff 已签（2026-08-16，9 项决策 D1~D9 全部采纳 OPTION_A）；Independent Review 未开始。
+> 说明：本文件为 AI Operations P1（AISignal / AIRecommendation / SimulationRun 三对象）的合同冻结候选。Owner 已签 → 三对象 enum 落定、可进入快照 2（建 DDL/Model/DAO/Service/command 骨架）；C 端泄露边界 FORBIDDEN；不继承 V1.x 矿机套利语义、不沿用硬编码 secret。
 > 起草日期：2026-08-16
 > 关联 DDL：无（本快照为合同盘点，不生成 DDL）
 > 权威契约：`Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§3/§4/§8/§11）、`02_ECONOMIC_MODEL_AND_BUSINESS_RULES.md`（§5.4/§11）、`06_PARAMETER_DICTIONARY.md`（§4）
@@ -92,9 +92,9 @@
 
 ## 4. 状态合同（候选，未 FROZEN）
 
-> Owner 未签 → 三对象 status enum 未冻结。以下为候选 enum（对应 decision_request D1/D2/D3 RECOMMENDED_OPTION），**正式 FROZEN 前不生效，状态机全部 FAIL_CLOSED**。
+> Owner 已签（2026-08-16）→ 三对象 status enum 落定。以下为已签 enum（对应 decision_request D1/D2/D3 OPTION_A），**Independent Review 通过前状态机仍 FAIL_CLOSED，不写业务**（骨架可建）。
 
-### 4.1 AISignal（候选 enum：`active / expired / consumed / closed / invalid`，D1 OPTION_A）
+### 4.1 AISignal（已签 enum：`active / expired / consumed / closed / invalid`，D1 OPTION_A）
 
 ```text
 初态 = active
@@ -109,7 +109,7 @@ Writer = AISignalService（Owner 签后）
 账本副作用 = 无
 ```
 
-### 4.2 AIRecommendation（候选 enum：`draft / active / expired / superseded`，D2 OPTION_A）
+### 4.2 AIRecommendation（已签 enum：`draft / active / expired / superseded`，D2 OPTION_A）
 
 ```text
 初态 = draft
@@ -124,7 +124,7 @@ Writer = AIRecommendationService（Owner 签后）
 账本副作用 = 无（正式经济计算属 STAGE-02）
 ```
 
-### 4.3 SimulationRun（候选 enum：`pending / running / completed / failed / cancelled`，D3 OPTION_A）
+### 4.3 SimulationRun（已签 enum：`pending / running / completed / failed / cancelled`，D3 OPTION_A）
 
 ```text
 初态 = pending
@@ -139,7 +139,7 @@ Writer = SimulationRunService（Owner 签后）
 账本副作用 = 无（预算连接 D8 未签 → 关闭）
 ```
 
-**FAIL_CLOSED（Owner 未签）**：三对象无合法转移；`status` 未定义前 `varchar(32) NULL` + 不建表、不写业务。
+**FAIL_CLOSED（状态机未冻结）**：enum 已签但转移矩阵待 IR；Independent Review 通过前状态机 fail-closed，不写业务（骨架可建）。
 
 ## 5. 跨对象协同与内部边界（候选，未 FROZEN）
 
@@ -170,24 +170,24 @@ Writer = SimulationRunService（Owner 签后）
 ## 7. 冻结状态与 gate
 
 ```text
-OWNER_SIGNOFF = PENDING（D1~D9 未签）
+OWNER_SIGNOFF = SIGNED（2026-08-16，D1~D9 全部 OPTION_A）
 INDEPENDENT_REVIEW = PENDING
-FROZEN_STATUS = CANDIDATE
-AISIGNAL_ENUM = active/expired/consumed/closed/invalid（候选，D1）
-AI_RECOMMENDATION_ENUM = draft/active/expired/superseded（候选，D2）
-SIMULATION_RUN_ENUM = pending/running/completed/failed/cancelled（候选，D3）
+FROZEN_STATUS = OWNER_SIGNED（未 FROZEN）
+AISIGNAL_ENUM = active/expired/consumed/closed/invalid（已签，D1）
+AI_RECOMMENDATION_ENUM = draft/active/expired/superseded（已签，D2）
+SIMULATION_RUN_ENUM = pending/running/completed/failed/cancelled（已签，D3）
 OWNER_DECISION_MATRIX_COUNT = 9（D1~D9）
 LOCKED_COUNT = 1（D10 C 端边界）
-NO_SELF_INVENTED_STATE = YES（全部候选，未冻结）
+NO_SELF_INVENTED_STATE = YES（enum 已签，转移矩阵待 IR）
 NO_SELF_INVENTED_ROLE = YES（复用 05 §8）
-CONTRACT_GAP = YES（Owner 未签前不建表不建 Service）
+CONTRACT_GAP = NO（Owner 已签，可进快照 2 建 DDL/骨架）
 C_ENDPOINT_INTERNAL_LEAK = FORBIDDEN
 NO_LEGACY_MINER_INHERITANCE = YES（arbitrage_project* 矿机/分销不迁移）
 V1X_ARBITRAGE_UNTOUCHED = YES（只读盘点，不沿用 secret）
 AI_PREDICTION_BUDGET_ISOLATION = YES
 ```
 
-正式 FROZEN 前须：Owner 签 D1~D9 → 更新 05 / 06 → Freeze Candidate → Independent Review 通过 → FROZEN → 快照 2 建 DDL/Model/DAO/Service/command。
+正式 FROZEN 前须：Owner 签 D1~D9 ✅（2026-08-16）→ 更新 05 / 06 ✅ → Freeze Candidate → Independent Review 通过 → FROZEN → 快照 2 建 DDL/Model/DAO/Service/command。
 
 ## 信息来源
 

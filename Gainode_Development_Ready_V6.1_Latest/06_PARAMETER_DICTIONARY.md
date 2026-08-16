@@ -193,6 +193,11 @@ prediction_contribution_period_cap
 
 P0 可以建 Definition，但不开正式功能。
 
+Owner 签核（2026-08-16，S01-P07 D4/D8 OPTION_A）：
+- 层级深度 ≤ 2 代（直推 + 二代）；team_pool 更深层级（p3~p6）留 STAGE-02 单独决策。
+- 增长奖励资金来源 = 独立 growth treasury budget（走 ParameterRelease，禁用户本金/退款/Prediction 结算）。
+- 佣金确认时点 = 平台收入确认后；回滚 = append-only reversal（复用 2B-1 CorrectionCase/RefundCase）。
+
 ## 10. Treasury / Finance
 
 ```text

@@ -399,10 +399,16 @@ Prediction funds → AI budget = FORBIDDEN
 P1，不阻塞首发。
 
 保留原则：
-- 邀请关系可以共用；
+- 邀请关系可以共用（邀请码可复用；但一 invitee 唯一 inviter，关系唯一，见下 Owner 签核）；
 - AI 与 Prediction 奖励基础分开；
 - 不允许用用户本金/退款资金付增长奖励；
 - Candidate/HELD 不可当成已支付。
+
+Owner 签核（2026-08-16，S01-P07 全 OPTION_A）：
+- 一 invitee 唯一 inviter，禁解绑/更换上级（关系终身固定）。
+- 层级深度 ≤ 2 代；team_pool 更深层级留 STAGE-02。
+- 佣金确认 = 平台收入确认后；回滚 = append-only reversal（复用 2B-1 CorrectionCase/RefundCase）。
+- 资金来源 = 独立 growth treasury budget（走 ParameterRelease）。
 
 ## 13. 收入确认
 

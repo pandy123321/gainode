@@ -1,6 +1,6 @@
 # Owner Decision Request: S01-P08 AI Operations P1 合同
 
-> 状态：**OPEN_OWNER_DECISION**（9 项，D1~D9，全部 OWNER_DECISION_REQUIRED）+ 1 项 LOCKED（D10 C 端边界）
+> 状态：**OWNER_SIGNED**（2026-08-16，9 项 D1~D9 全部采纳 OPTION_A）+ 1 项 LOCKED（D10 C 端边界）
 > 起草日期：2026-08-16
 > 任务：`.project-ai/tasks/TASK-20260816-007/`
 > 关联候选合同：`sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md`
@@ -162,8 +162,25 @@ VIOLATION = Scope Finding（直接禁止并报 Scope Finding，不可申请豁�
 ```text
 OWNER_DECISION_COUNT = 9（D1~D9）
 LOCKED_COUNT = 1（D10 C 端边界）
-ALL_OPEN = YES（Owner 未签）
-DEFAULT_FAIL_CLOSED = YES（三对象不建表不建 Service）
+OWNER_SIGNOFF_DATE = 2026-08-16
+OWNER_SIGNOFF_SCOPE = 全部 9 项采纳 OPTION_A
+ALL_OPEN = NO
+DEFAULT_FAIL_CLOSED = 解除（三对象可进入快照 2：建 DDL/Model/DAO/Service/command 骨架）
 C_ENDPOINT_INTERNAL_LEAK = FORBIDDEN
 NO_LEGACY_MINER_INHERITANCE = YES
 ```
+
+逐项签核结果（2026-08-16，全部 OPTION_A）：
+
+| # | 决策 | 落定值 |
+|---|---|---|
+| D1 | AISignal.status | `active / expired / consumed / closed / invalid` |
+| D2 | AIRecommendation.status | `draft / active / expired / superseded` |
+| D3 | SimulationRun.status | `pending / running / completed / failed / cancelled` |
+| D4 | retention 期限 | 固定期限：raw 30 天 / 归一化 90 天 |
+| D5 | 供应商许可 | 仅内部使用（不向 C 端再分发任何供应商数据/衍生 signal） |
+| D6 | Authoritative Writer | 系统内部进程写（无 END_USER 写路径；管理走 ADMIN_SECURITY） |
+| D7 | 重试/幂等 | dedupe_key 强制唯一（信号 upsert 幂等）；SimulationRun 失败不自动重试 |
+| D8 | 预算连接 | 预留连接字段（budget_ref/mapped_apt_budget），P1 不启用 |
+| D9 | 模型版本 | 复用 06 参数生命周期（Definition→Candidate→Simulation→Approval→Release） |
+| D10 | C 端输出边界 | LOCKED（非 Owner 决策）：C 端不得返回 signal/profit/position/payload |

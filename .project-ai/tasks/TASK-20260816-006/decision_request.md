@@ -1,6 +1,6 @@
 # Owner Decision Request: S01-P07 Affiliate/Agent P1 合同
 
-> 状态：**OPEN_OWNER_DECISION**（11 项，D1~D11，全部 OWNER_DECISION_REQUIRED）
+> 状态：**OWNER_SIGNED**（2026-08-16，11 项 D1~D11 全部采纳 OPTION_A）
 > 起草日期：2026-08-16
 > 任务：`.project-ai/tasks/TASK-20260816-006/`
 > 关联候选合同：`sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md`
@@ -180,7 +180,25 @@ RESUME_CONDITION = 裁决后补 05 §3/§8
 
 ```text
 OWNER_DECISION_COUNT = 11（D1~D11）
-ALL_OPEN = YES（Owner 未签）
-DEFAULT_FAIL_CLOSED = YES（三对象不建表不建 Service；P0 奖励关闭）
+OWNER_SIGNOFF_DATE = 2026-08-16
+OWNER_SIGNOFF_SCOPE = 全部 11 项采纳 OPTION_A
+ALL_OPEN = NO
+DEFAULT_FAIL_CLOSED = 解除（三对象可进入快照 2：建 DDL/Model/DAO/Service 骨架）
 NO_LEGACY_COMMISSION_INHERITANCE = YES
 ```
+
+逐项签核结果（2026-08-16，全部 OPTION_A）：
+
+| # | 决策 | 落定值 |
+|---|---|---|
+| D1 | Agent.status | `active / suspended / terminated` |
+| D2 | Referral.status | `active / revoked / expired` |
+| D3 | AgentEarning.status | `candidate / held / confirmed / reversed` |
+| D4 | 层级最大深度 | 2 代（直推 + 二代；team_pool 更深层级留 STAGE-02） |
+| D5 | 归属 | 一 invitee 唯一 inviter（邀请码可复用，关系唯一） |
+| D6 | 解绑/更换上级 | 禁止（关系终身固定） |
+| D7 | earning 确认时点 | 平台收入确认后（关联 Settlement=paid） |
+| D8 | 预算来源 | 独立 growth treasury budget（走 ParameterRelease） |
+| D9 | 回滚 | append-only reversal（复用 2B-1 CorrectionCase/RefundCase） |
+| D10 | 税务/合规 | 预留地区/税号字段，P1 不启用（fail-closed） |
+| D11 | PII | 最小化暴露（仅 agent_code/层级，不暴露 email/phone/实名） |
