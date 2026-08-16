@@ -1,0 +1,18 @@
+{
+  "app": { "name": "Gainode" },
+  "common": {
+    "loading": "불러오는 중…",
+    "empty": "데이터가 없습니다",
+    "error": "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "retry": "다시 시도",
+    "restricted": "제한됨",
+    "unknownResult": "결과 확인 중…",
+    "confirm": "확인",
+    "cancel": "취소"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC 거래에는 위험이 따릅니다. 진행 전 관련 규칙을 확인해 주세요."
+    }
+  }
+}

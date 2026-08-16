@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "generated": "2026-08-16",
+  "status": "ENGINEERING_DRAFT",
+  "keys": [
+    { "key": "app.name", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.loading", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.empty", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.error", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.retry", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.restricted", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.unknownResult", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.confirm", "page_id": "COMMON", "sensitive": false },
+    { "key": "common.cancel", "page_id": "COMMON", "sensitive": false },
+    { "key": "otc.risk_disclosure.body", "page_id": "M-OTC-001", "sensitive": true }
+  ]
+}

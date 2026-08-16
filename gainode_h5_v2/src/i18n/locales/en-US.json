@@ -1,0 +1,18 @@
+{
+  "app": { "name": "Gainode" },
+  "common": {
+    "loading": "Loading…",
+    "empty": "No data yet",
+    "error": "Something went wrong. Please try again.",
+    "retry": "Retry",
+    "restricted": "Restricted",
+    "unknownResult": "Confirming result…",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC trading involves risk. Please review and confirm the relevant rules before proceeding."
+    }
+  }
+}

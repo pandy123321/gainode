@@ -1,0 +1,8 @@
+{
+  "description": "敏感文案签核清单（08 §15.7/§15.8）。PENDING_HUMAN_REVIEW = 待 Product/Legal/Compliance Owner 签核，不得宣称最终生产文案。",
+  "status": "PENDING_HUMAN_REVIEW",
+  "review_required_by": ["PRODUCT", "LEGAL", "COMPLIANCE"],
+  "keys": [
+    { "key": "otc.risk_disclosure.body", "category": "FINANCIAL", "status": "PENDING_HUMAN_REVIEW" }
+  ]
+}

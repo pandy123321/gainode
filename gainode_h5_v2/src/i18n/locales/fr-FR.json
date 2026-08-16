@@ -1,0 +1,18 @@
+{
+  "app": { "name": "Gainode" },
+  "common": {
+    "loading": "Chargement…",
+    "empty": "Aucune donnée",
+    "error": "Une erreur est survenue. Veuillez réessayer plus tard.",
+    "retry": "Réessayer",
+    "restricted": "Restreint",
+    "unknownResult": "Confirmation du résultat…",
+    "confirm": "Confirmer",
+    "cancel": "Annuler"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "Le trading OTC comporte des risques. Veuillez consulter les règles avant de continuer."
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "app": { "name": "Gainode" },
+  "common": {
+    "loading": "Wird geladen…",
+    "empty": "Keine Daten",
+    "error": "Etwas ist schiefgelaufen. Bitte später erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "restricted": "Eingeschränkt",
+    "unknownResult": "Ergebnis wird bestätigt…",
+    "confirm": "Bestätigen",
+    "cancel": "Abbrechen"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "Der OTC-Handel ist mit Risiken verbunden. Bitte prüfen Sie die Regeln, bevor Sie fortfahren."
+    }
+  }
+}
