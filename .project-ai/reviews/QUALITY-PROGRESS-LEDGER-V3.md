@@ -30,6 +30,10 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 1 | 0 | CHANGES_REQUIRED | YES | NOT_APPLICABLE |
+| STAGE-02 | S02-P07-GOVERNANCE | 678b61a | bc7daf4 | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P08-AI-ENGINE | 273513a | 4e68838 | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
+| STAGE-03 | S03-P00-FRONTEND-FREEZE | 4e68838 | c30315a | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
+| STAGE-03 | S03-P01-H5-BASE | c30315a | 23e2a63 | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
 | STAGE-03 | S03-P02-H5-AUTH | 23e2a63 | 87136de | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
 | STAGE-03 | S03-P02-H5-KYC-NOTICE | 87136de | a90310f | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
 
@@ -59,9 +63,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 继续逐个外部复审：S03-P02 H5-02 已审（CHANGES_REQUIRED）；待审历史业务 commit（S02-P07 bc7daf4、S02-P08 4e68838、S03-P00 e2ea3c2/c30315a、S02-P06 修复 f088d7f、密钥脱敏 b50767e、S03-P01 23e2a63）
-NEXT_DEVELOPER_ACTION = 按外审 record_id=739/741 修复 S03-P02 H5-01/H5-02：fail-closed 收紧 Contract Gap 处置（KYC form meta/consent、attachment_ref、Notice markRead、created_at、entitlement 刷新）
-OWNER_DECISION_REQUIRED = YES（①S03-P02 P1-3 Recovery verify 合同冲突；②H5-02 P1-1/P1-2/P1-3 涉及 Contract Gap 是否可 best-effort 的边界；③逐个复审历史 commit 的 HEAD 回退策略）
+NEXT_QUALITY_ACTION = 继续逐个外部复审历史 commit：S02-P08 4e68838、S03-P00 e2ea3c2/c30315a、S02-P06 修复 f088d7f、密钥脱敏 b50767e、S03-P01 23e2a63；S02-P07 bc7daf4 已审（CHANGES_REQUIRED）；S03-P02 H5-01/H5-02 已审（CHANGES_REQUIRED）
+NEXT_DEVELOPER_ACTION = 按外审修复：S02-P07（record_id=742：角色授权/SoD 证据/状态完成语义/Idempotency/attempt_count/OpenAPI parity）；S03-P02 H5-01/H5-02（record_id=739/741：fail-closed 收紧 Contract Gap）
+OWNER_DECISION_REQUIRED = YES（①S03-P02 P1-3 Recovery verify 合同冲突；②H5-02 P1-1/P1-2/P1-3 涉及 Contract Gap 是否可 best-effort 的边界；③S02-P07 P1-2 Actor-level SoD 需 DDL/合同证据或 FAIL_CLOSED；④逐个复审历史 commit 的 HEAD 回退策略）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -287,6 +291,36 @@ DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = YES（S02-P06 需修复后复审）
 FORMAL_STAGE_GATE = NOT_APPLICABLE
 GOVERNANCE_OBSERVATIONS = 0（OBS-002 关闭仍成立；V3.4 基线问题单独记 P2-1）
 LAST_CHECKED_AT = 2026-08-16T19:30+08:00
+```
+
+### S02-P07-GOVERNANCE（外部审核 CHANGES_REQUIRED）
+
+```text
+DEVELOPER_BASE_COMMIT = 678b61a（S02-P06 OTC-Power）
+DEVELOPER_SNAPSHOT_COMMIT = bc7daf4
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1（外部 ChatGPT 独立审核）
+REVIEW_STATUS = CHANGES_REQUIRED
+P0_OPEN = 0
+P1_OPEN = 3
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 3（P2-001 Idempotency/request_id 缺失；P2-002 attempt_count 重试计数错误；P2-003 OpenAPI 与 05 字段漂移）
+EXTERNAL_REVIEW_ID = 742（2026-08-17T02:06:48 完成）
+EXTERNAL_VERDICT = CHANGES_REQUIRED（不建议合并）
+EXTERNAL_FINDINGS =
+  P1-1 = 六域 Authoritative Writer 基本只校验状态，未校验冻结角色/data_scope 授权
+  P1-2 = Parameter/Risk 的 Actor-level SoD 无法证明（role switching bypass），却仍 fail-open 推进审批
+  P1-3 = active/resolved/executed 等「业务完成」语义状态在真实副作用/证据未完成时提前写入
+  P2-1 = 状态转移无真正 Idempotency，Audit request_id 全部写空
+  P2-2 = NotificationDelivery attempt_count 永远写 1，retry 不递增
+  P2-3 = governance OpenAPI Schema 与 05 最低对象合同字段漂移（created_at 等）
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A（待 Developer 修复）
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = CHANGES_REQUIRED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO（V3.4 一开到底；Finding 转 Developer 修复队列）
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+LAST_CHECKED_AT = 2026-08-17T02:10+08:00
 ```
 
 ### S03-P02-H5-AUTH（外部审核 CHANGES_REQUIRED）
