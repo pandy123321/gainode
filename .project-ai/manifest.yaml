@@ -177,7 +177,7 @@ decisionSources:
     provenance: "OWNER_DIRECTIVE 2026-08-11. Re-evaluated 2026-08-12 per IR-001 P1-010: Override Contract formalized 2026-08-12 per OWNER_DIRECTIVE."
 
   p0_001_s3_remediated:
-    value: "FULLY CLOSED 2026-08-12. OWNER_DIRECTIVE: V2.0 改用后端预签名 URL（POST /api/upload/presigned-url → S3 presigned PUT）。旧 Access Key AKIAWNHTHADXNYVAT74S 已在 AWS IAM 控制台完成轮换（Owner confirmed 2026-08-12 15:58 UTC+8）。"
+    value: "FULLY CLOSED 2026-08-12. OWNER_DIRECTIVE: V2.0 改用后端预签名 URL（POST /api/upload/presigned-url → S3 presigned PUT）。旧 Access Key AKIA-ROTATED-OLD-KEY 已在 AWS IAM 控制台完成轮换（Owner confirmed 2026-08-12 15:58 UTC+8）。"
     decision_date: "2026-08-12"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE + RUNTIME_EVIDENCE — user confirmed key rotation completed 2026-08-12"

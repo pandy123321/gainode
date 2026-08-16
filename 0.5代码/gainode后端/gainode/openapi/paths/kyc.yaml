@@ -1,0 +1,53 @@
+# KYC 路径（05 §3 KycCase / §4 KYC 状态机）
+
+me_kyc:
+  get:
+    operationId: kyc_me
+    summary: 我的 KYC 案件
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: KYC 案件
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/kyc.yaml#/KycCase' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+kyc_submit:
+  post:
+    operationId: kyc_submit
+    summary: 提交 KYC
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/kyc.yaml#/KycSubmitRequest' }
+    responses:
+      '200':
+        description: 提交成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/WriteResult' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/kyc.yaml#/KycCase' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

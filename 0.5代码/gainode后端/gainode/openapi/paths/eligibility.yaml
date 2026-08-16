@@ -1,0 +1,43 @@
+# Eligibility / LoginAudit 路径（05 §3 FeatureEntitlement / LoginAudit）
+
+me_eligibility:
+  get:
+    operationId: eligibility_me
+    summary: 资格聚合（global_p / AI / Prediction）
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: 资格聚合
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/eligibility.yaml#/EligibilityResponse' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+me_login_audit:
+  get:
+    operationId: user_login_audit
+    summary: 登录审计（source 未裁决 → UNAVAILABLE）
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: 登录审计投影
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/user.yaml#/LoginAudit' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

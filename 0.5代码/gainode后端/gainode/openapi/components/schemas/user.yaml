@@ -1,0 +1,75 @@
+# User / Session / Security 对象 schema（05 §3 User / AuthSession / MfaEnrollment / SecurityProfile / SessionDevice / LoginAudit）
+
+User:
+  description: 会员最低字段（05 §3 User）
+  type: object
+  required: [user_id, status, display_name, locale, timezone, global_p_level, ai_reward_eligibility, prediction_eligibility]
+  properties:
+    user_id: { type: string }
+    status: { type: string, enum: [active, restricted, suspended, closed] }
+    display_name: { type: string }
+    locale: { type: string }
+    timezone: { type: string, nullable: true }
+    global_p_level: { type: string }
+    ai_reward_eligibility: { type: boolean }
+    prediction_eligibility: { type: boolean }
+    created_at: { type: integer }
+    updated_at: { type: integer }
+
+SessionDevice:
+  description: 会话设备投影（05 §3 SessionDevice）
+  type: object
+  required: [session_id, is_current, revocable]
+  properties:
+    session_id: { type: string }
+    device_fingerprint: { type: string, nullable: true }
+    os: { type: string, nullable: true }
+    browser: { type: string, nullable: true }
+    ip: { type: string, nullable: true }
+    location_region: { type: string, nullable: true }
+    last_active_at: { type: integer, nullable: true }
+    is_current: { type: boolean }
+    revocable: { type: boolean }
+
+MfaEnrollment:
+  description: MFA 注册（05 §3 / §4）
+  type: object
+  required: [enrollment_id, user_id, method_type, status]
+  properties:
+    enrollment_id: { type: string }
+    user_id: { type: string }
+    method_type: { type: string, enum: [totp] }
+    status: { type: string, enum: [pending, active, revoked] }
+    enrolled_at: { type: integer, nullable: true }
+    last_verified_at: { type: integer, nullable: true }
+    backup_codes_active: { type: boolean }
+    device_info: { type: string, nullable: true }
+
+SecurityProfile:
+  description: 安全画像投影（05 §3 SecurityProfile）
+  type: object
+  required: [user_id, mfa_enrolled_methods]
+  properties:
+    user_id: { type: string }
+    mfa_enrolled_methods: { type: array, items: { type: string } }
+    mfa_required_actions: { type: array, items: { type: string } }
+    login_history_window: { type: string, nullable: true }
+    suspicious_flags: { type: array, nullable: true, items: { type: string } }
+    last_password_change: { type: integer, nullable: true }
+    last_security_review: { type: integer, nullable: true }
+    policy_version: { type: string, nullable: true }
+
+LoginAudit:
+  description: 登录审计投影（05 §3 LoginAudit，source 未裁决 → UNAVAILABLE）
+  type: object
+  required: [audit_id, user_id, event_type, outcome, created_at]
+  properties:
+    audit_id: { type: string }
+    user_id: { type: string }
+    event_type: { type: string }
+    ip_address: { type: string, nullable: true }
+    device_fingerprint: { type: string, nullable: true }
+    outcome: { type: string, enum: [success, failure, mfa_required] }
+    failure_reason_code: { type: string, nullable: true }
+    challenge_type: { type: string, nullable: true }
+    created_at: { type: integer }

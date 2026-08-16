@@ -1,0 +1,32 @@
+# KYC 对象 schema（05 §3 KycCase / §4 KYC 状态机）
+
+KycCase:
+  description: KYC 案件（05 §3 / §4）
+  type: object
+  required: [case_id, user_id, kyc_level, status]
+  properties:
+    case_id: { type: string }
+    user_id: { type: string }
+    kyc_level: { type: string }
+    status: { type: string, enum: [not_started, pending, needs_info, approved, rejected, review] }
+    submitted_at: { type: integer, nullable: true }
+    reviewed_at: { type: integer, nullable: true }
+    reviewed_by: { type: string, nullable: true }
+    reason_code: { type: string, nullable: true }
+    reason_text_key: { type: string, nullable: true }
+    next_action: { type: string, nullable: true }
+    policy_version: { type: string, nullable: true }
+    rule_version: { type: string, nullable: true }
+
+KycSubmitRequest:
+  description: KYC 提交（附件走后端签发对象引用，不传用户上传直链明文）
+  type: object
+  required: [kyc_level, attachment_refs]
+  properties:
+    kyc_level: { type: string }
+    attachment_refs:
+      type: array
+      description: 后端签发的附件对象引用 ID
+      items: { type: string }
+    consent_version: { type: string }
+  additionalProperties: false

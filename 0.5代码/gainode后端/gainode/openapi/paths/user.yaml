@@ -1,0 +1,110 @@
+# User / MFA enrollment / SecurityProfile 路径（05 §3 User / MfaEnrollment / SecurityProfile）
+
+me:
+  get:
+    operationId: user_me
+    summary: 当前用户信息
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: 用户信息
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/user.yaml#/User' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+mfa_enrollment_setup:
+  post:
+    operationId: user_mfa_enrollment_setup
+    summary: MFA 注册发起
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/MfaEnrollmentSetupRequest' }
+    responses:
+      '200':
+        description: 返回一次性 secret/QR（不回显）
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/auth.yaml#/MfaEnrollmentSetupResponse' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+mfa_enrollment_confirm:
+  post:
+    operationId: user_mfa_enrollment_confirm
+    summary: MFA 注册确认
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/MfaEnrollmentConfirmRequest' }
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+mfa_enrollment_disable:
+  post:
+    operationId: user_mfa_enrollment_disable
+    summary: MFA 停用/恢复
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+security_profile:
+  get:
+    operationId: user_security_profile
+    summary: 安全画像
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: 安全画像
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/user.yaml#/SecurityProfile' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

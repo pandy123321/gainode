@@ -3,10 +3,9 @@ info:
   title: Gainode V2.0 API
   version: 2.0.0
   description: >
-    Gainode AI 体育分析与预测平台后端 API 契约（S02-P01 骨架）。
+    Gainode AI 体育分析与预测平台后端 API 契约（S02-P02 Auth/KYC/User/Eligibility 落地）。
     权威契约：05_DATA_STATE_PERMISSION_API_CONTRACT.md（§1/§2/§6/§7/§10）。
-    P0 path 骨架已冻结 operationId/security/统一响应；业务 request/response schema
-    在 S02-P02~P08 落地，不在此虚构未冻结字段。
+    Auth/KYC/User/Eligibility 已落地业务 schema；其余 P0 path 骨架保留 operationId/security/统一响应。
 servers:
   - url: /api/v1
     description: C 端（End User）
@@ -43,6 +42,27 @@ paths:
     $ref: './paths/auth.yaml#/me_sessions'
   /api/v1/me/sessions/{id}/revoke:
     $ref: './paths/auth.yaml#/me_session_revoke'
+  # ---- User / MFA / SecurityProfile（S02-P02，05 §3）----
+  /api/v1/me:
+    $ref: './paths/user.yaml#/me'
+  /api/v1/me/mfa/enrollments:
+    $ref: './paths/user.yaml#/mfa_enrollment_setup'
+  /api/v1/me/mfa/enrollments/{id}/confirm:
+    $ref: './paths/user.yaml#/mfa_enrollment_confirm'
+  /api/v1/me/mfa/enrollments/{id}/disable:
+    $ref: './paths/user.yaml#/mfa_enrollment_disable'
+  /api/v1/me/security-profile:
+    $ref: './paths/user.yaml#/security_profile'
+  # ---- KYC（S02-P02，05 §3/§4）----
+  /api/v1/me/kyc:
+    $ref: './paths/kyc.yaml#/me_kyc'
+  /api/v1/me/kyc/submit:
+    $ref: './paths/kyc.yaml#/kyc_submit'
+  # ---- Eligibility / LoginAudit（S02-P02，05 §3）----
+  /api/v1/me/eligibility:
+    $ref: './paths/eligibility.yaml#/me_eligibility'
+  /api/v1/me/login-audit:
+    $ref: './paths/eligibility.yaml#/me_login_audit'
   # ---- AI / Robot（05 §6）----
   /api/v1/ai/users/{id}/summary:
     $ref: './paths/robot.yaml#/user_summary'
@@ -171,6 +191,22 @@ components:
       $ref: './components/schemas/common.yaml#/WriteResult'
     PaginationCursor:
       $ref: './components/schemas/common.yaml#/PaginationCursor'
+    User:
+      $ref: './components/schemas/user.yaml#/User'
+    SessionDevice:
+      $ref: './components/schemas/user.yaml#/SessionDevice'
+    MfaEnrollment:
+      $ref: './components/schemas/user.yaml#/MfaEnrollment'
+    SecurityProfile:
+      $ref: './components/schemas/user.yaml#/SecurityProfile'
+    LoginAudit:
+      $ref: './components/schemas/user.yaml#/LoginAudit'
+    KycCase:
+      $ref: './components/schemas/kyc.yaml#/KycCase'
+    FeatureEntitlement:
+      $ref: './components/schemas/eligibility.yaml#/FeatureEntitlement'
+    EligibilityResponse:
+      $ref: './components/schemas/eligibility.yaml#/EligibilityResponse'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

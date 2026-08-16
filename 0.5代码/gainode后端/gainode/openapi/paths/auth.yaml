@@ -1,5 +1,5 @@
-# Auth / Session P0 路径骨架（05 §2.1）
-# 业务 request/response schema 在 S02-P02 落地；本包仅 operationId/security/统一响应。
+# Auth / Session P0 路径（05 §2.1）— S02-P02 落地业务 request/response schema。
+# 写操作统一 Idempotency-Key；统一响应见 responses/common.yaml。
 
 register:
   post:
@@ -9,8 +9,23 @@ register:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/RegisterRequest' }
     responses:
-      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '200':
+        description: 注册成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/WriteResult' }
+                - type: object
+                  properties:
+                    user_id: { type: string }
+                    account: { type: string }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
@@ -23,8 +38,22 @@ login:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/LoginRequest' }
     responses:
-      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '200':
+        description: 登录成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/auth.yaml#/AuthTokenResponse' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
@@ -37,6 +66,11 @@ otp_verify:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/OtpVerifyRequest' }
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
@@ -51,6 +85,11 @@ otp_resend:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/OtpResendRequest' }
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
@@ -65,8 +104,22 @@ mfa_verify:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/MfaVerifyRequest' }
     responses:
-      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '200':
+        description: MFA 验证成功
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/auth.yaml#/AuthTokenResponse' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
@@ -79,8 +132,22 @@ refresh:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/RefreshRequest' }
     responses:
-      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '200':
+        description: 刷新成功（refresh rotation）
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/auth.yaml#/AuthTokenResponse' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
@@ -106,6 +173,11 @@ recovery:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/RecoveryRequest' }
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
@@ -119,6 +191,11 @@ password_reset:
     security: []
     parameters:
       - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '../components/schemas/auth.yaml#/PasswordResetRequest' }
     responses:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
@@ -132,7 +209,16 @@ me_sessions:
     security:
       - bearerAuth: []
     responses:
-      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '200':
+        description: 会话列表
+        content:
+          application/json:
+            schema:
+              allOf:
+                - { $ref: '../components/schemas/common.yaml#/SuccessEnvelope' }
+                - type: object
+                  properties:
+                    data: { $ref: '../components/schemas/auth.yaml#/SessionListResponse' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 

@@ -1,0 +1,26 @@
+# FeatureEntitlement 资格 schema（05 §3 / §5 Allowed Actions）
+
+FeatureEntitlement:
+  description: 功能资格投影（05 §3 / §5）
+  type: object
+  required: [feature_key, allowed]
+  properties:
+    feature_key: { type: string }
+    allowed: { type: boolean }
+    reason_code: { type: string, nullable: true }
+    reason_text_key: { type: string, nullable: true }
+    next_action: { type: string, nullable: true }
+    allowed_actions: { type: array, items: { type: string } }
+    policy_version: { type: string, nullable: true }
+    rule_version: { type: string, nullable: true }
+    expires_at: { type: integer, nullable: true }
+
+EligibilityResponse:
+  description: 资格聚合（global_p / AI / Prediction 三分支，互不推导）
+  type: object
+  required: [user_id, global_p, ai, prediction]
+  properties:
+    user_id: { type: string }
+    global_p: { $ref: '#/FeatureEntitlement' }
+    ai: { $ref: '#/FeatureEntitlement' }
+    prediction: { $ref: '#/FeatureEntitlement' }
