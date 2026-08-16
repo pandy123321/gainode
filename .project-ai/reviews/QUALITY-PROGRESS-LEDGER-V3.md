@@ -29,7 +29,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P03-LEDGER-APTACCOUNT-POWER | 0084fae | 978ca8a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
-| STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 1 | 0 | CHANGES_REQUIRED | YES | NOT_APPLICABLE |
 
 ## 明细
 
@@ -57,9 +57,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 审核 S02-P07（Approval/Parameter/Risk/Support/Notice/Audit，随开发 agent 提交）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
-NEXT_DEVELOPER_ACTION = 推进 S02-P07（Approval/Parameter/Risk/Support/Notice/Audit）
-OWNER_DECISION_REQUIRED = PARTIAL（S01-P07/P08 20 项已签 2026-08-16 全 OPTION_A；S02-P02 4 项 TBC 待签；GitHub unblock-secret AKIA 待 Owner 标记；OBS-001 历史重写迹象待 Owner 确认）
+NEXT_QUALITY_ACTION = 等待 Developer 修复 S02-P06（OtcOrderService Guard/Role/经济 fail-closed + 负向测试）后重新独立复审；修复 S02-P06 前不得推进 S02-P07 审核结论
+NEXT_DEVELOPER_ACTION = 按外审 record_id=727 修复 S02-P06：O1-O12 Guard Matrix、经济 transition fail-closed、幂等/并发、补负向测试
+OWNER_DECISION_REQUIRED = YES（①V3.3/V3.4 基线矛盾需 Owner 定夺——07 文档 Git Tree 仍 V3.3，V3.4 凭证未 commit；②S02-P06 修复方向授权；③OBS-001 历史重写迹象待确认）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -257,27 +257,34 @@ GOVERNANCE_OBSERVATIONS = 1（OBS-002 developer trailer 简写 origin:developer�
 LAST_CHECKED_AT = 2026-08-16T18:58+08:00
 ```
 
-### S02-P06-OTC-POWER（Round 1）
+### S02-P06-OTC-POWER（Round 1 → 外部审核 CHANGES_REQUIRED）
 
 ```text
 DEVELOPER_BASE_COMMIT = c6d7357（S02-P05 质量审核提交）
 DEVELOPER_SNAPSHOT_COMMIT = 273513a
 SNAPSHOT_LOCKED = YES
-REVIEW_ROUND = 1
-REVIEW_STATUS = APPROVED
+REVIEW_ROUND = 1（本地 Quality 内审）
+REVIEW_STATUS = CHANGES_REQUIRED（外部 ChatGPT 独立审核否决 1d3f580，record_id=727）
 P0_OPEN = 0
-P1_OPEN = 0
-BLOCKING_P2_OPEN = 0
+P1_OPEN = 3
+BLOCKING_P2_OPEN = 1
 NON_BLOCKING_FINDINGS = 0
 P3 = 0
+EXTERNAL_REVIEW_ID = 727（2026-08-16T19:22:34 完成）
+EXTERNAL_VERDICT = CHANGES_REQUIRED（不建议合并）
+EXTERNAL_FINDINGS =
+  P1-1 = OTC 带经济副作用的 transition 只改 status，违反 fail-closed（OtcOrderService.php）
+  P1-2 = O1-O12 Trigger/Guard/Role 未执行，任意调用者可推进状态机
+  P1-3 = 审核证据时间线倒置（commit 18:55 < 快照声称 19:00/19:05）
+  P2-1 = 审核报告声称 V3.4，但 Git Tree 07 文档仍为 V3.3（V3.4 凭证未提交）
 DEVELOPER_ADJUDICATION_RECEIVED = N/A
-FIX_COMMIT = N/A
+FIX_COMMIT = N/A（待 Developer 修复）
 RE_REVIEW_STATUS = N/A
-PACKAGE_MERGE_RECOMMENDATION = APPROVED
-DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO
+PACKAGE_MERGE_RECOMMENDATION = CHANGES_REQUIRED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = YES（S02-P06 需修复后复审）
 FORMAL_STAGE_GATE = NOT_APPLICABLE
-GOVERNANCE_OBSERVATIONS = 0（Developer 已切换 V3.4 完整 trailer，OBS-002 关闭）
-LAST_CHECKED_AT = 2026-08-16T19:05+08:00
+GOVERNANCE_OBSERVATIONS = 0（OBS-002 关闭仍成立；V3.4 基线问题单独记 P2-1）
+LAST_CHECKED_AT = 2026-08-16T19:30+08:00
 ```
 
 ## 关键约束（全程保持）
@@ -301,7 +308,7 @@ S02-P02 Auth/KYC/User/Eligibility = DONE（APPROVED，35 文件六子流程，2 
 S02-P03 Ledger/AptAccount/Power = DONE（APPROVED，14 文件经济写路径，11 步模板 + L1/L2/L3 + CAS + 负余额保护，1 P3 负余额口径，48 断言）
 S02-P04 Robot/Reward/Upgrade = DONE（APPROVED，16 文件 56 级规则读取器 + 三状态轴骨架 + 只读投影，写路径 fail-closed，82 断言，0 Finding）
 S02-P05 Prediction P0 = DONE（APPROVED，18 文件 8 对象状态机骨架 + 只读投影 + ConsentReceipt grant，写路径 fail-closed，113 断言，0 Finding）
-S02-P06 OTC/Power = DONE（APPROVED，12 文件 OTC O1-O12 状态机 + Trade append-only + 只读投影，写路径 fail-closed，61 断言，0 Finding）
+S02-P06 OTC/Power = CHANGES_REQUIRED（外审 record_id=727 否决：12 文件 OTC O1-O12 状态机 Guard/Role/经济 fail-closed 缺失，3 P1 + 1 P2；待 Developer 修复后复审）
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
