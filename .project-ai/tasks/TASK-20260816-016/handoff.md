@@ -120,4 +120,6 @@ S02-P08 Integration   = PASS（24 断言）
 S02-P08 OpenAPI 解析  = PASS（aiops.yaml + gainode-v2.yaml）
 trailer               = Code-Origin: Developer + Git-Operator: Developer ✅
 FINAL_SELF_CHECK      = 范围无越界；未建 DDL；未触碰 apt_accounts；fail-closed 边界完整
+EXECUTION_PLAN_FREEZE_SHA256_MATCH = TRUE（V3.4，E48D6B8B22AF1C575528D2FB270D625C1EDEB2BF3B2C718C06171473A08CC8E8，UTF8_LF_NO_BOM，2026-08-16 核对）
+V3.4_RULE_ALIGNMENT   = 07 正文 §3 / 冻结凭证 V3.4 / manifest CR-20260816-004 / §16 变更流水 四处一致 ✅
 ```
