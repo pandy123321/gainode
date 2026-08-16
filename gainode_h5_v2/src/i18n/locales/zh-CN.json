@@ -96,6 +96,23 @@
       "review": "审核中",
       "restricted": "受限",
       "paused": "已暂停"
+    },
+    "upgrade_status": {
+      "pending": "待处理",
+      "processing": "处理中",
+      "completed": "已完成",
+      "failed": "失败",
+      "cancelled": "已取消"
+    },
+    "reward_state": {
+      "candidate": "候选",
+      "held": "已锁定",
+      "pending_claim": "待领取",
+      "claiming": "领取中",
+      "claimed": "已领取",
+      "expired_returned": "已过期退回",
+      "review": "审核中",
+      "reversed": "已冲正"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "暂无热门竞猜",
       "markets_participate": "参与",
       "markets_more": "更多"
+    },
+    "m_robot_001": {
+      "title": "Robot 控制中心",
+      "description": "查看你的 Robot 运行状态与下一步",
+      "restricted": "Robot 功能暂不可用",
+      "empty": "尚未创建 Robot",
+      "level": "等级",
+      "capacity": "标准容量",
+      "capability_title": "能力",
+      "capability_empty": "暂无能力数据",
+      "entry_start": "启动 / 停止",
+      "entry_upgrade": "升级",
+      "entry_levels": "56 级等级地图",
+      "entry_rewards": "收益与领取",
+      "entry_activity": "活动记录"
+    },
+    "m_robot_002": {
+      "title": "启动 / 停止确认",
+      "description": "启停操作尚未开放，敬请期待",
+      "restricted": "启停功能暂不可用"
+    },
+    "m_robot_003": {
+      "title": "Robot 升级",
+      "description": "升级功能尚未开放，敬请期待",
+      "restricted": "升级功能暂不可用"
+    },
+    "m_robot_004": {
+      "title": "升级结果",
+      "description": "升级订单处理结果",
+      "primary_action": "返回 Robot",
+      "from_level": "原等级",
+      "to_level": "目标等级",
+      "apt_cost": "APT 花费",
+      "power_cap_after": "升级后 Power Cap",
+      "order_id": "订单号",
+      "rule_version": "规则版本"
+    },
+    "m_robot_005": {
+      "title": "56 级等级地图",
+      "description": "等级规则尚未开放，敬请期待",
+      "restricted": "等级地图暂不可用"
+    },
+    "m_robot_006": {
+      "title": "收益与领取",
+      "description": "查看动态收益与领取记录",
+      "primary_action": "领取今日收益",
+      "empty": "暂无收益记录",
+      "claimable": "当前可领取",
+      "claim_restricted": "领取功能暂未开放，动态系数可能为 0",
+      "history_title": "收益记录",
+      "period": "周期"
+    },
+    "m_robot_007": {
+      "title": "活动记录",
+      "description": "活动记录尚未开放，敬请期待",
+      "restricted": "活动记录暂不可用"
     }
   }
 }

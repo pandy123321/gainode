@@ -96,6 +96,23 @@
       "review": "En revue",
       "restricted": "Restreint",
       "paused": "En pause"
+    },
+    "upgrade_status": {
+      "pending": "En attente",
+      "processing": "En cours",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "cancelled": "Annulé"
+    },
+    "reward_state": {
+      "candidate": "Candidat",
+      "held": "Bloqué",
+      "pending_claim": "À réclamer",
+      "claiming": "Réclamation en cours",
+      "claimed": "Réclamé",
+      "expired_returned": "Expiré & restitué",
+      "review": "En revue",
+      "reversed": "Annulé"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "Aucun pronostic populaire",
       "markets_participate": "Participer",
       "markets_more": "Plus"
+    },
+    "m_robot_001": {
+      "title": "Centre de contrôle Robot",
+      "description": "Voir l'état du Robot et la prochaine étape",
+      "restricted": "Robot est actuellement indisponible",
+      "empty": "Pas encore de Robot",
+      "level": "Niveau",
+      "capacity": "Capacité standard",
+      "capability_title": "Capacités",
+      "capability_empty": "Aucune donnée de capacité",
+      "entry_start": "Démarrer / Arrêter",
+      "entry_upgrade": "Mise à niveau",
+      "entry_levels": "Carte des 56 niveaux",
+      "entry_rewards": "Récompenses & réclamation",
+      "entry_activity": "Activité"
+    },
+    "m_robot_002": {
+      "title": "Confirmation démarrer / arrêter",
+      "description": "Démarrer/arrêter n'est pas encore disponible",
+      "restricted": "Démarrer/arrêter est actuellement indisponible"
+    },
+    "m_robot_003": {
+      "title": "Mise à niveau Robot",
+      "description": "La mise à niveau n'est pas encore disponible",
+      "restricted": "La mise à niveau est actuellement indisponible"
+    },
+    "m_robot_004": {
+      "title": "Résultat de mise à niveau",
+      "description": "Résultat de la commande de mise à niveau",
+      "primary_action": "Retour au Robot",
+      "from_level": "Niveau d'origine",
+      "to_level": "Niveau cible",
+      "apt_cost": "Coût APT",
+      "power_cap_after": "Power Cap après",
+      "order_id": "Numéro de commande",
+      "rule_version": "Version de règle"
+    },
+    "m_robot_005": {
+      "title": "Carte des 56 niveaux",
+      "description": "Les règles de niveau ne sont pas encore disponibles",
+      "restricted": "La carte des niveaux est actuellement indisponible"
+    },
+    "m_robot_006": {
+      "title": "Récompenses & réclamation",
+      "description": "Voir les récompenses dynamiques et l'historique",
+      "primary_action": "Réclamer la récompense du jour",
+      "empty": "Aucun enregistrement de récompense",
+      "claimable": "Réclamable maintenant",
+      "claim_restricted": "La réclamation n'est pas encore ouverte ; le coefficient dynamique peut être 0",
+      "history_title": "Enregistrements de récompense",
+      "period": "Période"
+    },
+    "m_robot_007": {
+      "title": "Activité",
+      "description": "L'activité n'est pas encore disponible",
+      "restricted": "L'activité est actuellement indisponible"
     }
   }
 }

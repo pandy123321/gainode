@@ -96,6 +96,23 @@
       "review": "Under review",
       "restricted": "Restricted",
       "paused": "Paused"
+    },
+    "upgrade_status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "reward_state": {
+      "candidate": "Candidate",
+      "held": "Held",
+      "pending_claim": "Claimable",
+      "claiming": "Claiming",
+      "claimed": "Claimed",
+      "expired_returned": "Expired & returned",
+      "review": "In review",
+      "reversed": "Reversed"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "No featured predictions",
       "markets_participate": "Join",
       "markets_more": "More"
+    },
+    "m_robot_001": {
+      "title": "Robot Control Center",
+      "description": "View your Robot status and next step",
+      "restricted": "Robot is currently unavailable",
+      "empty": "No Robot yet",
+      "level": "Level",
+      "capacity": "Standard capacity",
+      "capability_title": "Capabilities",
+      "capability_empty": "No capability data",
+      "entry_start": "Start / Stop",
+      "entry_upgrade": "Upgrade",
+      "entry_levels": "56-Level Map",
+      "entry_rewards": "Rewards & Claim",
+      "entry_activity": "Activity"
+    },
+    "m_robot_002": {
+      "title": "Start / Stop Confirmation",
+      "description": "Start/stop is not yet available",
+      "restricted": "Start/stop is currently unavailable"
+    },
+    "m_robot_003": {
+      "title": "Robot Upgrade",
+      "description": "Upgrade is not yet available",
+      "restricted": "Upgrade is currently unavailable"
+    },
+    "m_robot_004": {
+      "title": "Upgrade Result",
+      "description": "Upgrade order result",
+      "primary_action": "Back to Robot",
+      "from_level": "From level",
+      "to_level": "Target level",
+      "apt_cost": "APT cost",
+      "power_cap_after": "Power Cap after",
+      "order_id": "Order ID",
+      "rule_version": "Rule version"
+    },
+    "m_robot_005": {
+      "title": "56-Level Map",
+      "description": "Level rules are not yet available",
+      "restricted": "Level map is currently unavailable"
+    },
+    "m_robot_006": {
+      "title": "Rewards & Claim",
+      "description": "View dynamic rewards and claim history",
+      "primary_action": "Claim today's reward",
+      "empty": "No reward records",
+      "claimable": "Claimable now",
+      "claim_restricted": "Claim is not yet open; the dynamic coefficient may be 0",
+      "history_title": "Reward records",
+      "period": "Period"
+    },
+    "m_robot_007": {
+      "title": "Activity",
+      "description": "Activity is not yet available",
+      "restricted": "Activity is currently unavailable"
     }
   }
 }

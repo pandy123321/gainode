@@ -96,6 +96,23 @@
       "review": "In Prüfung",
       "restricted": "Eingeschränkt",
       "paused": "Pausiert"
+    },
+    "upgrade_status": {
+      "pending": "Ausstehend",
+      "processing": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "cancelled": "Storniert"
+    },
+    "reward_state": {
+      "candidate": "Kandidat",
+      "held": "Gesperrt",
+      "pending_claim": "Einlösbar",
+      "claiming": "Wird eingelöst",
+      "claimed": "Eingelöst",
+      "expired_returned": "Abgelaufen & zurückgegeben",
+      "review": "In Prüfung",
+      "reversed": "Storniert"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "Keine beliebten Prognosen",
       "markets_participate": "Teilnehmen",
       "markets_more": "Mehr"
+    },
+    "m_robot_001": {
+      "title": "Robot-Kontrollzentrum",
+      "description": "Robot-Status und nächsten Schritt ansehen",
+      "restricted": "Robot ist derzeit nicht verfügbar",
+      "empty": "Noch kein Robot",
+      "level": "Level",
+      "capacity": "Standardkapazität",
+      "capability_title": "Fähigkeiten",
+      "capability_empty": "Keine Fähigkeitsdaten",
+      "entry_start": "Starten / Stoppen",
+      "entry_upgrade": "Upgrade",
+      "entry_levels": "56-Level-Karte",
+      "entry_rewards": "Belohnungen & Einlösung",
+      "entry_activity": "Aktivität"
+    },
+    "m_robot_002": {
+      "title": "Start-/Stopp-Bestätigung",
+      "description": "Starten/Stoppen ist noch nicht verfügbar",
+      "restricted": "Starten/Stoppen ist derzeit nicht verfügbar"
+    },
+    "m_robot_003": {
+      "title": "Robot-Upgrade",
+      "description": "Upgrade ist noch nicht verfügbar",
+      "restricted": "Upgrade ist derzeit nicht verfügbar"
+    },
+    "m_robot_004": {
+      "title": "Upgrade-Ergebnis",
+      "description": "Ergebnis der Upgrade-Bestellung",
+      "primary_action": "Zurück zu Robot",
+      "from_level": "Von Level",
+      "to_level": "Ziel-Level",
+      "apt_cost": "APT-Kosten",
+      "power_cap_after": "Power Cap nachher",
+      "order_id": "Bestellnummer",
+      "rule_version": "Regelversion"
+    },
+    "m_robot_005": {
+      "title": "56-Level-Karte",
+      "description": "Level-Regeln sind noch nicht verfügbar",
+      "restricted": "Level-Karte ist derzeit nicht verfügbar"
+    },
+    "m_robot_006": {
+      "title": "Belohnungen & Einlösung",
+      "description": "Dynamische Belohnungen und Einlöseverlauf ansehen",
+      "primary_action": "Heutige Belohnung einlösen",
+      "empty": "Keine Belohnungsdatensätze",
+      "claimable": "Jetzt einlösbar",
+      "claim_restricted": "Einlösung ist noch nicht freigeschaltet; der dynamische Koeffizient kann 0 sein",
+      "history_title": "Belohnungsdatensätze",
+      "period": "Zeitraum"
+    },
+    "m_robot_007": {
+      "title": "Aktivität",
+      "description": "Aktivität ist noch nicht verfügbar",
+      "restricted": "Aktivität ist derzeit nicht verfügbar"
     }
   }
 }

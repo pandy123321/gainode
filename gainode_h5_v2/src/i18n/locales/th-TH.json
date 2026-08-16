@@ -96,6 +96,23 @@
       "review": "กำลังตรวจสอบ",
       "restricted": "ถูกจำกัด",
       "paused": "หยุดชั่วคราว"
+    },
+    "upgrade_status": {
+      "pending": "รอดำเนินการ",
+      "processing": "กำลังดำเนินการ",
+      "completed": "เสร็จสิ้น",
+      "failed": "ล้มเหลว",
+      "cancelled": "ยกเลิกแล้ว"
+    },
+    "reward_state": {
+      "candidate": "ผู้สมัคร",
+      "held": "ถูกล็อก",
+      "pending_claim": "รอรับ",
+      "claiming": "กำลังรับ",
+      "claimed": "รับแล้ว",
+      "expired_returned": "หมดอายุและคืนกลับ",
+      "review": "กำลังตรวจสอบ",
+      "reversed": "ถูกยกเลิก"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "ยังไม่มีทายผลยอดนิยม",
       "markets_participate": "เข้าร่วม",
       "markets_more": "เพิ่มเติม"
+    },
+    "m_robot_001": {
+      "title": "ศูนย์ควบคุม Robot",
+      "description": "ดูสถานะการทำงานของ Robot และขั้นตอนถัดไป",
+      "restricted": "ฟังก์ชัน Robot ใช้งานไม่ได้ชั่วคราว",
+      "empty": "ยังไม่มี Robot",
+      "level": "เลเวล",
+      "capacity": "ความจุมาตรฐาน",
+      "capability_title": "ความสามารถ",
+      "capability_empty": "ไม่มีข้อมูลความสามารถ",
+      "entry_start": "เริ่ม / หยุด",
+      "entry_upgrade": "อัปเกรด",
+      "entry_levels": "แผนที่ 56 เลเวล",
+      "entry_rewards": "รางวัลและการรับ",
+      "entry_activity": "กิจกรรม"
+    },
+    "m_robot_002": {
+      "title": "ยืนยันเริ่ม / หยุด",
+      "description": "การเริ่ม/หยุดยังไม่เปิดให้บริการ",
+      "restricted": "ฟังก์ชันเริ่ม/หยุดใช้งานไม่ได้ชั่วคราว"
+    },
+    "m_robot_003": {
+      "title": "อัปเกรด Robot",
+      "description": "การอัปเกรดยังไม่เปิดให้บริการ",
+      "restricted": "ฟังก์ชันอัปเกรดใช้งานไม่ได้ชั่วคราว"
+    },
+    "m_robot_004": {
+      "title": "ผลการอัปเกรด",
+      "description": "ผลคำสั่งอัปเกรด",
+      "primary_action": "กลับไปที่ Robot",
+      "from_level": "เลเวลเดิม",
+      "to_level": "เลเวลเป้าหมาย",
+      "apt_cost": "ค่าใช้จ่าย APT",
+      "power_cap_after": "Power Cap หลังอัปเกรด",
+      "order_id": "หมายเลขคำสั่ง",
+      "rule_version": "เวอร์ชันกฎ"
+    },
+    "m_robot_005": {
+      "title": "แผนที่ 56 เลเวล",
+      "description": "กฎเลเวลยังไม่เปิดให้บริการ",
+      "restricted": "แผนที่เลเวลใช้งานไม่ได้ชั่วคราว"
+    },
+    "m_robot_006": {
+      "title": "รางวัลและการรับ",
+      "description": "ดูรางวัลแบบไดนามิกและประวัติการรับ",
+      "primary_action": "รับรางวัลวันนี้",
+      "empty": "ไม่มีบันทึกรางวัล",
+      "claimable": "รับได้ตอนนี้",
+      "claim_restricted": "การรับยังไม่เปิด และค่าสัมประสิทธิ์ไดนามิกอาจเป็น 0",
+      "history_title": "บันทึกรางวัล",
+      "period": "รอบ"
+    },
+    "m_robot_007": {
+      "title": "กิจกรรม",
+      "description": "กิจกรรมยังไม่เปิดให้บริการ",
+      "restricted": "กิจกรรมใช้งานไม่ได้ชั่วคราว"
     }
   }
 }

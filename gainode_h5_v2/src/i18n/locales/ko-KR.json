@@ -96,6 +96,23 @@
       "review": "심사 중",
       "restricted": "제한됨",
       "paused": "일시중지"
+    },
+    "upgrade_status": {
+      "pending": "대기",
+      "processing": "처리 중",
+      "completed": "완료",
+      "failed": "실패",
+      "cancelled": "취소됨"
+    },
+    "reward_state": {
+      "candidate": "후보",
+      "held": "보류",
+      "pending_claim": "수령 대기",
+      "claiming": "수령 중",
+      "claimed": "수령됨",
+      "expired_returned": "만료 반환",
+      "review": "심사 중",
+      "reversed": "취소"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "인기 예측이 없습니다",
       "markets_participate": "참여",
       "markets_more": "더보기"
+    },
+    "m_robot_001": {
+      "title": "Robot 컨트롤 센터",
+      "description": "Robot 실행 상태와 다음 단계 확인",
+      "restricted": "Robot 기능을 현재 사용할 수 없습니다",
+      "empty": "아직 Robot이 없습니다",
+      "level": "레벨",
+      "capacity": "표준 용량",
+      "capability_title": "능력",
+      "capability_empty": "능력 데이터가 없습니다",
+      "entry_start": "시작 / 중지",
+      "entry_upgrade": "업그레이드",
+      "entry_levels": "56레벨 지도",
+      "entry_rewards": "보상 및 수령",
+      "entry_activity": "활동"
+    },
+    "m_robot_002": {
+      "title": "시작 / 중지 확인",
+      "description": "시작/중지는 아직 제공되지 않습니다",
+      "restricted": "시작/중지 기능을 현재 사용할 수 없습니다"
+    },
+    "m_robot_003": {
+      "title": "Robot 업그레이드",
+      "description": "업그레이드는 아직 제공되지 않습니다",
+      "restricted": "업그레이드 기능을 현재 사용할 수 없습니다"
+    },
+    "m_robot_004": {
+      "title": "업그레이드 결과",
+      "description": "업그레이드 주문 결과",
+      "primary_action": "Robot으로 돌아가기",
+      "from_level": "이전 레벨",
+      "to_level": "목표 레벨",
+      "apt_cost": "APT 비용",
+      "power_cap_after": "업그레이드 후 Power Cap",
+      "order_id": "주문 번호",
+      "rule_version": "규칙 버전"
+    },
+    "m_robot_005": {
+      "title": "56레벨 지도",
+      "description": "레벨 규칙은 아직 제공되지 않습니다",
+      "restricted": "레벨 지도를 현재 사용할 수 없습니다"
+    },
+    "m_robot_006": {
+      "title": "보상 및 수령",
+      "description": "동적 보상과 수령 기록 확인",
+      "primary_action": "오늘의 보상 수령",
+      "empty": "보상 기록이 없습니다",
+      "claimable": "현재 수령 가능",
+      "claim_restricted": "수령은 아직 열리지 않았으며 동적 계수는 0일 수 있습니다",
+      "history_title": "보상 기록",
+      "period": "기간"
+    },
+    "m_robot_007": {
+      "title": "활동",
+      "description": "활동 기록은 아직 제공되지 않습니다",
+      "restricted": "활동 기록을 현재 사용할 수 없습니다"
     }
   }
 }

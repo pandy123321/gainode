@@ -74,13 +74,48 @@ const router = createRouter({
       component: () => import('../views/notice/m-notice-001/index.vue'),
       meta: { pageId: 'M-NOTICE-001', auth: true },
     },
-    // ---- H5-03 Home 底部导航占位（H5-04/05/08 逐页替换为真实视图）----
+    // ---- H5-04 Robot（M-ROBOT-001..007）----
     {
       path: '/robot',
-      name: 'robot-placeholder',
-      component: () => import('../views/common/ComingSoonView.vue'),
-      props: { pageTitle: 'Robot', navActive: 'robot' },
+      name: 'robot-root',
+      component: () => import('../views/robot/m-robot-001/index.vue'),
       meta: { pageId: 'M-ROBOT-001', auth: true },
+    },
+    {
+      path: '/robot/start',
+      name: 'robot-start',
+      component: () => import('../views/robot/m-robot-002/index.vue'),
+      meta: { pageId: 'M-ROBOT-002', auth: true },
+    },
+    {
+      path: '/robot/upgrade',
+      name: 'robot-upgrade',
+      component: () => import('../views/robot/m-robot-003/index.vue'),
+      meta: { pageId: 'M-ROBOT-003', auth: true },
+    },
+    {
+      path: '/robot/upgrade/result/:id',
+      name: 'robot-upgrade-result',
+      component: () => import('../views/robot/m-robot-004/index.vue'),
+      meta: { pageId: 'M-ROBOT-004', auth: true },
+    },
+    {
+      path: '/robot/levels',
+      name: 'robot-levels',
+      component: () => import('../views/robot/m-robot-005/index.vue'),
+      meta: { pageId: 'M-ROBOT-005', auth: true },
+    },
+    {
+      path: '/robot/rewards',
+      name: 'robot-rewards',
+      component: () => import('../views/robot/m-robot-006/index.vue'),
+      meta: { pageId: 'M-ROBOT-006', auth: true },
+    },
+    {
+      path: '/robot/activity',
+      name: 'robot-activity',
+      component: () => import('../views/robot/m-robot-007/index.vue'),
+      meta: { pageId: 'M-ROBOT-007', auth: true },
     },
     {
       path: '/prediction',

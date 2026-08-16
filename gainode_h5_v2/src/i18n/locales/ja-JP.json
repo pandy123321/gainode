@@ -96,6 +96,23 @@
       "review": "審査中",
       "restricted": "制限",
       "paused": "一時停止"
+    },
+    "upgrade_status": {
+      "pending": "保留",
+      "processing": "処理中",
+      "completed": "完了",
+      "failed": "失敗",
+      "cancelled": "キャンセル"
+    },
+    "reward_state": {
+      "candidate": "候補",
+      "held": "保留",
+      "pending_claim": "受取待ち",
+      "claiming": "受取中",
+      "claimed": "受取済み",
+      "expired_returned": "期限切れで返却",
+      "review": "審査中",
+      "reversed": "取消"
     }
   },
   "page": {
@@ -188,6 +205,62 @@
       "markets_empty": "注目の予想はありません",
       "markets_participate": "参加",
       "markets_more": "もっと見る"
+    },
+    "m_robot_001": {
+      "title": "Robot コントロールセンター",
+      "description": "Robot の稼働状況と次のステップを確認",
+      "restricted": "Robot 機能は現在ご利用いただけません",
+      "empty": "Robot がまだありません",
+      "level": "レベル",
+      "capacity": "標準容量",
+      "capability_title": "能力",
+      "capability_empty": "能力データがありません",
+      "entry_start": "開始 / 停止",
+      "entry_upgrade": "アップグレード",
+      "entry_levels": "56レベルマップ",
+      "entry_rewards": "報酬と受取",
+      "entry_activity": "アクティビティ"
+    },
+    "m_robot_002": {
+      "title": "開始 / 停止の確認",
+      "description": "開始・停止はまだ利用できません",
+      "restricted": "開始・停止機能は現在利用できません"
+    },
+    "m_robot_003": {
+      "title": "Robot アップグレード",
+      "description": "アップグレードはまだ利用できません",
+      "restricted": "アップグレード機能は現在利用できません"
+    },
+    "m_robot_004": {
+      "title": "アップグレード結果",
+      "description": "アップグレード注文の結果",
+      "primary_action": "Robot に戻る",
+      "from_level": "元レベル",
+      "to_level": "目標レベル",
+      "apt_cost": "APT コスト",
+      "power_cap_after": "アップグレード後の Power Cap",
+      "order_id": "注文番号",
+      "rule_version": "ルールバージョン"
+    },
+    "m_robot_005": {
+      "title": "56レベルマップ",
+      "description": "レベルルールはまだ利用できません",
+      "restricted": "レベルマップは現在利用できません"
+    },
+    "m_robot_006": {
+      "title": "報酬と受取",
+      "description": "動的報酬と受取履歴を確認",
+      "primary_action": "本日の報酬を受け取る",
+      "empty": "報酬記録がありません",
+      "claimable": "現在受取可能",
+      "claim_restricted": "受取はまだ開放されておらず、動的係数は 0 になる場合があります",
+      "history_title": "報酬記録",
+      "period": "期間"
+    },
+    "m_robot_007": {
+      "title": "アクティビティ",
+      "description": "アクティビティはまだ利用できません",
+      "restricted": "アクティビティは現在利用できません"
     }
   }
 }
