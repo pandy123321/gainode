@@ -241,6 +241,25 @@ const router = createRouter({
       component: () => import('../views/settings/m-settings-001/index.vue'),
       meta: { pageId: 'M-SETTINGS-001', auth: true },
     },
+    // ---- H5-09 Support/工单（M-SUPPORT-001..003）----
+    {
+      path: '/support',
+      name: 'support',
+      component: () => import('../views/support/m-support-001/index.vue'),
+      meta: { pageId: 'M-SUPPORT-001', auth: true },
+    },
+    {
+      path: '/support/new',
+      name: 'support-new',
+      component: () => import('../views/support/m-support-002/index.vue'),
+      meta: { pageId: 'M-SUPPORT-002', auth: true },
+    },
+    {
+      path: '/support/:id',
+      name: 'support-detail',
+      component: () => import('../views/support/m-support-003/index.vue'),
+      meta: { pageId: 'M-SUPPORT-003', auth: true },
+    },
     {
       path: '/:pathMatch(.*)*',
       redirect: '/',

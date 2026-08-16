@@ -78,13 +78,13 @@ describe('M-ME-001 我的', () => {
     expect(w.find('[data-testid="me-mfa-status"]').text()).toContain('已绑定')
   })
 
-  it('入口分组渲染 + Support 未开放（coming soon）', async () => {
+  it('入口分组渲染 + Support 入口已接入 /support', async () => {
     const w = mount(MeRoot, { global: { stubs: { RouterLink: RouterLinkStub } } })
     await flushPromises()
     expect(w.find('[data-testid="me-entry-asset"]').exists()).toBe(true)
     expect(w.find('[data-testid="me-entry-security"]').exists()).toBe(true)
     expect(w.find('[data-testid="me-entry-settings"]').exists()).toBe(true)
-    expect(w.find('[data-testid="me-entry-support"]').text()).toContain('敬请期待')
+    expect(w.find('[data-testid="me-entry-support"]').attributes('href')).toBe('/support')
   })
 })
 

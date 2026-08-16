@@ -557,6 +557,29 @@
       "preferences_restricted": "偏好设置端点尚未开放",
       "legal_notices": "公告与消息",
       "logout": "退出登录"
+    },
+    "m_support_001": {
+      "title": "帮助与工单",
+      "description": "自助查找帮助并查看工单",
+      "primary_action": "创建工单",
+      "create_action": "创建工单",
+      "create_restricted": "工单功能尚未开放，暂不可创建",
+      "faq_title": "常见问题",
+      "faq_restricted": "常见问题暂未开放",
+      "tickets_title": "我的工单",
+      "tickets_restricted": "工单列表暂未开放"
+    },
+    "m_support_002": {
+      "title": "创建工单 / 申诉",
+      "description": "提交问题或申诉，并绑定具体对象",
+      "primary_action": "提交",
+      "restricted": "创建工单 / 申诉功能尚未开放"
+    },
+    "m_support_003": {
+      "title": "工单详情",
+      "description": "查看处理进度、回复与结论",
+      "primary_action": "回复",
+      "restricted": "工单详情功能尚未开放"
     }
   }
 }

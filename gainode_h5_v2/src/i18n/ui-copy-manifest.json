@@ -1,5 +1,5 @@
 {
-  "version": "1.8",
+  "version": "1.9",
   "generated": "2026-08-17",
   "status": "ENGINEERING_DRAFT",
   "keys": [
@@ -434,6 +434,23 @@
     { "key": "page.m_settings_001.preferences_title", "page_id": "M-SETTINGS-001", "sensitive": false },
     { "key": "page.m_settings_001.preferences_restricted", "page_id": "M-SETTINGS-001", "sensitive": false },
     { "key": "page.m_settings_001.legal_notices", "page_id": "M-SETTINGS-001", "sensitive": false },
-    { "key": "page.m_settings_001.logout", "page_id": "M-SETTINGS-001", "sensitive": false }
+    { "key": "page.m_settings_001.logout", "page_id": "M-SETTINGS-001", "sensitive": false },
+    { "key": "page.m_support_001.title", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.description", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.primary_action", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.create_action", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.create_restricted", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.faq_title", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.faq_restricted", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.tickets_title", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_001.tickets_restricted", "page_id": "M-SUPPORT-001", "sensitive": false },
+    { "key": "page.m_support_002.title", "page_id": "M-SUPPORT-002", "sensitive": false },
+    { "key": "page.m_support_002.description", "page_id": "M-SUPPORT-002", "sensitive": false },
+    { "key": "page.m_support_002.primary_action", "page_id": "M-SUPPORT-002", "sensitive": false },
+    { "key": "page.m_support_002.restricted", "page_id": "M-SUPPORT-002", "sensitive": false },
+    { "key": "page.m_support_003.title", "page_id": "M-SUPPORT-003", "sensitive": false },
+    { "key": "page.m_support_003.description", "page_id": "M-SUPPORT-003", "sensitive": false },
+    { "key": "page.m_support_003.primary_action", "page_id": "M-SUPPORT-003", "sensitive": false },
+    { "key": "page.m_support_003.restricted", "page_id": "M-SUPPORT-003", "sensitive": false }
   ]
 }

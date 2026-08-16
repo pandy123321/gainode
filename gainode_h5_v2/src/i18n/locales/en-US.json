@@ -557,6 +557,29 @@
       "preferences_restricted": "Preference endpoints are not available yet",
       "legal_notices": "Announcements & notifications",
       "logout": "Sign out"
+    },
+    "m_support_001": {
+      "title": "Help & Tickets",
+      "description": "Self-help and view your tickets",
+      "primary_action": "New ticket",
+      "create_action": "New ticket",
+      "create_restricted": "Ticket creation is not yet available",
+      "faq_title": "FAQ",
+      "faq_restricted": "FAQ is not yet available",
+      "tickets_title": "My tickets",
+      "tickets_restricted": "Ticket list is not yet available"
+    },
+    "m_support_002": {
+      "title": "New ticket / Appeal",
+      "description": "Submit an issue or appeal with a linked object",
+      "primary_action": "Submit",
+      "restricted": "Ticket / appeal creation is not yet available"
+    },
+    "m_support_003": {
+      "title": "Ticket details",
+      "description": "View progress, replies and outcome",
+      "primary_action": "Reply",
+      "restricted": "Ticket details are not yet available"
     }
   }
 }

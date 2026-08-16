@@ -546,6 +546,29 @@
       "preferences_restricted": "기본 설정 엔드포인트는 아직 제공되지 않습니다",
       "legal_notices": "공지 및 알림",
       "logout": "로그아웃"
+    },
+    "m_support_001": {
+      "title": "도움말 및 티켓",
+      "description": "자가 해결 및 내 티켓 확인",
+      "primary_action": "티켓 만들기",
+      "create_action": "티켓 만들기",
+      "create_restricted": "티켓 생성 기능은 아직 제공되지 않습니다",
+      "faq_title": "자주 묻는 질문",
+      "faq_restricted": "자주 묻는 질문은 아직 제공되지 않습니다",
+      "tickets_title": "내 티켓",
+      "tickets_restricted": "티켓 목록은 아직 제공되지 않습니다"
+    },
+    "m_support_002": {
+      "title": "티켓 만들기 / 이의 제기",
+      "description": "문제 또는 이의를 대상 객체와 함께 제출",
+      "primary_action": "제출",
+      "restricted": "티켓 / 이의 제기 기능은 아직 제공되지 않습니다"
+    },
+    "m_support_003": {
+      "title": "티켓 상세",
+      "description": "진행 상황, 답변, 결론 확인",
+      "primary_action": "답장",
+      "restricted": "티켓 상세 기능은 아직 제공되지 않습니다"
     }
   }
 }

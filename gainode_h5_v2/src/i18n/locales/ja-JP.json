@@ -546,6 +546,29 @@
       "preferences_restricted": "設定エンドポイントはまだ利用できません",
       "legal_notices": "告知と通知",
       "logout": "ログアウト"
+    },
+    "m_support_001": {
+      "title": "ヘルプとチケット",
+      "description": "セルフヘルプとチケット確認",
+      "primary_action": "チケット作成",
+      "create_action": "チケット作成",
+      "create_restricted": "チケット作成は現在ご利用いただけません",
+      "faq_title": "よくある質問",
+      "faq_restricted": "よくある質問は現在ご利用いただけません",
+      "tickets_title": "マイチケット",
+      "tickets_restricted": "チケット一覧は現在ご利用いただけません"
+    },
+    "m_support_002": {
+      "title": "チケット作成 / 異議申立て",
+      "description": "問題や異議を対象オブジェクトと共に送信",
+      "primary_action": "送信",
+      "restricted": "チケット / 異議申立て作成は現在ご利用いただけません"
+    },
+    "m_support_003": {
+      "title": "チケット詳細",
+      "description": "進捗・返信・結果を確認",
+      "primary_action": "返信",
+      "restricted": "チケット詳細は現在ご利用いただけません"
     }
   }
 }

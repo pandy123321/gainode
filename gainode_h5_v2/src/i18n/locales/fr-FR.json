@@ -546,6 +546,29 @@
       "preferences_restricted": "Les points de terminaison des préférences ne sont pas encore disponibles",
       "legal_notices": "Annonces et notifications",
       "logout": "Se déconnecter"
+    },
+    "m_support_001": {
+      "title": "Aide et tickets",
+      "description": "Aide en libre-service et suivi de vos tickets",
+      "primary_action": "Nouveau ticket",
+      "create_action": "Nouveau ticket",
+      "create_restricted": "La création de ticket n'est pas encore disponible",
+      "faq_title": "FAQ",
+      "faq_restricted": "La FAQ n'est pas encore disponible",
+      "tickets_title": "Mes tickets",
+      "tickets_restricted": "La liste des tickets n'est pas encore disponible"
+    },
+    "m_support_002": {
+      "title": "Nouveau ticket / Réclamation",
+      "description": "Soumettre un problème ou une réclamation liée à un objet",
+      "primary_action": "Soumettre",
+      "restricted": "La création de ticket / réclamation n'est pas encore disponible"
+    },
+    "m_support_003": {
+      "title": "Détail du ticket",
+      "description": "Suivre l'avancement, les réponses et la conclusion",
+      "primary_action": "Répondre",
+      "restricted": "Le détail du ticket n'est pas encore disponible"
     }
   }
 }

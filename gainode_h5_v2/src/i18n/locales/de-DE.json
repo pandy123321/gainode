@@ -546,6 +546,29 @@
       "preferences_restricted": "Einstellungs-Endpunkte sind noch nicht verfügbar",
       "legal_notices": "Ankündigungen & Benachrichtigungen",
       "logout": "Abmelden"
+    },
+    "m_support_001": {
+      "title": "Hilfe & Tickets",
+      "description": "Selbsthilfe und Ticketübersicht",
+      "primary_action": "Ticket erstellen",
+      "create_action": "Ticket erstellen",
+      "create_restricted": "Die Ticketerstellung ist noch nicht verfügbar",
+      "faq_title": "Häufige Fragen",
+      "faq_restricted": "Häufige Fragen sind noch nicht verfügbar",
+      "tickets_title": "Meine Tickets",
+      "tickets_restricted": "Die Ticketliste ist noch nicht verfügbar"
+    },
+    "m_support_002": {
+      "title": "Ticket erstellen / Einspruch",
+      "description": "Problem oder Einspruch mit verknüpftem Objekt einreichen",
+      "primary_action": "Senden",
+      "restricted": "Ticket- / Einspruchserstellung ist noch nicht verfügbar"
+    },
+    "m_support_003": {
+      "title": "Ticketdetails",
+      "description": "Fortschritt, Antworten und Ergebnis anzeigen",
+      "primary_action": "Antworten",
+      "restricted": "Ticketdetails sind noch nicht verfügbar"
     }
   }
 }

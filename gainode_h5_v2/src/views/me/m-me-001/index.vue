@@ -18,6 +18,7 @@ const entries = [
   { key: 'notice', to: '/notices', label: t('page.m_me_001.entry_notice') },
   { key: 'security', to: '/security', label: t('page.m_me_001.entry_security') },
   { key: 'settings', to: '/settings', label: t('page.m_me_001.entry_settings') },
+  { key: 'support', to: '/support', label: t('page.m_me_001.entry_support') },
 ]
 
 onMounted(() => {
@@ -84,11 +85,6 @@ onMounted(() => {
         <span class="entry-label">{{ e.label }}</span>
         <span class="entry-arrow" aria-hidden="true">›</span>
       </RouterLink>
-      <!-- Support 属 H5-09，尚未实现 → coming soon，不伪造入口 -->
-      <div class="entry-row entry-disabled" data-testid="me-entry-support">
-        <span class="entry-label">{{ t('page.m_me_001.entry_support') }}</span>
-        <span class="entry-hint">{{ t('common.comingSoon') }}</span>
-      </div>
     </section>
   </main>
 </template>
