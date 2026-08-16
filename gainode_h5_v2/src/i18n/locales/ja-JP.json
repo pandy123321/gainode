@@ -8,7 +8,8 @@
     "restricted": "制限されています",
     "unknownResult": "結果を確認中…",
     "confirm": "確認",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "comingSoon": "近日公開"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "システム告知"
     }
   },
+  "nav": {
+    "home": "ホーム",
+    "robot": "Robot",
+    "prediction": "予想",
+    "me": "マイ"
+  },
+  "robot": {
+    "status": {
+      "inactive": "未有効",
+      "active": "稼働中",
+      "cooling": "冷却中",
+      "review": "審査中",
+      "restricted": "制限",
+      "paused": "一時停止"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "ログイン",
@@ -145,6 +162,32 @@
       "tab_all": "すべて",
       "mark_all": "すべて既読",
       "empty": "通知はありません"
+    },
+    "m_home_001": {
+      "title": "ホーム",
+      "description": "今日注目すべきこと",
+      "primary_action": "Robot を見る",
+      "cta_kyc": "KYC へ",
+      "cta_start": "Robot を開始",
+      "hero_restricted": "機能は一時的に制限されています",
+      "hero_robot_none": "Robot がまだありません",
+      "section_robot": "マイ Robot",
+      "section_markets": "注目の予想",
+      "section_ai": "AI データサマリー",
+      "section_leaderboard": "アップグレードランキング",
+      "leaderboard_empty": "ランキングデータはありません",
+      "notice_empty": "通知はありません",
+      "apt_balance": "APT 利用可能残高",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "見る",
+      "robot_level": "レベル",
+      "robot_capacity": "標準容量",
+      "robot_empty": "Robot がまだありません",
+      "markets_empty": "注目の予想はありません",
+      "markets_participate": "参加",
+      "markets_more": "もっと見る"
     }
   }
 }

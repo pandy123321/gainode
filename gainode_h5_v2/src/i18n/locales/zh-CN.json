@@ -8,7 +8,8 @@
     "restricted": "暂时受限",
     "unknownResult": "正在确认结果…",
     "confirm": "确认",
-    "cancel": "取消"
+    "cancel": "取消",
+    "comingSoon": "敬请期待"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "系统公告"
     }
   },
+  "nav": {
+    "home": "首页",
+    "robot": "Robot",
+    "prediction": "竞猜",
+    "me": "我的"
+  },
+  "robot": {
+    "status": {
+      "inactive": "未启用",
+      "active": "运行中",
+      "cooling": "冷却中",
+      "review": "审核中",
+      "restricted": "受限",
+      "paused": "已暂停"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "登录",
@@ -145,6 +162,32 @@
       "tab_all": "全部",
       "mark_all": "全部已读",
       "empty": "暂无通知"
+    },
+    "m_home_001": {
+      "title": "首页",
+      "description": "今天有什么值得关注",
+      "primary_action": "查看 Robot",
+      "cta_kyc": "进入 KYC",
+      "cta_start": "启动 Robot",
+      "hero_restricted": "功能暂时受限",
+      "hero_robot_none": "Robot 尚未创建",
+      "section_robot": "我的 Robot",
+      "section_markets": "热门竞猜",
+      "section_ai": "AI 数据摘要",
+      "section_leaderboard": "升级排行榜",
+      "leaderboard_empty": "暂无榜单数据",
+      "notice_empty": "暂无通知",
+      "apt_balance": "APT 可用余额",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "查看",
+      "robot_level": "等级",
+      "robot_capacity": "标准容量",
+      "robot_empty": "尚未创建 Robot",
+      "markets_empty": "暂无热门竞猜",
+      "markets_participate": "参与",
+      "markets_more": "更多"
     }
   }
 }

@@ -8,7 +8,8 @@
     "restricted": "Restreint",
     "unknownResult": "Confirmation du résultat…",
     "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "comingSoon": "Bientôt disponible"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "Annonce système"
     }
   },
+  "nav": {
+    "home": "Accueil",
+    "robot": "Robot",
+    "prediction": "Pronostics",
+    "me": "Mon compte"
+  },
+  "robot": {
+    "status": {
+      "inactive": "Inactif",
+      "active": "En cours",
+      "cooling": "Refroidissement",
+      "review": "En revue",
+      "restricted": "Restreint",
+      "paused": "En pause"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Se connecter",
@@ -145,6 +162,32 @@
       "tab_all": "Toutes",
       "mark_all": "Tout marquer comme lu",
       "empty": "Aucune notification"
+    },
+    "m_home_001": {
+      "title": "Accueil",
+      "description": "Ce qui mérite votre attention aujourd'hui",
+      "primary_action": "Voir le Robot",
+      "cta_kyc": "Aller à KYC",
+      "cta_start": "Démarrer le Robot",
+      "hero_restricted": "Fonctions temporairement restreintes",
+      "hero_robot_none": "Pas encore de Robot",
+      "section_robot": "Mon Robot",
+      "section_markets": "Pronostics populaires",
+      "section_ai": "Résumé des données IA",
+      "section_leaderboard": "Classement d'upgrade",
+      "leaderboard_empty": "Aucune donnée de classement",
+      "notice_empty": "Aucune notification",
+      "apt_balance": "Solde APT disponible",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "Voir",
+      "robot_level": "Niveau",
+      "robot_capacity": "Capacité standard",
+      "robot_empty": "Pas encore de Robot",
+      "markets_empty": "Aucun pronostic populaire",
+      "markets_participate": "Participer",
+      "markets_more": "Plus"
     }
   }
 }

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { predictionApi, type PredictionMarket } from '../api/prediction'
 
 export interface PredictionOrderBrief {
   orderId: string
@@ -6,16 +7,40 @@ export interface PredictionOrderBrief {
   status: string
 }
 
+interface PredictionState {
+  markets: PredictionMarket[]
+  myOrders: PredictionOrderBrief[]
+  loaded: boolean
+  loading: boolean
+  error: string | null
+}
+
 export const usePredictionStore = defineStore('prediction', {
-  state: () => ({
-    markets: [] as unknown[],
-    myOrders: [] as PredictionOrderBrief[],
+  state: (): PredictionState => ({
+    markets: [],
+    myOrders: [],
     loaded: false,
+    loading: false,
+    error: null,
   }),
+  getters: {
+    /** 热门竞猜：仅展示 open/closing 中的市场，避免展示锁定/结算态 */
+    featuredMarkets: (s): PredictionMarket[] =>
+      s.markets.filter((m) => m.market_status === 'open' || m.market_status === 'closing'),
+  },
   actions: {
-    setMarkets(markets: unknown[]) {
-      this.markets = markets
-      this.loaded = true
+    async fetchMarkets() {
+      this.loading = true
+      this.error = null
+      try {
+        const env = await predictionApi.markets()
+        this.markets = env.data ?? []
+        this.loaded = true
+      } catch (e) {
+        this.error = e instanceof Error ? e.message : '竞猜加载失败'
+      } finally {
+        this.loading = false
+      }
     },
     setMyOrders(orders: PredictionOrderBrief[]) {
       this.myOrders = orders
@@ -24,6 +49,8 @@ export const usePredictionStore = defineStore('prediction', {
       this.markets = []
       this.myOrders = []
       this.loaded = false
+      this.loading = false
+      this.error = null
     },
   },
 })

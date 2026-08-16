@@ -8,7 +8,8 @@
     "restricted": "제한됨",
     "unknownResult": "결과 확인 중…",
     "confirm": "확인",
-    "cancel": "취소"
+    "cancel": "취소",
+    "comingSoon": "곧 제공 예정"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "시스템 공지"
     }
   },
+  "nav": {
+    "home": "홈",
+    "robot": "Robot",
+    "prediction": "예측",
+    "me": "마이"
+  },
+  "robot": {
+    "status": {
+      "inactive": "비활성",
+      "active": "실행 중",
+      "cooling": "쿨다운 중",
+      "review": "심사 중",
+      "restricted": "제한됨",
+      "paused": "일시중지"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "로그인",
@@ -145,6 +162,32 @@
       "tab_all": "전체",
       "mark_all": "모두 읽음",
       "empty": "알림 없음"
+    },
+    "m_home_001": {
+      "title": "홈",
+      "description": "오늘 주목할 만한 것",
+      "primary_action": "Robot 보기",
+      "cta_kyc": "KYC 진행",
+      "cta_start": "Robot 시작",
+      "hero_restricted": "기능이 일시적으로 제한됩니다",
+      "hero_robot_none": "아직 Robot이 없습니다",
+      "section_robot": "내 Robot",
+      "section_markets": "인기 예측",
+      "section_ai": "AI 데이터 요약",
+      "section_leaderboard": "업그레이드 순위",
+      "leaderboard_empty": "순위 데이터가 없습니다",
+      "notice_empty": "알림이 없습니다",
+      "apt_balance": "APT 사용 가능 잔액",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "보기",
+      "robot_level": "레벨",
+      "robot_capacity": "표준 용량",
+      "robot_empty": "아직 Robot이 없습니다",
+      "markets_empty": "인기 예측이 없습니다",
+      "markets_participate": "참여",
+      "markets_more": "더보기"
     }
   }
 }

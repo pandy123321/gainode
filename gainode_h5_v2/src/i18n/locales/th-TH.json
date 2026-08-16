@@ -8,7 +8,8 @@
     "restricted": "ถูกจำกัด",
     "unknownResult": "กำลังยืนยันผล…",
     "confirm": "ยืนยัน",
-    "cancel": "ยกเลิก"
+    "cancel": "ยกเลิก",
+    "comingSoon": "เร็วๆ นี้"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "ประกาศระบบ"
     }
   },
+  "nav": {
+    "home": "หน้าแรก",
+    "robot": "Robot",
+    "prediction": "ทายผล",
+    "me": "ของฉัน"
+  },
+  "robot": {
+    "status": {
+      "inactive": "ยังไม่เปิด",
+      "active": "กำลังทำงาน",
+      "cooling": "พักเครื่อง",
+      "review": "กำลังตรวจสอบ",
+      "restricted": "ถูกจำกัด",
+      "paused": "หยุดชั่วคราว"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "เข้าสู่ระบบ",
@@ -145,6 +162,32 @@
       "tab_all": "ทั้งหมด",
       "mark_all": "อ่านทั้งหมด",
       "empty": "ไม่มีการแจ้งเตือน"
+    },
+    "m_home_001": {
+      "title": "หน้าแรก",
+      "description": "วันนี้มีอะไรน่าสนใจ",
+      "primary_action": "ดู Robot",
+      "cta_kyc": "ไปที่ KYC",
+      "cta_start": "เริ่ม Robot",
+      "hero_restricted": "ฟีเจอร์ถูกจำกัดชั่วคราว",
+      "hero_robot_none": "ยังไม่มี Robot",
+      "section_robot": "Robot ของฉัน",
+      "section_markets": "ทายผลยอดนิยม",
+      "section_ai": "สรุปข้อมูล AI",
+      "section_leaderboard": "อันดับการอัปเกรด",
+      "leaderboard_empty": "ยังไม่มีข้อมูลอันดับ",
+      "notice_empty": "ไม่มีการแจ้งเตือน",
+      "apt_balance": "ยอดคงเหลือ APT ที่ใช้ได้",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "ดู",
+      "robot_level": "เลเวล",
+      "robot_capacity": "ความจุมาตรฐาน",
+      "robot_empty": "ยังไม่มี Robot",
+      "markets_empty": "ยังไม่มีทายผลยอดนิยม",
+      "markets_participate": "เข้าร่วม",
+      "markets_more": "เพิ่มเติม"
     }
   }
 }

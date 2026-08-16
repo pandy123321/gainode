@@ -8,7 +8,8 @@
     "restricted": "Eingeschränkt",
     "unknownResult": "Ergebnis wird bestätigt…",
     "confirm": "Bestätigen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "comingSoon": "Bald verfügbar"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "Systemankündigung"
     }
   },
+  "nav": {
+    "home": "Startseite",
+    "robot": "Robot",
+    "prediction": "Prognosen",
+    "me": "Mein Bereich"
+  },
+  "robot": {
+    "status": {
+      "inactive": "Inaktiv",
+      "active": "Läuft",
+      "cooling": "Abkühlung",
+      "review": "In Prüfung",
+      "restricted": "Eingeschränkt",
+      "paused": "Pausiert"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Anmelden",
@@ -145,6 +162,32 @@
       "tab_all": "Alle",
       "mark_all": "Alle als gelesen markieren",
       "empty": "Keine Benachrichtigungen"
+    },
+    "m_home_001": {
+      "title": "Startseite",
+      "description": "Das ist heute wichtig",
+      "primary_action": "Robot ansehen",
+      "cta_kyc": "Zu KYC",
+      "cta_start": "Robot starten",
+      "hero_restricted": "Funktionen vorübergehend eingeschränkt",
+      "hero_robot_none": "Noch kein Robot",
+      "section_robot": "Mein Robot",
+      "section_markets": "Beliebte Prognosen",
+      "section_ai": "KI-Datenübersicht",
+      "section_leaderboard": "Upgrade-Rangliste",
+      "leaderboard_empty": "Keine Ranglistendaten",
+      "notice_empty": "Keine Benachrichtigungen",
+      "apt_balance": "Verfügbares APT-Guthaben",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "Ansehen",
+      "robot_level": "Level",
+      "robot_capacity": "Standardkapazität",
+      "robot_empty": "Noch kein Robot",
+      "markets_empty": "Keine beliebten Prognosen",
+      "markets_participate": "Teilnehmen",
+      "markets_more": "Mehr"
     }
   }
 }

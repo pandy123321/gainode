@@ -55,7 +55,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
 - Ledger append-only 的 Model/Builder/DAO 防护与 CLI 回归已落地；已记录测试证据为 `67 pass / 0 fail`。这是已完成成果，除有效 Finding 外不得重写。
 - **MC2 当前进度**：Owner 22 项 + 2 项财务裁决已完成；IR 686 的 1 P1 + 3 P2 修复提交到 `2795e38`，独立复审 Round 7（IR `GAINODE-S01P01-MC2-IR-20260816-001`）已返回 **APPROVED**（0 P0 / 0 P1 / 0 blocking P2；1 非阻塞 P3 = `aggregate_dispute_hold` 标注 DERIVED，后续顺带修正）。MC2 已置 **FROZEN（2026-08-16）**。
 - **S01-P02（2B-1 状态合同补齐）已完成（2026-08-16，commit `2707938`）**：9 对象状态合同已产出（task `TASK-20260816-001`）。Result/Settlement 复制 05 §4 canonical enum + 转移矩阵（RS1-RS5 / ST1-ST7，候选，待 State Machine gate）；AuditEvent 复用 MC2 `audit_events` DDL；6 缺 enum 实体（SettlementBatch/RefundCase/CorrectionCase/OtcTrade/RobotUpgradeOrder/ConsentReceipt）仅生成 Owner Decision Matrix（2B1-ENUM-01..06），未自创状态，FAIL_CLOSED 不建表。Result `official` ≠ Settlement `paid`；Result confirmer ≠ Settlement approver。
-- 当前执行包：`S03-P02-H5-PAGE-IMPLEMENTATION`（H5-01 Auth + H5-02 KYC/Notice 已完成，下一批 H5-03 Home；前置「S03-P01 H5 基础设施」已完成）。已完成（Dev 一开到底，不 push，本地 QUALITY-01 全 APPROVED）：
+- 当前执行包：`S03-P02-H5-PAGE-IMPLEMENTATION`（H5-01 Auth + H5-02 KYC/Notice + H5-03 Home 已完成，下一批 H5-04 Robot；前置「S03-P01 H5 基础设施」已完成）。已完成（Dev 一开到底，不 push，本地 QUALITY-01 全 APPROVED）：
   - S01-P01 MC2 FROZEN；S01-P02 2B-1 状态合同（`2707938`）；S01-P03 2B-1 DDL；S01-P04 2B-2 状态合同；S01-P05 2B-2 DDL+骨架（13 对象）；S01-P06 非持久投影（7 对象）；S01-P07 Affiliate/Agent P1（`4f01bad`/`f1b28c4`）；S01-P08 AI Operations P1（`799d588`/`cf50829`）；S01-P09 STAGE-01 全量收口（43 对象，`5e75ade`/`678b61a`）。【S01-P05~P09 APPROVED，P3×2 非阻塞；STAGE-01 本地全 APPROVED，待统一 push + 外部审核 + 合并后输出 STAGE-01-QUALITY-GATE-V3.md】
   - S02-P01 通用内核（env 契约/ErrorDict/Envelope/RequestContext/幂等/Outbox/TransactionBoundary/OpenAPI 入口，41 断言）。【APPROVED】
   - S02-P02 Auth/KYC/User/Eligibility（`1c37f6b`，69 断言）。【APPROVED；2 NON_BLOCKING P2 留 S02-P07/Admin 闭环】
@@ -68,7 +68,8 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
   - S03-P00 前端目录冻结（`e2ea3c2`/`c30315a`，方案 A：gainode_h5_v2/gainode_admin_v2，_existing_prod/** 只读）。
   - S03-P01 H5 基础设施（`23e2a63`，19 断言 + type-check 0 + build 122 modules）。
   - S03-P02 H5-01 Auth 批次（M-AUTH-001..005 五页：登录/注册/OTP/找回/MFA，绑定 OpenAPI auth.yaml + tokens + 7 语言 + 五态；36 断言 + type-check 0 + build 140 modules）。
-  - S03-P02 H5-02 KYC/Notice 批次（M-KYC-001..003 + M-NOTICE-001 四页，绑定 OpenAPI kyc/eligibility/Notice；18 断言 + type-check 0 + build 159 modules）。下一批 H5-03 Home。
+  - S03-P02 H5-02 KYC/Notice 批次（M-KYC-001..003 + M-NOTICE-001 四页，绑定 OpenAPI kyc/eligibility/Notice；18 断言 + type-check 0 + build 159 modules）。
+  - S03-P02 H5-03 Home 批次（M-HOME-001 首页，局部聚合 5 个已冻结端点 robot/markets/asset/eligibility/notice；14 断言 + type-check 0 + build 171 modules；BottomNav + /robot /prediction /me 占位路由）。下一批 H5-04 Robot。
   - 各包详细交付清单/审核证据：.project-ai/tasks/<task-id>/ + .project-ai/reviews/。
 - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
 - 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.4；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816`。40 个工作包均具备目标、固定步骤、验证、停止条件和验收；Development、Quality 和复审 Agent 必须按该文件执行，V3.3 及更早路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。V3.4 整合五角色执行纪律（Owner/Scheduler/Developer/Quality/Reviewer）与提交来源 trailer（`Code-Origin: Developer`/`Quality`），详见 07 §3 与 `.project-ai/rules/roles.md`、`.project-ai/rules/workflow.md`、`.project-ai/rules/git-review-worktree.md`。

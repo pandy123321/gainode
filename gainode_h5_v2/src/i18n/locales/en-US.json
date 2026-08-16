@@ -8,7 +8,8 @@
     "restricted": "Restricted",
     "unknownResult": "Confirming result…",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "comingSoon": "Coming soon"
   },
   "otc": {
     "risk_disclosure": {
@@ -81,6 +82,22 @@
       "SYSTEM_ANNOUNCEMENT": "System announcement"
     }
   },
+  "nav": {
+    "home": "Home",
+    "robot": "Robot",
+    "prediction": "Predictions",
+    "me": "Me"
+  },
+  "robot": {
+    "status": {
+      "inactive": "Inactive",
+      "active": "Running",
+      "cooling": "Cooling",
+      "review": "Under review",
+      "restricted": "Restricted",
+      "paused": "Paused"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Sign in",
@@ -145,6 +162,32 @@
       "tab_all": "All",
       "mark_all": "Mark all read",
       "empty": "No notifications"
+    },
+    "m_home_001": {
+      "title": "Home",
+      "description": "What's worth your attention today",
+      "primary_action": "View Robot",
+      "cta_kyc": "Go to KYC",
+      "cta_start": "Start Robot",
+      "hero_restricted": "Features temporarily restricted",
+      "hero_robot_none": "No Robot yet",
+      "section_robot": "My Robot",
+      "section_markets": "Featured predictions",
+      "section_ai": "AI data summary",
+      "section_leaderboard": "Upgrade leaderboard",
+      "leaderboard_empty": "No leaderboard data",
+      "notice_empty": "No notifications",
+      "apt_balance": "APT available balance",
+      "quick_apt": "APT",
+      "quick_power": "Power",
+      "quick_otc": "OTC",
+      "robot_view": "View",
+      "robot_level": "Level",
+      "robot_capacity": "Standard capacity",
+      "robot_empty": "No Robot yet",
+      "markets_empty": "No featured predictions",
+      "markets_participate": "Join",
+      "markets_more": "More"
     }
   }
 }

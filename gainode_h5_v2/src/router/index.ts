@@ -8,8 +8,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'root',
-      component: () => import('../views/RootShell.vue'),
+      name: 'home',
+      component: () => import('../views/home/m-home-001/index.vue'),
       meta: { pageId: 'M-HOME-001' },
     },
     {
@@ -73,6 +73,28 @@ const router = createRouter({
       name: 'notice-center',
       component: () => import('../views/notice/m-notice-001/index.vue'),
       meta: { pageId: 'M-NOTICE-001', auth: true },
+    },
+    // ---- H5-03 Home 底部导航占位（H5-04/05/08 逐页替换为真实视图）----
+    {
+      path: '/robot',
+      name: 'robot-placeholder',
+      component: () => import('../views/common/ComingSoonView.vue'),
+      props: { pageTitle: 'Robot', navActive: 'robot' },
+      meta: { pageId: 'M-ROBOT-001', auth: true },
+    },
+    {
+      path: '/prediction',
+      name: 'prediction-placeholder',
+      component: () => import('../views/common/ComingSoonView.vue'),
+      props: { pageTitle: 'Prediction', navActive: 'prediction' },
+      meta: { pageId: 'M-PREDICT-001', auth: true },
+    },
+    {
+      path: '/me',
+      name: 'me-placeholder',
+      component: () => import('../views/common/ComingSoonView.vue'),
+      props: { pageTitle: 'Me', navActive: 'me' },
+      meta: { pageId: 'M-ME-001', auth: true },
     },
     {
       path: '/:pathMatch(.*)*',
