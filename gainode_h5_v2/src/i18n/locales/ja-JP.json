@@ -115,6 +115,35 @@
       "reversed": "取消"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "下書き",
+      "open": "受付中",
+      "closing": "まもなく締切",
+      "locked": "締切済み",
+      "awaiting_result": "結果待ち",
+      "settlement": "精算中",
+      "settled": "精算済み",
+      "void": "無効",
+      "exception": "異常"
+    },
+    "order_status": {
+      "submitted": "送信済み",
+      "locked": "確定済み",
+      "awaiting_result": "結果待ち",
+      "settling": "精算中",
+      "settled": "精算済み",
+      "refunding": "返金中",
+      "refunded": "返金済み",
+      "correcting": "修正中",
+      "corrected": "修正済み"
+    },
+    "selection": {
+      "HOME": "ホーム",
+      "DRAW": "ドロー",
+      "AWAY": "アウェイ"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "ログイン",
@@ -261,6 +290,52 @@
       "title": "アクティビティ",
       "description": "アクティビティはまだ利用できません",
       "restricted": "アクティビティは現在利用できません"
+    },
+    "m_predict_001": {
+      "title": "予想",
+      "description": "スポーツ予想を見つけて参加",
+      "primary_action": "予想を見る",
+      "empty": "予想はまだありません",
+      "section_hot": "人気",
+      "section_closing": "まもなく締切",
+      "my_orders": "マイ予想",
+      "status": "ステータス",
+      "lock_at": "締切時刻"
+    },
+    "m_predict_002": {
+      "title": "予想詳細",
+      "description": "試合と参加状況を確認",
+      "primary_action": "予想に参加",
+      "selection_title": "結果を選択",
+      "rules_title": "ルールとリスク",
+      "rules_placeholder": "ルールとAIデータ参照は準備中です",
+      "empty": "予想が見つかりません"
+    },
+    "m_predict_003": {
+      "title": "予想確認",
+      "description": "参加機能はまだ利用できません",
+      "restricted": "予想の送信は現在利用できません"
+    },
+    "m_predict_004": {
+      "title": "マイ予想",
+      "description": "予想履歴はまだ利用できません",
+      "restricted": "マイ予想は現在利用できません"
+    },
+    "m_predict_005": {
+      "title": "予想注文詳細",
+      "description": "予想注文の進捗を追跡",
+      "primary_action": "予想に戻る",
+      "selection": "選択",
+      "amount_apt": "数量",
+      "order_id": "注文番号",
+      "order_status": "注文ステータス",
+      "result_settlement_title": "結果と精算",
+      "result_settlement_placeholder": "結果と精算の詳細は準備中です"
+    },
+    "m_predict_006": {
+      "title": "予想の例外",
+      "description": "例外・返金・修正の詳細はまだ利用できません",
+      "restricted": "例外の詳細は現在利用できません"
     }
   }
 }

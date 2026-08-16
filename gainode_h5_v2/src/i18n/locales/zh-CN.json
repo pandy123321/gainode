@@ -115,6 +115,35 @@
       "reversed": "已冲正"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "草稿",
+      "open": "开放中",
+      "closing": "即将截止",
+      "locked": "已锁定",
+      "awaiting_result": "等待赛果",
+      "settlement": "结算中",
+      "settled": "已结算",
+      "void": "已作废",
+      "exception": "异常"
+    },
+    "order_status": {
+      "submitted": "已提交",
+      "locked": "已锁定",
+      "awaiting_result": "等待赛果",
+      "settling": "结算中",
+      "settled": "已结算",
+      "refunding": "退款中",
+      "refunded": "已退款",
+      "correcting": "更正处理中",
+      "corrected": "已更正"
+    },
+    "selection": {
+      "HOME": "主胜",
+      "DRAW": "平局",
+      "AWAY": "客胜"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "登录",
@@ -261,6 +290,52 @@
       "title": "活动记录",
       "description": "活动记录尚未开放，敬请期待",
       "restricted": "活动记录暂不可用"
+    },
+    "m_predict_001": {
+      "title": "竞猜广场",
+      "description": "发现并参与体育竞猜",
+      "primary_action": "查看竞猜",
+      "empty": "暂无竞猜场次",
+      "section_hot": "热门",
+      "section_closing": "即将截止",
+      "my_orders": "我的竞猜",
+      "status": "状态",
+      "lock_at": "截止时间"
+    },
+    "m_predict_002": {
+      "title": "竞猜详情",
+      "description": "查看赛事与参与情况",
+      "primary_action": "参与竞猜",
+      "selection_title": "选择方向",
+      "rules_title": "规则与风险",
+      "rules_placeholder": "规则与 AI 数据参考即将开放",
+      "empty": "未找到该竞猜场次"
+    },
+    "m_predict_003": {
+      "title": "竞猜确认",
+      "description": "确认参与功能尚未开放",
+      "restricted": "竞猜提交暂不可用"
+    },
+    "m_predict_004": {
+      "title": "我的竞猜",
+      "description": "我的竞猜记录尚未开放",
+      "restricted": "我的竞猜暂不可用"
+    },
+    "m_predict_005": {
+      "title": "竞猜订单详情",
+      "description": "追踪竞猜订单进度",
+      "primary_action": "返回竞猜",
+      "selection": "我的选择",
+      "amount_apt": "参与数量",
+      "order_id": "订单号",
+      "order_status": "订单状态",
+      "result_settlement_title": "赛果与结算",
+      "result_settlement_placeholder": "赛果与结算详情即将开放"
+    },
+    "m_predict_006": {
+      "title": "竞猜异常处理",
+      "description": "异常/退款/更正详情尚未开放",
+      "restricted": "异常处理详情暂不可用"
     }
   }
 }

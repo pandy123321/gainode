@@ -115,6 +115,35 @@
       "reversed": "Reversed"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "Draft",
+      "open": "Open",
+      "closing": "Closing soon",
+      "locked": "Locked",
+      "awaiting_result": "Awaiting result",
+      "settlement": "Settling",
+      "settled": "Settled",
+      "void": "Void",
+      "exception": "Exception"
+    },
+    "order_status": {
+      "submitted": "Submitted",
+      "locked": "Locked",
+      "awaiting_result": "Awaiting result",
+      "settling": "Settling",
+      "settled": "Settled",
+      "refunding": "Refunding",
+      "refunded": "Refunded",
+      "correcting": "Correcting",
+      "corrected": "Corrected"
+    },
+    "selection": {
+      "HOME": "Home",
+      "DRAW": "Draw",
+      "AWAY": "Away"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Sign in",
@@ -261,6 +290,52 @@
       "title": "Activity",
       "description": "Activity is not yet available",
       "restricted": "Activity is currently unavailable"
+    },
+    "m_predict_001": {
+      "title": "Predictions",
+      "description": "Discover and join sports predictions",
+      "primary_action": "View prediction",
+      "empty": "No predictions yet",
+      "section_hot": "Hot",
+      "section_closing": "Closing soon",
+      "my_orders": "My predictions",
+      "status": "Status",
+      "lock_at": "Deadline"
+    },
+    "m_predict_002": {
+      "title": "Prediction detail",
+      "description": "View the match and participation",
+      "primary_action": "Join prediction",
+      "selection_title": "Choose an outcome",
+      "rules_title": "Rules & risks",
+      "rules_placeholder": "Rules and AI data reference coming soon",
+      "empty": "Prediction not found"
+    },
+    "m_predict_003": {
+      "title": "Confirm prediction",
+      "description": "Joining is not yet available",
+      "restricted": "Prediction submission is currently unavailable"
+    },
+    "m_predict_004": {
+      "title": "My predictions",
+      "description": "My prediction records are not yet available",
+      "restricted": "My predictions is currently unavailable"
+    },
+    "m_predict_005": {
+      "title": "Prediction order detail",
+      "description": "Track your prediction order progress",
+      "primary_action": "Back to predictions",
+      "selection": "My choice",
+      "amount_apt": "Amount",
+      "order_id": "Order ID",
+      "order_status": "Order status",
+      "result_settlement_title": "Result & settlement",
+      "result_settlement_placeholder": "Result and settlement details coming soon"
+    },
+    "m_predict_006": {
+      "title": "Prediction exception",
+      "description": "Exception/refund/correction details are not yet available",
+      "restricted": "Exception details are currently unavailable"
     }
   }
 }

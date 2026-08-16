@@ -115,6 +115,35 @@
       "reversed": "Storniert"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "Entwurf",
+      "open": "Offen",
+      "closing": "Endet bald",
+      "locked": "Gesperrt",
+      "awaiting_result": "Ergebnis ausstehend",
+      "settlement": "Abrechnung",
+      "settled": "Abgerechnet",
+      "void": "Ungültig",
+      "exception": "Ausnahme"
+    },
+    "order_status": {
+      "submitted": "Übermittelt",
+      "locked": "Gesperrt",
+      "awaiting_result": "Ergebnis ausstehend",
+      "settling": "Abrechnung",
+      "settled": "Abgerechnet",
+      "refunding": "Rückerstattung",
+      "refunded": "Erstattet",
+      "correcting": "Korrektur",
+      "corrected": "Korrigiert"
+    },
+    "selection": {
+      "HOME": "Heim",
+      "DRAW": "Unentschieden",
+      "AWAY": "Auswärts"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Anmelden",
@@ -261,6 +290,52 @@
       "title": "Aktivität",
       "description": "Aktivität ist noch nicht verfügbar",
       "restricted": "Aktivität ist derzeit nicht verfügbar"
+    },
+    "m_predict_001": {
+      "title": "Prognosen",
+      "description": "Sportprognosen entdecken und teilnehmen",
+      "primary_action": "Prognose ansehen",
+      "empty": "Noch keine Prognosen",
+      "section_hot": "Beliebt",
+      "section_closing": "Endet bald",
+      "my_orders": "Meine Prognosen",
+      "status": "Status",
+      "lock_at": "Deadline"
+    },
+    "m_predict_002": {
+      "title": "Prognosedetails",
+      "description": "Spiel und Teilnahme ansehen",
+      "primary_action": "Teilnehmen",
+      "selection_title": "Ergebnis wählen",
+      "rules_title": "Regeln & Risiken",
+      "rules_placeholder": "Regeln und KI-Datenreferenz folgen in Kürze",
+      "empty": "Prognose nicht gefunden"
+    },
+    "m_predict_003": {
+      "title": "Prognose bestätigen",
+      "description": "Teilnahme ist noch nicht verfügbar",
+      "restricted": "Prognoseübermittlung derzeit nicht verfügbar"
+    },
+    "m_predict_004": {
+      "title": "Meine Prognosen",
+      "description": "Prognoseverlauf noch nicht verfügbar",
+      "restricted": "Meine Prognosen derzeit nicht verfügbar"
+    },
+    "m_predict_005": {
+      "title": "Prognoseauftrag Details",
+      "description": "Fortschritt des Prognoseauftrags verfolgen",
+      "primary_action": "Zurück zu Prognosen",
+      "selection": "Meine Auswahl",
+      "amount_apt": "Betrag",
+      "order_id": "Auftrags-ID",
+      "order_status": "Auftragsstatus",
+      "result_settlement_title": "Ergebnis & Abrechnung",
+      "result_settlement_placeholder": "Details zu Ergebnis und Abrechnung folgen in Kürze"
+    },
+    "m_predict_006": {
+      "title": "Prognose-Ausnahme",
+      "description": "Details zu Ausnahme/Erstattung/Korrektur noch nicht verfügbar",
+      "restricted": "Ausnahmedetails derzeit nicht verfügbar"
     }
   }
 }

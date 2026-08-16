@@ -117,12 +117,42 @@ const router = createRouter({
       component: () => import('../views/robot/m-robot-007/index.vue'),
       meta: { pageId: 'M-ROBOT-007', auth: true },
     },
+    // ---- H5-05 Prediction（M-PREDICT-001..006）----
     {
       path: '/prediction',
-      name: 'prediction-placeholder',
-      component: () => import('../views/common/ComingSoonView.vue'),
-      props: { pageTitle: 'Prediction', navActive: 'prediction' },
+      name: 'prediction-root',
+      component: () => import('../views/prediction/m-predict-001/index.vue'),
       meta: { pageId: 'M-PREDICT-001', auth: true },
+    },
+    {
+      path: '/prediction/my',
+      name: 'prediction-my',
+      component: () => import('../views/prediction/m-predict-004/index.vue'),
+      meta: { pageId: 'M-PREDICT-004', auth: true },
+    },
+    {
+      path: '/prediction/:id',
+      name: 'prediction-detail',
+      component: () => import('../views/prediction/m-predict-002/index.vue'),
+      meta: { pageId: 'M-PREDICT-002', auth: true },
+    },
+    {
+      path: '/prediction/confirm/:id',
+      name: 'prediction-confirm',
+      component: () => import('../views/prediction/m-predict-003/index.vue'),
+      meta: { pageId: 'M-PREDICT-003', auth: true },
+    },
+    {
+      path: '/prediction/order/:id',
+      name: 'prediction-order',
+      component: () => import('../views/prediction/m-predict-005/index.vue'),
+      meta: { pageId: 'M-PREDICT-005', auth: true },
+    },
+    {
+      path: '/prediction/exception/:id',
+      name: 'prediction-exception',
+      component: () => import('../views/prediction/m-predict-006/index.vue'),
+      meta: { pageId: 'M-PREDICT-006', auth: true },
     },
     {
       path: '/me',

@@ -115,6 +115,35 @@
       "reversed": "취소"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "초안",
+      "open": "진행 중",
+      "closing": "곧 마감",
+      "locked": "잠김",
+      "awaiting_result": "결과 대기",
+      "settlement": "정산 중",
+      "settled": "정산 완료",
+      "void": "무효",
+      "exception": "예외"
+    },
+    "order_status": {
+      "submitted": "제출됨",
+      "locked": "잠김",
+      "awaiting_result": "결과 대기",
+      "settling": "정산 중",
+      "settled": "정산 완료",
+      "refunding": "환불 중",
+      "refunded": "환불됨",
+      "correcting": "수정 중",
+      "corrected": "수정됨"
+    },
+    "selection": {
+      "HOME": "홈",
+      "DRAW": "무승부",
+      "AWAY": "어웨이"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "로그인",
@@ -261,6 +290,52 @@
       "title": "활동",
       "description": "활동 기록은 아직 제공되지 않습니다",
       "restricted": "활동 기록을 현재 사용할 수 없습니다"
+    },
+    "m_predict_001": {
+      "title": "예측",
+      "description": "스포츠 예측을 발견하고 참여",
+      "primary_action": "예측 보기",
+      "empty": "아직 예측이 없습니다",
+      "section_hot": "인기",
+      "section_closing": "곧 마감",
+      "my_orders": "내 예측",
+      "status": "상태",
+      "lock_at": "마감 시간"
+    },
+    "m_predict_002": {
+      "title": "예측 상세",
+      "description": "경기와 참여 현황 보기",
+      "primary_action": "예측 참여",
+      "selection_title": "결과 선택",
+      "rules_title": "규칙과 위험",
+      "rules_placeholder": "규칙과 AI 데이터 참조는 준비 중입니다",
+      "empty": "예측을 찾을 수 없습니다"
+    },
+    "m_predict_003": {
+      "title": "예측 확인",
+      "description": "참여 기능은 아직 사용할 수 없습니다",
+      "restricted": "예측 제출은 현재 사용할 수 없습니다"
+    },
+    "m_predict_004": {
+      "title": "내 예측",
+      "description": "예측 기록은 아직 사용할 수 없습니다",
+      "restricted": "내 예측은 현재 사용할 수 없습니다"
+    },
+    "m_predict_005": {
+      "title": "예측 주문 상세",
+      "description": "예측 주문 진행 상황 추적",
+      "primary_action": "예측으로 돌아가기",
+      "selection": "내 선택",
+      "amount_apt": "수량",
+      "order_id": "주문 번호",
+      "order_status": "주문 상태",
+      "result_settlement_title": "결과와 정산",
+      "result_settlement_placeholder": "결과와 정산 상세는 준비 중입니다"
+    },
+    "m_predict_006": {
+      "title": "예측 예외",
+      "description": "예외/환불/수정 상세는 아직 사용할 수 없습니다",
+      "restricted": "예외 상세는 현재 사용할 수 없습니다"
     }
   }
 }

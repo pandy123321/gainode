@@ -115,6 +115,35 @@
       "reversed": "Annulé"
     }
   },
+  "prediction": {
+    "market_status": {
+      "draft": "Brouillon",
+      "open": "Ouvert",
+      "closing": "Clôture imminente",
+      "locked": "Verrouillé",
+      "awaiting_result": "Résultat en attente",
+      "settlement": "Règlement",
+      "settled": "Réglé",
+      "void": "Annulé",
+      "exception": "Exception"
+    },
+    "order_status": {
+      "submitted": "Soumis",
+      "locked": "Verrouillé",
+      "awaiting_result": "Résultat en attente",
+      "settling": "Règlement",
+      "settled": "Réglé",
+      "refunding": "Remboursement",
+      "refunded": "Remboursé",
+      "correcting": "Correction",
+      "corrected": "Corrigé"
+    },
+    "selection": {
+      "HOME": "Domicile",
+      "DRAW": "Nul",
+      "AWAY": "Extérieur"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Se connecter",
@@ -261,6 +290,52 @@
       "title": "Activité",
       "description": "L'activité n'est pas encore disponible",
       "restricted": "L'activité est actuellement indisponible"
+    },
+    "m_predict_001": {
+      "title": "Pronostics",
+      "description": "Découvrir et participer aux pronostics sportifs",
+      "primary_action": "Voir le pronostic",
+      "empty": "Aucun pronostic",
+      "section_hot": "Populaires",
+      "section_closing": "Clôture imminente",
+      "my_orders": "Mes pronostics",
+      "status": "Statut",
+      "lock_at": "Date limite"
+    },
+    "m_predict_002": {
+      "title": "Détail du pronostic",
+      "description": "Voir le match et la participation",
+      "primary_action": "Participer",
+      "selection_title": "Choisir un résultat",
+      "rules_title": "Règles et risques",
+      "rules_placeholder": "Règles et référence de données IA à venir",
+      "empty": "Pronostic introuvable"
+    },
+    "m_predict_003": {
+      "title": "Confirmer le pronostic",
+      "description": "La participation n'est pas encore disponible",
+      "restricted": "Soumission de pronostic indisponible actuellement"
+    },
+    "m_predict_004": {
+      "title": "Mes pronostics",
+      "description": "Historique des pronostics pas encore disponible",
+      "restricted": "Mes pronostics indisponibles actuellement"
+    },
+    "m_predict_005": {
+      "title": "Détail de l'ordre de pronostic",
+      "description": "Suivre la progression de l'ordre",
+      "primary_action": "Retour aux pronostics",
+      "selection": "Mon choix",
+      "amount_apt": "Montant",
+      "order_id": "ID de l'ordre",
+      "order_status": "Statut de l'ordre",
+      "result_settlement_title": "Résultat et règlement",
+      "result_settlement_placeholder": "Détails du résultat et du règlement à venir"
+    },
+    "m_predict_006": {
+      "title": "Exception de pronostic",
+      "description": "Détails exception/remboursement/correction pas encore disponibles",
+      "restricted": "Détails d'exception indisponibles actuellement"
     }
   }
 }
