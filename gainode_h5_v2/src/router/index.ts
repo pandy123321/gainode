@@ -18,6 +18,37 @@ const router = createRouter({
       component: () => import('../components/RestrictedState.vue'),
       meta: { pageId: 'COMMON-RESTRICTED' },
     },
+    // ---- H5-01 Auth（M-AUTH-001..005）----
+    {
+      path: '/auth/login',
+      name: 'auth-login',
+      component: () => import('../views/auth/m-auth-001/index.vue'),
+      meta: { pageId: 'M-AUTH-001' },
+    },
+    {
+      path: '/auth/register',
+      name: 'auth-register',
+      component: () => import('../views/auth/m-auth-002/index.vue'),
+      meta: { pageId: 'M-AUTH-002' },
+    },
+    {
+      path: '/auth/otp',
+      name: 'auth-otp',
+      component: () => import('../views/auth/m-auth-003/index.vue'),
+      meta: { pageId: 'M-AUTH-003' },
+    },
+    {
+      path: '/auth/recovery',
+      name: 'auth-recovery',
+      component: () => import('../views/auth/m-auth-004/index.vue'),
+      meta: { pageId: 'M-AUTH-004' },
+    },
+    {
+      path: '/auth/mfa',
+      name: 'auth-mfa',
+      component: () => import('../views/auth/m-auth-005/index.vue'),
+      meta: { pageId: 'M-AUTH-005' },
+    },
     {
       path: '/:pathMatch(.*)*',
       redirect: '/',

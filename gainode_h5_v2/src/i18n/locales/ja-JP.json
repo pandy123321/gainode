@@ -3,7 +3,7 @@
   "common": {
     "loading": "読み込み中…",
     "empty": "データがありません",
-    "error": "エラーが発生しました。しばらくしてからお試しください。",
+    "error": "エラーが発生しました。もう一度お試しください",
     "retry": "再試行",
     "restricted": "制限されています",
     "unknownResult": "結果を確認中…",
@@ -12,7 +12,73 @@
   },
   "otc": {
     "risk_disclosure": {
-      "body": "OTC 取引にはリスクがあります。操作前にルールをご確認ください。"
+      "body": "OTC 取引にはリスクがあります。操作前にルールをお読みのうえご確認ください。"
+    }
+  },
+  "auth": {
+    "account_email": "メール",
+    "account_mobile": "電話番号",
+    "account_placeholder_email": "メールアドレスを入力",
+    "account_placeholder_mobile": "電話番号を入力",
+    "password": "パスワード",
+    "password_placeholder": "パスワードを入力",
+    "confirm_password": "パスワード確認",
+    "confirm_password_placeholder": "パスワードを再入力",
+    "invite_code": "招待コード",
+    "invite_code_placeholder": "招待コードを入力（任意）",
+    "vcode": "認証コード",
+    "vcode_placeholder": "認証コードを入力",
+    "send_code": "コード送信",
+    "resend": "再送信",
+    "countdown": "{seconds}秒",
+    "consent_label": "利用規約を読み、同意します",
+    "consent_required": "まず利用規約に同意してください",
+    "no_account": "アカウントをお持ちでないですか？",
+    "have_account": "すでにアカウントをお持ちですか？",
+    "register_now": "新規登録",
+    "login_now": "ログイン",
+    "forgot_password": "パスワードをお忘れですか？",
+    "invalid_account": "有効なアカウントを入力してください",
+    "invalid_password": "パスワードを入力してください",
+    "invalid_credentials": "アカウントまたはパスワードが正しくありません",
+    "password_mismatch": "パスワードが一致しません",
+    "password_too_short": "パスワードは8文字以上にしてください",
+    "invalid_vcode": "認証コードを入力してください",
+    "account_exists": "このアカウントは既に存在します",
+    "send_limited": "送信が頻繁すぎます。後でもう一度お試しください",
+    "account_locked": "アカウントはロックされています。サポートに連絡してください",
+    "mfa_hint": "認証アプリの6桁のコードを入力してください",
+    "mfa_verify": "検証",
+    "recovery_sent": "アカウントが存在する場合、復旧手順を送信しました",
+    "password_reset_done": "パスワードをリセットしました。新しいパスワードでログインしてください",
+    "back_to_login": "ログインに戻る",
+    "next_step_home": "続ける"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "ログイン",
+      "description": "おかえりなさい。アカウントにログインしてください",
+      "primary_action": "ログイン"
+    },
+    "m_auth_002": {
+      "title": "新規登録",
+      "description": "Gainode アカウントを作成",
+      "primary_action": "登録"
+    },
+    "m_auth_003": {
+      "title": "認証コード確認",
+      "description": "{account} に送信されたコードを入力してください",
+      "primary_action": "検証"
+    },
+    "m_auth_004": {
+      "title": "パスワード再設定",
+      "description": "認証コードでパスワードを再設定",
+      "primary_action": "次へ"
+    },
+    "m_auth_005": {
+      "title": "二段階認証",
+      "description": "続行するにはセキュリティ検証を完了してください",
+      "primary_action": "検証"
     }
   }
 }

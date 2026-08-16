@@ -3,7 +3,7 @@
   "common": {
     "loading": "불러오는 중…",
     "empty": "데이터가 없습니다",
-    "error": "문제가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+    "error": "오류가 발생했습니다. 다시 시도해 주세요",
     "retry": "다시 시도",
     "restricted": "제한됨",
     "unknownResult": "결과 확인 중…",
@@ -12,7 +12,73 @@
   },
   "otc": {
     "risk_disclosure": {
-      "body": "OTC 거래에는 위험이 따릅니다. 진행 전 관련 규칙을 확인해 주세요."
+      "body": "OTC 거래에는 위험이 따릅니다. 진행하기 전에 관련 규칙을 읽고 확인하세요."
+    }
+  },
+  "auth": {
+    "account_email": "이메일",
+    "account_mobile": "휴대폰 번호",
+    "account_placeholder_email": "이메일을 입력하세요",
+    "account_placeholder_mobile": "휴대폰 번호를 입력하세요",
+    "password": "비밀번호",
+    "password_placeholder": "비밀번호를 입력하세요",
+    "confirm_password": "비밀번호 확인",
+    "confirm_password_placeholder": "비밀번호를 다시 입력하세요",
+    "invite_code": "초대 코드",
+    "invite_code_placeholder": "초대 코드 입력(선택)",
+    "vcode": "인증 코드",
+    "vcode_placeholder": "인증 코드를 입력하세요",
+    "send_code": "코드 전송",
+    "resend": "재전송",
+    "countdown": "{seconds}초",
+    "consent_label": "약관을 읽고 동의합니다",
+    "consent_required": "먼저 약관에 동의해 주세요",
+    "no_account": "계정이 없으신가요?",
+    "have_account": "이미 계정이 있으신가요?",
+    "register_now": "가입하기",
+    "login_now": "로그인",
+    "forgot_password": "비밀번호를 잊으셨나요?",
+    "invalid_account": "유효한 계정을 입력하세요",
+    "invalid_password": "비밀번호를 입력하세요",
+    "invalid_credentials": "계정 또는 비밀번호가 올바르지 않습니다",
+    "password_mismatch": "비밀번호가 일치하지 않습니다",
+    "password_too_short": "비밀번호는 8자 이상이어야 합니다",
+    "invalid_vcode": "인증 코드를 입력하세요",
+    "account_exists": "이 계정은 이미 존재합니다",
+    "send_limited": "전송이 너무 잦습니다. 나중에 다시 시도하세요",
+    "account_locked": "계정이 잠겼습니다. 고객센터에 문의하세요",
+    "mfa_hint": "인증 앱의 6자리 코드를 입력하세요",
+    "mfa_verify": "확인",
+    "recovery_sent": "계정이 존재하면 복구 안내가 전송되었습니다",
+    "password_reset_done": "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인하세요",
+    "back_to_login": "로그인으로 돌아가기",
+    "next_step_home": "계속"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "로그인",
+      "description": "다시 오신 것을 환영합니다. 계정에 로그인하세요",
+      "primary_action": "로그인"
+    },
+    "m_auth_002": {
+      "title": "가입",
+      "description": "Gainode 계정 만들기",
+      "primary_action": "가입"
+    },
+    "m_auth_003": {
+      "title": "인증 코드 확인",
+      "description": "{account}로 전송된 코드를 입력하세요",
+      "primary_action": "확인"
+    },
+    "m_auth_004": {
+      "title": "비밀번호 재설정",
+      "description": "인증 코드로 비밀번호를 재설정하세요",
+      "primary_action": "다음"
+    },
+    "m_auth_005": {
+      "title": "2단계 인증",
+      "description": "계속하려면 보안 인증을 완료하세요",
+      "primary_action": "확인"
     }
   }
 }

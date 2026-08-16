@@ -14,5 +14,71 @@
     "risk_disclosure": {
       "body": "OTC 交易存在风险，请在操作前阅读并确认相关规则。"
     }
+  },
+  "auth": {
+    "account_email": "邮箱",
+    "account_mobile": "手机号",
+    "account_placeholder_email": "请输入邮箱",
+    "account_placeholder_mobile": "请输入手机号",
+    "password": "密码",
+    "password_placeholder": "请输入密码",
+    "confirm_password": "确认密码",
+    "confirm_password_placeholder": "请再次输入密码",
+    "invite_code": "邀请码",
+    "invite_code_placeholder": "请输入邀请码（选填）",
+    "vcode": "验证码",
+    "vcode_placeholder": "请输入验证码",
+    "send_code": "发送验证码",
+    "resend": "重新发送",
+    "countdown": "{seconds}s",
+    "consent_label": "我已阅读并同意相关条款",
+    "consent_required": "请先勾选并同意条款",
+    "no_account": "还没有账号？",
+    "have_account": "已有账号？",
+    "register_now": "立即注册",
+    "login_now": "立即登录",
+    "forgot_password": "忘记密码？",
+    "invalid_account": "请输入有效的账号",
+    "invalid_password": "请输入密码",
+    "invalid_credentials": "账号或密码错误",
+    "password_mismatch": "两次输入的密码不一致",
+    "password_too_short": "密码至少 8 位",
+    "invalid_vcode": "请输入验证码",
+    "account_exists": "该账号已存在",
+    "send_limited": "发送过于频繁，请稍后再试",
+    "account_locked": "账号已锁定，请联系客服",
+    "mfa_hint": "请输入身份验证器中的 6 位验证码",
+    "mfa_verify": "验证",
+    "recovery_sent": "若账号存在，找回指引已发送",
+    "password_reset_done": "密码已重置，请使用新密码登录",
+    "back_to_login": "返回登录",
+    "next_step_home": "继续"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "登录",
+      "description": "欢迎回来，请登录你的账号",
+      "primary_action": "登录"
+    },
+    "m_auth_002": {
+      "title": "注册",
+      "description": "创建你的 Gainode 账号",
+      "primary_action": "注册"
+    },
+    "m_auth_003": {
+      "title": "验证码验证",
+      "description": "请输入发送到 {account} 的验证码",
+      "primary_action": "验证"
+    },
+    "m_auth_004": {
+      "title": "找回密码",
+      "description": "通过验证码重置你的密码",
+      "primary_action": "下一步"
+    },
+    "m_auth_005": {
+      "title": "二次验证",
+      "description": "请完成安全验证以继续",
+      "primary_action": "验证"
+    }
   }
 }

@@ -2,17 +2,83 @@
   "app": { "name": "Gainode" },
   "common": {
     "loading": "กำลังโหลด…",
-    "empty": "ยังไม่มีข้อมูล",
-    "error": "เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลัง",
+    "empty": "ไม่มีข้อมูล",
+    "error": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
     "retry": "ลองใหม่",
     "restricted": "ถูกจำกัด",
-    "unknownResult": "กำลังยืนยันผลลัพธ์…",
+    "unknownResult": "กำลังยืนยันผล…",
     "confirm": "ยืนยัน",
     "cancel": "ยกเลิก"
   },
   "otc": {
     "risk_disclosure": {
-      "body": "การซื้อขาย OTC มีความเสี่ยง โปรดตรวจสอบกฎที่เกี่ยวข้องก่อนดำเนินการ"
+      "body": "การซื้อขาย OTC มีความเสี่ยง กรุณาอ่านและยืนยันกฎที่เกี่ยวข้องก่อนดำเนินการ"
+    }
+  },
+  "auth": {
+    "account_email": "อีเมล",
+    "account_mobile": "เบอร์โทร",
+    "account_placeholder_email": "กรอกอีเมล",
+    "account_placeholder_mobile": "กรอกเบอร์โทรศัพท์",
+    "password": "รหัสผ่าน",
+    "password_placeholder": "กรอกรหัสผ่าน",
+    "confirm_password": "ยืนยันรหัสผ่าน",
+    "confirm_password_placeholder": "กรอกรหัสผ่านอีกครั้ง",
+    "invite_code": "รหัสเชิญ",
+    "invite_code_placeholder": "กรอกรหัสเชิญ (ไม่บังคับ)",
+    "vcode": "รหัสยืนยัน",
+    "vcode_placeholder": "กรอกรหัสยืนยัน",
+    "send_code": "ส่งรหัส",
+    "resend": "ส่งอีกครั้ง",
+    "countdown": "{seconds} วินาที",
+    "consent_label": "ฉันได้อ่านและยอมรับข้อกำหนด",
+    "consent_required": "กรุณายอมรับข้อกำหนดก่อน",
+    "no_account": "ยังไม่มีบัญชี?",
+    "have_account": "มีบัญชีอยู่แล้ว?",
+    "register_now": "สมัครเลย",
+    "login_now": "เข้าสู่ระบบ",
+    "forgot_password": "ลืมรหัสผ่าน?",
+    "invalid_account": "กรุณากรอกบัญชีที่ถูกต้อง",
+    "invalid_password": "กรุณากรอกรหัสผ่าน",
+    "invalid_credentials": "บัญชีหรือรหัสผ่านไม่ถูกต้อง",
+    "password_mismatch": "รหัสผ่านไม่ตรงกัน",
+    "password_too_short": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+    "invalid_vcode": "กรุณากรอกรหัสยืนยัน",
+    "account_exists": "บัญชีนี้มีอยู่แล้ว",
+    "send_limited": "ส่งบ่อยเกินไป กรุณาลองใหม่ภายหลัง",
+    "account_locked": "บัญชีถูกล็อก กรุณาติดต่อฝ่ายสนับสนุน",
+    "mfa_hint": "กรอกรหัส 6 หลักจากแอปยืนยันตัวตน",
+    "mfa_verify": "ยืนยัน",
+    "recovery_sent": "หากบัญชีมีอยู่ ระบบได้ส่งคำแนะนำการกู้คืนแล้ว",
+    "password_reset_done": "รีเซ็ตรหัสผ่านแล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่านใหม่",
+    "back_to_login": "กลับไปเข้าสู่ระบบ",
+    "next_step_home": "ดำเนินการต่อ"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "เข้าสู่ระบบ",
+      "description": "ยินดีต้อนรับกลับ กรุณาเข้าสู่ระบบบัญชีของคุณ",
+      "primary_action": "เข้าสู่ระบบ"
+    },
+    "m_auth_002": {
+      "title": "สมัครสมาชิก",
+      "description": "สร้างบัญชี Gainode ของคุณ",
+      "primary_action": "สมัคร"
+    },
+    "m_auth_003": {
+      "title": "ยืนยันรหัส",
+      "description": "กรอกรหัสที่ส่งไปยัง {account}",
+      "primary_action": "ยืนยัน"
+    },
+    "m_auth_004": {
+      "title": "รีเซ็ตรหัสผ่าน",
+      "description": "รีเซ็ตรหัสผ่านด้วยรหัสยืนยัน",
+      "primary_action": "ถัดไป"
+    },
+    "m_auth_005": {
+      "title": "ยืนยันสองขั้นตอน",
+      "description": "กรุณายืนยันความปลอดภัยเพื่อดำเนินการต่อ",
+      "primary_action": "ยืนยัน"
     }
   }
 }

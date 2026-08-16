@@ -2,8 +2,8 @@
   "app": { "name": "Gainode" },
   "common": {
     "loading": "Loading…",
-    "empty": "No data yet",
-    "error": "Something went wrong. Please try again.",
+    "empty": "No data",
+    "error": "Something went wrong, please try again",
     "retry": "Retry",
     "restricted": "Restricted",
     "unknownResult": "Confirming result…",
@@ -12,7 +12,73 @@
   },
   "otc": {
     "risk_disclosure": {
-      "body": "OTC trading involves risk. Please review and confirm the relevant rules before proceeding."
+      "body": "OTC trading involves risks. Please read and confirm the relevant rules before proceeding."
+    }
+  },
+  "auth": {
+    "account_email": "Email",
+    "account_mobile": "Phone",
+    "account_placeholder_email": "Enter your email",
+    "account_placeholder_mobile": "Enter your phone number",
+    "password": "Password",
+    "password_placeholder": "Enter your password",
+    "confirm_password": "Confirm password",
+    "confirm_password_placeholder": "Re-enter your password",
+    "invite_code": "Invite code",
+    "invite_code_placeholder": "Enter invite code (optional)",
+    "vcode": "Verification code",
+    "vcode_placeholder": "Enter verification code",
+    "send_code": "Send code",
+    "resend": "Resend",
+    "countdown": "{seconds}s",
+    "consent_label": "I have read and agree to the terms",
+    "consent_required": "Please agree to the terms first",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "register_now": "Sign up",
+    "login_now": "Sign in",
+    "forgot_password": "Forgot password?",
+    "invalid_account": "Please enter a valid account",
+    "invalid_password": "Please enter your password",
+    "invalid_credentials": "Incorrect account or password",
+    "password_mismatch": "Passwords do not match",
+    "password_too_short": "Password must be at least 8 characters",
+    "invalid_vcode": "Please enter the verification code",
+    "account_exists": "This account already exists",
+    "send_limited": "Sent too frequently, please try again later",
+    "account_locked": "Account is locked, please contact support",
+    "mfa_hint": "Enter the 6-digit code from your authenticator",
+    "mfa_verify": "Verify",
+    "recovery_sent": "If the account exists, recovery instructions have been sent",
+    "password_reset_done": "Password reset. Please sign in with your new password",
+    "back_to_login": "Back to sign in",
+    "next_step_home": "Continue"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "Sign in",
+      "description": "Welcome back, please sign in to your account",
+      "primary_action": "Sign in"
+    },
+    "m_auth_002": {
+      "title": "Sign up",
+      "description": "Create your Gainode account",
+      "primary_action": "Sign up"
+    },
+    "m_auth_003": {
+      "title": "Verification",
+      "description": "Enter the code sent to {account}",
+      "primary_action": "Verify"
+    },
+    "m_auth_004": {
+      "title": "Reset password",
+      "description": "Reset your password with a verification code",
+      "primary_action": "Next"
+    },
+    "m_auth_005": {
+      "title": "Two-factor verification",
+      "description": "Complete security verification to continue",
+      "primary_action": "Verify"
     }
   }
 }

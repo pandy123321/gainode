@@ -3,7 +3,7 @@
   "common": {
     "loading": "Wird geladen…",
     "empty": "Keine Daten",
-    "error": "Etwas ist schiefgelaufen. Bitte später erneut versuchen.",
+    "error": "Etwas ist schiefgelaufen, bitte erneut versuchen",
     "retry": "Erneut versuchen",
     "restricted": "Eingeschränkt",
     "unknownResult": "Ergebnis wird bestätigt…",
@@ -12,7 +12,73 @@
   },
   "otc": {
     "risk_disclosure": {
-      "body": "Der OTC-Handel ist mit Risiken verbunden. Bitte prüfen Sie die Regeln, bevor Sie fortfahren."
+      "body": "OTC-Handel birgt Risiken. Bitte lesen und bestätigen Sie die Regeln, bevor Sie fortfahren."
+    }
+  },
+  "auth": {
+    "account_email": "E-Mail",
+    "account_mobile": "Telefonnummer",
+    "account_placeholder_email": "E-Mail eingeben",
+    "account_placeholder_mobile": "Telefonnummer eingeben",
+    "password": "Passwort",
+    "password_placeholder": "Passwort eingeben",
+    "confirm_password": "Passwort bestätigen",
+    "confirm_password_placeholder": "Passwort erneut eingeben",
+    "invite_code": "Einladungscode",
+    "invite_code_placeholder": "Einladungscode eingeben (optional)",
+    "vcode": "Bestätigungscode",
+    "vcode_placeholder": "Bestätigungscode eingeben",
+    "send_code": "Code senden",
+    "resend": "Erneut senden",
+    "countdown": "{seconds} s",
+    "consent_label": "Ich habe die Bedingungen gelesen und stimme zu",
+    "consent_required": "Bitte stimmen Sie zuerst den Bedingungen zu",
+    "no_account": "Noch kein Konto?",
+    "have_account": "Bereits ein Konto?",
+    "register_now": "Registrieren",
+    "login_now": "Anmelden",
+    "forgot_password": "Passwort vergessen?",
+    "invalid_account": "Bitte geben Sie ein gültiges Konto ein",
+    "invalid_password": "Bitte geben Sie Ihr Passwort ein",
+    "invalid_credentials": "Konto oder Passwort ist falsch",
+    "password_mismatch": "Passwörter stimmen nicht überein",
+    "password_too_short": "Passwort muss mindestens 8 Zeichen lang sein",
+    "invalid_vcode": "Bitte geben Sie den Bestätigungscode ein",
+    "account_exists": "Dieses Konto existiert bereits",
+    "send_limited": "Zu häufiges Senden, bitte später erneut versuchen",
+    "account_locked": "Konto ist gesperrt, bitte kontaktieren Sie den Support",
+    "mfa_hint": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein",
+    "mfa_verify": "Verifizieren",
+    "recovery_sent": "Falls das Konto existiert, wurden Wiederherstellungshinweise gesendet",
+    "password_reset_done": "Passwort zurückgesetzt. Bitte mit neuem Passwort anmelden",
+    "back_to_login": "Zurück zur Anmeldung",
+    "next_step_home": "Weiter"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "Anmelden",
+      "description": "Willkommen zurück, bitte melden Sie sich an",
+      "primary_action": "Anmelden"
+    },
+    "m_auth_002": {
+      "title": "Registrieren",
+      "description": "Erstellen Sie Ihr Gainode-Konto",
+      "primary_action": "Registrieren"
+    },
+    "m_auth_003": {
+      "title": "Bestätigung",
+      "description": "Geben Sie den an {account} gesendeten Code ein",
+      "primary_action": "Verifizieren"
+    },
+    "m_auth_004": {
+      "title": "Passwort zurücksetzen",
+      "description": "Setzen Sie Ihr Passwort mit einem Code zurück",
+      "primary_action": "Weiter"
+    },
+    "m_auth_005": {
+      "title": "Zwei-Faktor-Verifizierung",
+      "description": "Schließen Sie die Sicherheitsprüfung ab, um fortzufahren",
+      "primary_action": "Verifizieren"
     }
   }
 }

@@ -3,7 +3,7 @@
   "common": {
     "loading": "Chargement…",
     "empty": "Aucune donnée",
-    "error": "Une erreur est survenue. Veuillez réessayer plus tard.",
+    "error": "Une erreur est survenue, veuillez réessayer",
     "retry": "Réessayer",
     "restricted": "Restreint",
     "unknownResult": "Confirmation du résultat…",
@@ -12,7 +12,73 @@
   },
   "otc": {
     "risk_disclosure": {
-      "body": "Le trading OTC comporte des risques. Veuillez consulter les règles avant de continuer."
+      "body": "Le trading OTC comporte des risques. Veuillez lire et confirmer les règles avant de continuer."
+    }
+  },
+  "auth": {
+    "account_email": "E-mail",
+    "account_mobile": "Téléphone",
+    "account_placeholder_email": "Saisissez votre e-mail",
+    "account_placeholder_mobile": "Saisissez votre numéro de téléphone",
+    "password": "Mot de passe",
+    "password_placeholder": "Saisissez votre mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "confirm_password_placeholder": "Saisissez à nouveau le mot de passe",
+    "invite_code": "Code d'invitation",
+    "invite_code_placeholder": "Saisissez le code d'invitation (facultatif)",
+    "vcode": "Code de vérification",
+    "vcode_placeholder": "Saisissez le code de vérification",
+    "send_code": "Envoyer le code",
+    "resend": "Renvoyer",
+    "countdown": "{seconds} s",
+    "consent_label": "J'ai lu et j'accepte les conditions",
+    "consent_required": "Veuillez d'abord accepter les conditions",
+    "no_account": "Pas encore de compte ?",
+    "have_account": "Déjà un compte ?",
+    "register_now": "S'inscrire",
+    "login_now": "Se connecter",
+    "forgot_password": "Mot de passe oublié ?",
+    "invalid_account": "Veuillez saisir un compte valide",
+    "invalid_password": "Veuillez saisir votre mot de passe",
+    "invalid_credentials": "Compte ou mot de passe incorrect",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "password_too_short": "Le mot de passe doit comporter au moins 8 caractères",
+    "invalid_vcode": "Veuillez saisir le code de vérification",
+    "account_exists": "Ce compte existe déjà",
+    "send_limited": "Envoi trop fréquent, veuillez réessayer plus tard",
+    "account_locked": "Compte verrouillé, veuillez contacter le support",
+    "mfa_hint": "Saisissez le code à 6 chiffres de votre application d'authentification",
+    "mfa_verify": "Vérifier",
+    "recovery_sent": "Si le compte existe, les instructions de récupération ont été envoyées",
+    "password_reset_done": "Mot de passe réinitialisé. Connectez-vous avec votre nouveau mot de passe",
+    "back_to_login": "Retour à la connexion",
+    "next_step_home": "Continuer"
+  },
+  "page": {
+    "m_auth_001": {
+      "title": "Se connecter",
+      "description": "Bon retour, veuillez vous connecter à votre compte",
+      "primary_action": "Se connecter"
+    },
+    "m_auth_002": {
+      "title": "S'inscrire",
+      "description": "Créez votre compte Gainode",
+      "primary_action": "S'inscrire"
+    },
+    "m_auth_003": {
+      "title": "Vérification",
+      "description": "Saisissez le code envoyé à {account}",
+      "primary_action": "Vérifier"
+    },
+    "m_auth_004": {
+      "title": "Réinitialiser le mot de passe",
+      "description": "Réinitialisez votre mot de passe avec un code",
+      "primary_action": "Suivant"
+    },
+    "m_auth_005": {
+      "title": "Vérification à deux facteurs",
+      "description": "Terminez la vérification de sécurité pour continuer",
+      "primary_action": "Vérifier"
     }
   }
 }
