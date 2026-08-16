@@ -92,7 +92,11 @@ STAGE-02-QUALITY-GATE.md
 ## 3. Quality 执行约束（V3.4）
 
 ```text
-- 独立 worktree：git worktree add -b gainode/review/S02-P09 <dir> master（base=master）
+- 独立 worktree（固定 SHA，物理隔离，见 rules/git-review-worktree.md）：
+  STAGE-02 全链在 feature/gainode-v3-serial-development（领先 master 62 提交，merge-base=fd7968b）。
+  审核基线 = 该分支 HEAD（等价于 base=master + cherry-pick master..HEAD 全链，直接以 feature 分支
+  HEAD 建基线更简单、不会漏 commit）：
+      git worktree add -b gainode/review/S02-P09 <dir> feature/gainode-v3-serial-development
 - 只读 Developer worktree；独立复跑测试，不把 Developer 自检当 Quality Verdict
 - 修复提交用 Code-Origin: Quality + Git-Operator: Quality + Review-Findings: <ids>
 - push / 提审 / merge 需 Owner 明确授权；本单不含任何授权
@@ -104,7 +108,7 @@ STAGE-02-QUALITY-GATE.md
 ```text
 S02-P07: PR3/PR4 changes_requested 合同缺口（NEEDS_OWNER_DECISION）
 S02-P08: BUDGET-PERSISTENCE + PARAMS 未冻结（NEEDS_OWNER_DECISION）
-S01-P07: 11 项 Owner Decision；S01-P08: 9 项 Owner Decision（延续）
+S01-P07: 11 项已签（2026-08-16 全 OPTION_A）；S01-P08: 9 项已签 + D10 LOCKED（状态机待 IR 冻结）
 ```
 
 ## 5. Developer 最终自检记录
