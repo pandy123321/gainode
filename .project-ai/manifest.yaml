@@ -249,3 +249,13 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE 2026-08-16（Owner 逐项裁决 6 缺 enum 实体 = 2B1-ENUM-01..06，全部采纳各 D.x RECOMMENDED_OPTION）← EXECUTOR_DELIVERY 2026-08-16（S01-P02 合同补齐，commit 2707938/c2d57ce）← 05 §3/§4 canonical ← MC2 Freeze 协同关系（M6/M7/M9/M10/M12、P3/P5/P6/P7/P10/P11/P12、结算会计矩阵）← Owner 裁决 #19/#21（拆 2B-1/2B-2、缺 enum 补 05 §4）"
+  machine_contract_batch2b2_state_contract:
+    value: "CANDIDATE 2026-08-16 — Machine Contract 第二批 2B-2 小批状态合同补齐（S01-P04）。范围：13 对象 = ApprovalRequest / ParameterRelease / ParameterSnapshot / Notice / NotificationDelivery / AuthSession / MfaEnrollment / KycCase / RiskCase / Ticket / TicketMessage / TicketAttachment / SettlementMethod。5 复用对象 enum 复制 05（Approval 8 态 / Parameter Release 8 态 / AuthSession 5 态 §2.2 / KYC 6 态 / Ticket 6 态，未新增状态值）；3 缺 enum 对象经 Owner 逐项裁决（2026-08-16，全部采纳 OPTION_A）并补入 05 §4 V2.4：NotificationDelivery = pending/delivered/failed/cancelled；MfaEnrollment = pending/active/revoked；RiskCase = open/investigating/under_review/resolved/closed。5 值对象/只读聚合无状态机。职责分离：PARAM_EDITOR != PARAM_APPROVER != RELEASE_OPERATOR；RISK_ANALYST != RISK_APPROVER。Parameter approved ≠ active + ParameterSnapshot。Notice 与业务解耦 + NotificationDelivery 失败不回滚。转移矩阵均为候选（未 FROZEN），FAIL_CLOSED。Independent Review Round 1（GAINODE-S01P04-2B2-IR-20260816-001）= APPROVED（1 非阻塞 P3：快照 range 字符串精度）。任务: .project-ai/tasks/TASK-20260816-003/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（Owner 逐项裁决 3 缺 enum 实体 = 2B2-ENUM-01..03，全部采纳 OPTION_A）← EXECUTOR_DELIVERY 2026-08-16（S01-P04 合同补齐，commit 884cdf9/5d57704）← 05 §2.2/§3/§4/§8/§11 canonical ← 2B-1 Owner Decision Matrix 格式先例"
+  development_execution_plan_v32_approval:
+    value: "APPROVED 2026-08-16 — Owner 认可 07 开发执行计划 V3.2（CR-20260816-002 OPTION_A 全量批准）。V3.2 为 V3.1 的详细化，不改变 Formal Stage / Package ID / 顺序：补充 OBJECT_COVERAGE_MATRIX（S01 每包强制输出）、contract test（tests/contract/Stage01Batch2B*Test.php）、显式对象批次顺序 + 禁止建表对象清单（S01-P05）、STAGE-02 固定实现顺序（Contract→Controller→Application→Domain→Transaction→Tests）、Page ID 注册表 + Admin 逐导航批次（STAGE-03）、STAGE-01-OBJECT-COVERAGE-MATRIX.md（S01-P09）。已完成的 S01-P01/P02/P03/P04 不追溯补合同测试；B1~B6 自 S01-P05 起适用。开发 Agent 已提交 V3.2 于 057e810 并自标 FROZEN_FOR_EXECUTION，本批准补足治理可追溯性，冻结状态维持。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user selected approve_v32）← CR-20260816-002 ← QUALITY-01 发现开发 Agent 冻结计划未提交全量重构"
