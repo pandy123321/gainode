@@ -1,0 +1,58 @@
+# 内部 AI 经济引擎 schema（S02-P08 落地，02 §5.4 / 07 §S02-P08）。
+# 标记 INTERNAL_ONLY：内部计算流水线产物，禁止 C 端 serializer/route 暴露
+# 供应商 / arbitrage signal / profit detail / position / cap 明细 / 内部模型参数。
+
+AiBudgetDecision:
+  description: 内部 AI 预算决定（INTERNAL_ONLY，四字段 + 版本/审计元数据）
+  type: object
+  required: [confirmed_profit, reference_profit, mapped_apt_budget, daily_ai_budget]
+  properties:
+    confirmed_profit: { type: string, description: 已确认利润（decimal string） }
+    reference_profit: { type: string, description: 参考利润（decimal string） }
+    mapped_apt_budget: { type: string, description: 映射 APT 预算（decimal string） }
+    daily_ai_budget: { type: string, description: 每日 AI 预算（decimal string） }
+    source_status:
+      type: string
+      enum: [AVAILABLE, UNAVAILABLE]
+    algorithm:
+      type: string
+      enum: [ZERO_SHORTCUT, APPROVED_SMOOTHING]
+      description: 计算算法（INTERNAL_ONLY）
+    rule_version: { type: string, description: 参数规则版本（INTERNAL_ONLY） }
+    source_hash: { type: string, description: 来源哈希（INTERNAL_ONLY） }
+    parameter_release_id: { type: string, description: 参数发布 ID（INTERNAL_ONLY） }
+    snapshot_id: { type: string, description: 参数快照 ID（INTERNAL_ONLY） }
+    business_date: { type: string, description: 业务日期（INTERNAL_ONLY） }
+    idempotency_key: { type: string, description: 幂等键（INTERNAL_ONLY） }
+
+AiBudgetDecisionExternal:
+  description: AI 预算决定脱敏对外视图（C 端安全，仅四字段 + source_status）
+  type: object
+  required: [confirmed_profit, reference_profit, mapped_apt_budget, daily_ai_budget]
+  properties:
+    confirmed_profit: { type: string, description: 已确认利润（decimal string） }
+    reference_profit: { type: string, description: 参考利润（decimal string） }
+    mapped_apt_budget: { type: string, description: 映射 APT 预算（decimal string） }
+    daily_ai_budget: { type: string, description: 每日 AI 预算（decimal string） }
+    source_status:
+      type: string
+      enum: [AVAILABLE, UNAVAILABLE]
+
+AiBudgetParameterSnapshot:
+  description: AI 预算参数快照（INTERNAL_ONLY，从 Active Release→Snapshot 解析）
+  type: object
+  required: [source_status, parameter_release_id, snapshot_id]
+  properties:
+    source_status:
+      type: string
+      enum: [AVAILABLE, UNAVAILABLE]
+    parameter_release_id: { type: string }
+    snapshot_id: { type: string }
+    smoothing_rule: { type: string, description: approved smoothing 规则（06 TBC） }
+    mapping_multiplier: { type: string, description: mapping multiplier（decimal string，06 TBC） }
+    stage_expected_budget: { type: string, description: 阶段预期预算（decimal string，06 TBC） }
+    stage_hard_cap: { type: string, description: 阶段硬上限（decimal string，06 TBC） }
+    cash_support_cap: { type: string, description: 现金支持上限（decimal string，06 TBC） }
+    human_approved_cap: { type: string, description: 人工批准上限（decimal string，06 TBC） }
+    rounding_precision: { type: string, description: 舍入精度（06 TBC） }
+    reason_code: { type: string, description: 不可用原因码（I18N 安全） }

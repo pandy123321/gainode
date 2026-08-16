@@ -278,6 +278,12 @@ components:
       $ref: './components/schemas/governance.yaml#/NotificationDelivery'
     AuditEvent:
       $ref: './components/schemas/governance.yaml#/AuditEvent'
+    AiBudgetDecision:
+      $ref: './components/schemas/aiops.yaml#/AiBudgetDecision'
+    AiBudgetDecisionExternal:
+      $ref: './components/schemas/aiops.yaml#/AiBudgetDecisionExternal'
+    AiBudgetParameterSnapshot:
+      $ref: './components/schemas/aiops.yaml#/AiBudgetParameterSnapshot'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'
