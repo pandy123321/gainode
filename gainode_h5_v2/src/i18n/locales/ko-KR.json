@@ -569,6 +569,30 @@
       "description": "진행 상황, 답변, 결론 확인",
       "primary_action": "답장",
       "restricted": "티켓 상세 기능은 아직 제공되지 않습니다"
+    },
+    "m_ai_001": {
+      "title": "AI 데이터 상세",
+      "description": "AI 데이터 및 신호 출처, 시점, 비보장 속성",
+      "primary_action": "보기",
+      "restricted": "AI 데이터 기능은 아직 제공되지 않습니다"
+    },
+    "m_growth_001": {
+      "title": "초대 및 팀",
+      "description": "초대 관계와 보상 확인",
+      "primary_action": "초대",
+      "restricted": "초대 및 팀 기능은 아직 제공되지 않습니다"
+    },
+    "m_predict_free_001": {
+      "title": "무료 예측",
+      "description": "실가치가 없는 학습·상호작용 예측",
+      "primary_action": "참여",
+      "restricted": "무료 예측 기능은 아직 제공되지 않습니다"
+    },
+    "m_migration_001": {
+      "title": "APT-I → APT-C 마이그레이션",
+      "description": "조건 충족 후 수량 마이그레이션 처리",
+      "primary_action": "마이그레이션",
+      "closed": "마이그레이션은 아직 정식으로 시작되지 않았습니다"
     }
   }
 }

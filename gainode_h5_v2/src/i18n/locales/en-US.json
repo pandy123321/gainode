@@ -580,6 +580,30 @@
       "description": "View progress, replies and outcome",
       "primary_action": "Reply",
       "restricted": "Ticket details are not yet available"
+    },
+    "m_ai_001": {
+      "title": "AI data details",
+      "description": "AI data and signal sources, timing and non-guarantee",
+      "primary_action": "View",
+      "restricted": "AI data is not yet available"
+    },
+    "m_growth_001": {
+      "title": "Invite & Team",
+      "description": "View your invite relationships and rewards",
+      "primary_action": "Invite",
+      "restricted": "Invite & Team is not yet available"
+    },
+    "m_predict_free_001": {
+      "title": "Free prediction",
+      "description": "Learning and interactive prediction with no real value",
+      "primary_action": "Join",
+      "restricted": "Free prediction is not yet available"
+    },
+    "m_migration_001": {
+      "title": "APT-I → APT-C Migration",
+      "description": "Handle quantity migration once conditions are met",
+      "primary_action": "Migrate",
+      "closed": "Migration is not yet enabled"
     }
   }
 }

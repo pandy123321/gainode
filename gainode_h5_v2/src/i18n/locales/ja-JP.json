@@ -569,6 +569,30 @@
       "description": "進捗・返信・結果を確認",
       "primary_action": "返信",
       "restricted": "チケット詳細は現在ご利用いただけません"
+    },
+    "m_ai_001": {
+      "title": "AIデータ詳細",
+      "description": "AIデータと信号の出所・時点・非保証属性",
+      "primary_action": "表示",
+      "restricted": "AIデータは現在ご利用いただけません"
+    },
+    "m_growth_001": {
+      "title": "招待とチーム",
+      "description": "招待関係と報酬を確認",
+      "primary_action": "招待",
+      "restricted": "招待とチームは現在ご利用いただけません"
+    },
+    "m_predict_free_001": {
+      "title": "無料予測",
+      "description": "実価値のない学習・交流予測",
+      "primary_action": "参加",
+      "restricted": "無料予測は現在ご利用いただけません"
+    },
+    "m_migration_001": {
+      "title": "APT-I → APT-C 移行",
+      "description": "条件を満たした後の数量移行",
+      "primary_action": "移行",
+      "closed": "移行はまだ正式に開始されていません"
     }
   }
 }

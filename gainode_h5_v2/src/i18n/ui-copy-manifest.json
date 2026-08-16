@@ -1,5 +1,5 @@
 {
-  "version": "1.9",
+  "version": "1.10",
   "generated": "2026-08-17",
   "status": "ENGINEERING_DRAFT",
   "keys": [
@@ -451,6 +451,22 @@
     { "key": "page.m_support_003.title", "page_id": "M-SUPPORT-003", "sensitive": false },
     { "key": "page.m_support_003.description", "page_id": "M-SUPPORT-003", "sensitive": false },
     { "key": "page.m_support_003.primary_action", "page_id": "M-SUPPORT-003", "sensitive": false },
-    { "key": "page.m_support_003.restricted", "page_id": "M-SUPPORT-003", "sensitive": false }
+    { "key": "page.m_support_003.restricted", "page_id": "M-SUPPORT-003", "sensitive": false },
+    { "key": "page.m_ai_001.title", "page_id": "M-AI-001", "sensitive": false },
+    { "key": "page.m_ai_001.description", "page_id": "M-AI-001", "sensitive": false },
+    { "key": "page.m_ai_001.primary_action", "page_id": "M-AI-001", "sensitive": false },
+    { "key": "page.m_ai_001.restricted", "page_id": "M-AI-001", "sensitive": false },
+    { "key": "page.m_growth_001.title", "page_id": "M-GROWTH-001", "sensitive": false },
+    { "key": "page.m_growth_001.description", "page_id": "M-GROWTH-001", "sensitive": false },
+    { "key": "page.m_growth_001.primary_action", "page_id": "M-GROWTH-001", "sensitive": false },
+    { "key": "page.m_growth_001.restricted", "page_id": "M-GROWTH-001", "sensitive": false },
+    { "key": "page.m_predict_free_001.title", "page_id": "M-PREDICT-FREE-001", "sensitive": false },
+    { "key": "page.m_predict_free_001.description", "page_id": "M-PREDICT-FREE-001", "sensitive": false },
+    { "key": "page.m_predict_free_001.primary_action", "page_id": "M-PREDICT-FREE-001", "sensitive": false },
+    { "key": "page.m_predict_free_001.restricted", "page_id": "M-PREDICT-FREE-001", "sensitive": false },
+    { "key": "page.m_migration_001.title", "page_id": "M-MIGRATION-001", "sensitive": false },
+    { "key": "page.m_migration_001.description", "page_id": "M-MIGRATION-001", "sensitive": false },
+    { "key": "page.m_migration_001.primary_action", "page_id": "M-MIGRATION-001", "sensitive": false },
+    { "key": "page.m_migration_001.closed", "page_id": "M-MIGRATION-001", "sensitive": false }
   ]
 }

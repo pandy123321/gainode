@@ -569,6 +569,30 @@
       "description": "Fortschritt, Antworten und Ergebnis anzeigen",
       "primary_action": "Antworten",
       "restricted": "Ticketdetails sind noch nicht verfügbar"
+    },
+    "m_ai_001": {
+      "title": "KI-Datendetails",
+      "description": "Quelle, Zeitpunkt und Nicht-Garantie-Eigenschaften von KI-Daten und Signalen",
+      "primary_action": "Anzeigen",
+      "restricted": "KI-Daten sind noch nicht verfügbar"
+    },
+    "m_growth_001": {
+      "title": "Einladen & Team",
+      "description": "Einladungsbeziehungen und Belohnungen anzeigen",
+      "primary_action": "Einladen",
+      "restricted": "Einladen & Team ist noch nicht verfügbar"
+    },
+    "m_predict_free_001": {
+      "title": "Kostenlose Vorhersage",
+      "description": "Lern- und interaktive Vorhersage ohne echten Wert",
+      "primary_action": "Teilnehmen",
+      "restricted": "Kostenlose Vorhersage ist noch nicht verfügbar"
+    },
+    "m_migration_001": {
+      "title": "APT-I → APT-C Migration",
+      "description": "Mengenmigration nach erfüllten Bedingungen",
+      "primary_action": "Migrieren",
+      "closed": "Migration ist noch nicht offiziell aktiviert"
     }
   }
 }

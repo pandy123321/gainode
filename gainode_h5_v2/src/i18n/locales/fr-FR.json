@@ -569,6 +569,30 @@
       "description": "Suivre l'avancement, les réponses et la conclusion",
       "primary_action": "Répondre",
       "restricted": "Le détail du ticket n'est pas encore disponible"
+    },
+    "m_ai_001": {
+      "title": "Détails des données IA",
+      "description": "Source, moment et caractère non garanti des données et signaux IA",
+      "primary_action": "Voir",
+      "restricted": "Les données IA ne sont pas encore disponibles"
+    },
+    "m_growth_001": {
+      "title": "Inviter & Équipe",
+      "description": "Voir vos relations de parrainage et récompenses",
+      "primary_action": "Inviter",
+      "restricted": "Inviter & Équipe n'est pas encore disponible"
+    },
+    "m_predict_free_001": {
+      "title": "Prédiction gratuite",
+      "description": "Prédiction d'apprentissage et interactive sans valeur réelle",
+      "primary_action": "Participer",
+      "restricted": "La prédiction gratuite n'est pas encore disponible"
+    },
+    "m_migration_001": {
+      "title": "Migration APT-I → APT-C",
+      "description": "Traiter la migration de quantité une fois les conditions remplies",
+      "primary_action": "Migrer",
+      "closed": "La migration n'est pas encore officiellement activée"
     }
   }
 }

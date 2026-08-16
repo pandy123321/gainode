@@ -260,6 +260,31 @@ const router = createRouter({
       component: () => import('../views/support/m-support-003/index.vue'),
       meta: { pageId: 'M-SUPPORT-003', auth: true },
     },
+    // ---- H5-10 P1 / H5-11 Future（M-AI-001 / M-GROWTH-001 / M-PREDICT-FREE-001 / M-MIGRATION-001，Closed/Restricted 占位）----
+    {
+      path: '/ai/signals',
+      name: 'ai-signals',
+      component: () => import('../views/ai/m-ai-001/index.vue'),
+      meta: { pageId: 'M-AI-001', auth: true },
+    },
+    {
+      path: '/growth',
+      name: 'growth',
+      component: () => import('../views/growth/m-growth-001/index.vue'),
+      meta: { pageId: 'M-GROWTH-001', auth: true },
+    },
+    {
+      path: '/prediction/free',
+      name: 'prediction-free',
+      component: () => import('../views/prediction/m-predict-free-001/index.vue'),
+      meta: { pageId: 'M-PREDICT-FREE-001', auth: true },
+    },
+    {
+      path: '/migration',
+      name: 'migration',
+      component: () => import('../views/migration/m-migration-001/index.vue'),
+      meta: { pageId: 'M-MIGRATION-001', auth: true },
+    },
     {
       path: '/:pathMatch(.*)*',
       redirect: '/',

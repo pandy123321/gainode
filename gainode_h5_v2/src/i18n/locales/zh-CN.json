@@ -580,6 +580,30 @@
       "description": "查看处理进度、回复与结论",
       "primary_action": "回复",
       "restricted": "工单详情功能尚未开放"
+    },
+    "m_ai_001": {
+      "title": "AI 数据详情",
+      "description": "AI 数据与信号来源、时间与非保证属性",
+      "primary_action": "查看",
+      "restricted": "AI 数据功能尚未开放"
+    },
+    "m_growth_001": {
+      "title": "邀请与团队",
+      "description": "查看邀请关系与奖励",
+      "primary_action": "邀请",
+      "restricted": "邀请与团队功能尚未开放"
+    },
+    "m_predict_free_001": {
+      "title": "免费预测",
+      "description": "不含真实价值的学习与互动预测",
+      "primary_action": "参与",
+      "restricted": "免费预测功能尚未开放"
+    },
+    "m_migration_001": {
+      "title": "APT-I → APT-C 迁移",
+      "description": "未来满足条件后处理数量迁移",
+      "primary_action": "迁移",
+      "closed": "迁移功能尚未正式开启"
     }
   }
 }
