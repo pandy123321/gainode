@@ -26,6 +26,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-01 | S01-P09-STAGE01-CLOSURE | cf50829 | 5e75ade | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | PENDING |
 | STAGE-02 | S02-P01-GENERAL-KERNEL | 678b61a | 097b5ce | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P02-AUTH-KYC-USER-ELIGIBILITY | b61b93e | c29f42a | YES | 1 | APPROVED | 0 / 0 / 0 | 2 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P03-LEDGER-APTACCOUNT-POWER | 0084fae | 978ca8a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 
 ## 明细
 
@@ -53,9 +54,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 审核 S02-P03（Ledger/Power，复审快照包 c7a7f7d 已提交）；push 本地 ahead 的审核产物（网络恢复后）
+NEXT_QUALITY_ACTION = 审核 S02-P04（Robot/Reward/Upgrade）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
 NEXT_DEVELOPER_ACTION = 推进 S02-P04（Robot/Reward/Upgrade）
-OWNER_DECISION_REQUIRED = YES（S01-P07/P08 共 20 项 Owner Decision 待签；S02-P02 4 项 TBC 参数待 Owner 裁决）
+OWNER_DECISION_REQUIRED = YES（S01-P07/P08 共 20 项 Owner Decision 待签；S02-P02 4 项 TBC 参数；GitHub unblock-secret AKIA 待 Owner 标记）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -184,6 +185,29 @@ FORMAL_STAGE_GATE = NOT_APPLICABLE
 LAST_CHECKED_AT = 2026-08-16T17:50+08:00
 ```
 
+### S02-P03-LEDGER-APTACCOUNT-POWER（Round 1）
+
+```text
+DEVELOPER_BASE_COMMIT = 0084fae
+DEVELOPER_SNAPSHOT_COMMIT = 978ca8a
+REVIEW_PACKAGE_COMMIT = c7a7f7d
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1
+REVIEW_STATUS = APPROVED
+P0_OPEN = 0
+P1_OPEN = 0
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 0
+P3 = 1（P3-001 负余额口径 stored_balance vs effective_available，dispute 冻结后需同步）
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A（P3 非阻塞，dispute 冻结时同步）
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = APPROVED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+LAST_CHECKED_AT = 2026-08-16T18:10+08:00
+```
+
 ## 关键约束（全程保持）
 
 ```text
@@ -202,6 +226,7 @@ STAGE-01 Gate = APPROVED_WITH_CONDITIONS（本地版 2026-08-16；条件①外�
 STAGE-01 Gate 文件 = .project-ai/reviews/STAGE-01-QUALITY-GATE-V3.md
 S02-P01 通用内核 = DONE（APPROVED，30 文件不建表不写业务，16 错误码 + Envelope + RequestContext + Null store + TransactionBoundary + OpenAPI 3.1，41 断言）
 S02-P02 Auth/KYC/User/Eligibility = DONE（APPROVED，35 文件六子流程，2 NON_BLOCKING P2：KYC reviewer 角色校验缺失 + 敏感操作未写审计，69 断言）
+S02-P03 Ledger/AptAccount/Power = DONE（APPROVED，14 文件经济写路径，11 步模板 + L1/L2/L3 + CAS + 负余额保护，1 P3 负余额口径，48 断言）
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
