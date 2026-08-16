@@ -234,8 +234,22 @@ components:
       $ref: './components/schemas/robot.yaml#/Robot'
     RobotReward:
       $ref: './components/schemas/robot.yaml#/RobotReward'
-    RobotUpgradeOrder:
-      $ref: './components/schemas/robot.yaml#/RobotUpgradeOrder'
+    PredictionMarket:
+      $ref: './components/schemas/prediction.yaml#/PredictionMarket'
+    PredictionOrder:
+      $ref: './components/schemas/prediction.yaml#/PredictionOrder'
+    PredictionResult:
+      $ref: './components/schemas/prediction.yaml#/PredictionResult'
+    PredictionSettlement:
+      $ref: './components/schemas/prediction.yaml#/PredictionSettlement'
+    SettlementBatch:
+      $ref: './components/schemas/prediction.yaml#/SettlementBatch'
+    RefundCase:
+      $ref: './components/schemas/prediction.yaml#/RefundCase'
+    CorrectionCase:
+      $ref: './components/schemas/prediction.yaml#/CorrectionCase'
+    ConsentReceipt:
+      $ref: './components/schemas/prediction.yaml#/ConsentReceipt'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

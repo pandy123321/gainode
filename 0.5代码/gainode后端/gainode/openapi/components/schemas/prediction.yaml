@@ -1,0 +1,165 @@
+# Prediction P0 对象 schema（05 §3 Market/PredictionOrder/Result/Settlement/SettlementBatch/
+# RefundCase/CorrectionCase/ConsentReceipt；S02-P05 落地）
+# decimal 字段一律 string（decimal(36,18)），禁 number/float。
+
+PredictionMarket:
+  description: 预测市场（05 §3 Market，9 态，MC1 冻结）
+  type: object
+  required: [market_id, event_id, template_id, market_status]
+  properties:
+    market_id: { type: string, description: Snowflake 主键 }
+    event_id: { type: string, description: 赛事 ID（引用 Fixture） }
+    template_id: { type: string, enum: [FOOTBALL_PREMATCH_1X2], description: P0 冻结：足球赛前 1X2 }
+    market_status: { type: string, enum: [draft, open, closing, locked, awaiting_result, settlement, settled, void, exception] }
+    lock_at: { type: integer, description: 锁定时间戳(Unix 秒) }
+    selections: { type: array, items: { type: string }, description: 选项定义(05: [HOME,DRAW,AWAY]) }
+    liquidity_summary: { type: string, description: 流动性汇总 JSON(服务端计算) }
+    result_status: { type: string, enum: [provisional, official, disputed, corrected], description: 赛果状态投影(独立 Result 对象) }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
+    policy_version: { type: string }
+    snapshot_id: { type: string }
+    object_version: { type: integer }
+
+PredictionOrder:
+  description: 预测订单（05 §3 PredictionOrder，9 态，MC1 冻结）
+  type: object
+  required: [order_id, user_id, market_id, selection, amount_apt, order_status]
+  properties:
+    order_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    market_id: { type: string }
+    selection: { type: string, enum: [HOME, DRAW, AWAY], description: 投注选项(1X2) }
+    amount_apt: { type: string, description: 参与数量 APT(decimal string) }
+    order_status: { type: string, enum: [submitted, locked, awaiting_result, settling, settled, refunding, refunded, correcting, corrected] }
+    asset_status: { type: string, nullable: true, description: 资产状态(05 §4 未定义，TBC) }
+    risk_status: { type: string, nullable: true, description: 风险状态(05 §4 未定义，TBC) }
+    consent_receipt_id: { type: string }
+    submit_snapshot_id: { type: string }
+    parameter_release_id: { type: string }
+    policy_version: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+PredictionResult:
+  description: 预测结果（05 §3 Result，4 态，05 §4 V2.3 冻结）
+  type: object
+  required: [result_id, market_id, outcome, status]
+  properties:
+    result_id: { type: string, description: Snowflake 主键 }
+    market_id: { type: string }
+    event_id: { type: string }
+    scores: { type: object, additionalProperties: true, description: 比分(JSON，如 {home:2, away:1}) }
+    outcome: { type: string, enum: [HOME, DRAW, AWAY], description: 结果(1X2) }
+    status: { type: string, enum: [provisional, official, disputed, corrected] }
+    confirmed_by: { type: string }
+    confirmed_at: { type: integer }
+    evidence_ids: { type: array, items: { type: string } }
+    dispute_reason_code: { type: string }
+    correction_version: { type: integer, description: 纠错版本号(仅一次，MC2 #11) }
+    rule_version: { type: string }
+    snapshot_id: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+PredictionSettlement:
+  description: 结算单（05 §3 Settlement，6 态，05 §4 V2.3 冻结）
+  type: object
+  required: [settlement_id, market_id, status]
+  properties:
+    settlement_id: { type: string, description: Snowflake 主键 }
+    market_id: { type: string }
+    batch_id: { type: string, description: 结算批 ID(settlement_batches.batch_id) }
+    status: { type: string, enum: [queued, calculating, review, payable, paid, failed] }
+    principal_total_apt: { type: string, description: 本金总额 APT(decimal string) }
+    reward_total_apt: { type: string, description: 盈利总额 APT(decimal string) }
+    service_fee_total_apt: { type: string, description: 服务费总额 APT(decimal string) }
+    ledger_batch_id: { type: string }
+    approved_by: { type: string }
+    executed_at: { type: integer }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
+    snapshot_id: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+SettlementBatch:
+  description: 结算批（05 §3 SettlementBatch，5 态，Owner 2B1-ENUM-01）
+  type: object
+  required: [batch_id, status]
+  properties:
+    batch_id: { type: string, description: Snowflake 主键 }
+    status: { type: string, enum: [created, processing, completed, partially_failed, failed] }
+    market_count: { type: integer }
+    order_count: { type: integer }
+    settlement_ids: { type: array, items: { type: string }, description: 结算单 ID 列表(JSON 数组) }
+    total_principal_apt: { type: string }
+    total_reward_apt: { type: string }
+    total_service_fee_apt: { type: string }
+    executed_at: { type: integer }
+    rule_version: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+RefundCase:
+  description: 退款案件（05 §3 RefundCase，6 态，Owner 2B1-ENUM-02）
+  type: object
+  required: [refund_id, market_id, status]
+  properties:
+    refund_id: { type: string, description: Snowflake 主键 }
+    market_id: { type: string }
+    batch_size: { type: integer }
+    principal_total_apt: { type: string }
+    service_fee_total_apt: { type: string }
+    status: { type: string, enum: [pending, approved, executing, completed, rejected, failed] }
+    approved_by: { type: string }
+    executed_at: { type: integer }
+    ledger_batch_ids: { type: array, items: { type: string } }
+    reason_code: { type: string }
+    case_id: { type: string }
+    approval_id: { type: string }
+    rule_version: { type: string }
+    snapshot_id: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+CorrectionCase:
+  description: 纠错案件（05 §3 CorrectionCase，6 态，Owner 2B1-ENUM-03）
+  type: object
+  required: [correction_id, market_id, status]
+  properties:
+    correction_id: { type: string, description: Snowflake 主键 }
+    market_id: { type: string }
+    result_id_old: { type: string }
+    result_id_new: { type: string }
+    settlement_ids_old: { type: array, items: { type: string } }
+    settlement_ids_new: { type: array, items: { type: string } }
+    status: { type: string, enum: [pending, approved, executing, completed, rejected, failed] }
+    approved_by: { type: string }
+    executed_at: { type: integer }
+    ledger_reversal_ids: { type: array, items: { type: string } }
+    ledger_new_ids: { type: array, items: { type: string } }
+    case_id: { type: string }
+    approval_id: { type: string }
+    evidence_ids: { type: array, items: { type: string } }
+    rule_version: { type: string }
+    snapshot_id: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+ConsentReceipt:
+  description: 同意回执（05 §3 ConsentReceipt，2 态，Owner 2B1-ENUM-06）
+  type: object
+  required: [receipt_id, user_id, consent_type, consent_version, status]
+  properties:
+    receipt_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    consent_type: { type: string }
+    consent_version: { type: string }
+    content_hash: { type: string, description: 同意内容哈希 }
+    status: { type: string, enum: [active, expired] }
+    agreed_at: { type: integer }
+    expires_at: { type: integer }
+    policy_version: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }

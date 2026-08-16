@@ -1,6 +1,6 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 29
+contextVersion: 30
 status: PUBLISHED
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
@@ -266,12 +266,12 @@ decisionSources:
     owner: OWNER
     provenance: "OWNER_DIRECTIVE 2026-08-16（user: 开发 agent 一开到底，删除阻挡开发进度门禁，改为质量 agent 审核提审时遵守）← CR-20260816-003"
   machine_contract_affiliate_agent_p1:
-    value: "CANDIDATE 2026-08-16 — S01-P07 Affiliate/Agent P1 合同盘点（快照 1，不建表）。三对象 Agent / Referral / AgentEarning 字段候选表 + Decision Matrix（11 项 Owner Decision D1~D11：状态×3/层级深度/重复归属/解绑/确认时点/预算来源/回滚/税务/PII）+ Freeze 候选 + Decision Request。Owner 未签 → 三对象 CONTRACT_GAP/FAIL_CLOSED，不建表不建 Service；P0 增长奖励写路径 fail-closed；不继承 V1.x 佣金语义（invite_income_money/team_income_money/reward 不迁移）；V1.x member_user_team 只读盘点。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md。快照 2（建 DDL）阻塞在 Owner 签署 D1~D11。任务: .project-ai/tasks/TASK-20260816-006/。commit 4f01bad（实现）/ f1b28c4（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。"
+    value: "CANDIDATE 2026-08-16 — S01-P07 Affiliate/Agent P1 合同盘点（快照 1，不建表）。三对象 Agent / Referral / AgentEarning 字段候选表 + Decision Matrix（11 项 Owner Decision D1~D11：状态×3/层级深度/重复归属/解绑/确认时点/预算来源/回滚/税务/PII）+ Freeze 候选 + Decision Request。Owner 未签 → 三对象 CONTRACT_GAP/FAIL_CLOSED，不建表不建 Service；P0 增长奖励写路径 fail-closed；不继承 V1.x 佣金语义（invite_income_money/team_income_money/reward 不迁移）；V1.x member_user_team 只读盘点。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md。快照 2（建 DDL）已解除阻塞（Owner 签 2026-08-16 全 OPTION_A）。任务: .project-ai/tasks/TASK-20260816-006/。commit 4f01bad（实现）/ f1b28c4（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。Owner 签核 2026-08-16：D1~D11 全 OPTION_A（见 affiliate_agent_p1_owner_signoff）。"
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P07 合同盘点，commit 4f01bad/f1b28c4）← 07 §S01-P07 固定步骤 1-4 ← 01 §P1 / 02 §Team/Referral / 06 §Growth / V1.x member_user_team"
   machine_contract_ai_operations_p1:
-    value: "CANDIDATE 2026-08-16 — S01-P08 AI Operations P1 合同盘点（快照 1，不建表）。三对象 AISignal / AIRecommendation / SimulationRun 字段候选表 + V1.x arbitrage 盘点（arbitrage_signal/raw=ADAPT；fixture/attempt/day_plan/position=KEEP_INTERNAL；project*=RETIRE）+ Decision Matrix（9 项 Owner Decision D1~D9 + 1 LOCKED D10）+ Freeze 候选 + Decision Request。C 端泄露边界 FORBIDDEN（signal/profit/position/payload 禁止 C 端，D10 LOCKED）；AI/Prediction 预算隔离（02 §11 双向 FORBIDDEN）；不继承 V1.x 矿机套利语义；不沿用硬编码 secret。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md。快照 2（建 DDL）阻塞在 Owner 签署 D1~D9。任务: .project-ai/tasks/TASK-20260816-007/。commit 799d588（实现）/ cf50829（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。"
+    value: "CANDIDATE 2026-08-16 — S01-P08 AI Operations P1 合同盘点（快照 1，不建表）。三对象 AISignal / AIRecommendation / SimulationRun 字段候选表 + V1.x arbitrage 盘点（arbitrage_signal/raw=ADAPT；fixture/attempt/day_plan/position=KEEP_INTERNAL；project*=RETIRE）+ Decision Matrix（9 项 Owner Decision D1~D9 + 1 LOCKED D10）+ Freeze 候选 + Decision Request。C 端泄露边界 FORBIDDEN（signal/profit/position/payload 禁止 C 端，D10 LOCKED）；AI/Prediction 预算隔离（02 §11 双向 FORBIDDEN）；不继承 V1.x 矿机套利语义；不沿用硬编码 secret。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md。快照 2（建 DDL）已解除阻塞（Owner 签 2026-08-16 全 OPTION_A）。任务: .project-ai/tasks/TASK-20260816-007/。commit 799d588（实现）/ cf50829（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。Owner 签核 2026-08-16：D1~D9 全 OPTION_A（见 ai_operations_p1_owner_signoff）。"
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P08 合同盘点，commit 799d588/cf50829）← 07 §S01-P08 固定步骤 1-5 ← 01 §P1 / 02 §5.4/§11 / 06 §4 / V1.x arbitrage_*"
@@ -310,3 +310,23 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P04 56 级规则读取器 + 状态机骨架 + 只读投影）← 07 §S02-P04 固定步骤 1-7 ← 05 §3/§6/§7 ← 06 §4（AI.* 全 TBC）← machine_contract_batch1_freeze（MC1 Robot/Reward DDL + Canonical State）← machine_contract_batch2_freeze（MC2 Robot R1-R12 / AI Reward W1-W10 状态转移）← stage02_p03_ledger_aptaccount_power（经济事务模板先例）"
+  affiliate_agent_p1_owner_signoff:
+    value: "OWNER_SIGNED 2026-08-16 — S01-P07 Affiliate/Agent P1 合同 Owner 签核（11 项 D1~D11 全部采纳 OPTION_A）。落定：Agent=active/suspended/terminated；Referral=active/revoked/expired；AgentEarning=candidate/held/confirmed/reversed；层级≤2代；一 invitee 唯一 inviter + 禁解绑/更换；佣金平台收入确认后确认；预算=独立 growth treasury budget；回滚=append-only reversal；税务/地区预留字段 P1 不启用；PII 最小化。三对象 CONTRACT_GAP 解除，可进快照 2（建 DDL/Model/DAO/Service 骨架）；转移矩阵仍待 Independent Review，状态机 FAIL_CLOSED。enum 已回填 05 §4，层级/预算回填 06 §9 + 02 §12。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 全盘接受推荐选项 A）← TASK-20260816-006 decision_request D1~D11"
+  ai_operations_p1_owner_signoff:
+    value: "OWNER_SIGNED 2026-08-16 — S01-P08 AI Operations P1 合同 Owner 签核（9 项 D1~D9 全部采纳 OPTION_A + D10 LOCKED）。落定：AISignal=active/expired/consumed/closed/invalid；AIRecommendation=draft/active/expired/superseded；SimulationRun=pending/running/completed/failed/cancelled；retention raw 30 天/归一化 90 天；供应商仅内部使用；writer=系统内部进程；dedupe_key 唯一 + 模拟不自动重试；预算连接 P1 不启用；模型版本复用 06 参数生命周期。三对象 CONTRACT_GAP 解除，可进快照 2；C 端泄露边界 FORBIDDEN（D10 LOCKED，非 Owner 决策）。enum 已回填 05 §4。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 全盘接受推荐选项 A）← TASK-20260816-007 decision_request D1~D9"
+  stage02_p05_prediction_p0:
+    value: "COMPLETE 2026-08-16 — S02-P05 Prediction P0 八对象状态机骨架 + 只读投影 + fail-closed（不新增 DDL）。交付：library/service/prediction/{PredictionMarketService,PredictionOrderService,ResultService,SettlementService,SettlementBatchService,RefundCaseService,CorrectionCaseService}.php + library/service/policy/ConsentReceiptService.php。Market（M1-M12 纯状态转移 draft→open→closing→locked→awaiting_result→settlement→settled + void/exception 旁路；createMarket 依赖 Fixture 源 FAIL_CLOSED DEPENDENCY_UNAVAILABLE）；PredictionOrder（P1-P4 纯转移 submitted→locked→awaiting_result→settling→settled；submit/startRefund/completeRefund/startCorrect/completeCorrect FAIL_CLOSED 因 06 锁盘参数 TBC / RefundCase/CorrectionCase 契约未冻结）；Result（RS3 uphold disputed→official / RS4+RS5 correctFromDisputed/Official→corrected 仅一次 MC2 #11 守卫；confirm/dispute FAIL_CLOSED 因赛果源/RiskCase）；Settlement（ST1/ST3/ST4/ST6/ST7 纯转移；calculate/pay FAIL_CLOSED 因 06 结算参数/账本过账）；SettlementBatch（process/complete/partiallyFail/retry/fail 纯转移；createBatch FAIL_CLOSED）；RefundCase/CorrectionCase（approve/reject/execute/fail/retry 纯转移；createCase/complete FAIL_CLOSED）；ConsentReceipt（grant 幂等去重完整实现 + expire 纯转移，active→expired 两态）。全部状态转移走 TransactionBoundary + object_version CAS + appendAudit 审计（Market 无 audit_event_id 列单向关联）；金额 decimal string；allowedActions 下单候选因锁盘参数 TBC 进 blocked_actions。OpenAPI components/schemas/prediction.yaml（PredictionMarket/PredictionOrder/PredictionResult/PredictionSettlement/SettlementBatch/RefundCase/CorrectionCase/ConsentReceipt）+ paths/prediction.yaml（写 POST 补 503 DependencyUnavailable）+ gainode-v2.yaml 注册。测试 113 断言全过（35 Contract 状态常量冻结/Event Catalog/fail-closed/错误码 HTTP 映射 + 78 Integration SQLite 内存库状态机合法非法转移/CAS 冲突/幂等去重/只读投影/fail-closed）。任务: .project-ai/tasks/TASK-20260816-012/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P05 Prediction P0 状态机骨架 + 只读投影 + fail-closed）← 07 §S02-P05 固定步骤 1-7 ← 05 §3/§4/§6/§7 ← machine_contract_batch1_freeze（MC1 Market/Order DDL + Canonical State）← machine_contract_batch2_freeze（MC2 Market M1-M12 / Order P1-P12 状态转移）← machine_contract_batch2b1_state_contract（2B-1 Result/Settlement/SettlementBatch/RefundCase/CorrectionCase/ConsentReceipt enum + RS1-RS5/ST1-ST7）← stage02_p04_robot_reward_upgrade（fail-closed 只读投影 + CAS 状态转移先例）"
+  role_workflow_rules:
+    value: "EXECUTION_RULES_ADDED 2026-08-16 — 将创世DOG tools/git-review-worktree 通用多角色协作框架整合为 Gainode 项目执行规则：新增 .project-ai/rules/roles.md（5 角色 Owner/Scheduler/Developer/Quality/Reviewer 分工 + 权限矩阵 + 推理强度 + Gainode 参数表）、.project-ai/rules/workflow.md（双流水线 + 状态词 + 提交 trailer Code-Origin + 问题分级 + Verdict + 11 项门禁清单 + Stage 交接格式 + worktree 拓扑）、.project-ai/rules/git-review-worktree.md（独立审核 worktree 手工命令 + 必查清单 + 回滚）。定位为执行层细化，不推翻 MASTER_PROJECT_GOVERNANCE / 07 V3.3；DEV_GATE_MODEL=NO_PROGRESS_GATES_QUALITY_ENFORCES 与双流水线一致。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 读取创世DOG 三份通用方案整合进本项目 rules）← E:\\github\\AItradeos\\创世狗\\tools\\git-review-worktree\\{README,ROLES,WORKFLOW}.md"

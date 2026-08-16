@@ -1,5 +1,8 @@
 # Prediction P0 路径骨架（05 §6 Prediction，C 端）
-# 业务 request/response schema 在 S02-P05 落地。
+# S02-P05：8 对象状态机骨架 + fail-closed + 只读投影落地。
+#   - consent_receipt_create：完整实现（grant 幂等去重）。
+#   - order_create / order_addition：依赖锁盘参数/资格/stake（06 TBC）→ 503 fail-closed。
+#   - appeal_create：依赖 RiskCase/案件契约（未冻结）→ 503 fail-closed。
 
 markets:
   get:
@@ -53,7 +56,7 @@ consent_receipt_create:
 order_create:
   post:
     operationId: prediction_order_create
-    summary: 提交订单
+    summary: 提交订单（锁盘参数/资格/stake TBC → fail-closed）
     tags: [Prediction]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -66,12 +69,13 @@ order_create:
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
       '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 order_addition:
   post:
     operationId: prediction_order_addition
-    summary: 同选项追加
+    summary: 同选项追加（锁盘参数/资格/stake TBC → fail-closed）
     tags: [Prediction]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -83,6 +87,7 @@ order_addition:
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
       '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 order_receipt:
@@ -124,7 +129,7 @@ refund_detail:
 appeal_create:
   post:
     operationId: prediction_appeal_create
-    summary: 发起申诉
+    summary: 发起申诉（RiskCase/案件契约未冻结 → fail-closed）
     tags: [Prediction]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -133,6 +138,7 @@ appeal_create:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 appeal_detail:
