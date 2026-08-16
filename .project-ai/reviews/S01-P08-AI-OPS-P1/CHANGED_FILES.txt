@@ -1,0 +1,1 @@
+A	.project-ai/tasks/TASK-20260816-007/acceptance.md A	.project-ai/tasks/TASK-20260816-007/decision_request.md A	.project-ai/tasks/TASK-20260816-007/design.md A	.project-ai/tasks/TASK-20260816-007/requirement.md A	0.5浠ｇ爜/gainode鍚庣/gainode/sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md
