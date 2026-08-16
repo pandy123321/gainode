@@ -27,6 +27,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P01-GENERAL-KERNEL | 678b61a | 097b5ce | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P02-AUTH-KYC-USER-ELIGIBILITY | b61b93e | c29f42a | YES | 1 | APPROVED | 0 / 0 / 0 | 2 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P03-LEDGER-APTACCOUNT-POWER | 0084fae | 978ca8a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 
 ## 明细
 
@@ -54,9 +55,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 审核 S02-P04（Robot/Reward/Upgrade）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
-NEXT_DEVELOPER_ACTION = 推进 S02-P04（Robot/Reward/Upgrade）
-OWNER_DECISION_REQUIRED = YES（S01-P07/P08 共 20 项 Owner Decision 待签；S02-P02 4 项 TBC 参数；GitHub unblock-secret AKIA 待 Owner 标记）
+NEXT_QUALITY_ACTION = 审核 S02-P05（Prediction P0，commit 4ffef8b）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
+NEXT_DEVELOPER_ACTION = 推进 S02-P06（OTC/Power）
+OWNER_DECISION_REQUIRED = PARTIAL（S01-P07/P08 20 项已签 2026-08-16 全 OPTION_A；S02-P02 4 项 TBC 待签；GitHub unblock-secret AKIA 待 Owner 标记；OBS-001 历史重写迹象待 Owner 确认）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -208,6 +209,29 @@ FORMAL_STAGE_GATE = NOT_APPLICABLE
 LAST_CHECKED_AT = 2026-08-16T18:10+08:00
 ```
 
+### S02-P04-ROBOT-REWARD-UPGRADE（Round 1）
+
+```text
+DEVELOPER_BASE_COMMIT = 4999cf2（S02-P03 质量审核提交）
+DEVELOPER_SNAPSHOT_COMMIT = 916e815
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1
+REVIEW_STATUS = APPROVED
+P0_OPEN = 0
+P1_OPEN = 0
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 0
+P3 = 0
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = APPROVED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+GOVERNANCE_OBSERVATIONS = 2（OBS-001 历史重写迹象待 Owner 确认；OBS-002 developer trailer 简写 origin:developer）
+LAST_CHECKED_AT = 2026-08-16T18:40+08:00
+```
+
 ## 关键约束（全程保持）
 
 ```text
@@ -218,8 +242,8 @@ MC2 = FROZEN（Round 7 APPROVED，已落状态）
 2B-2 enum = Owner 裁决完成（05 V2.4），转移矩阵 CANDIDATE（未 FROZEN，FAIL_CLOSED）
 2B-2 DDL + 骨架 = DONE（S01-P05 APPROVED，13 对象，append-only 3，fail-closed）
 非持久投影 = DONE（S01-P06 APPROVED，7 对象 NOT_PERSISTED，default-deny，105 断言）
-Affiliate/Agent P1 盘点 = DONE（S01-P07 APPROVED，3 对象合同盘点，11 Owner Decision D1~D11 待签，不建表）
-AI Operations P1 盘点 = DONE（S01-P08 APPROVED，3 对象合同盘点，9 Owner Decision D1~D9 + D10 C 端边界 LOCKED，不建表）
+Affiliate/Agent P1 盘点 = DONE（S01-P07 APPROVED，3 对象合同盘点，11 Owner Decision D1~D11 已签 2026-08-16 全 OPTION_A，可进快照 2 建骨架）
+AI Operations P1 盘点 = DONE（S01-P08 APPROVED，3 对象合同盘点，9 Owner Decision D1~D9 已签 2026-08-16 全 OPTION_A + D10 C 端边界 LOCKED，可进快照 2 建骨架）
 STAGE-01 收口 = DONE（S01-P09 APPROVED，43 对象覆盖矩阵 = 30 持久 + 7 投影 + 6 盘点）
 STAGE-01 全包 = S01-P01~P09 本地全 APPROVED
 STAGE-01 Gate = APPROVED_WITH_CONDITIONS（本地版 2026-08-16；条件①外部 ChatGPT 审核待补②S01-P07/P08 Owner Decision 待签）
@@ -227,6 +251,7 @@ STAGE-01 Gate 文件 = .project-ai/reviews/STAGE-01-QUALITY-GATE-V3.md
 S02-P01 通用内核 = DONE（APPROVED，30 文件不建表不写业务，16 错误码 + Envelope + RequestContext + Null store + TransactionBoundary + OpenAPI 3.1，41 断言）
 S02-P02 Auth/KYC/User/Eligibility = DONE（APPROVED，35 文件六子流程，2 NON_BLOCKING P2：KYC reviewer 角色校验缺失 + 敏感操作未写审计，69 断言）
 S02-P03 Ledger/AptAccount/Power = DONE（APPROVED，14 文件经济写路径，11 步模板 + L1/L2/L3 + CAS + 负余额保护，1 P3 负余额口径，48 断言）
+S02-P04 Robot/Reward/Upgrade = DONE（APPROVED，16 文件 56 级规则读取器 + 三状态轴骨架 + 只读投影，写路径 fail-closed，82 断言，0 Finding）
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
