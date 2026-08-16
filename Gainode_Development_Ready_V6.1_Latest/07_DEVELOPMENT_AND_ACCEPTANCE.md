@@ -1,8 +1,8 @@
 # 07 · Gainode 开发执行计划、Agent 派发规则与功能验收
 
-> 版本：V3.3 · Fully Detailed 40-Packages + Single Developer Serial + Independent Quality Review（Dev 一开到底，门禁移交 Quality）
+> 版本：V3.4 · Fully Detailed 40-Packages + Single Developer Serial + Independent Quality Review（Dev 一开到底，门禁移交 Quality；整合五角色纪律）
 > 文档状态：`FROZEN_FOR_EXECUTION`
-> 冻结 ID：`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816`
+> 冻结 ID：`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816`
 > 冻结日期：2026-08-16（Asia/Shanghai）
 > 生效项目：Gainode 体育预测、竞猜与内部套利经济引擎
 > 唯一工作区：`E:\github\sports`
@@ -15,13 +15,13 @@
 
 ### 0.1 冻结执行基线
 
-本文件 V3.3 是 Gainode 当前唯一、最新且已冻结的开发步骤基线。Development Agent、Quality Agent 和后续复审 Agent 必须按本文件定义的 Formal Stage、Package ID、包顺序、范围、停止条件、提审节奏和 Gate 条件执行。V3.3 起 Development Agent 一开到底，进度门禁由 Quality Agent 在审核时验证（见 §3.2 与 §5 门禁语义统一覆盖条款）。
+本文件 V3.4 是 Gainode 当前唯一、最新且已冻结的开发步骤基线。Development Agent、Quality Agent 和后续复审 Agent 必须按本文件定义的 Formal Stage、Package ID、包顺序、范围、停止条件、提审节奏和 Gate 条件执行。自 V3.3 起 Development Agent 一开到底，进度门禁由 Quality Agent 在审核时验证（见 §3.2 与 §5 门禁语义统一覆盖条款）；V3.4 在此基础上升级 §3 角色纪律（五角色、双流水线、提交来源 trailer、独立审核 worktree 与 11 项门禁清单）。
 
 ```text
 LATEST_EXECUTION_PLAN = Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md
-LATEST_EXECUTION_PLAN_VERSION = V3.3
+LATEST_EXECUTION_PLAN_VERSION = V3.4
 EXECUTION_PLAN_STATUS = FROZEN_FOR_EXECUTION
-EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816
+EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816
 DEVELOPMENT_AGENT_MUST_FOLLOW_FROZEN_PLAN = YES
 QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN = YES
 OLDER_EXECUTION_PLAN_STATUS = SUPERSEDED_DO_NOT_EXECUTE
@@ -154,12 +154,24 @@ S01_P03_REVIEW_STATUS = APPROVED
 
 ## 3. 开发 Agent 与质量 Agent 的执行节奏
 
-### 3.1 角色分离
+### 3.1 角色分离（五角色）
 
-- 全项目只允许一个 Development Agent 串行修改产品代码。
-- Quality Agent 默认只读，只写 `.project-ai/reviews/**` 审核报告，不修改产品代码。
-- Development Agent 对 Finding 先复核再修复；Quality Agent 负责独立复审，执行者不能自关 Finding。
-- Quality Agent 不得把自己的建议写进 Development Agent 的提交；任何获授权的质量修复也必须使用独立分支和 `origin:quality` 提交，默认流程不启用该例外。
+Gainode 执行层固定五个角色，职责分离是硬约束（完整定义与权限矩阵见 `.project-ai/rules/roles.md`）：
+
+| 角色 | 定位 | 关键边界 |
+|---|---|---|
+| Owner（人工） | 唯一最终决策者 | 批准范围/提交/推送/合并/发布/资产 |
+| Scheduler | 策划拆解派发 | 不写业务代码，不做 git 写操作 |
+| Developer（Development Agent） | 唯一执行者，一开到底 | 只本地 commit，禁 push/merge/rebase/cherry-pick |
+| Quality（Quality Agent） | 独立内审 + 提审 + 合并唯一执行者 | 唯一可 push/提审/merge，仍需 Owner 授权 |
+| Reviewer（独立外审 Agent） | 只读、固定 SHA 外审 | 只给 Verdict + 证据，不改文件 |
+
+- 全项目只允许一个 Developer 串行修改产品代码。
+- Quality 默认只读，只写 `.project-ai/reviews/**` 审核报告，不修改产品代码。
+- Developer 对 Finding 先复核再修复；Quality 负责独立复审，执行者不能自关 Finding。
+- Quality 不得把自己的建议写进 Developer 的提交；任何获授权的质量修复也必须使用独立分支和 `Code-Origin: Quality` 提交（见 §3.3），默认流程不启用该例外。
+- Scheduler 可由 Owner 兼任或独立承担；冻结执行路线唯一来源是本文件，Scheduler 不得自创 Stage。
+- 计划、实现、质量控制、外部审核必须职责分离；参与实现的 Agent 不得代替独立 Reviewer 给外审结论。
 
 ### 3.2 开发进度门禁移交 Quality
 
@@ -192,21 +204,63 @@ QUALITY_APPROVED != PRODUCTION_APPROVED
 SNAPSHOT_LOCKED != FINDINGS_CLOSED
 ```
 
-### 3.3 提交和提审不得混淆
+#### 双流水线
 
-Development Agent 提交信息：
+开发线与质量线是两条独立流水线，不得混成一个提交，也不得让外审进度阻塞 Developer 推进无依赖 Stage（执行细节见 `.project-ai/rules/workflow.md` §1）：
 
 ```text
-origin:developer stage:<stage-id> package:<package-id> <summary>
+开发线：IMPLEMENTING_STAGE_N → LOCAL_VALIDATED → DEVELOPER_COMMITTED → IMPLEMENTING_STAGE_N+1
+质量线：DEVELOPER_COMMITTED → QUALITY_REVIEW → FIXED_REVIEW_HEAD → EXTERNAL_REVIEW → OWNER_APPROVED_STAGE_EXIT → MERGED
 ```
 
-Quality Agent 报告文件：
+### 3.3 提交来源与提审不得混淆
+
+V3.4 起，提交来源归属统一使用完整 trailer（`Code-Origin` + `Git-Operator`）；V3.3 及更早的 `origin:developer` / `origin:quality` 简写视为同一来源归属的等价记录，追溯有效，但新提交必须用完整格式。
+
+Developer 实现提交：
+
+```text
+feat(<scope>): <stage-id> <summary>
+
+Stage: <stage-id>
+Code-Origin: Developer
+Git-Operator: Developer
+```
+
+Quality 获授权修复提交（默认不启用，见 §3.1）：
+
+```text
+fix(review): <stage-id> close <finding-ids>
+
+Stage: <stage-id>
+Code-Origin: Quality
+Git-Operator: Quality
+Review-Findings: <P1-001,P2-002>
+```
+
+硬规则：
+
+- Developer 与 Quality 的代码禁止混入同一 commit；
+- 禁止 amend、squash、rebase 或重新复制文件来抹掉来源边界；
+- 重新提审时审核范围覆盖当前 Stage 从基线到最新固定 SHA 的完整提交链，而非只审最后一个修复 commit。
+
+Quality 报告文件：
 
 ```text
 .project-ai/reviews/<review-id>-QUALITY-REVIEW.md
 ```
 
-每个快照只审核明确的 `BASE_COMMIT..SNAPSHOT_COMMIT`。Development Agent 后续提交不自动进入旧审核范围。
+每个快照只审核明确的 `BASE_COMMIT..SNAPSHOT_COMMIT`。Developer 后续提交不自动进入旧审核范围。
+
+### 3.4 独立审核 worktree 与门禁清单
+
+Quality 审核对象 = 固定 SHA 的独立 worktree（分支 `gainode/review/<stage-id>`，base=`master`），物理隔离，不碰 Developer 的 HEAD 与工作区；建立/回滚命令见 `.project-ai/rules/git-review-worktree.md`。
+
+Quality 在「审核—提审—合并」环节逐项把关以下 11 项门禁（见 `.project-ai/rules/workflow.md` §8），任一不满足即阻断对应 Stage，但不要求 Developer 停止后续无依赖 Stage：
+
+1. 基线一致性；2. Stage 边界；3. 来源归属；4. 合同一致性；5. 安全红线；6. 测试真实性；7. 覆盖完整性；8. 待决项上报；9. P0/P1 阻断；10. 外审对象一致；11. 合并顺序。
+
+以下仍为硬停止（任何角色不得绕过，需 Owner 单独授权）：push/merge/rebase/cherry-pick/tag/release/deploy；资产/账本/真实资金/生产数据变更；修改已完成只读基线。
 
 ---
 
@@ -267,7 +321,7 @@ PRODUCTION_APPROVED = NO
 | STAGE-05 | Sandbox E2E 与迁移演练 | 15 个极端场景、账本守恒、回滚演练通过 |
 | STAGE-06 | 发布就绪审查 | 安全、性能、观测、运维材料就绪；仍不自动部署生产 |
 
-### 门禁语义统一覆盖条款（V3.3）
+### 门禁语义统一覆盖条款（V3.3 起，V3.4 沿用）
 
 自 V3.3 起，本文件所有 Package 内的「前置」「停止条件」「Stage Gate」字段**不再作为 Development Agent 的进度阻塞条件**。Development Agent 一开到底，这些字段统一解释为 Quality Agent 审核/提审时的验证项与风险登记点（见 §3.2 与 §15）。Development Agent 触达这些字段时不停下，按 best-effort 继续并在交接声明；Quality Agent 审核时逐项核对是否违反，违反则记为 Finding。唯二硬停止是 §0.1 永久禁止项与「包未在本文件定义」。
 
@@ -1333,7 +1387,7 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 先完整读取：
 1. Gainode_Development_Ready_V6.1_Latest/01-08 当前基线；
 2. Gainode_Development_Ready_V6.1_Latest/design-system/12_FIGMA_FRONTEND_DEVELOPMENT_BASELINE_V1.0.md；
-3. .project-ai/bootstrap.md、context.md、architecture.md、manifest.yaml、rules/coding.md、rules/review.md；
+3. .project-ai/bootstrap.md、context.md、architecture.md、manifest.yaml、rules/coding.md、rules/review.md、rules/roles.md、rules/workflow.md、rules/git-review-worktree.md；
 4. 当前 package 指定的 task/freeze/review；
 5. 通过agent开发前规则/EXECUTOR_AGENT_PROTOCOL.md。
 
@@ -1343,7 +1397,7 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 
 每包结束必须输出完整交接字段（含 `CONSUMED_UNFROZEN_CONTRACT`、`OPEN_OWNER_DECISION`、`OVERLAPS_LOCKED_SNAPSHOT`）、审核提示词、精确文件范围、验证证据和 NEXT_PACKAGE。
 涉及规则性修改时生成 Change Request/Decision Request 后继续无依赖部分，不停下等待；不得猜测，不得把推测写进代码。
-允许为当前 Package 创建一个范围纯净的本地 `origin:developer` 提交；禁止 push、merge、deploy，除非派发单另有明确授权。
+允许为当前 Package 创建范围纯净的本地提交，trailer 用 `Code-Origin: Developer` + `Git-Operator: Developer`；禁止 push、merge、rebase、cherry-pick、deploy，除非派发单另有明确授权。
 ```
 
 ---
@@ -1353,7 +1407,7 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 ```text
 你是 Gainode Independent Quality Agent，默认只读。工作区只能是 E:\github\sports。
 
-唯一审核计划基线是本文件 V3.3，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816，状态必须为 FROZEN_FOR_EXECUTION。先读取 DEVELOPMENT_EXECUTION_PLAN_FREEZE_V3.3.md，并按凭证规定的 `UTF8_LF_NO_BOM` 规范化方式核对本文件 SHA-256；不一致时输出 EXECUTION_PLAN_FREEZE_MISMATCH 并停止使用该快照，不得自行选择旧版计划。
+唯一审核计划基线是本文件 V3.4，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816，状态必须为 FROZEN_FOR_EXECUTION。先读取 DEVELOPMENT_EXECUTION_PLAN_FREEZE_V3.4.md，并按凭证规定的 `UTF8_LF_NO_BOM` 规范化方式核对本文件 SHA-256；不一致时输出 EXECUTION_PLAN_FREEZE_MISMATCH 并停止使用该快照，不得自行选择旧版计划。
 
 必须按本文件定义的 Package 顺序逐包锁定 Snapshot 和审核，并在每个 Formal Stage 的全部 Package 完成后单独执行 Stage Gate。不得新增、删除、合并、拆分、跳过或重排 Package；计划变更必须先取得 Owner 明确批准并生成新版本和新 Freeze ID。
 
@@ -1367,7 +1421,7 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 先验证 PROJECT/STAGE/PACKAGE/BASE_COMMIT/SNAPSHOT_COMMIT/REVIEW_RANGE/PACKAGE_SHA256/SNAPSHOT_PATHS。
 只审核锁定快照，不把 Developer 后续提交混进本轮，不修改产品代码。
 
-依据 01-08、当前 Freeze、.project-ai/rules/review.md 和 INDEPENDENT_REVIEW_AGENT_PROTOCOL.md 审核。
+依据 01-08、当前 Freeze、.project-ai/rules/review.md、.project-ai/rules/workflow.md（§8 十一项门禁清单）、.project-ai/rules/roles.md 和 INDEPENDENT_REVIEW_AGENT_PROTOCOL.md 审核。
 每条 Finding 必须给：严重度、精确文件、行/函数、当前行为、期望行为、证据、根因、触发条件、可达场景、影响、最小修复步骤、禁止扩展、验收、回归、Gate 影响。
 
 区分：
@@ -1393,3 +1447,11 @@ PRODUCTION_APPROVAL = NO
 - 每完成一个工作包，只更新 §2 进度、当前包、对应验收状态和证据链接。
 - 任何规则性修改必须有 Owner 决策记录；执行 Agent 不得把自己的推理当成 Owner Signoff。
 - 文档修改完成后应同步项目上下文发布工具；若工具不可用，记录 `CONTEXT_PUBLISH = NOT_RUN_TOOL_UNAVAILABLE`，不得伪造发布成功。
+
+### 变更流水
+
+| 版本 | Freeze ID | 变更内容 | Owner 决策 |
+|---|---|---|---|
+| V3.3 | `...V3.3-20260816` | 开发进度门禁全部移交 Quality（Dev 一开到底，DEV_GATE_MODEL=NO_PROGRESS_GATES_QUALITY_ENFORCES） | CR-20260816-003 |
+| V3.4 | `...V3.4-20260816` | 整合五角色执行纪律：§3.1 五角色表（新增 Scheduler 显式化）、§3.2 双流水线、§3.3 提交来源 trailer 统一为 `Code-Origin`+`Git-Operator`、新增 §3.4 独立审核 worktree + 11 项门禁清单；§14/§15 提示词引用 `rules/roles.md`/`workflow.md`/`git-review-worktree.md`。不改变 40 个 Package 的 ID/顺序/范围/步骤/停止条件/验收/Gate 语义 | CR-20260816-004 |
+
