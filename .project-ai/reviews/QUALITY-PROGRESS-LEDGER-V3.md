@@ -30,6 +30,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 1 | 0 | CHANGES_REQUIRED | YES | NOT_APPLICABLE |
+| STAGE-03 | S03-P02-H5-AUTH | 23e2a63 | 87136de | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
 
 ## 明细
 
@@ -57,9 +58,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 等待 Developer 修复 S02-P06（OtcOrderService Guard/Role/经济 fail-closed + 负向测试）后重新独立复审；修复 S02-P06 前不得推进 S02-P07 审核结论
-NEXT_DEVELOPER_ACTION = 按外审 record_id=727 修复 S02-P06：O1-O12 Guard Matrix、经济 transition fail-closed、幂等/并发、补负向测试
-OWNER_DECISION_REQUIRED = YES（①V3.3/V3.4 基线矛盾需 Owner 定夺——07 文档 Git Tree 仍 V3.3，V3.4 凭证未 commit；②S02-P06 修复方向授权；③OBS-001 历史重写迹象待确认）
+NEXT_QUALITY_ACTION = 继续逐个外部复审历史 commit（S02-P07/P08、S03-P00/P01、S02-P06 修复 f088d7f、密钥脱敏 b50767e）；S03-P02 外审 CHANGES_REQUIRED 待 Developer 修复后复审
+NEXT_DEVELOPER_ACTION = 按外审 record_id=739 修复 S03-P02：①统一 Auth base path /v1/api/②删除 consent_version 硬编码③关闭 Recovery verify 合同冲突④OTP retry_after 服务端化⑤Refresh 生命周期闭环⑥补三尺寸视觉验收
+OWNER_DECISION_REQUIRED = YES（①S03-P02 P1-3 Recovery verify 合同冲突；②逐个复审历史 commit 的 HEAD 回退策略）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -285,6 +286,36 @@ DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = YES（S02-P06 需修复后复审）
 FORMAL_STAGE_GATE = NOT_APPLICABLE
 GOVERNANCE_OBSERVATIONS = 0（OBS-002 关闭仍成立；V3.4 基线问题单独记 P2-1）
 LAST_CHECKED_AT = 2026-08-16T19:30+08:00
+```
+
+### S03-P02-H5-AUTH（外部审核 CHANGES_REQUIRED）
+
+```text
+DEVELOPER_BASE_COMMIT = 23e2a63（S03-P01 H5 基础设施）
+DEVELOPER_SNAPSHOT_COMMIT = 87136de
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1（外部 ChatGPT 独立审核）
+REVIEW_STATUS = CHANGES_REQUIRED
+P0_OPEN = 0
+P1_OPEN = 3
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 3（P2-001 OTP 60s fallback；P2-002 Refresh 生命周期；P2-003 三尺寸视觉验收）
+EXTERNAL_REVIEW_ID = 739（2026-08-17T01:29:48 完成）
+EXTERNAL_VERDICT = CHANGES_REQUIRED（修改后合并）
+EXTERNAL_FINDINGS =
+  P1-1 = Auth API 路径 /api/v1/ 与冻结 PUBLIC_BASE_PATH=/v1/api/ 冲突
+  P1-2 = Consent Version 契约缺失时硬编码 2026-08-01
+  P1-3 = Password Recovery 用 otp/verify 替代未裁决 /auth/recovery/verify
+  P2-1 = OTP resend 硬编码 60s（retry_after 未冻结）
+  P2-2 = Refresh 生命周期不闭环（15d/60d vs 无 refresh_token）
+  P2-3 = 三尺寸 375/390/430 视觉验收未执行却登记 IMPLEMENTED
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A（待 Developer 修复）
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = CHANGES_REQUIRED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO（V3.4 一开到底；外审 Finding 转 Developer 修复队列）
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+LAST_CHECKED_AT = 2026-08-17T01:35+08:00
 ```
 
 ## 关键约束（全程保持）
