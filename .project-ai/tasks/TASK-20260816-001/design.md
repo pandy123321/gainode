@@ -3,7 +3,7 @@
 ## 状态
 
 - **Owner Signoff：完成（6 实体 enum 已逐项裁决，2026-08-16，全部采纳各 D.x 的 RECOMMENDED_OPTION）**
-- **Independent Review：未开始（Result/Settlement 转移矩阵候选 + 6 实体 enum，待 State Machine gate）**
+- **Independent Review：Round 1 = CHANGES_REQUIRED（GAINODE-S01P02-2B1-IR-20260816-001）；已修复 2 P3 + 补记 1 BLOCKING_P2（方案 C 裁决），待复审（Round 2）**
 - **冻结状态：CANDIDATE（未 FROZEN）**
 
 ## 权威依据与角色（05 canonical）
@@ -80,11 +80,14 @@
 | `Result=official` → Market M6（`awaiting_result`→`settlement`） | MC2 §3.4 |
 | `Settlement=paid` → Market M7（`settlement`→`settled`）→ Order P4（`settling`→`settled`） | MC2 §3.4/§3.5 |
 | `Settlement=failed` → Market M9（`settlement`→`exception`）→ Order P5（`settling`→`refunding`，RefundCase 审批） | MC2 §3.4/§3.5/§3.7 |
+| `Settlement failed→queued`（ST7）↔ `Market exception→settlement`（M10）——结算失败重试两侧（同一重试动作） | MC2 §3.4 |
 | `Result=corrected` → Market M12（`settled`→`settlement`）→ Order P7/P8（`settled`→`correcting`→`corrected`）；经 CorrectionCase | MC2 §3.4/§3.5/§3.7 |
 | `Market=void` → Order P10/P11/P12 → `refunding` → RefundCase | MC2 §3.7 |
 | `OtcOrder=completed` → 生成 `OtcTrade` → Ledger 分录（`OTC_TRADE`）+ Power 消耗/释放 | MC2 §3.6/§5 |
 
 > 结算会计矩阵（MC2 §5，权威）：`WIN`=CREDIT 本金+盈利；`LOSS`=NO_LEDGER_ENTRY（stake 已 DEBIT）；`PUSH`=CREDIT 本金。任一订单净账本效果仅一次且方向确定。
+
+> **Owner 裁决 2026-08-16（方案 C）**：Result `corrected` 重结算的 Market `settlement→settled` 协同（MC2 M7 guard=`Settlement=paid` 与 corrected 走 CorrectionCase 之间的边界缺口）**deferred 至 STAGE-02**。S01-P03 仅建 Settlement 基础状态机骨架 + fail-closed guard，不实现 corrected 重结算业务路径；不修改已冻结 MC2 的 M7 guard，不生成 Change Request。corrected 重结算业务路径保持 FAIL_CLOSED 直至 STAGE-02 定义。
 
 ---
 
@@ -172,7 +175,7 @@ CURRENT_AUTHORITY = Owner（05 §4 未定义；05 §3 有 status 无 enum）
 MISSING_DECISION = canonical enum 值集
 OPTION_A = pending / processing / completed / failed / cancelled
 OPTION_B = draft / pending / changes_requested / approved / rejected / executing / executed / failed（复用 Approval enum，因有 approval_id）
-RECOMMENDED_OPTION = OPTION_A（升级订单是执行型，非完整审批流；approval_id 仅关联大额人工确认，见 MC2 Owner 裁决 #13）
+RECOMMENDED_OPTION = OPTION_A（升级订单是执行型，非完整审批流；approval_id 仅关联大额人工确认，类比 MC2 Owner 裁决 #13 的大额人工确认原则）
 RISK_OF_EACH_OPTION = A：五态是否需 rejected 场景待确认；B：强制审批流与「默认系统自动执行」冲突
 SAFE_WORK_CONTINUING = 不受阻塞
 RESUME_CONDITION = Owner 裁决后补 05 §4，再 S01-P03 建 DDL
@@ -265,7 +268,7 @@ Writer = OtcTradeService
 初态 = pending
 合法转移（候选）= pending→processing→completed / pending→cancelled / processing→failed
 终态 = completed / cancelled / failed
-触发者 = END_USER 发起；大额人工确认 = OPS_OPERATOR + RISK_APPROVER（MC2 Owner 裁决 #13）
+触发者 = END_USER 发起；大额人工确认 = OPS_OPERATOR + RISK_APPROVER（类比 MC2 Owner 裁决 #13 的大额人工确认原则）
 Writer = RobotUpgradeOrderService
 失败态 = failed
 重试 = failed→processing

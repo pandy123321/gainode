@@ -1,6 +1,6 @@
 # Machine Contract 第二批 2B-1 — State Contract Freeze（候选）
 
-> 状态：**CANDIDATE（未 FROZEN）** — Owner Signoff ✅（6 缺 enum 实体已逐项裁决 2026-08-16，全部采纳各 D.x RECOMMENDED_OPTION，已补入 05 §4 V2.3）；Independent Review 未开始（Result/Settlement 转移矩阵 + 6 实体 enum 待 State Machine gate）。
+> 状态：**CANDIDATE（未 FROZEN）** — Owner Signoff ✅（6 缺 enum 实体已逐项裁决 2026-08-16，全部采纳各 D.x RECOMMENDED_OPTION，已补入 05 §4 V2.3）；Independent Review Round 1 = CHANGES_REQUIRED（GAINODE-S01P02-2B1-IR-20260816-001），已修复 2 P3 + 补记 1 BLOCKING_P2（方案 C 裁决），待 Round 2 复审（State Machine gate）。
 > 说明：本文件为 Machine Contract 第二批 **2B-1 小批**（9 对象）的状态合同冻结候选。Result/Settlement enum 复制 05 §4（已冻结）；6 缺 enum 实体经 Owner 裁决后补入 05 §4；AuditEvent 复用 MC2 `audit_events` DDL。转移矩阵均为**候选**，正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
 > 起草日期：2026-08-16
 > 关联 DDL：无（本批不生成 DDL，属 S01-P03；`audit_events` 复用 `20260815_machine_contract_batch2_audit_events.sql`）
@@ -35,7 +35,7 @@
 - Settlement 复核/批准 → **RISK_APPROVER**（与 Result confirmer 分离，SoD）。
 - RefundCase/CorrectionCase 发起 → **OPS_OPERATOR**；审批 → **RISK_APPROVER**。
 - OtcTrade 撮合成交 → 系统；争议裁决 → **RISK_APPROVER**（作用于 OtcOrder，不覆盖 Trade）。
-- RobotUpgradeOrder 发起 → **END_USER**；大额人工确认 → **OPS_OPERATOR + RISK_APPROVER**（MC2 Owner 裁决 #13）。
+- RobotUpgradeOrder 发起 → **END_USER**；大额人工确认 → **OPS_OPERATOR + RISK_APPROVER**（类比 MC2 Owner 裁决 #13 的大额人工确认原则）。
 - ConsentReceipt 同意 → **END_USER**；到期 → 系统。
 - 对账只读 → **FINANCE_REVIEWER**（不可写）。
 - 审计只读 → **AUDITOR**。
@@ -165,7 +165,7 @@ Writer = OtcTradeService
 初态 = pending
 合法转移（候选）= pending→processing→completed / pending→cancelled / processing→failed
 终态 = completed / cancelled / failed
-触发者 = END_USER 发起；大额人工确认 = OPS_OPERATOR + RISK_APPROVER（MC2 Owner 裁决 #13）
+触发者 = END_USER 发起；大额人工确认 = OPS_OPERATOR + RISK_APPROVER（类比 MC2 Owner 裁决 #13 的大额人工确认原则）
 Writer = RobotUpgradeOrderService
 失败态 = failed
 重试 = failed→processing
@@ -203,6 +203,7 @@ Writer = ConsentReceiptService
 | `Result=official` → Market M6（`awaiting_result`→`settlement`） | MC2 §3.4 |
 | `Settlement=paid` → Market M7（`settlement`→`settled`）→ Order P4 | MC2 §3.4/§3.5 |
 | `Settlement=failed` → Market M9 → Order P5（`settling`→`refunding`，RefundCase 审批） | MC2 §3.4/§3.5/§3.7 |
+| `Settlement failed→queued`（ST7）↔ `Market exception→settlement`（M10）——结算失败重试两侧（同一重试动作） | MC2 §3.4 |
 | `Result=corrected` → Market M12 → Order P7/P8（`settled`→`correcting`→`corrected`）；经 CorrectionCase | MC2 §3.4/§3.5/§3.7 |
 | `Market=void` → Order P10/P11/P12 → `refunding` → RefundCase | MC2 §3.7 |
 | `OtcOrder=completed` → 生成 `OtcTrade` → Ledger 分录（`OTC_TRADE`）+ Power 消耗/释放 | MC2 §3.6/§5 |
@@ -235,7 +236,10 @@ OWNER_DECISION_MATRIX_COUNT = 6
 NO_SELF_INVENTED_STATE = YES
 NO_SELF_INVENTED_ROLE = YES
 AUDIT_EVENTS_REUSED_NOT_RECREATED = YES
+CORRECTED_RESETTLEMENT_COORDINATION = DEFERRED_TO_STAGE-02（Owner 裁决 2026-08-16 方案 C）
 ```
+
+> **Owner 裁决 2026-08-16（方案 C）**：Result `corrected` 重结算的 Market `settlement→settled` 协同（MC2 M7 guard=`Settlement=paid` 与 corrected 走 CorrectionCase 之间的边界缺口）**deferred 至 STAGE-02**。S01-P03 仅建 Settlement 基础状态机骨架 + fail-closed guard，不实现 corrected 重结算业务路径；不修改已冻结 MC2 的 M7 guard，不生成 Change Request。corrected 重结算业务路径保持 FAIL_CLOSED 直至 STAGE-02 定义。
 
 正式 FROZEN 前须重提 Independent Review（State Machine gate）并通过。
 
