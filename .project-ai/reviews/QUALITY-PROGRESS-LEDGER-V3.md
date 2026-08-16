@@ -151,7 +151,9 @@ MC2 = FROZEN（Round 7 APPROVED，已落状态）
 Affiliate/Agent P1 盘点 = DONE（S01-P07 APPROVED，3 对象合同盘点，11 Owner Decision D1~D11 待签，不建表）
 AI Operations P1 盘点 = DONE（S01-P08 APPROVED，3 对象合同盘点，9 Owner Decision D1~D9 + D10 C 端边界 LOCKED，不建表）
 STAGE-01 收口 = DONE（S01-P09 APPROVED，43 对象覆盖矩阵 = 30 持久 + 7 投影 + 6 盘点）
-STAGE-01 全包 = S01-P01~P09 本地全 APPROVED（待外部审核 + push + 合并后输出 STAGE-01-QUALITY-GATE）
+STAGE-01 全包 = S01-P01~P09 本地全 APPROVED
+STAGE-01 Gate = APPROVED_WITH_CONDITIONS（本地版 2026-08-16；条件①外部 ChatGPT 审核待补②S01-P07/P08 Owner Decision 待签）
+STAGE-01 Gate 文件 = .project-ai/reviews/STAGE-01-QUALITY-GATE-V3.md
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
