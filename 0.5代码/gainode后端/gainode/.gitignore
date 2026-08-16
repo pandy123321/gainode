@@ -1,0 +1,18 @@
+.idea/*
+.buildpath
+composer.lock
+runtime
+public/uploads/*
+resource/backup
+.env
+tmp
+vendor
+.DS_Store
+._*
+# 私钥/证书（SECURITY：绝不入版控）
+resource/cert/
+# 二进制数据/构建产物
+resource/region/
+build/
+nohup.out
+doc.txt

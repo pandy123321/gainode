@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; line-height: 1.6;
+        }
+        .header {
+            background: #fff; border-bottom: 1px solid #e4e7ed; padding: 12px 24px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .header h1 { font-size: 18px; color: #1f2d3d; white-space: nowrap; }
+        .header-row { display: flex; align-items: center; gap: 8px; }
+        .header-row label { font-size: 13px; color: #606266; white-space: nowrap; }
+        .header-row input {
+            padding: 6px 10px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; width: 280px;
+        }
+        .header select {
+            padding: 6px 12px; border: 1px solid #dcdfe6; border-radius: 4px; background: #fff; min-width: 140px; cursor: pointer;
+        }
+        .btn {
+            padding: 6px 14px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap;
+        }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-primary:hover { background: #337ecc; }
+        .btn-test { background: #67c23a; color: #fff; margin-top: 8px; }
+        .btn-test:hover { background: #529b2e; }
+        .btn-send { background: #e6a23c; color: #fff; }
+        .btn-send:hover { background: #cf9236; }
+        .btn-clear { background: #909399; color: #fff; }
+        .container { display: flex; margin-top: 104px; min-height: calc(100vh - 104px); }
+        .sidebar {
+            width: 300px; background: #fff; border-right: 1px solid #e4e7ed;
+            overflow-y: auto; position: fixed; top: 104px; bottom: 0; left: 0; padding: 16px;
+        }
+        .search-box {
+            width: 100%; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 4px; margin-bottom: 16px;
+        }
+        .module-group { margin-bottom: 8px; }
+        .module-title {
+            padding: 10px 12px; font-weight: 700; color: #303133; background: #f5f7fa;
+            border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between;
+            align-items: center; user-select: none;
+        }
+        .module-title:hover { background: #eef1f6; }
+        .module-controllers { display: none; padding: 6px 0 6px 12px; }
+        .module-controllers.open { display: block; }
+        .controller-item {
+            padding: 8px 12px; color: #606266; cursor: pointer; border-radius: 4px; margin: 2px 0;
+        }
+        .controller-item:hover { background: #f5f7fa; color: #409eff; }
+        .controller-item.active { background: #ecf5ff; color: #409eff; }
+        .controller-name { font-weight: 600; display: flex; align-items: center; }
+        .controller-name-cn {
+            font-size: 12px; color: #909399; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sidebar-badge {
+            margin-left: 6px; padding: 1px 5px; border-radius: 3px;
+            font-size: 11px; font-weight: 600; color: #fff;
+            flex-shrink: 0;
+        }
+        .main {
+            flex: 1; margin-left: 300px; padding: 24px; max-width: calc(100% - 300px);
+        }
+        .module-card {
+            background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .module-card h2 { font-size: 18px; margin-bottom: 16px; color: #303133; border-bottom: 2px solid #409eff; padding-bottom: 10px; }
+        .controller-section { margin-top: 24px; padding-top: 24px; border-top: 1px dashed #e4e7ed; }
+        .controller-section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+        .controller-section h3 { font-size: 16px; color: #1f2d3d; margin-bottom: 4px; }
+        .controller-section .controller-cn { color: #909399; font-size: 13px; margin-bottom: 16px; }
+        .api-item {
+            border: 1px solid #e4e7ed; border-radius: 6px; margin-bottom: 14px; overflow: hidden;
+        }
+        .api-header {
+            background: #f5f7fa; padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+        }
+        .method-badge {
+            padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; min-width: 60px; text-align: center;
+        }
+        .method-GET { background: #67c23a; color: #fff; }
+        .method-POST { background: #409eff; color: #fff; }
+        .method-PUT { background: #e6a23c; color: #fff; }
+        .method-DELETE { background: #f56c6c; color: #fff; }
+        .method-OTHER { background: #909399; color: #fff; }
+        .api-title { flex: 1; min-width: 0; }
+        .api-name { font-weight: 600; color: #303133; font-size: 14px; }
+        .api-name-cn { color: #606266; font-size: 12px; margin-top: 2px; }
+        .api-url { color: #909399; font-family: monospace; font-size: 12px; white-space: nowrap; }
+        .api-body { display: none; padding: 16px; border-top: 1px solid #e4e7ed; background: #fff; }
+        .api-body.open { display: block; }
+        .api-body p { margin-bottom: 8px; }
+        .api-body h4 { font-size: 14px; color: #303133; margin: 16px 0 8px; }
+        .api-body table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+        .api-body th, .api-body td { border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; }
+        .api-body th { background: #f5f7fa; }
+        .required-mark { color: #f56c6c; font-weight: 600; }
+        .tag-list { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { background: #f0f9ff; color: #409eff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .api-badge { margin-left: 8px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .badge-new { border: red 1px dashed; color: red; }
+        .badge-changed { border: #e6a23c 1px dashed; color: #e6a23c; }
+        .loading, .empty { text-align: center; padding: 60px; color: #909399; }
+        .error { color: #f56c6c; }
+        .chevron { transition: transform 0.2s; font-size: 12px; }
+        .chevron.open { transform: rotate(90deg); }
+        /* 测试区域 */
+        .test-section { border-top: 1px dashed #e4e7ed; margin-top: 16px; padding-top: 12px; display: none; }
+        .test-section.open { display: block; }
+        .test-section-title {
+            font-size: 14px; font-weight: 600; color: #303133;
+            margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #ebeef5;
+        }
+        .test-section-title:first-child { margin-top: 0; }
+        .test-form { margin-top: 8px; }
+        .test-form .form-row {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+        }
+        .test-form .form-row label {
+            width: 110px; text-align: right; font-size: 13px; color: #606266;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .test-form .form-row input[type="text"] {
+            flex: 1; padding: 8px 12px; border: 1px solid #dcdfe6; border-radius: 4px;
+            font-size: 13px; transition: border-color .2s, box-shadow .2s;
+        }
+        .test-form .form-row input[type="text"]:focus {
+            outline: none; border-color: #409eff; box-shadow: 0 0 0 2px rgba(64,158,255,0.15);
+        }
+        .test-form .form-row .required-label { color: #f56c6c; font-weight: 500; }
+        .test-form .form-row .readonly { background: #f5f7fa; cursor: not-allowed; }
+        .sign-row { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .sign-row input { flex: 1; }
+        .btn-primary { background: #409eff; color: #fff; }
+        .btn-primary:hover { background: #337ecc; }
+        .test-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .test-response { margin-top: 16px; }
+        .test-response .status-bar {
+            display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+            background: #f5f7fa; border-radius: 4px; margin-bottom: 8px;
+        }
+        .status-ok { color: #67c23a; font-weight: 600; }
+        .status-err { color: #f56c6c; font-weight: 600; }
+        .copy-btn {
+            margin-left: auto;
+            padding: 4px 10px;
+            background: #606266;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .copy-btn:hover { background: #909399; }
+        .copy-btn.copied { background: #67c23a; }
+        .response-body {
+            background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px;
+            font-family: 'Menlo', 'Monaco', monospace; font-size: 13px; line-height: 1.5;
+            overflow-x: auto; max-height: 400px; overflow-y: auto; white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .response-body.loading { color: #e6a23c; background: #1e1e1e; padding: 16px; }
+
+        /* 响应数据树形表格（单表平铺，列对齐） */
+        .tree-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+        .tree-table th { background: #f5f7fa; border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; }
+        .tree-table td { border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; vertical-align: middle; }
+        .tree-table th:nth-child(1), .tree-table td:nth-child(1) { width: 50%; }
+        .tree-table th:nth-child(2), .tree-table td:nth-child(2) { width: 15%; }
+        .tree-table th:nth-child(3), .tree-table td:nth-child(3) { width: 35%; }
+        .tree-row td { border-top: none; }
+        .tree-row td[data-level="0"] { padding-left: 12px; }
+        .tree-row td[data-level="1"] { padding-left: 34px; }
+        .tree-row td[data-level="2"] { padding-left: 56px; }
+        .tree-row td[data-level="3"] { padding-left: 78px; }
+        .tree-row td[data-level="4"] { padding-left: 100px; }
+        .tree-row td[data-level="5"] { padding-left: 122px; }
+        .tree-row td[data-level="6"] { padding-left: 144px; }
+        .tree-row:first-child td { border-top: 1px solid #e4e7ed; }
+        .tree-toggle {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px; height: 16px;
+            margin-right: 6px;
+            color: #409eff;
+            font-size: 11px;
+            transition: transform 0.2s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .tree-toggle.open { transform: rotate(90deg); }
+        .tree-row.hidden-row { display: none; }
+        .tree-placeholder { display: inline-block; width: 16px; margin-right: 6px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>接口文档中心</h1>
+        <div class="header-row">
+            <label>认证Token：</label>
+            <input type="text" id="globalToken" style="width: 300px;" placeholder="输入 Authorization Token">
+            <button class="btn btn-primary" onclick="applyToken()">应用</button>
+        </div>
+        <select id="moduleSelect">
+            <option value="">全部模块</option>
+        </select>
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <input type="text" id="searchInput" class="search-box" placeholder="搜索控制器或接口中文名...">
+            <div id="sidebarContent"></div>
+        </div>
+        <div class="main" id="mainContent">
+            <div class="loading">正在加载接口文档...</div>
+        </div>
+    </div>
+
+    <script>
+        let docData = [];
+        const currentModule = '{{ module }}';
+        let globalToken = localStorage.getItem('globalToken');
+        if(globalToken){
+            document.getElementById('globalToken').value = globalToken;
+        }
+
+        async function loadModules() {
+            try {
+                const res = await fetch('/v1/doc/modules');
+                const json = await res.json();
+                if (json.success && json.data.modules) {
+                    const select = document.getElementById('moduleSelect');
+                    json.data.modules.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m; option.textContent = m;
+                        if (m === currentModule) option.selected = true;
+                        select.appendChild(option);
+                    });
+                }
+            } catch(e) { console.error('加载模块失败', e); }
+        }
+
+        async function loadDocs(module = '') {
+            const main = document.getElementById('mainContent');
+            main.innerHTML = '<div class="loading">正在加载接口文档...</div>';
+            try {
+                const url = module ? `/v1/doc/list?module=${encodeURIComponent(module)}` : '/v1/doc/list';
+                const res = await fetch(url);
+                const json = await res.json();
+                if (!json.success) { main.innerHTML = `<div class="error">加载失败：${json.msg||'未知错误'}</div>`; return; }
+                docData = json.data.modules || [];
+                renderSidebar(docData);
+                renderMain(docData);
+            } catch(e) { main.innerHTML = `<div class="error">加载异常：${e.message}</div>`; }
+        }
+
+        function applyToken() {
+            globalToken = document.getElementById('globalToken').value.trim();
+            if (globalToken) {
+                localStorage.setItem('globalToken', globalToken);
+            } else {
+                localStorage.removeItem('globalToken');
+            }
+        }
+
+        function getHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            globalToken = localStorage.getItem('globalToken');
+            if (globalToken) { headers['Authorization'] = globalToken; }
+            return headers;
+        }
+
+        function extractPathParams(url) {
+            const matches = url.match(/\{(\w+)\}/g);
+            return matches ? matches.map(m => m.replace(/[{}]/g, '')) : [];
+        }
+
+        function getBadgeFromActions(actions) {
+            let hasNew = false, hasChanged = false;
+            (actions || []).forEach(a => {
+                if (a.badge === 'new') hasNew = true;
+                if (a.badge === 'changed') hasChanged = true;
+            });
+            if (hasNew) return '<span class="sidebar-badge badge-new">New</span>';
+            if (hasChanged) return '<span class="sidebar-badge badge-changed">Change</span>';
+            return '';
+        }
+
+        function getControllerBadge(controller) {
+            return getBadgeFromActions(controller.actions);
+        }
+
+        function renderSidebar(modules) {
+            const container = document.getElementById('sidebarContent');
+            if (!modules.length) { container.innerHTML = '<div class="empty">暂无接口</div>'; return; }
+            container.innerHTML = modules.map(m => `
+                <div class="module-group" data-module="${m.module}">
+                    <div class="module-title" onclick="toggleModule(this)">
+                        <span>${m.module}</span>
+                        <span class="chevron">▶</span>
+                    </div>
+                    <div class="module-controllers open">${m.controllers.map(c => `
+                        <div class="controller-item" data-controller="${m.module}-${c.controller}" onclick="scrollToController('${m.module}-${c.controller}', this)">
+                            <div class="controller-name">${c.controller_name||c.controller}${getControllerBadge(c)}</div>
+                            <div class="controller-name-cn">${c.controller}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>`).join('');
+        }
+
+        function renderMain(modules) {
+            const main = document.getElementById('mainContent');
+            if (!modules.length) { main.innerHTML = '<div class="empty">暂无接口数据</div>'; return; }
+            main.innerHTML = modules.map(m => `
+                <div class="module-card">
+                    <h2>模块：${m.module}</h2>
+                    ${m.controllers.map(c => `
+                        <div class="controller-section" id="card-${m.module}-${c.controller}">
+                            <h3>${c.controller_name||c.controller}</h3>
+                            <div class="controller-cn">${c.controller}</div>
+                            ${c.actions.map(api => renderApiItem(api)).join('')}
+                        </div>`).join('')}
+                </div>`).join('');
+        }
+
+        function renderApiItem(api) {
+            const method = (api.method||'GET').toUpperCase();
+            const cls = ['GET','POST','PUT','DELETE'].includes(method) ? `method-${method}` : 'method-OTHER';
+            const pathParams = extractPathParams(api.url);
+            const allParams = (api.params||[]).filter(p => !pathParams.includes(p.field));
+
+            const paramsRows = allParams.map(p => `
+                <tr><td>${p.field}</td><td>${p.type||'string'}</td>
+                <td class="${p.required?'required-mark':''}">${p.required?'必填':'选填'}</td>
+                <td>${p.description||'-'}</td></tr>`).join('');
+
+            // 路径参数：如果在注释中有定义则使用注释中的描述，否则显示"路径参数"
+            const paramMap = {};
+            (api.params||[]).forEach(p => { paramMap[p.field] = p; });
+            const pathParamsRows = pathParams.map(p => {
+                const def = paramMap[p];
+                if (def) {
+                    return `<tr><td>${p}</td><td>${def.type||'string'}</td>
+                    <td class="${def.required?'required-mark':''}">${def.required?'必填':'选填'}</td>
+                    <td>${def.description||'-'}</td></tr>`;
+                }
+                return `<tr><td>${p}</td><td>string</td>
+                <td class="required-mark">必填</td><td>路径参数</td></tr>`;
+            }).join('');
+
+            const paramsTable = (paramsRows||pathParamsRows) ? `
+                <h4>请求参数</h4>
+                <table>
+                    <tr><th>参数</th><th>类型</th><th>是否必填</th><th>说明</th></tr>
+                    ${pathParamsRows}${paramsRows}
+                </table>` : '';
+
+            const midTags = (api.middleware||[]).map(m=>`<span class="tag">${m}</span>`).join('');
+            const verify = api.verify==1?'需登录':(api.verify==2?'需登录+权限':'公开');
+
+            // 测试参数输入
+            const testInputs = pathParams.map(p => {
+                const def = paramMap[p];
+                const desc = (def && def.description) ? def.description : `路径参数 ${p}`;
+                const reqHtml = (def && !def.required) ? '' : ' <span class="required-mark">*</span>';
+                return `<div class="form-row">
+                    <label class="${(def && !def.required)?'':'required-label'}">${p}${reqHtml}</label>
+                    <input type="text" data-field="${p}" placeholder="${desc}">
+                </div>`;
+            }).join('') + allParams.map(p => `
+                <div class="form-row">
+                    <label class="${p.required?'required-label':''}">${p.field}${p.required?' <span class="required-mark">*</span>':''}</label>
+                    <input type="text" data-field="${p.field}" placeholder="${p.description||p.field}${p.required?' (必填)':''}">
+                </div>`).join('');
+
+            // 鉴权头部
+            const signRequired = api.sign_required;
+            const needToken = api.verify == 1 || api.verify == 2;
+            const headerInputs = (signRequired || needToken) ? `
+                <div class="test-section-title">请求头 (Headers)</div>
+                <div class="test-form">
+                    ${needToken ? `
+                    <div class="form-row">
+                        <label class="required-label">Token <span class="required-mark">*</span></label>
+                        <input type="text" data-header="token" placeholder="Authorization Token">
+                    </div>` : `
+                    <div class="form-row">
+                        <label>Token</label>
+                        <input type="text" data-header="token" placeholder="可选">
+                    </div>`}
+                    ${signRequired ? `
+                    <div class="form-row">
+                        <label class="required-label">Timestamp</label>
+                        <input type="text" data-header="timestamp" class="auto-timestamp" placeholder="时间戳（自动生成）">
+                        <button class="btn btn-primary" onclick="refreshTimestamp(this, '${api.id}')">生成时间戳</button>
+                    </div>
+                    <div class="form-row">
+                        <label class="required-label">Version</label>
+                        <input type="text" data-header="version" value="1.0" placeholder="版本号">
+                    </div>
+                    <div class="form-row">
+                        <label class="required-label">Language</label>
+                        <input type="text" data-header="language" value="zh_CN" placeholder="语言">
+                    </div>
+                    <div class="form-row">
+                        <label class="required-label">Sign</label>
+                        <div class="sign-row">
+                            <input type="text" data-header="sign" class="readonly" placeholder="点击生成签名" readonly>
+                            <button class="btn btn-primary" onclick="generateSign(this, '${api.id}', '${api.module}')">生成签名</button>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>` : '';
+
+            const testSection = `
+                <div class="test-section" id="test-${api.id}">
+                    ${headerInputs}
+                    <div class="test-section-title">请求参数</div>
+                    <div class="test-form">${testInputs||'<p style="color:#909399">该接口无需请求参数</p>'}</div>
+                    <div class="test-actions">
+                        <button class="btn btn-send" data-api-id="${api.id}">发送请求</button>
+                        <button class="btn btn-clear" data-api-id="${api.id}">清空</button>
+                    </div>
+                    <div class="test-response" id="resp-${api.id}"></div>
+                </div>`;
+
+            const badgeHtml = api.badge
+                ? `<span class="api-badge badge-${api.badge}">${api.badge === 'new' ? 'New' : 'Change'}</span>`
+                : '';
+
+            return `
+                <div class="api-item">
+                    <div class="api-header" onclick="toggleApi(this)">
+                        <span class="method-badge ${cls}">${method}</span>
+                        <div class="api-title">
+                            <div class="api-name">${api.action_name||api.action}${badgeHtml}</div>
+                            <div class="api-name-cn">${api.action}</div>
+                        </div>
+                        <span class="api-url">${api.url}</span>
+                    </div>
+                    <div class="api-body">
+                        <p><strong>URL：</strong>${api.url} <a href="/v1/doc/${api.key}" target="_blank" style="color:#409eff;font-size:12px;margin-left:6px;text-decoration:none;">[查看详情]</a></p>
+                        <p><strong>路由标识：</strong>${api.key}</p>
+                        <p><strong>请求方式：</strong>${method}</p>
+                        <p><strong>接口鉴权：</strong>${verify}</p>
+                        ${api.description?`<p><strong>说明：</strong>${api.description}</p>`:''}
+                        ${paramsTable||'<p><strong>请求参数：</strong>无</p>'}
+                        ${renderResponseSection(api)}
+                        ${midTags?`<h4>中间件</h4><div class="tag-list">${midTags}</div>`:''}
+                        <button class="btn btn-test" data-api-id="${api.id}">▶ 运行测试</button>
+                        ${testSection}
+                    </div>
+                </div>`;
+        }
+
+        function toggleTest(apiId, btn) {
+            const section = document.getElementById('test-' + apiId);
+            const isOpen = section.classList.toggle('open');
+            btn.textContent = isOpen ? '▼ 收起测试' : '▶ 运行测试';
+            if (isOpen) {
+                // 自动填充时间戳
+                const tsInp = section.querySelector('input[data-header="timestamp"]');
+                if (tsInp) tsInp.value = Math.floor(Date.now() / 1000);
+                // 从全局 Token 预填
+                const tokenInp = section.querySelector('input[data-header="token"]');
+                if (tokenInp && globalToken) tokenInp.value = globalToken;
+            }
+        }
+
+        async function refreshTimestamp(btn, apiId) {
+            const section = document.getElementById('test-' + apiId);
+            const timestamp = String(Math.floor(Date.now() / 1000))
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+            section.querySelector('input[data-header="timestamp"]').value = timestamp;
+            btn.textContent = '生成时间戳';
+            btn.disabled = false;
+        }
+
+        async function generateSign(btn, apiId, module) {
+            const section = document.getElementById('test-' + apiId);
+            const token = section.querySelector('input[data-header="token"]')?.value || '';
+            const timestamp = section.querySelector('input[data-header="timestamp"]')?.value || '';
+            const version = section.querySelector('input[data-header="version"]')?.value || '1.0';
+            const language = section.querySelector('input[data-header="language"]')?.value || 'zh_CN';
+            const traceId = section.querySelector('input[data-header="trace_id"]')?.value || '';
+
+            btn.textContent = '生成中...';
+            btn.disabled = true;
+            try {
+                const res = await fetch('/v1/doc/sign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ module, token, timestamp, version, language, trace_id: traceId })
+                });
+                const json = await res.json();
+                if (json.success && json.data.sign) {
+                    const signInp = section.querySelector('input[data-header="sign"]');
+                    if (signInp) signInp.value = json.data.sign;
+                }
+            } catch(e) {
+                console.error('生成签名失败', e);
+            }
+            btn.textContent = '生成签名';
+            btn.disabled = false;
+        }
+
+        function clearTest(apiId) {
+            const section = document.getElementById('test-' + apiId);
+            section.querySelectorAll('input').forEach(inp => inp.value = '');
+            document.getElementById('resp-' + apiId).innerHTML = '';
+        }
+
+        async function sendRequest(apiId, url, method, pathParams, bodyParams) {
+            console.log('sendRequest', apiId, url, method, pathParams, bodyParams);
+            const respDiv = document.getElementById('resp-' + apiId);
+            if (!respDiv) {
+                console.error('respDiv not found', 'resp-' + apiId);
+                return;
+            }
+            respDiv.innerHTML = '<div class="response-body loading">请求中...</div>';
+
+            // 替换路径参数
+            let finalUrl = url;
+            const section = document.getElementById('test-' + apiId);
+            if (pathParams.length) {
+                pathParams.forEach(p => {
+                    const inp = section.querySelector(`input[data-field="${p}"]`);
+                    finalUrl = finalUrl.replace(`{${p}}`, encodeURIComponent(inp ? inp.value : ''));
+                });
+            }
+
+            // 构建请求头
+            const headers = { 'Content-Type': 'application/json' };
+            const headerIns = section.querySelectorAll('input[data-header]');
+            headerIns.forEach(inp => {
+                const key = inp.dataset.header;
+                const val = inp.value.trim();
+                if (val) {
+                    headers[key.charAt(0).toUpperCase() + key.slice(1)] = val;
+                }
+            });
+            // 使用全局 Token 作为默认值
+            if (!headers['Token'] && globalToken) {
+                headers['Token'] = globalToken;
+            }
+
+            // 构建请求选项
+            const options = { method: method, headers: headers };
+            if (['GET', 'DELETE'].includes(method)) {
+                const params = new URLSearchParams();
+                bodyParams.forEach(f => {
+                    const inp = section.querySelector(`input[data-field="${f}"]`);
+                    if (inp && inp.value !== '') params.append(f, inp.value);
+                });
+                const qs = params.toString();
+                if (qs) finalUrl += (finalUrl.includes('?') ? '&' : '?') + qs;
+            } else if (['POST', 'PUT'].includes(method)) {
+                const body = {};
+                bodyParams.forEach(f => {
+                    const inp = section.querySelector(`input[data-field="${f}"]`);
+                    if (inp && inp.value !== '') {
+                        const v = inp.value;
+                        body[f] = /^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : v;
+                    }
+                });
+                options.body = JSON.stringify(body);
+            }
+            console.log('fetch', finalUrl, options);
+            const startTime = Date.now();
+            try {
+                const res = await fetch(finalUrl, options);
+                const duration = Date.now() - startTime;
+                const contentType = res.headers.get('content-type') || '';
+                let body;
+                if (contentType.includes('application/json')) {
+                    body = await res.json();
+                } else {
+                    body = await res.text();
+                }
+
+                const statusClass = res.ok ? 'status-ok' : 'status-err';
+                const bodyStr = typeof body === 'object' ? JSON.stringify(body, null, 2) : body;
+
+                respDiv.innerHTML = `
+                    <div class="status-bar">
+                        <span class="${statusClass}">${res.status} ${res.statusText}</span>
+                        <span style="color:#909399">${duration}ms</span>
+                        <span style="color:#909399">${res.headers.get('content-length') || 0} bytes</span>
+                        <button class="copy-btn" type="button">复制</button>
+                    </div>
+                    <div class="response-body">${escapeHtml(bodyStr)}</div>`;
+            } catch (e) {
+                const duration = Date.now() - startTime;
+                respDiv.innerHTML = `
+                    <div class="status-bar">
+                        <span class="status-err">请求失败</span>
+                        <span style="color:#909399">${duration}ms</span>
+                        <button class="copy-btn" type="button">复制</button>
+                    </div>
+                    <div class="response-body">${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function renderResponseSection(api) {
+            const fields = api.response_fields;
+            if (!fields || !fields.length) {
+                const exampleJson = JSON.stringify({ success: true, code: 0, msg: 'success', data: [] }, null, 2);
+                return `
+                <h4>响应数据</h4>
+                <table class="tree-table">
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                </table>
+                <details style="margin-top:8px">
+                    <summary style="cursor:pointer;color:#409eff;">示例 JSON</summary>
+                    <pre style="background:#f8f9fa;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto;margin-top:8px;">${escapeHtml(exampleJson)}</pre>
+                </details>`;
+            }
+            const typeDefaults = { int: 0, string: '', float: 0.0, array: [], bool: false };
+
+            // 单表平铺渲染树形行，所有行在同一 table 中，仅字段列缩进
+            const renderRows = (list, level = 0, parentPath = '') => {
+                let rows = '';
+                list.forEach((f, idx) => {
+                    const path = parentPath ? `${parentPath}-${idx}` : `api-${api.id}-${idx}`;
+                    const hasChildren = f.children && f.children.length;
+                    const toggle = hasChildren
+                        ? `<span class="tree-toggle" data-path="${path}" title="展开/收起">▶</span>`
+                        : '<span class="tree-placeholder"></span>';
+                    const hiddenClass = level === 0 ? '' : 'hidden-row';
+
+                    rows += `<tr class="tree-row level-${level} ${hiddenClass}" data-path="${path}">
+                        <td data-level="${level}">${toggle}${f.field}</td>
+                        <td>${f.type || 'string'}</td>
+                        <td>${f.description || '-'}</td>
+                    </tr>`;
+
+                    if (hasChildren) {
+                        rows += renderRows(f.children, level + 1, path);
+                    }
+                });
+                return rows;
+            };
+
+            // 递归构建示例 JSON
+            const buildExample = (list) => {
+                const obj = {};
+                list.forEach(f => {
+                    if (f.children && f.type === 'array') {
+                        obj[f.field] = [buildExample(f.children)];
+                    } else if (f.children) {
+                        obj[f.field] = buildExample(f.children);
+                    } else {
+                        obj[f.field] = typeDefaults[f.type] ?? '';
+                    }
+                });
+                return obj;
+            };
+
+            const rows = renderRows(fields);
+            const example = buildExample(fields);
+            const exampleJson = JSON.stringify({ success: true, code: 0, msg: 'success', data: example }, null, 2);
+
+            return `
+                <h4>响应数据</h4>
+                <table class="tree-table">
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    ${rows}
+                </table>
+                <details style="margin-top:8px">
+                    <summary style="cursor:pointer;color:#409eff;">示例 JSON</summary>
+                    <pre style="background:#f8f9fa;padding:12px;border-radius:4px;font-size:12px;overflow-x:auto;margin-top:8px;">${escapeHtml(exampleJson)}</pre>
+                </details>`;
+        }
+
+        // 响应数据树形表格展开/收起（单表平铺，按 data-path 控制显示）
+        document.addEventListener('click', function(e) {
+            const toggle = e.target.closest('.tree-toggle');
+            if (!toggle) return;
+            e.stopPropagation();
+            const path = toggle.dataset.path;
+            const isOpen = toggle.classList.contains('open');
+
+            if (isOpen) {
+                // 收起：隐藏所有后代行，并重置后代 toggle 状态
+                document.querySelectorAll('.tree-row').forEach(row => {
+                    const rowPath = row.dataset.path;
+                    if (rowPath !== path && rowPath.startsWith(path + '-')) {
+                        row.classList.add('hidden-row');
+                        const childToggle = row.querySelector('.tree-toggle');
+                        if (childToggle) childToggle.classList.remove('open');
+                    }
+                });
+                toggle.classList.remove('open');
+            } else {
+                // 展开：只显示直接子行（路径仅深一层）
+                const directPrefix = path + '-';
+                document.querySelectorAll('.tree-row').forEach(row => {
+                    const rowPath = row.dataset.path;
+                    if (rowPath.startsWith(directPrefix)) {
+                        const suffix = rowPath.substring(directPrefix.length);
+                        if (!suffix.includes('-')) {
+                            row.classList.remove('hidden-row');
+                        }
+                    }
+                });
+                toggle.classList.add('open');
+            }
+        });
+
+        // 测试结果复制功能
+        function fallbackCopy(text, callback) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                callback();
+            } catch (err) {
+                console.error('复制失败', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function copyResponseText(text, btn) {
+            const originalText = btn.textContent;
+            const showCopied = () => {
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 1500);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(showCopied).catch(() => {
+                    fallbackCopy(text, showCopied);
+                });
+            } else {
+                fallbackCopy(text, showCopied);
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.copy-btn');
+            if (!btn) return;
+            e.stopPropagation();
+            const statusBar = btn.closest('.status-bar');
+            if (!statusBar) return;
+            const responseBody = statusBar.nextElementSibling;
+            if (!responseBody) return;
+            copyResponseText(responseBody.textContent, btn);
+        });
+
+        function escapeHtml(str) {
+            const el = document.createElement('div');
+            el.textContent = str;
+            return el.innerHTML;
+        }
+
+        function toggleModule(el) {
+            const items = el.nextElementSibling;
+            const chevron = el.querySelector('.chevron');
+            items.classList.toggle('open'); chevron.classList.toggle('open');
+        }
+
+        function scrollToController(id, el) {
+            document.querySelectorAll('.controller-item').forEach(i=>i.classList.remove('active'));
+            el.classList.add('active');
+            const target = document.getElementById('card-'+id);
+            if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+        }
+
+        function toggleApi(header) {
+            header.nextElementSibling.classList.toggle('open');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const kw = e.target.value.toLowerCase().trim();
+            if (!kw) { renderMain(docData); renderSidebar(docData); return; }
+            const filtered = docData.map(m=>{
+                const controllers = m.controllers.map(c=>{
+                    const actions = c.actions.filter(a=>
+                        (a.action_name&&a.action_name.toLowerCase().includes(kw))||
+                        a.action.toLowerCase().includes(kw)||
+                        a.url.toLowerCase().includes(kw)||
+                        (c.controller_name&&c.controller_name.toLowerCase().includes(kw))||
+                        c.controller.toLowerCase().includes(kw));
+                    return actions.length?{...c,actions}:null;
+                }).filter(Boolean);
+                return controllers.length?{...m,controllers}:null;
+            }).filter(Boolean);
+            renderSidebar(filtered); renderMain(filtered);
+        });
+
+        document.getElementById('moduleSelect').addEventListener('change', function(e) {
+            loadDocs(e.target.value);
+        });
+
+        // 事件代理：处理按钮点击
+        document.getElementById('mainContent').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-api-id]');
+            if (!btn) return;
+            const apiId = btn.dataset.apiId;
+            const api = findApiById(apiId);
+
+            if (btn.classList.contains('btn-send') && api) {
+                const method = (api.method || 'GET').toUpperCase();
+                const pathParams = extractPathParams(api.url);
+                const bodyParams = (api.params || []).filter(p => !pathParams.includes(p.field)).map(p => p.field);
+                sendRequest(apiId, api.url, method, pathParams, bodyParams);
+                return;
+            }
+            if (btn.classList.contains('btn-test')) {
+                toggleTest(apiId, btn);
+                return;
+            }
+            if (btn.classList.contains('btn-clear')) {
+                clearTest(apiId);
+                return;
+            }
+        });
+
+        function findApiById(id) {
+            const numId = parseInt(id);
+            for (const m of docData) {
+                for (const c of m.controllers) {
+                    for (const a of c.actions) {
+                        if (a.id == numId) return a;
+                    }
+                }
+            }
+            return null;
+        }
+
+        loadModules(); loadDocs(currentModule);
+    </script>
+</body>
+</html>

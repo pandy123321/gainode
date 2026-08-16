@@ -1,0 +1,34 @@
+<?php
+
+namespace support\controller;
+
+use support\extend\Controller;
+use support\Request;
+
+/**
+ * 平台访问模式controller 继承
+ */
+class Admin extends Controller
+{
+    /**
+     * 初始化数据
+     */
+    public function beforeAction(Request $request)
+    {
+        try {
+//            $this->loginUser = getTokenUser('admin');
+            $response = parent::beforeAction($request);
+            if(!empty($response)){
+                return $response;
+            }
+        }
+        catch (\Exception $e) {
+            if ($request->isAjax()) {
+                return $this->failJson([],$e->getMessage(), $e->getCode());
+            }
+            else {
+                return redirect($request->getLoginUrl());
+            }
+        }
+    }
+}

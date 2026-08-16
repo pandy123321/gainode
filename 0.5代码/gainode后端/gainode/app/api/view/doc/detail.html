@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f5f7fa; color: #333; font-size: 14px; line-height: 1.6;
+        }
+        .header {
+            background: #fff; border-bottom: 1px solid #e4e7ed; padding: 12px 24px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header h1 { font-size: 18px; color: #1f2d3d; }
+        .header a { color: #409eff; text-decoration: none; font-size: 14px; }
+        .header a:hover { text-decoration: underline; }
+        .container { max-width: 960px; margin: 0 auto; padding: 80px 24px 40px; }
+        .api-card {
+            background: #fff; border-radius: 8px; padding: 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .api-header {
+            background: #f5f7fa; padding: 14px 16px; border-radius: 6px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+        }
+        .method-badge {
+            padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;
+            text-transform: uppercase; min-width: 60px; text-align: center; color: #fff;
+        }
+        .method-GET { background: #67c23a; }
+        .method-POST { background: #409eff; }
+        .method-PUT { background: #e6a23c; }
+        .method-DELETE { background: #f56c6c; }
+        .method-OTHER { background: #909399; }
+        .api-title { flex: 1; min-width: 0; }
+        .api-name { font-weight: 600; color: #303133; font-size: 15px; }
+        .api-name-cn { color: #606266; font-size: 12px; margin-top: 2px; }
+        .api-url { color: #909399; font-family: monospace; font-size: 13px; }
+        .api-body p { margin-bottom: 10px; }
+        .api-body h4 { font-size: 14px; color: #303133; margin: 20px 0 10px; }
+        .api-body code {
+            background: #f5f7fa; padding: 2px 6px; border-radius: 3px;
+            font-family: 'Menlo', 'Monaco', monospace; color: #606266; font-size: 12px;
+        }
+        .tree-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+        .tree-table th { background: #f5f7fa; border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; }
+        .tree-table td { border: 1px solid #e4e7ed; padding: 8px 12px; text-align: left; vertical-align: middle; }
+        .tree-table th:nth-child(1), .tree-table td:nth-child(1) { width: 50%; }
+        .tree-table th:nth-child(2), .tree-table td:nth-child(2) { width: 15%; }
+        .tree-table th:nth-child(3), .tree-table td:nth-child(3) { width: 35%; }
+        .tree-table.th-4 th:nth-child(1), .tree-table.th-4 td:nth-child(1) { width: 25%; }
+        .tree-table.th-4 th:nth-child(2), .tree-table.th-4 td:nth-child(2) { width: 15%; }
+        .tree-table.th-4 th:nth-child(3), .tree-table.th-4 td:nth-child(3) { width: 15%; }
+        .tree-table.th-4 th:nth-child(4), .tree-table.th-4 td:nth-child(4) { width: 45%; }
+        .tree-row td { border-top: none; }
+        .tree-row:first-child td { border-top: 1px solid #e4e7ed; }
+        .tree-toggle {
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            width: 16px; height: 16px; margin-right: 6px; color: #409eff;
+            font-size: 11px; transition: transform 0.2s; user-select: none;
+        }
+        .tree-toggle.open { transform: rotate(90deg); }
+        .tree-placeholder { display: inline-block; width: 16px; margin-right: 6px; }
+        .required-mark { color: #f56c6c; font-weight: 600; }
+        .empty-cell { color: #909399; }
+        .error { color: #f56c6c; padding: 60px; text-align: center; }
+        .example-box {
+            background: #f8f9fa; padding: 12px; border-radius: 4px; font-size: 12px;
+            overflow-x: auto; margin-top: 8px; font-family: 'Menlo', 'Monaco', monospace;
+            white-space: pre-wrap; word-break: break-all;
+        }
+        .tag-list { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .tag { background: #f0f9ff; color: #409eff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .detail-badge { margin-left: 10px; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .badge-new { background: #67c23a; color: #fff; }
+        .badge-changed { background: #e6a23c; color: #fff; }
+        .copy-btn {
+            margin-left: 12px; padding: 3px 8px; background: #606266; color: #fff;
+            border: none; border-radius: 4px; font-size: 12px; cursor: pointer;
+        }
+        .copy-btn:hover { background: #909399; }
+        .copy-btn.copied { background: #67c23a; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>接口详情</h1>
+        <a href="/v1/doc">返回文档中心</a>
+    </div>
+    <div class="container">
+        {% if info %}
+        {% set verifyText = info.verify == 1 ? '需登录' : (info.verify == 2 ? '需登录+权限' : '公开') %}
+        {% set methodClass = info.method|upper in ['GET','POST','PUT','DELETE'] ? 'method-' ~ info.method|upper : 'method-OTHER' %}
+        {% set badgeText = info.badge == 'new' ? '新接口' : (info.badge == 'changed' ? '已变更' : '') %}
+        <div class="api-card">
+            <div class="api-header">
+                <span class="method-badge {{ methodClass }}">{{ info.method|upper }}</span>
+                <div class="api-title">
+                    <div class="api-name">{{ info.action_name }}{% if badgeText %}<span class="detail-badge badge-{{ info.badge }}">{{ badgeText }}</span>{% endif %}</div>
+                    <div class="api-name-cn">{{ info.action }}</div>
+                </div>
+                <span class="api-url">{{ info.url }}</span>
+            </div>
+            <div class="api-body">
+                <p><strong>URL：</strong>{{ info.url }}</p>
+                <p><strong>路由标识：</strong><code>{{ info.key }}</code></p>
+                <p><strong>请求方式：</strong>{{ info.method|upper }}</p>
+                <p><strong>鉴权：</strong>{{ verifyText }}</p>
+                {% if info.description %}
+                    <p><strong>说明：</strong>{{ info.description }}</p>
+                {% endif %}
+                {% if info.middleware %}
+                    <p><strong>中间件：</strong></p>
+                    <div class="tag-list">
+                        {% for m in info.middleware %}
+                            <span class="tag">{{ m }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <h4>请求参数</h4>
+                <table class="tree-table th-4">
+                    <tr><th>参数</th><th>类型</th><th>是否必填</th><th>说明</th></tr>
+                    {% for p in info.params %}
+                    <tr>
+                        <td>{{ p.field }}</td>
+                        <td>{{ p.type|default('string') }}</td>
+                        <td class="{{ p.required ? 'required-mark' : '' }}">{{ p.required ? '必填' : '选填' }}</td>
+                        <td>{{ p.description|default('-') }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if info.params is empty %}
+                    <tr><td colspan="4" class="empty-cell">该接口无需请求参数</td></tr>
+                    {% endif %}
+                </table>
+
+                <h4>响应数据</h4>
+                <table class="tree-table" id="responseTable">
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    {{ _self.renderTree(info.response_fields) }}
+                    {% if info.response_fields is empty %}
+                    <tr><td colspan="3" class="empty-cell">该接口无响应数据</td></tr>
+                    {% endif %}
+                </table>
+
+                <h4>示例 JSON</h4>
+                <div style="display:flex; align-items:center;">
+                    <button class="copy-btn" type="button" onclick="copyExample(this)">复制</button>
+                </div>
+                <pre class="example-box" id="exampleJson"></pre>
+            </div>
+        </div>
+        {% else %}
+            <div class="error">{{ error|default('接口不存在') }}</div>
+        {% endif %}
+    </div>
+
+    {% macro renderTree(fields, level=0) %}
+        {% for f in fields %}
+            {% set hasChildren = f.children is defined and f.children|length > 0 %}
+            {% set paddingLeft = 12 + level * 22 %}
+            <tr class="tree-row" data-level="{{ level }}" style="{{ level > 0 ? 'display:none' : '' }}">
+                <td style="padding-left:{{ paddingLeft }}px;">
+                    {% if hasChildren %}
+                        <span class="tree-toggle">▶</span>
+                    {% else %}
+                        <span class="tree-placeholder"></span>
+                    {% endif %}
+                    {{ f.field }}
+                </td>
+                <td>{{ f.type|default('string') }}</td>
+                <td>{{ f.description|default('-') }}</td>
+            </tr>
+            {% if hasChildren %}
+                {{ _self.renderTree(f.children, level + 1) }}
+            {% endif %}
+        {% endfor %}
+    {% endmacro %}
+
+    <script>
+        const responseFields = {{ info.response_fields|default([])|json_encode|raw }};
+        const typeDefaults = { int: 0, string: '', float: 0.0, array: [], bool: false };
+
+        function buildExample(list) {
+            const obj = {};
+            list.forEach(f => {
+                if (f.children && f.type === 'array') {
+                    obj[f.field] = [buildExample(f.children)];
+                } else if (f.children) {
+                    obj[f.field] = buildExample(f.children);
+                } else {
+                    obj[f.field] = typeDefaults[f.type] ?? '';
+                }
+            });
+            return obj;
+        }
+
+        const example = buildExample(responseFields);
+        const exampleJson = JSON.stringify({ success: true, code: 0, msg: 'success', data: example }, null, 2);
+        document.getElementById('exampleJson').textContent = exampleJson;
+
+        function copyExample(btn) {
+            const text = document.getElementById('exampleJson').textContent;
+            const original = btn.textContent;
+            const showCopied = () => {
+                btn.textContent = '已复制';
+                btn.classList.add('copied');
+                setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(showCopied).catch(() => fallbackCopy(text, showCopied));
+            } else {
+                fallbackCopy(text, showCopied);
+            }
+        }
+
+        function fallbackCopy(text, callback) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try { document.execCommand('copy'); callback(); } catch(e) { console.error(e); }
+            document.body.removeChild(textarea);
+        }
+
+        document.addEventListener('click', function(e) {
+            const toggle = e.target.closest('.tree-toggle');
+            if (!toggle) return;
+            const row = toggle.closest('tr');
+            const level = parseInt(row.dataset.level, 10);
+            const isOpen = toggle.classList.contains('open');
+
+            let sibling = row.nextElementSibling;
+            while (sibling) {
+                const siblingLevel = parseInt(sibling.dataset.level, 10);
+                if (siblingLevel <= level) break;
+                if (isOpen) {
+                    sibling.style.display = 'none';
+                    const childToggle = sibling.querySelector('.tree-toggle');
+                    if (childToggle) childToggle.classList.remove('open');
+                } else if (siblingLevel === level + 1) {
+                    sibling.style.display = 'table-row';
+                }
+                sibling = sibling.nextElementSibling;
+            }
+            toggle.classList.toggle('open', !isOpen);
+        });
+    </script>
+</body>
+</html>

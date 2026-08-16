@@ -1,0 +1,12 @@
+.git
+.gitignore
+runtime/logs/*
+runtime/cache/*
+*.log
+nohup.out
+doc.txt
+docker-compose.yml
+.dockerignore
+.github
+tests
+**/.DS_Store

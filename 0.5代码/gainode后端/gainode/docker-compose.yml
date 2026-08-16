@@ -1,0 +1,43 @@
+services:
+  webman:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crmproject-server:latest
+    container_name: crm_server
+    restart: unless-stopped
+    # 若数据库/Redis 也在 compose 内，可连到同一网络
+    ports:
+      - "8787:8787"   # 主服务
+      - "8786:8786"   # task_server
+      # - "8686:8686" # coroutine_server（按需）
+      # - "8989:8989" # proxy_server（按需）
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_PROCESS_LIST: "task_server,crontab_task,arb_task"
+      MYSQL_HOST: ${MYSQL_HOST:-mysql}
+      MYSQL_PORT: ${MYSQL_PORT:-3306}
+      MYSQL_DB: ${MYSQL_DB:-webman}
+      MYSQL_USER: ${MYSQL_USER:-root}
+      MYSQL_PASS: ${MYSQL_PASS:-windows521}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+    # 如需用宿主机 .env 覆盖，去掉下面注释并放好文件
+    # env_file:
+    #   - .env
+    # 若要依赖外部 mysql/redis 容器，可在此挂卷持久化 runtime
+    volumes:
+      - ./runtime:/var/www/runtime
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8787/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - crm_net
+
+networks:
+  crm_net:
+    driver: bridge
