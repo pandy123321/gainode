@@ -258,6 +258,26 @@ components:
       $ref: './components/schemas/otc.yaml#/OtcEligibility'
     OtcCapacity:
       $ref: './components/schemas/otc.yaml#/OtcCapacity'
+    ApprovalRequest:
+      $ref: './components/schemas/governance.yaml#/ApprovalRequest'
+    ParameterRelease:
+      $ref: './components/schemas/governance.yaml#/ParameterRelease'
+    ParameterSnapshot:
+      $ref: './components/schemas/governance.yaml#/ParameterSnapshot'
+    RiskCase:
+      $ref: './components/schemas/governance.yaml#/RiskCase'
+    Ticket:
+      $ref: './components/schemas/governance.yaml#/Ticket'
+    TicketMessage:
+      $ref: './components/schemas/governance.yaml#/TicketMessage'
+    TicketAttachment:
+      $ref: './components/schemas/governance.yaml#/TicketAttachment'
+    Notice:
+      $ref: './components/schemas/governance.yaml#/Notice'
+    NotificationDelivery:
+      $ref: './components/schemas/governance.yaml#/NotificationDelivery'
+    AuditEvent:
+      $ref: './components/schemas/governance.yaml#/AuditEvent'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

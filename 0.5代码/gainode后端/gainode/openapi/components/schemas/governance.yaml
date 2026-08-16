@@ -1,0 +1,193 @@
+# 治理 / 流程 / 审计对象 schema（05 §3 ApprovalRequest/ParameterRelease/ParameterSnapshot/RiskCase/
+# Ticket/TicketMessage/TicketAttachment/Notice/NotificationDelivery/AuditEvent；S02-P07 落地）
+# 状态字段均为 canonical enum（05 §4 / §4 V2.4 冻结），append-only 值对象无 status/object_version。
+
+ApprovalRequest:
+  description: 审批请求（05 §3 ApprovalRequest + §4 Approval 状态机，8 态，冻结）
+  type: object
+  required: [approval_id, request_type, status]
+  properties:
+    approval_id: { type: string, description: Snowflake 主键 }
+    request_type: { type: string, description: 申请类型 }
+    request_object_type: { type: string }
+    request_object_id: { type: string }
+    status:
+      type: string
+      enum: [draft, pending, changes_requested, approved, rejected, executing, executed, failed]
+    submitted_by: { type: string, description: 申请人 user_id }
+    submitter_role: { type: string }
+    assigned_to: { type: string, description: 审批人 user_id }
+    decided_by: { type: string, description: 裁决人 user_id }
+    decided_at: { type: integer }
+    reason_key: { type: string, description: 裁决理由 I18N key }
+    changes_requested_reason: { type: string }
+    execution_id: { type: string }
+    case_id: { type: string }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+ParameterRelease:
+  description: 参数发布（05 §3 ParameterRelease + §4 Parameter Release 状态机，8 态，冻结）
+  type: object
+  required: [release_id, status]
+  properties:
+    release_id: { type: string, description: Snowflake 主键 }
+    parameter_keys: { type: string, description: 参数键列表(JSON 数组) }
+    status:
+      type: string
+      enum: [draft, pending_approval, approved, scheduled, active, paused, rolled_back, archived]
+    draft_version: { type: string }
+    approved_by: { type: string, description: 批准人 user_id }
+    scheduled_at: { type: integer }
+    activated_at: { type: integer }
+    paused_at: { type: integer }
+    rolled_back_at: { type: integer }
+    archived_at: { type: integer }
+    snapshot_id: { type: string }
+    case_id: { type: string }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+ParameterSnapshot:
+  description: 参数快照（05 §3 ParameterSnapshot，append-only 只读聚合，无状态机）
+  type: object
+  required: [snapshot_id, release_id, version]
+  properties:
+    snapshot_id: { type: string, description: Snowflake 主键 }
+    release_id: { type: string }
+    parameter_keys: { type: string, description: 参数键列表(JSON 数组) }
+    parameter_values: { type: string, description: 参数值(JSON 键值对) }
+    version: { type: string }
+    created_by: { type: string }
+    audit_event_id: { type: string }
+    created_time: { type: integer }
+
+RiskCase:
+  description: 风控案件（05 §3 RiskCase + §4 V2.4 状态机，5 态，Owner 2B2-ENUM-03 冻结）
+  type: object
+  required: [case_id, user_id, status]
+  properties:
+    case_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    risk_type: { type: string }
+    severity: { type: string }
+    status:
+      type: string
+      enum: [open, investigating, under_review, resolved, closed]
+    detected_at: { type: integer }
+    detected_by: { type: string, description: 检测人 user_id }
+    reviewed_by: { type: string, description: 处置审批人 user_id }
+    disposition: { type: string }
+    disposition_reason_key: { type: string }
+    restrictions: { type: string, description: 限制措施(JSON 数组) }
+    appeal_eligible: { type: integer, description: 是否可申诉(0=否 1=是) }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+Ticket:
+  description: 工单（05 §3 Ticket + §4 Ticket 状态机，6 态，冻结）
+  type: object
+  required: [ticket_id, user_id, status]
+  properties:
+    ticket_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    category: { type: string }
+    status:
+      type: string
+      enum: [submitted, in_progress, waiting_user, under_review, resolved, closed]
+    assigned_to: { type: string, description: 处理人 user_id }
+    last_activity_at: { type: integer }
+    resolution_type: { type: string }
+    resolution_summary_key: { type: string }
+    appeal_eligible: { type: integer, description: 是否可申诉(0=否 1=是) }
+    case_id: { type: string }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+TicketMessage:
+  description: 工单消息（05 §3 TicketMessage，append-only 值对象，无状态机）
+  type: object
+  required: [message_id, ticket_id, sender_role]
+  properties:
+    message_id: { type: string, description: Snowflake 主键 }
+    ticket_id: { type: string }
+    sender_role: { type: string, description: 发送方角色(END_USER/SUPPORT_AGENT) }
+    body_key: { type: string, description: 正文 I18N key }
+    attachments: { type: string, description: 附件列表(JSON 数组) }
+    audit_event_id: { type: string }
+    created_time: { type: integer }
+
+TicketAttachment:
+  description: 工单附件（05 §3 TicketAttachment，append-only 值对象，无状态机）
+  type: object
+  required: [attachment_id, ticket_id, file_type]
+  properties:
+    attachment_id: { type: string, description: Snowflake 主键 }
+    ticket_id: { type: string }
+    ticket_message_id: { type: string }
+    file_type: { type: string }
+    file_url: { type: string }
+    file_hash: { type: string }
+    uploaded_by: { type: string }
+    audit_event_id: { type: string }
+    created_time: { type: integer }
+
+Notice:
+  description: 通知（05 §3 Notice，只读聚合，read_state 为可变字段，无状态机）
+  type: object
+  required: [notice_id, user_id, read_state]
+  properties:
+    notice_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    notice_type: { type: string }
+    title_key: { type: string, description: I18N 标题 key }
+    body_key: { type: string, description: I18N 正文 key }
+    priority: { type: string, enum: [INFO, WARNING, CRITICAL] }
+    related_object_type: { type: string }
+    related_object_id: { type: string }
+    read_state: { type: string, enum: [unread, read] }
+    content_version: { type: string }
+    locale: { type: string }
+    expires_at: { type: integer }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+NotificationDelivery:
+  description: 通知投递（05 §3 NotificationDelivery + §4 V2.4 状态机，4 态，Owner 2B2-ENUM-01 冻结）
+  type: object
+  required: [delivery_id, notice_id, channel, delivery_status]
+  properties:
+    delivery_id: { type: string, description: Snowflake 主键 }
+    notice_id: { type: string }
+    channel: { type: string, enum: [PUSH, EMAIL, SMS, IN_APP] }
+    delivery_status: { type: string, enum: [pending, delivered, failed, cancelled] }
+    dedupe_key: { type: string, description: 去重 key(幂等) }
+    attempt_count: { type: integer }
+    last_attempt_at: { type: integer }
+    next_retry_at: { type: integer }
+    delivered_at: { type: integer }
+    failure_reason_code: { type: string }
+    object_version: { type: integer }
+    audit_event_id: { type: string }
+
+AuditEvent:
+  description: 审计事件（05 §3 AuditLog，append-only，复用 MC2 DDL，无 UPDATE/DELETE）
+  type: object
+  required: [audit_event_id, event_code]
+  properties:
+    audit_event_id: { type: string, description: Snowflake 主键 }
+    event_code: { type: string, description: 事件码(对齐 Event Catalog) }
+    actor_id: { type: string, description: 操作者ID(user_id 或系统=0) }
+    actor_role: { type: string }
+    target_object_type: { type: string }
+    target_object_id: { type: string }
+    before_snapshot_type: { type: string }
+    before_snapshot_id: { type: string }
+    after_snapshot_type: { type: string }
+    after_snapshot_id: { type: string }
+    outcome: { type: string, enum: [SUCCESS, FAILED, REJECTED] }
+    reason_code: { type: string }
+    request_id: { type: string }
+    approval_id: { type: string }
+    case_id: { type: string }
+    created_time: { type: integer }

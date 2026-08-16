@@ -1,5 +1,8 @@
 # Admin P0 路径骨架（05 §6 Admin + Prediction 后台）
-# 业务 request/response schema 在 S02-P05/P07 落地。
+# S02-P07：ApprovalRequest（AR1-AR8）/ RiskCase（5 态）/ AuditEvent（append-only + 脱敏查询）落地。
+#   - approval_decision：pending → approved/rejected（审批人 ≠ 申请人 SoD 守卫）。
+#   - case_create：RiskCase 检测落库（open 初态）；execute 处置依赖风险策略（TBC）→ 由后续补 503。
+#   - audit_log：append-only 审计脱敏查询（Actor/Object/Action/Time/RequestId 白名单字段）。
 
 market_create:
   post:

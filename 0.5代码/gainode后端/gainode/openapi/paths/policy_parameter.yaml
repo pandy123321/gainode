@@ -1,5 +1,8 @@
 # Policy / Parameter P0 路径骨架（05 §6 Policy/Parameter）
-# 业务 request/response schema 在 S02-P07 落地。
+# S02-P07：ParameterRelease 状态机（PR1/PR2/PR5-PR11）+ ParameterSnapshot append-only 落地。
+#   - parameter_release_activate：approved/scheduled → active 纯状态转移已实现；
+#     生成 active ParameterSnapshot 的副作用依赖参数值内容（TBC），由参数冻结后附加。
+#   - parameter_snapshot_detail：append-only 只读投影。
 
 policy_evaluation_create:
   post:
