@@ -31,12 +31,14 @@ use support\utils\Random;
  *   - STABLE_WITH_EXCEPTION_TRANSITIONS：completed（可经 O11 争议）
  *   - disputed = 中间态
  *
- * 实现策略（fail-closed，与 S02-P05 一致）：
- *   - 纯状态转移（O1–O12）完整实现（审计 + object_version CAS + audit_event_id 回写）。
- *   - quote / createOrder 依赖 06 OTC 参数（min/max/fee/inventory，全部 TBC）→ FAIL_CLOSED。
- *   - 成交记录（recordTrade）由 OtcTradeService 承载（append-only + Ledger + Power，TBC）→ FAIL_CLOSED。
- *   - 金额/Power 字段（filled/remaining/fee/power_*）的更新由成交/释放动作在参数冻结后附加，
- *     纯状态转移不触碰经济字段（与 S02-P05 Settlement 状态转移不计算金额一致）。
+ * 实现策略（fail-closed；外审 S02-P06 P1-1/P1-2 修复后）：
+ *   - 纯状态转移（O1/O3/O4/O11）完整实现：审计 + object_version CAS + audit_event_id 回写，
+ *     并在 UPDATE 前执行 Guard/Role（owner / review_required / KYC_REVIEWER+OPS_OPERATOR）。
+ *   - 带经济副作用的转移（O5/O6/O7/O8/O9/O10/O12）依赖 Trade/Ledger/Power/Approval（06 TBC）→ FAIL_CLOSED。
+ *   - O2（draft→matching）需服务端资格（eligibility，06 TBC）→ FAIL_CLOSED（先过 owner + review_required 守卫）。
+ *   - quote / createOrder 依赖 06 OTC 参数（min/max/fee/inventory）→ FAIL_CLOSED。
+ *   - recordTrade 由 OtcTradeService 承载（append-only + Ledger + Power，TBC）→ FAIL_CLOSED。
+ *   - 金额/Power 字段（filled/remaining/fee/power_*）在参数冻结后由成交/释放动作附加。
  *
  * @method OtcOrderModel create($data)
  * @method OtcOrderModel get($id, string $field = null)
@@ -57,6 +59,12 @@ class OtcOrderService extends Service
     public const EVENT_EXPIRED             = 'OTC_ORDER_EXPIRED';
     public const EVENT_DISPUTED            = 'OTC_ORDER_DISPUTED';
     public const EVENT_DISPUTE_RESOLVED    = 'OTC_ORDER_DISPUTE_RESOLVED';
+
+    // ---- 05 §8 最小角色（本包仅引用这 4 个，canonical 冻结）----
+    public const ROLE_END_USER      = 'END_USER';
+    public const ROLE_OPS_OPERATOR  = 'OPS_OPERATOR';
+    public const ROLE_KYC_REVIEWER  = 'KYC_REVIEWER';
+    public const ROLE_RISK_APPROVER = 'RISK_APPROVER';
 
     public function __construct()
     {
@@ -146,129 +154,143 @@ class OtcOrderService extends Service
         ];
     }
 
-    /** O1：draft → review（提交审核，review_required=1） */
+    /** O1：draft → review（提交审核，review_required=1；END_USER owner） */
     public function submitReview(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
         return $this->transition(
             $otcOrderId, [OtcOrderModel::STATUS_DRAFT], OtcOrderModel::STATUS_REVIEW,
-            self::EVENT_SUBMITTED_REVIEW, $actorId, $actorRole
+            self::EVENT_SUBMITTED_REVIEW, $actorId, $actorRole,
+            function (OtcOrderModel $order) use ($actorId): void {
+                $this->guardOwner($order, $actorId);
+                $this->guardReviewRequired($order, 1);
+            }
         );
     }
 
-    /** O2：draft → matching（提交撮合，review_required=0，资格通过） */
+    /** O2：draft → matching（review_required=0 + 资格通过；资格规则 06 TBC → FAIL_CLOSED） */
     public function submitMatching(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_DRAFT], OtcOrderModel::STATUS_MATCHING,
-            self::EVENT_SUBMITTED_MATCHING, $actorId, $actorRole
+        return $this->guardedFailClosed(
+            $otcOrderId,
+            function (OtcOrderModel $order) use ($actorId): void {
+                $this->guardOwner($order, $actorId);
+                $this->guardReviewRequired($order, 0);
+            },
+            'OTC submitMatching depends on server-side eligibility (06 TBC) — not frozen'
         );
     }
 
-    /** O3：review → matching（审核通过） */
+    /** O3：review → matching（审核通过；KYC_REVIEWER / OPS_OPERATOR） */
     public function approveReview(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
         return $this->transition(
             $otcOrderId, [OtcOrderModel::STATUS_REVIEW], OtcOrderModel::STATUS_MATCHING,
-            self::EVENT_REVIEW_APPROVED, $actorId, $actorRole
+            self::EVENT_REVIEW_APPROVED, $actorId, $actorRole,
+            function (OtcOrderModel $order) use ($actorRole): void {
+                $this->guardRole([self::ROLE_KYC_REVIEWER, self::ROLE_OPS_OPERATOR], $actorRole);
+            }
         );
     }
 
-    /** O4：review → rejected（审核驳回） */
+    /** O4：review → rejected（审核驳回；KYC_REVIEWER / OPS_OPERATOR） */
     public function reject(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
         return $this->transition(
             $otcOrderId, [OtcOrderModel::STATUS_REVIEW], OtcOrderModel::STATUS_REJECTED,
-            self::EVENT_REJECTED, $actorId, $actorRole
+            self::EVENT_REJECTED, $actorId, $actorRole,
+            function (OtcOrderModel $order) use ($actorRole): void {
+                $this->guardRole([self::ROLE_KYC_REVIEWER, self::ROLE_OPS_OPERATOR], $actorRole);
+            }
         );
     }
 
-    /** O5：matching → partial（部分成交） */
+    /** O5：matching → partial（部分成交；消耗 Power + 写 Trade，06 TBC → FAIL_CLOSED） */
     public function partialFill(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_MATCHING], OtcOrderModel::STATUS_PARTIAL,
-            self::EVENT_PARTIAL_FILLED, $actorId, $actorRole
-        );
+        return $this->failClosed('OTC partialFill consumes Power + writes Trade (06 TBC) — not frozen');
     }
 
-    /** O6：matching → completed（全部成交） */
+    /** O6：matching → completed（全部成交；Trade + Ledger + Power，06 TBC → FAIL_CLOSED） */
     public function completeFromMatching(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_MATCHING], OtcOrderModel::STATUS_COMPLETED,
-            self::EVENT_COMPLETED, $actorId, $actorRole
-        );
+        return $this->failClosed('OTC completeFromMatching depends on Trade + Ledger + Power (06 TBC) — not frozen');
     }
 
-    /** O7：matching → cancelled（用户取消，释放 remaining） */
+    /** O7：matching → cancelled（END_USER owner；取消需释放 remaining Power，06 TBC → FAIL_CLOSED） */
     public function cancel(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_MATCHING], OtcOrderModel::STATUS_CANCELLED,
-            self::EVENT_CANCELLED, $actorId, $actorRole
+        return $this->guardedFailClosed(
+            $otcOrderId,
+            function (OtcOrderModel $order) use ($actorId): void {
+                $this->guardOwner($order, $actorId);
+            },
+            'OTC cancel must release remaining Power (06 TBC) — not frozen'
         );
     }
 
-    /** O8：matching → expired（有效期到期，释放 remaining） */
+    /** O8：matching → expired（系统到期；需释放 remaining Power，06 TBC → FAIL_CLOSED） */
     public function expire(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_MATCHING], OtcOrderModel::STATUS_EXPIRED,
-            self::EVENT_EXPIRED, $actorId, $actorRole
-        );
+        return $this->failClosed('OTC expire must release remaining Power (06 TBC) — not frozen');
     }
 
-    /** O9：partial → completed（剩余全部成交） */
+    /** O9：partial → completed（剩余成交；Trade + Ledger + Power，06 TBC → FAIL_CLOSED） */
     public function completeFromPartial(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_PARTIAL], OtcOrderModel::STATUS_COMPLETED,
-            self::EVENT_COMPLETED, $actorId, $actorRole
-        );
+        return $this->failClosed('OTC completeFromPartial depends on Trade + Ledger + Power (06 TBC) — not frozen');
     }
 
-    /** O10（cancelled 分支）：partial → cancelled（取消剩余，仅释放 remaining） */
+    /** O10（cancelled 分支）：partial → cancelled（END_USER owner；释放 remaining Power，06 TBC → FAIL_CLOSED） */
     public function cancelRemaining(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_PARTIAL], OtcOrderModel::STATUS_CANCELLED,
-            self::EVENT_CANCELLED, $actorId, $actorRole
+        return $this->guardedFailClosed(
+            $otcOrderId,
+            function (OtcOrderModel $order) use ($actorId): void {
+                $this->guardOwner($order, $actorId);
+            },
+            'OTC cancelRemaining must release remaining Power (06 TBC) — not frozen'
         );
     }
 
-    /** O10（expired 分支）：partial → expired（到期，仅释放 remaining） */
+    /** O10（expired 分支）：partial → expired（系统到期；释放 remaining Power，06 TBC → FAIL_CLOSED） */
     public function expireRemaining(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_PARTIAL], OtcOrderModel::STATUS_EXPIRED,
-            self::EVENT_EXPIRED, $actorId, $actorRole
-        );
+        return $this->failClosed('OTC expireRemaining must release remaining Power (06 TBC) — not frozen');
     }
 
-    /** O11：completed → disputed（成交后争议，冻结） */
+    /** O11：completed → disputed（成交后争议冻结；END_USER owner） */
     public function dispute(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
         return $this->transition(
             $otcOrderId, [OtcOrderModel::STATUS_COMPLETED], OtcOrderModel::STATUS_DISPUTED,
-            self::EVENT_DISPUTED, $actorId, $actorRole
+            self::EVENT_DISPUTED, $actorId, $actorRole,
+            function (OtcOrderModel $order) use ($actorId): void {
+                $this->guardOwner($order, $actorId);
+            }
         );
     }
 
-    /** O12（cancelled 分支）：disputed → cancelled（裁决取消退钱） */
+    /** O12（cancelled 分支）：disputed → cancelled（RISK_APPROVER；退钱需 Approval + Ledger reversal，06 TBC → FAIL_CLOSED） */
     public function resolveDisputeCancel(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_DISPUTED], OtcOrderModel::STATUS_CANCELLED,
-            self::EVENT_DISPUTE_RESOLVED, $actorId, $actorRole
+        return $this->guardedFailClosed(
+            $otcOrderId,
+            function (OtcOrderModel $order) use ($actorRole): void {
+                $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole);
+            },
+            'OTC resolveDisputeCancel depends on Approval + Ledger reversal (06 TBC) — not frozen'
         );
     }
 
-    /** O12（completed 分支）：disputed → completed（裁决维持成交） */
+    /** O12（completed 分支）：disputed → completed（RISK_APPROVER；维持成交需一致性校验，06 TBC → FAIL_CLOSED） */
     public function resolveDisputeComplete(string $otcOrderId, string $actorId, string $actorRole): OtcOrderModel
     {
-        return $this->transition(
-            $otcOrderId, [OtcOrderModel::STATUS_DISPUTED], OtcOrderModel::STATUS_COMPLETED,
-            self::EVENT_DISPUTE_RESOLVED, $actorId, $actorRole
+        return $this->guardedFailClosed(
+            $otcOrderId,
+            function (OtcOrderModel $order) use ($actorRole): void {
+                $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole);
+            },
+            'OTC resolveDisputeComplete depends on Approval + Ledger reversal (06 TBC) — not frozen'
         );
     }
 
@@ -278,14 +300,18 @@ class OtcOrderService extends Service
         string $toStatus,
         string $eventCode,
         string $actorId,
-        string $actorRole
+        string $actorRole,
+        ?callable $guard = null
     ): OtcOrderModel {
         return (new TransactionBoundary())->run(function () use (
-            $otcOrderId, $fromStatuses, $toStatus, $eventCode, $actorId, $actorRole
+            $otcOrderId, $fromStatuses, $toStatus, $eventCode, $actorId, $actorRole, $guard
         ) {
             $order = $this->get($otcOrderId);
             if (empty($order)) {
                 throw new DomainException(ErrorDict::VALIDATION_ERROR, 'otc order not found');
+            }
+            if ($guard !== null) {
+                $guard($order);
             }
             $current = (string) $order->status;
             if (!in_array($current, $fromStatuses, true)) {
@@ -312,6 +338,44 @@ class OtcOrderService extends Service
 
             return $this->get($otcOrderId);
         });
+    }
+
+    private function guardOwner(OtcOrderModel $order, string $actorId): void
+    {
+        if ((string) $order->user_id !== $actorId) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'otc order owner mismatch');
+        }
+    }
+
+    private function guardRole(array $allowedRoles, string $actorRole): void
+    {
+        if (!in_array($actorRole, $allowedRoles, true)) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'otc order actor role forbidden');
+        }
+    }
+
+    private function guardReviewRequired(OtcOrderModel $order, int $expected): void
+    {
+        if ((int) $order->review_required !== $expected) {
+            throw new DomainException(ErrorDict::OBJECT_VERSION_CONFLICT, 'otc order review_required mismatch');
+        }
+    }
+
+    /** 无守卫的纯经济 fail-closed：直接 503，不读取/不转移状态。 */
+    private function failClosed(string $dependency): OtcOrderModel
+    {
+        throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, $dependency);
+    }
+
+    /** 先过守卫（owner/role/review_required）再经济 fail-closed；守卫失败优先于依赖不可用。 */
+    private function guardedFailClosed(string $otcOrderId, callable $guard, string $dependency): OtcOrderModel
+    {
+        $order = $this->get($otcOrderId);
+        if (empty($order)) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'otc order not found');
+        }
+        $guard($order);
+        throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, $dependency);
     }
 
     private function appendAudit(

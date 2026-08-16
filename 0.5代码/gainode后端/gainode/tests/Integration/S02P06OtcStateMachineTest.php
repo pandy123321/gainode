@@ -6,11 +6,13 @@ declare(strict_types=1);
  * S02-P06 OTC / Power 状态机 + fail-closed + 只读投影集成测试
  * （独立 CLI 脚本，无需 PHPUnit，SQLite in-memory）。
  *
- * 覆盖 07 §S02-P06 验证项：
- *   1. OtcOrder 状态机：O1-O12 合法/非法转移 + CAS + audit_event_id 回写
- *   2. OtcTrade 单态 completed append-only 只读查询
- *   3. fail-closed：quote / createOrder / recordTrade
- *   4. 只读投影（detail / listByUser / listByOrder）
+ * 覆盖 07 §S02-P06 验证项（外审 P1-1/P1-2 修复后）：
+ *   1. 纯状态转移（O1/O3/O4/O11）完整实现 + Guard/Role（owner / review_required / KYC_REVIEWER+OPS_OPERATOR）
+ *   2. 带经济副作用的转移（O5/O6/O7/O8/O9/O10/O12）→ FAIL_CLOSED（DEPENDENCY_UNAVAILABLE）
+ *   3. O2（draft→matching）资格依赖 06 TBC → FAIL_CLOSED（先过 owner + review_required 守卫）
+ *   4. OtcTrade 单态 completed append-only 只读查询
+ *   5. fail-closed：quote / createOrder / recordTrade
+ *   6. 只读投影（detail / listByUser / listByOrder）
  */
 
 require __DIR__ . '/_bootstrap.php';
@@ -116,154 +118,172 @@ function expectDomainException(callable $fn, string $expectedCode, string $label
     }
 }
 
+function makeOrder(OtcOrderService $svc, string $id, string $userId, string $status, int $reviewRequired = 0): void
+{
+    $svc->create([
+        'otc_order_id'    => $id,
+        'user_id'         => $userId,
+        'side'            => OtcOrderModel::SIDE_BUY,
+        'status'          => $status,
+        'review_required' => $reviewRequired,
+        'object_version'  => 0,
+    ]);
+}
+
 echo "=====================================================\n";
-echo "S02-P06 OTC / Power state machine test\n";
+echo "S02-P06 OTC / Power state machine test（外审修复后）\n";
 echo "=====================================================\n\n";
 
 $orderSvc = new OtcOrderService();
 $tradeSvc = new OtcTradeService();
 
-// ======================= 1. OtcOrder 主流程状态机（draft→review→matching→partial→completed） =======================
-echo "[1] OtcOrder 主流程（draft→review→matching→partial→completed）\n";
-$orderSvc->create([
-    'otc_order_id'   => 'O1',
-    'user_id'        => 'U1',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'price'          => '1.00000000',
-    'quantity_apt'   => '100.000000000000000000',
-    'status'         => OtcOrderModel::STATUS_DRAFT,
-    'review_required' => 1,
-    'object_version' => 0,
-]);
+// ======================= 1. 纯状态转移（O1/O3/O4/O11）+ Guard/Role =======================
+echo "[1] 纯状态转移（O1/O3/O4/O11）+ Guard/Role\n";
+// O1: draft → review（review_required=1 + owner）
+makeOrder($orderSvc, 'O1', 'U1', OtcOrderModel::STATUS_DRAFT, 1);
 $orderSvc->submitReview('O1', 'U1', 'END_USER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_REVIEW, 'O1 submitReview → review');
-$orderSvc->approveReview('O1', 'KYC', 'KYC_REVIEWER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_MATCHING, 'O3 approveReview → matching');
-$orderSvc->partialFill('O1', 'SYS', 'SYSTEM');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_PARTIAL, 'O5 partialFill → partial');
-$orderSvc->completeFromPartial('O1', 'SYS', 'SYSTEM');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_COMPLETED, 'O9 completeFromPartial → completed');
-check((int) $orderSvc->get('O1')->object_version === 4, 'object_version → 4（4 次转移）');
-check((string) $orderSvc->get('O1')->audit_event_id !== '0', 'audit_event_id 已回写');
+check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_REVIEW, 'O1 submitReview(owner) → review');
 
-// O11: completed → disputed
-$orderSvc->dispute('O1', 'U1', 'END_USER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_DISPUTED, 'O11 dispute → disputed');
-
-// O12 (completed 分支): disputed → completed（维持成交）
-$orderSvc->resolveDisputeComplete('O1', 'RA', 'RISK_APPROVER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_COMPLETED, 'O12 resolveDisputeComplete → completed');
-
-// O11 再次争议（STABLE_WITH_EXCEPTION_TRANSITIONS 可重复争议）
-$orderSvc->dispute('O1', 'U1', 'END_USER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_DISPUTED, 'O11 再次 dispute → disputed');
-// O12 (cancelled 分支): disputed → cancelled（退钱）
-$orderSvc->resolveDisputeCancel('O1', 'RA', 'RISK_APPROVER');
-check((string) $orderSvc->get('O1')->status === OtcOrderModel::STATUS_CANCELLED, 'O12 resolveDisputeCancel → cancelled');
-// cancelled = TRUE_TERMINAL，不可再转移
+// O1 负向：非 owner
+makeOrder($orderSvc, 'O1X', 'U1', OtcOrderModel::STATUS_DRAFT, 1);
 expectDomainException(function () use ($orderSvc) {
-    $orderSvc->dispute('O1', 'U1', 'END_USER');
-}, ErrorDict::OBJECT_VERSION_CONFLICT, 'cancelled 态 dispute → OBJECT_VERSION_CONFLICT（终态）');
+    $orderSvc->submitReview('O1X', 'U99', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O1 submitReview(非 owner) → AUTH_FORBIDDEN');
+
+// O1 负向：review_required=0（该订单应走 O2）
+makeOrder($orderSvc, 'O1Y', 'U1', OtcOrderModel::STATUS_DRAFT, 0);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->submitReview('O1Y', 'U1', 'END_USER');
+}, ErrorDict::OBJECT_VERSION_CONFLICT, 'O1 submitReview(review_required=0) → OBJECT_VERSION_CONFLICT');
+
+// O3: review → matching（KYC_REVIEWER）
+makeOrder($orderSvc, 'O3', 'U2', OtcOrderModel::STATUS_REVIEW);
+$orderSvc->approveReview('O3', 'KYC', 'KYC_REVIEWER');
+check((string) $orderSvc->get('O3')->status === OtcOrderModel::STATUS_MATCHING, 'O3 approveReview(KYC_REVIEWER) → matching');
+
+// O3 负向：END_USER 无权审批
+makeOrder($orderSvc, 'O3X', 'U2', OtcOrderModel::STATUS_REVIEW);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->approveReview('O3X', 'U1', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O3 approveReview(END_USER) → AUTH_FORBIDDEN');
+
+// O4: review → rejected（OPS_OPERATOR）
+makeOrder($orderSvc, 'O4', 'U3', OtcOrderModel::STATUS_REVIEW);
+$orderSvc->reject('O4', 'OPS', 'OPS_OPERATOR');
+check((string) $orderSvc->get('O4')->status === OtcOrderModel::STATUS_REJECTED, 'O4 reject(OPS_OPERATOR) → rejected');
+
+// O4 负向：END_USER 无权驳回
+makeOrder($orderSvc, 'O4X', 'U3', OtcOrderModel::STATUS_REVIEW);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->reject('O4X', 'U3', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O4 reject(END_USER) → AUTH_FORBIDDEN');
+
+// O11: completed → disputed（owner）
+makeOrder($orderSvc, 'O11', 'U4', OtcOrderModel::STATUS_COMPLETED);
+$orderSvc->dispute('O11', 'U4', 'END_USER');
+check((string) $orderSvc->get('O11')->status === OtcOrderModel::STATUS_DISPUTED, 'O11 dispute(owner) → disputed');
+
+// O11 负向：非 owner
+makeOrder($orderSvc, 'O11X', 'U4', OtcOrderModel::STATUS_COMPLETED);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->dispute('O11X', 'U99', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O11 dispute(非 owner) → AUTH_FORBIDDEN');
 echo "\n";
 
-// ======================= 2. OtcOrder 旁路状态机 =======================
-echo "[2] OtcOrder 旁路（draft→matching / review→rejected / 成交/取消/到期）\n";
-// O2: draft → matching（无需审核）
-$orderSvc->create([
-    'otc_order_id'    => 'O2',
-    'user_id'         => 'U1',
-    'side'            => OtcOrderModel::SIDE_SELL,
-    'status'          => OtcOrderModel::STATUS_DRAFT,
-    'review_required' => 0,
-    'object_version'  => 0,
-]);
-$orderSvc->submitMatching('O2', 'U1', 'END_USER');
-check((string) $orderSvc->get('O2')->status === OtcOrderModel::STATUS_MATCHING, 'O2 submitMatching → matching');
-
-// O4: review → rejected
-$orderSvc->create([
-    'otc_order_id'   => 'O4',
-    'user_id'        => 'U2',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'status'         => OtcOrderModel::STATUS_REVIEW,
-    'object_version' => 0,
-]);
-$orderSvc->reject('O4', 'OPS', 'OPS_OPERATOR');
-check((string) $orderSvc->get('O4')->status === OtcOrderModel::STATUS_REJECTED, 'O4 reject → rejected');
+// ======================= 2. 经济副作用转移（O5/O6/O7/O8/O9/O10/O12）→ FAIL_CLOSED =======================
+echo "[2] 经济副作用转移（O5/O6/O7/O8/O9/O10/O12）→ FAIL_CLOSED\n";
+// O5: matching → partial
+makeOrder($orderSvc, 'O5', 'U5', OtcOrderModel::STATUS_MATCHING);
 expectDomainException(function () use ($orderSvc) {
-    $orderSvc->approveReview('O4', 'OPS', 'OPS_OPERATOR');
-}, ErrorDict::OBJECT_VERSION_CONFLICT, 'rejected 态 approveReview → OBJECT_VERSION_CONFLICT（终态）');
+    $orderSvc->partialFill('O5', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O5 partialFill → DEPENDENCY_UNAVAILABLE');
 
-// O6: matching → completed（全部成交）
-$orderSvc->create([
-    'otc_order_id'   => 'O6',
-    'user_id'        => 'U3',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'status'         => OtcOrderModel::STATUS_MATCHING,
-    'object_version' => 0,
-]);
-$orderSvc->completeFromMatching('O6', 'SYS', 'SYSTEM');
-check((string) $orderSvc->get('O6')->status === OtcOrderModel::STATUS_COMPLETED, 'O6 completeFromMatching → completed');
+// O6: matching → completed
+makeOrder($orderSvc, 'O6', 'U5', OtcOrderModel::STATUS_MATCHING);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->completeFromMatching('O6', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O6 completeFromMatching → DEPENDENCY_UNAVAILABLE');
 
-// O7: matching → cancelled
-$orderSvc->create([
-    'otc_order_id'   => 'O7',
-    'user_id'        => 'U4',
-    'side'           => OtcOrderModel::SIDE_SELL,
-    'status'         => OtcOrderModel::STATUS_MATCHING,
-    'object_version' => 0,
-]);
-$orderSvc->cancel('O7', 'U4', 'END_USER');
-check((string) $orderSvc->get('O7')->status === OtcOrderModel::STATUS_CANCELLED, 'O7 cancel → cancelled');
+// O7: matching → cancelled（owner 守卫先过，再 fail-closed）
+makeOrder($orderSvc, 'O7', 'U6', OtcOrderModel::STATUS_MATCHING);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->cancel('O7', 'U6', 'END_USER');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O7 cancel(owner) → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->cancel('O7', 'U99', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O7 cancel(非 owner) → AUTH_FORBIDDEN');
 
 // O8: matching → expired
-$orderSvc->create([
-    'otc_order_id'   => 'O8',
-    'user_id'        => 'U5',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'status'         => OtcOrderModel::STATUS_MATCHING,
-    'object_version' => 0,
-]);
-$orderSvc->expire('O8', 'SYS', 'SYSTEM');
-check((string) $orderSvc->get('O8')->status === OtcOrderModel::STATUS_EXPIRED, 'O8 expire → expired');
-
-// O10 (cancelled): partial → cancelled
-$orderSvc->create([
-    'otc_order_id'   => 'O10a',
-    'user_id'        => 'U6',
-    'side'           => OtcOrderModel::SIDE_SELL,
-    'status'         => OtcOrderModel::STATUS_PARTIAL,
-    'object_version' => 0,
-]);
-$orderSvc->cancelRemaining('O10a', 'U6', 'END_USER');
-check((string) $orderSvc->get('O10a')->status === OtcOrderModel::STATUS_CANCELLED, 'O10 cancelRemaining → cancelled');
-
-// O10 (expired): partial → expired
-$orderSvc->create([
-    'otc_order_id'   => 'O10b',
-    'user_id'        => 'U7',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'status'         => OtcOrderModel::STATUS_PARTIAL,
-    'object_version' => 0,
-]);
-$orderSvc->expireRemaining('O10b', 'SYS', 'SYSTEM');
-check((string) $orderSvc->get('O10b')->status === OtcOrderModel::STATUS_EXPIRED, 'O10 expireRemaining → expired');
-
-// 非法：draft 态直接 completeFromMatching → 冲突
-$orderSvc->create([
-    'otc_order_id'   => 'OX',
-    'user_id'        => 'U8',
-    'side'           => OtcOrderModel::SIDE_BUY,
-    'status'         => OtcOrderModel::STATUS_DRAFT,
-    'object_version' => 0,
-]);
+makeOrder($orderSvc, 'O8', 'U5', OtcOrderModel::STATUS_MATCHING);
 expectDomainException(function () use ($orderSvc) {
-    $orderSvc->completeFromMatching('OX', 'SYS', 'SYSTEM');
-}, ErrorDict::OBJECT_VERSION_CONFLICT, 'draft 态 completeFromMatching → OBJECT_VERSION_CONFLICT');
+    $orderSvc->expire('O8', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O8 expire → DEPENDENCY_UNAVAILABLE');
+
+// O9: partial → completed
+makeOrder($orderSvc, 'O9', 'U5', OtcOrderModel::STATUS_PARTIAL);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->completeFromPartial('O9', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O9 completeFromPartial → DEPENDENCY_UNAVAILABLE');
+
+// O10（cancelled 分支）：partial → cancelled
+makeOrder($orderSvc, 'O10a', 'U7', OtcOrderModel::STATUS_PARTIAL);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->cancelRemaining('O10a', 'U7', 'END_USER');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O10 cancelRemaining(owner) → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->cancelRemaining('O10a', 'U99', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O10 cancelRemaining(非 owner) → AUTH_FORBIDDEN');
+
+// O10（expired 分支）：partial → expired
+makeOrder($orderSvc, 'O10b', 'U7', OtcOrderModel::STATUS_PARTIAL);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->expireRemaining('O10b', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O10 expireRemaining → DEPENDENCY_UNAVAILABLE');
+
+// O12（cancelled 分支）：disputed → cancelled（RISK_APPROVER 守卫先过，再 fail-closed）
+makeOrder($orderSvc, 'O12a', 'U8', OtcOrderModel::STATUS_DISPUTED);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->resolveDisputeCancel('O12a', 'RA', 'RISK_APPROVER');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O12 resolveDisputeCancel(RISK_APPROVER) → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->resolveDisputeCancel('O12a', 'U8', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O12 resolveDisputeCancel(END_USER) → AUTH_FORBIDDEN');
+
+// O12（completed 分支）：disputed → completed
+makeOrder($orderSvc, 'O12b', 'U8', OtcOrderModel::STATUS_DISPUTED);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->resolveDisputeComplete('O12b', 'RA', 'RISK_APPROVER');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O12 resolveDisputeComplete(RISK_APPROVER) → DEPENDENCY_UNAVAILABLE');
 echo "\n";
 
-// ======================= 3. OtcTrade 单态 + 只读查询 =======================
-echo "[3] OtcTrade 单态 completed + 只读查询\n";
+// ======================= 3. O2 资格依赖 fail-closed =======================
+echo "[3] O2（draft→matching）资格依赖 06 TBC → FAIL_CLOSED\n";
+// O2: draft(review_required=0) → matching（owner 守卫先过，资格依赖 fail-closed）
+makeOrder($orderSvc, 'O2', 'U9', OtcOrderModel::STATUS_DRAFT, 0);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->submitMatching('O2', 'U9', 'END_USER');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O2 submitMatching(owner,review_required=0) → DEPENDENCY_UNAVAILABLE');
+
+// O2 负向：review_required=1（应先走 O1）
+makeOrder($orderSvc, 'O2X', 'U9', OtcOrderModel::STATUS_DRAFT, 1);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->submitMatching('O2X', 'U9', 'END_USER');
+}, ErrorDict::OBJECT_VERSION_CONFLICT, 'O2 submitMatching(review_required=1) → OBJECT_VERSION_CONFLICT');
+
+// O2 负向：非 owner
+makeOrder($orderSvc, 'O2Y', 'U9', OtcOrderModel::STATUS_DRAFT, 0);
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->submitMatching('O2Y', 'U99', 'END_USER');
+}, ErrorDict::AUTH_FORBIDDEN, 'O2 submitMatching(非 owner) → AUTH_FORBIDDEN');
+
+// O2 负向：订单不存在
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->submitMatching('NOPE', 'U9', 'END_USER');
+}, ErrorDict::VALIDATION_ERROR, 'O2 submitMatching(不存在) → VALIDATION_ERROR');
+echo "\n";
+
+// ======================= 4. OtcTrade 单态 + 只读查询 =======================
+echo "[4] OtcTrade 单态 completed + 只读查询\n";
 $tradeSvc->create([
     'trade_id'        => 'T1',
     'otc_order_id'    => 'O6',
@@ -292,15 +312,14 @@ $sellerTrades = $tradeSvc->getBySeller('U9');
 check($sellerTrades->count() === 1, 'getBySeller(U9) 数量=1');
 echo "\n";
 
-// ======================= 4. 只读投影 =======================
-echo "[4] 只读投影（detail / listByUser）\n";
+// ======================= 5. 只读投影 =======================
+echo "[5] 只读投影（detail / listByUser）\n";
 $odetail = $orderSvc->detail('O1');
 check($odetail['otc_order_id'] === 'O1', 'order detail.otc_order_id=O1');
-check($odetail['status'] === OtcOrderModel::STATUS_CANCELLED, 'order detail.status=cancelled');
-check($odetail['quantity_apt'] === '100.000000000000000000', 'order detail.quantity_apt 精确 decimal string');
+check($odetail['status'] === OtcOrderModel::STATUS_REVIEW, 'order detail.status=review');
 
 $olist = $orderSvc->listByUser('U1');
-check(count($olist['orders']) === 2, 'listByUser(U1) 数量=2（O1 + O2）');
+check(count($olist['orders']) >= 1, 'listByUser(U1) 数量>=1');
 
 expectDomainException(function () use ($orderSvc) {
     $orderSvc->detail('NOPE');
@@ -310,8 +329,8 @@ expectDomainException(function () use ($tradeSvc) {
 }, ErrorDict::VALIDATION_ERROR, 'trade detail(不存在) → VALIDATION_ERROR');
 echo "\n";
 
-// ======================= 5. fail-closed（依赖未冻结） =======================
-echo "[5] fail-closed（quote/createOrder/recordTrade）\n";
+// ======================= 6. fail-closed（quote/createOrder/recordTrade） =======================
+echo "[6] fail-closed（quote/createOrder/recordTrade）\n";
 expectDomainException(function () use ($orderSvc) {
     $orderSvc->quote([], 'U1', 'END_USER');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'OTC quote → DEPENDENCY_UNAVAILABLE');

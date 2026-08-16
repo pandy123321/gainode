@@ -58,6 +58,14 @@ check(OtcOrderService::EVENT_DISPUTE_RESOLVED === 'OTC_ORDER_DISPUTE_RESOLVED', 
 check(OtcTradeService::EVENT_TRADE_RECORDED === 'OTC_TRADE_RECORDED', 'EVENT_TRADE_RECORDED');
 echo "\n";
 
+// ======================= 2.5 最小角色常量（05 §8 冻结） =======================
+echo "[2.5] 最小角色常量（05 §8 冻结）\n";
+check(OtcOrderService::ROLE_END_USER === 'END_USER', 'ROLE_END_USER');
+check(OtcOrderService::ROLE_OPS_OPERATOR === 'OPS_OPERATOR', 'ROLE_OPS_OPERATOR');
+check(OtcOrderService::ROLE_KYC_REVIEWER === 'KYC_REVIEWER', 'ROLE_KYC_REVIEWER');
+check(OtcOrderService::ROLE_RISK_APPROVER === 'RISK_APPROVER', 'ROLE_RISK_APPROVER');
+echo "\n";
+
 // ======================= 3. fail-closed 写路径 =======================
 echo "[3] fail-closed 写路径（DEPENDENCY_UNAVAILABLE，不触 DB）\n";
 $orderSvc = new OtcOrderService();
@@ -72,6 +80,23 @@ $tradeSvc = new OtcTradeService();
 expectDomainException(function () use ($tradeSvc) {
     $tradeSvc->recordTrade([], 'SYS', 'SYSTEM');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'OTC recordTrade → DEPENDENCY_UNAVAILABLE');
+
+// 纯 fail-closed 经济转移（系统触发，无守卫，直接 503，不触 DB）
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->partialFill('X', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O5 partialFill → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->completeFromMatching('X', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O6 completeFromMatching → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->expire('X', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O8 expire → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->completeFromPartial('X', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O9 completeFromPartial → DEPENDENCY_UNAVAILABLE');
+expectDomainException(function () use ($orderSvc) {
+    $orderSvc->expireRemaining('X', 'SYS', 'SYSTEM');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'O10 expireRemaining → DEPENDENCY_UNAVAILABLE');
 echo "\n";
 
 // ======================= 4. V2 错误码 HTTP 映射 =======================
