@@ -29,6 +29,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P03-LEDGER-APTACCOUNT-POWER | 0084fae | 978ca8a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 
 ## 明细
 
@@ -56,8 +57,8 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 审核 S02-P06（OTC/Power，随开发 agent 提交）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
-NEXT_DEVELOPER_ACTION = 推进 S02-P06（OTC/Power）
+NEXT_QUALITY_ACTION = 审核 S02-P07（Approval/Parameter/Risk/Support/Notice/Audit，随开发 agent 提交）；push 本地 ahead 的审核产物（等 Owner unblock-secret 后）
+NEXT_DEVELOPER_ACTION = 推进 S02-P07（Approval/Parameter/Risk/Support/Notice/Audit）
 OWNER_DECISION_REQUIRED = PARTIAL（S01-P07/P08 20 项已签 2026-08-16 全 OPTION_A；S02-P02 4 项 TBC 待签；GitHub unblock-secret AKIA 待 Owner 标记；OBS-001 历史重写迹象待 Owner 确认）
 PRODUCTION_APPROVAL = NO
 ```
@@ -256,6 +257,29 @@ GOVERNANCE_OBSERVATIONS = 1（OBS-002 developer trailer 简写 origin:developer�
 LAST_CHECKED_AT = 2026-08-16T18:58+08:00
 ```
 
+### S02-P06-OTC-POWER（Round 1）
+
+```text
+DEVELOPER_BASE_COMMIT = c6d7357（S02-P05 质量审核提交）
+DEVELOPER_SNAPSHOT_COMMIT = 273513a
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1
+REVIEW_STATUS = APPROVED
+P0_OPEN = 0
+P1_OPEN = 0
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 0
+P3 = 0
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = APPROVED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+GOVERNANCE_OBSERVATIONS = 0（Developer 已切换 V3.4 完整 trailer，OBS-002 关闭）
+LAST_CHECKED_AT = 2026-08-16T19:05+08:00
+```
+
 ## 关键约束（全程保持）
 
 ```text
@@ -277,6 +301,7 @@ S02-P02 Auth/KYC/User/Eligibility = DONE（APPROVED，35 文件六子流程，2 
 S02-P03 Ledger/AptAccount/Power = DONE（APPROVED，14 文件经济写路径，11 步模板 + L1/L2/L3 + CAS + 负余额保护，1 P3 负余额口径，48 断言）
 S02-P04 Robot/Reward/Upgrade = DONE（APPROVED，16 文件 56 级规则读取器 + 三状态轴骨架 + 只读投影，写路径 fail-closed，82 断言，0 Finding）
 S02-P05 Prediction P0 = DONE（APPROVED，18 文件 8 对象状态机骨架 + 只读投影 + ConsentReceipt grant，写路径 fail-closed，113 断言，0 Finding）
+S02-P06 OTC/Power = DONE（APPROVED，12 文件 OTC O1-O12 状态机 + Trade append-only + 只读投影，写路径 fail-closed，61 断言，0 Finding）
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
