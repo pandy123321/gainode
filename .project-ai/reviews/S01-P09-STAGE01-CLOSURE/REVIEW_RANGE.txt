@@ -1,0 +1,3 @@
+BASE_COMMIT=cf50829
+IMPLEMENTATION_COMMIT=5e75ade
+BRANCH=feature/gainode-v3-serial-development

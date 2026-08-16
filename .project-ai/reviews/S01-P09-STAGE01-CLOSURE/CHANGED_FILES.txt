@@ -1,0 +1,1 @@
+M	.project-ai/context.md M	.project-ai/manifest.yaml A	.project-ai/reviews/STAGE-01-OBJECT-COVERAGE-MATRIX.md
