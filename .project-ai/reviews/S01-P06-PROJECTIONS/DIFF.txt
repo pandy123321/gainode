@@ -1,0 +1,2065 @@
+diff --git a/.project-ai/tasks/TASK-20260816-005/acceptance.md b/.project-ai/tasks/TASK-20260816-005/acceptance.md
+new file mode 100644
+index 0000000..b716f5f
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-005/acceptance.md
+@@ -0,0 +1,56 @@
++# Acceptance: S01-P06 非持久投影服务
++
++## 状态
++
++- **执行授权**：CR-20260816-003 OPTION_A
++- **Independent Review：未开始**
++- **冻结状态**：投影依赖参数多 TBC，默认 deny
++
++## 验收清单
++
++| # | 验收项 | 状态 |
++|---|---|---|
++| 1 | 7 对象全部 NOT_PERSISTED，无任何 DDL | 待独立审核 |
++| 2 | 7 Response DTO + 7 ProjectionService + 2 公共基类 | 待独立审核 |
++| 3 | 每个响应含 05 §10 的 8 元数据字段 | 待独立审核 |
++| 4 | 未冻结依赖默认 deny（allowed=false + UNAVAILABLE，字段 null 不回退旧值） | 待独立审核 |
++| 5 | 无 mock fallback、无前端资格推导 | 待独立审核 |
++| 6 | decimal string / 禁 float（capacity/power） | 待独立审核 |
++| 7 | 跨用户访问 FORBIDDEN（SecurityProfile/SessionDevice/LoginAudit） | 待独立审核 |
++| 8 | 投影单元测试（REALTIME/UNAVAILABLE/越权/无 mock） | 待执行 |
++| 9 | php -l 全部 PASS | 待执行 |
++| 10 | git diff --check 无空白错误 | 待执行 |
++| 11 | 无新 DDL 检查（diff 中无 CREATE TABLE） | 待执行 |
++
++## 机械一致性断言
++
++```text
++NOT_PERSISTED = YES
++DDL_TABLE_COUNT_DELTA = 0（本包不新增任何表）
++PROJECTION_COUNT = 7
++RESPONSE_COUNT = 7
++BASE_CLASS_COUNT = 2（ProjectionResponse + ProjectionService）
++METADATA_FIELDS = 8（data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status）
++NO_MOCK_FALLBACK = YES
++DEFAULT_DENY = YES
++DECIMAL_STRING = YES
++CROSS_USER_ACCESS_FORBIDDEN = YES
++CONTRACT_GAP_COUNT = 3（G1 LoginAudit source / G2 allowed_actions / G3 capacity 结构）
++```
++
++## 非目标验证（NOT_RUN，属后续包）
++
++```text
++真实 OTC/Power/Feature 资格计算 = NOT_RUN（参数未冻结）
++业务写流程 = NOT_RUN（STAGE-02）
++Controller/OpenAPI 路由 = NOT_RUN
++参数冻结 = NOT_RUN（06 / ParameterRelease）
++```
++
++## 交付物
++
++- `.project-ai/tasks/TASK-20260816-005/{requirement,design,acceptance}.md`
++- `support/extend/ProjectionResponse.php`、`support/extend/ProjectionService.php`
++- 7 `library/response/*/<Object>Response.php`
++- 7 `library/service/*/<Object>ProjectionService.php`
++- 7 `tests/projection/<Object>ProjectionTest.php`
+diff --git a/.project-ai/tasks/TASK-20260816-005/design.md b/.project-ai/tasks/TASK-20260816-005/design.md
+new file mode 100644
+index 0000000..256b6ce
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-005/design.md
+@@ -0,0 +1,179 @@
++# Design: S01-P06 非持久投影服务
++
++## 状态
++
++- **执行授权**：CR-20260816-003 OPTION_A（一开到底；门禁降级为 Quality 验证项）
++- **冻结状态**：投影依赖的规则参数多 TBC，默认 deny；已知内容 best-effort 实现
++- **NOT_PERSISTED**：7 对象全部禁止建表
++
++## 公共基类（复用 support/extend，不另造根目录）
++
++```text
++support/extend/ProjectionResponse.php — 数据新鲜度元数据（05 §10 8 字段）+ toArray()
++support/extend/ProjectionService.php  — data_status/source_status 常量 + 默认 deny 判定
++```
++
++### data_status 枚举（05 §10）
++
++```text
++REALTIME / NEAR_REALTIME / STALE / UNAVAILABLE
++```
++
++### source_status 枚举（本包定义，05 §10 未冻结枚举值）
++
++```text
++READY / UNAVAILABLE / PARTIAL
++```
++
++## 7 个投影的字段表 + source-of-truth + 读取顺序 + 默认 deny
++
++### 1. FeatureEntitlement（entitlement 域）
++
++DTO 字段（05 §3 + 07 步骤 4 的 allowed_actions）：
++
++```text
++feature_key         string  必填（输入）
++allowed             bool    deny 时 false
++reason_code         string
++reason_text_key     string  I18N key
++allowed_actions[]   array   07 步骤 4 要求，05 §3 缺失 → Contract Gap（见下）
++policy_version      string  未冻结 → null
++rule_version        string  未冻结 → null
++expires_at          int     未冻结 → null
++```
++
++source-of-truth 读取顺序：
++
++```text
++1. feature 规则参数（06 Feature 段）→ TBC
++2. robots（Robot level → capability 映射）→ MC1 已建，但映射规则依赖 AI.power_cap_by_robot_level（TBC）
++```
++
++默认 deny：feature 规则未冻结 → `allowed=false`、`data_status=UNAVAILABLE`、`source_status=UNAVAILABLE`、`reason_code=FEATURE_RULE_UNAVAILABLE`。
++
++### 2. OtcEligibility（otc 域）
++
++DTO 字段（05 §3）：
++
++```text
++allowed / buy_allowed / sell_allowed / reason_code / reason_text_key / next_action /
++policy_version / rule_version / capacity / power_impact / expires_at / as_of
++```
++
++source 读取顺序：
++
++```text
++1. kyc_cases（2B-2 已建）→ KYC 状态可读；KYC_REQUIRED 可确定性 deny
++2. otc 参数（06：fee/limit/库存）→ TBC
++3. power_positions（MC1 已建）→ 可读，但 Power 资格阈值依赖 AI.power_*（TBC）
++```
++
++reason_code 枚举（05 §3 冻结）：`KYC_REQUIRED / SECURITY_VERIFICATION_REQUIRED / OTC_CAPACITY_INSUFFICIENT / INSUFFICIENT_POWER / UNDER_REVIEW / REGION_UNAVAILABLE / MAINTENANCE`。
++
++默认 deny 顺序：
++
++```text
++1. KYC 未通过（kyc_cases 可读且明确非 approved）→ allowed=false, reason_code=KYC_REQUIRED（确定性，data_status=REALTIME）
++2. OTC/Power 参数 TBC → allowed=false, reason_code=MAINTENANCE, data_status=UNAVAILABLE
++```
++
++### 3. OtcCapacity（otc 域）
++
++DTO 字段（05 §3）：`direction / user_remaining_capacity / global_remaining_capacity / reserve_ratio / as_of / next_refresh_at / rule_version / parameter_release_id`。
++
++source 读取顺序：
++
++```text
++1. otc.settlement_reserve_ratio / otc.risk_reserve_ratio（06）→ TBC
++2. otc.inventory_limit（06）→ TBC
++3. otc_orders（MC1 已建，但未消费冻结转移矩阵）→ 只读不聚合
++```
++
++默认 deny：`reserve_ratio`/`*_remaining_capacity` 均依赖 TBC 参数 → `data_status=UNAVAILABLE`、`source_status=UNAVAILABLE`、字段 null（不回退旧值）。
++
++### 4. PowerImpactPreview（power 域）
++
++DTO 字段（05 §3）：
++
++```text
++action_type / required_power / freeze_power / consume_power / release_power /
++available_before / available_after_preview / frozen_before / frozen_after_preview /
++robot_level / power_cap / rule_version / parameter_release_id / snapshot_id /
++expires_at / allowed / reason_code
++```
++
++source 读取顺序：
++
++```text
++1. power_positions（MC1 已建）→ available_before/frozen_before 可读（REALTIME）
++2. AI.power_cap_by_robot_level / AI.power_action_consumption_profile（06）→ TBC
++   → required_power/freeze/consume/release/power_cap/available_after_preview 全部 UNAVAILABLE
++```
++
++默认 deny：Power 动作消耗/上限参数 TBC → `allowed=false`、`reason_code=POWER_RULE_UNAVAILABLE`、`data_status=UNAVAILABLE`（保留 available_before/frozen_before 实时读数，但 `allowed=false`）。
++
++### 5. SecurityProfile（auth 域）
++
++DTO 字段（05 §3）：`user_id / mfa_enrolled_methods[] / mfa_required_actions[] / login_history_window / suspicious_flags / last_password_change / last_security_review / policy_version / as_of`。
++
++source 读取顺序：
++
++```text
++1. mfa_enrollments（2B-2 已建）→ mfa_enrolled_methods 可读（REALTIME）
++2. auth_sessions（2B-2 已建）→ 会话历史可读
++3. user（V1.x member_user 表）→ last_password_change 可读（best-effort）
++4. 安全策略参数（06）→ TBC → login_history_window/suspicious_flags/mfa_required_actions UNAVAILABLE
++```
++
++脱敏：跨用户访问 → 不泄露存在性，返回安全 reason（`reason_code=FORBIDDEN`），不返回任何字段。
++
++### 6. SessionDevice（auth 域）
++
++DTO 字段（05 §3）：`session_id / device_fingerprint / os / browser / ip / location_region / last_active_at / is_current / revocable`。
++
++source 读取顺序：
++
++```text
++1. auth_sessions（2B-2 已建）→ device_info JSON（os/browser/ip 可读）、last_active_at（updated_time）
++2. device_fingerprint / location_region → device_info 中缺失 → null（PARTIAL）
++```
++
++脱敏：仅会话归属用户或 SUPPORT_AGENT（05 §11.3 可读用户摘要）可读；越权返回 FORBIDDEN。
++
++### 7. LoginAudit（auth 域）
++
++DTO 字段（05 §3）：`audit_id / user_id / event_type / ip_address / device_fingerprint / outcome / failure_reason_code / challenge_type / created_at`。
++
++source-of-truth：**05 未明确**（V1.x `user_logs` 表 vs MC2 `audit_events` 表）→ **Contract Gap**。
++
++默认 deny：source 未裁决 → `data_status=UNAVAILABLE`、`source_status=UNAVAILABLE`，返回空列表 + reason，不读取 V1.x 表（避免依赖未裁决 schema）。
++
++## 关键不变量
++
++```text
++NOT_PERSISTED = YES（7 对象，无任何 DDL）
++NO_MOCK_FALLBACK = YES（TBC/null 不回退旧值，不填 mock）
++DEFAULT_DENY = YES（未冻结依赖 → UNAVAILABLE + allowed=false / 字段 null）
++DECIMAL_STRING = YES（capacity/power 数值 string，禁 float）
++METADATA_8_FIELDS = YES（每个响应含 05 §10 8 字段）
++CROSS_USER_ACCESS = FORBIDDEN（SecurityProfile/SessionDevice/LoginAudit）
++CONSUMED_UNFROZEN_CONTRACT = YES
++OPEN_OWNER_DECISION = YES（LoginAudit source + FeatureEntitlement allowed_actions）
++```
++
++## Contract Gap / Decision Request（交接，不阻塞实现）
++
++| # | 对象 | Gap | 建议 |
++|---|---|---|---|
++| G1 | LoginAudit | source-of-truth 未明确（user_logs vs audit_events） | Owner 裁决：复用 MC2 audit_events（event_type 扩展）或 V1.x user_logs |
++| G2 | FeatureEntitlement | allowed_actions 字段在 05 §3 缺失（07 步骤 4 要求输出） | Owner 裁决：补 05 §3 或降级为派生字段 |
++| G3 | OtcEligibility.capacity | capacity 结构未在 05 明确 | 默认 null，待 06 OTC 参数冻结 |
++
++## 测试策略（tests/projection/，独立 CLI 脚本，SQLite in-memory）
++
++复用 S01-P03 的 LedgerAppendOnlyMutationMatrixTest 风格（无需 PHPUnit）：
++
++- REALTIME 路径：source 可读时正确聚合（如 SessionDevice 读 auth_sessions）。
++- UNAVAILABLE 路径：依赖 TBC 时默认 deny（如 OtcCapacity、PowerImpactPreview）。
++- 跨用户访问：SecurityProfile/SessionDevice/LoginAudit 越权 → FORBIDDEN，不泄露存在性。
++- 无 mock：断言 TBC 字段为 null、不回退旧值。
+diff --git a/.project-ai/tasks/TASK-20260816-005/requirement.md b/.project-ai/tasks/TASK-20260816-005/requirement.md
+new file mode 100644
+index 0000000..cc82ee0
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-005/requirement.md
+@@ -0,0 +1,68 @@
++# Requirement: Machine Contract 第二批 2B-2 后续 — S01-P06 非持久投影服务
++
++## 状态
++
++- **Owner Signoff：不适用（无 enum 决策；依赖参数多 TBC，走 CONSUMED_UNFROZEN_CONTRACT）**
++- **Independent Review：未开始**
++- **执行授权：CR-20260816-003 OPTION_A（开发 agent 一开到底，门禁降级为 Quality 验证项）**
++
++## 背景
++
++S01-P05 已落 2B-2 的 13 张持久表 DDL + Model/DAO/Service 骨架。本包（S01-P06）实现 7 个**非持久投影**（NOT_PERSISTED，禁止建表）的服务端聚合服务，输出只读投影 DTO + 数据新鲜度元数据。
++
++这些投影依赖的规则参数（OTC fee/limit/库存、Power 消耗、Feature 规则、安全策略）在 06 大多为 `TBC`（未获生产批准值）。依据 05 §9「Mock 数据绝不作为 production fallback」、§10「未生产批准保持 TBC/null」与 06 约束，**未冻结依赖一律默认 deny / UNAVAILABLE，绝不 mock、绝不回退旧值、绝不由前端推导**。
++
++## 范围（7 个禁止建表对象）
++
++```text
++FeatureEntitlement   — 功能资格（allowed/denied/reason_codes/allowed_actions）
++OtcEligibility       — OTC 买卖资格
++OtcCapacity          — OTC 容量
++PowerImpactPreview   — Power 影响预览（仅服务端计算）
++SecurityProfile      — 安全画像
++SessionDevice        — 会话设备
++LoginAudit           — 登录审计投影
++```
++
++## 目标文件
++
++```text
++library/response/{entitlement,otc,power,auth}/<Object>Response.php（7）
++library/service/{entitlement,otc,power,auth}/<Object>ProjectionService.php（7）
++support/extend/ProjectionResponse.php（公共 Response 基类，含 05 §10 元数据）
++support/extend/ProjectionService.php（公共 Projection 基类，含 source 解析/default-deny）
++tests/projection/<Object>ProjectionTest.php（7）
++.project-ai/tasks/TASK-20260816-005/{requirement,design,acceptance}.md
++```
++
++## 规则（约束）
++
++1. **禁止建表**：7 对象全部 NOT_PERSISTED，不生成任何 DDL，不写任何表。
++2. **只读聚合**：不得把聚合结果写回新表/旧表；投影仅返回内存计算结果。
++3. **默认 deny**：聚合依赖（规则参数）未冻结/无 Active Release 时，返回 `data_status=UNAVAILABLE` + `source_status=UNAVAILABLE`，资格类投影 `allowed=false` + 明确 `reason_code`。
++4. **无 mock fallback**：TBC/null 不回退旧值、不填充占位 mock、不前端推导。
++5. **数据新鲜度元数据**：每个响应含 05 §10 的 8 字段（`data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status`）。
++6. **decimal string / 禁 float**：容量、Power、金额类数值一律 decimal string。
++7. **脱敏与存在性**：SecurityProfile/SessionDevice/LoginAudit 越权访问返回安全 reason，不泄露对象存在性（05 §11.1 字段权限≠数据范围权限）。
++8. **namespace 复用**：不另造第二套根目录，复用 `library\service`、`library\response`、`support\extend`。
++
++## 非目标（NON_GOALS）
++
++- 不实现任何业务写流程（OTC 下单、Robot 启动、Withdrawal 等属 STAGE-02）。
++- 不冻结任何参数（参数冻结属 06 / ParameterRelease 流程）。
++- 不建表、不实现 Controller/OpenAPI 路由。
++- 不接入真实风控/审计引擎（仅投影骨架 + 单元测试）。
++
++## 交接声明（必填，供 Quality 审核登记）
++
++```text
++CONSUMED_UNFROZEN_CONTRACT = YES（OTC/Power/Feature/安全 规则参数 TBC，按默认 deny 实现）
++OPEN_OWNER_DECISION = YES（LoginAudit source-of-truth 未在 05 明确；FeatureEntitlement allowed_actions 字段来源待裁决）
++```
++
++## 信息来源
++
++- `05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§3 字段表 / §9 前端规则 / §10 新鲜度 / §11 RBAC）
++- `06_PARAMETER_DICTIONARY.md`（OTC/Power/Feature 参数 TBC 状态）
++- `07_DEVELOPMENT_AND_ACCEPTANCE.md`（S01-P06 固定步骤 / 验证 / 验收）
++- `.project-ai/manifest.yaml`（CR-20260816-003 一开到底授权）
+diff --git a/0.5代码/gainode后端/gainode/library/response/auth/LoginAuditResponse.php b/0.5代码/gainode后端/gainode/library/response/auth/LoginAuditResponse.php
+new file mode 100644
+index 0000000..14768c4
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/auth/LoginAuditResponse.php
+@@ -0,0 +1,44 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\auth;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * LoginAudit 投影响应（05 §3 LoginAudit，非持久投影）。
++ *
++ * 只读聚合/Projection。source-of-truth 未在 05 明确（V1.x user_logs vs MC2 audit_events），
++ * 属 Contract Gap G1，未裁决前 source 不可用 → 本响应默认 UNAVAILABLE。
++ * 越权访问不返回本对象（由服务层抛 AuthorizeException，不泄露存在性）。
++ */
++class LoginAuditResponse extends ProjectionResponse
++{
++    /** @var string|null 审计ID */
++    public ?string $audit_id = null;
++
++    /** @var string|null 用户ID */
++    public ?string $user_id = null;
++
++    /** @var string|null 事件类型 */
++    public ?string $event_type = null;
++
++    /** @var string|null IP 地址 */
++    public ?string $ip_address = null;
++
++    /** @var string|null 设备指纹 */
++    public ?string $device_fingerprint = null;
++
++    /** @var string|null 结果（success/failure 等，source 未明确） */
++    public ?string $outcome = null;
++
++    /** @var string|null 失败原因码 */
++    public ?string $failure_reason_code = null;
++
++    /** @var string|null 挑战类型（MFA/验证码等，source 未明确） */
++    public ?string $challenge_type = null;
++
++    /** @var int|null 创建时间（Unix 秒） */
++    public ?int $created_at = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/auth/SecurityProfileResponse.php b/0.5代码/gainode后端/gainode/library/response/auth/SecurityProfileResponse.php
+new file mode 100644
+index 0000000..5a2eaa2
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/auth/SecurityProfileResponse.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\auth;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * SecurityProfile 投影响应（05 §3 SecurityProfile，非持久投影）。
++ *
++ * 只读聚合/Projection：仅返回服务端聚合结果，不写任何表。
++ * 越权访问不返回本对象（由服务层抛 AuthorizeException，不泄露存在性）。
++ *
++ * 字段未冻结（login_history_window/suspicious_flags/mfa_required_actions）一律 null，
++ * 不回退旧值、不填 mock。
++ */
++class SecurityProfileResponse extends ProjectionResponse
++{
++    /** @var string|null 用户ID（越权不返回） */
++    public ?string $user_id = null;
++
++    /** @var string[] MFA 已注册方法（来自 mfa_enrollments，可读） */
++    public array $mfa_enrolled_methods = [];
++
++    /** @var string[] 需 MFA 的动作列表（安全策略 TBC → 空） */
++    public array $mfa_required_actions = [];
++
++    /** @var string|null 登录历史窗口（安全策略 TBC → null） */
++    public ?string $login_history_window = null;
++
++    /** @var array|null 可疑标记（风控规则 TBC → null） */
++    public ?array $suspicious_flags = null;
++
++    /** @var int|null 最后改密时间（Unix 秒，源未冻结 → null） */
++    public ?int $last_password_change = null;
++
++    /** @var int|null 最后安全复核时间（Unix 秒，源未冻结 → null） */
++    public ?int $last_security_review = null;
++
++    /** @var string|null 策略版本号（未冻结 → null） */
++    public ?string $policy_version = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/auth/SessionDeviceResponse.php b/0.5代码/gainode后端/gainode/library/response/auth/SessionDeviceResponse.php
+new file mode 100644
+index 0000000..d15596d
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/auth/SessionDeviceResponse.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\auth;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * SessionDevice 投影响应（05 §3 SessionDevice，非持久投影）。
++ *
++ * 只读聚合/Projection：从 auth_sessions.device_info 派生，不写任何表。
++ * 越权访问不返回本对象（由服务层抛 AuthorizeException，不泄露存在性）。
++ */
++class SessionDeviceResponse extends ProjectionResponse
++{
++    /** @var string|null 会话ID */
++    public ?string $session_id = null;
++
++    /** @var string|null 设备指纹（device_info 缺失 → null） */
++    public ?string $device_fingerprint = null;
++
++    /** @var string|null 操作系统 */
++    public ?string $os = null;
++
++    /** @var string|null 浏览器 */
++    public ?string $browser = null;
++
++    /** @var string|null IP 地址 */
++    public ?string $ip = null;
++
++    /** @var string|null 位置区域（device_info 缺失 → null） */
++    public ?string $location_region = null;
++
++    /** @var int|null 最后活跃时间（Unix 秒） */
++    public ?int $last_active_at = null;
++
++    /** @var bool 是否当前会话 */
++    public bool $is_current = false;
++
++    /** @var bool 是否可撤销（撤销规则未冻结 → 默认 false，fail-closed） */
++    public bool $revocable = false;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/entitlement/FeatureEntitlementResponse.php b/0.5代码/gainode后端/gainode/library/response/entitlement/FeatureEntitlementResponse.php
+new file mode 100644
+index 0000000..d84628a
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/entitlement/FeatureEntitlementResponse.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\entitlement;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * FeatureEntitlement 投影响应（05 §3 FeatureEntitlement，非持久投影）。
++ *
++ * 功能资格投影：输出 allowed/denied/reason_codes/allowed_actions（07 S01-P06 步骤 4）。
++ * 资格规则依赖 06 Feature 参数（TBC），未冻结时 allowed=false。
++ */
++class FeatureEntitlementResponse extends ProjectionResponse
++{
++    /** @var string|null 功能键 */
++    public ?string $feature_key = null;
++
++    /** @var bool 是否允许（默认 deny） */
++    public bool $allowed = false;
++
++    /** @var string|null 原因码 */
++    public ?string $reason_code = null;
++
++    /** @var string|null 原因文案 I18N key */
++    public ?string $reason_text_key = null;
++
++    /**
++     * @var array 允许的动作列表（07 步骤 4 要求；05 §3 缺失 → Contract Gap G2，
++     *            未裁决前返回空数组，不自行推断）
++     */
++    public array $allowed_actions = [];
++
++    /** @var string|null 策略版本号（未冻结 → null） */
++    public ?string $policy_version = null;
++
++    /** @var string|null 规则版本号（未冻结 → null） */
++    public ?string $rule_version = null;
++
++    /** @var int|null 过期时间（Unix 秒） */
++    public ?int $expires_at = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/otc/OtcCapacityResponse.php b/0.5代码/gainode后端/gainode/library/response/otc/OtcCapacityResponse.php
+new file mode 100644
+index 0000000..b3f5b11
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/otc/OtcCapacityResponse.php
+@@ -0,0 +1,34 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\otc;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * OtcCapacity 投影响应（05 §3 OtcCapacity，非持久投影）。
++ *
++ * 只读聚合/Projection。容量/储备比例依赖 06 OTC 参数（TBC），未冻结时字段 null。
++ * 容量数值一律 decimal string，禁 float。
++ */
++class OtcCapacityResponse extends ProjectionResponse
++{
++    /** @var string|null 方向（BUY/SELL） */
++    public ?string $direction = null;
++
++    /** @var string|null 用户剩余容量（decimal string，依赖 inventory_limit TBC → null） */
++    public ?string $user_remaining_capacity = null;
++
++    /** @var string|null 全局剩余容量（decimal string，依赖 inventory_limit TBC → null） */
++    public ?string $global_remaining_capacity = null;
++
++    /** @var string|null 储备比例（依赖 otc.*_reserve_ratio TBC → null） */
++    public ?string $reserve_ratio = null;
++
++    /** @var string|null 规则版本号（未冻结 → null） */
++    public ?string $rule_version = null;
++
++    /** @var string|null 参数发布版本ID（未冻结 → null） */
++    public ?string $parameter_release_id = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/otc/OtcEligibilityResponse.php b/0.5代码/gainode后端/gainode/library/response/otc/OtcEligibilityResponse.php
+new file mode 100644
+index 0000000..890d3f3
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/otc/OtcEligibilityResponse.php
+@@ -0,0 +1,59 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\otc;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * OtcEligibility 投影响应（05 §3 OtcEligibility，非持久投影）。
++ *
++ * 每个请求/用户评估的资格投影，非持久实体。不得定义成 OtcEligibility.status 七选一状态机。
++ * reason_code 不得覆盖 OtcOrder.status。
++ * 容量/Power 数值一律 decimal string，禁 float。
++ */
++class OtcEligibilityResponse extends ProjectionResponse
++{
++    // ---- reason_code 枚举（05 §3 冻结）----
++    public const REASON_KYC_REQUIRED = 'KYC_REQUIRED';
++    public const REASON_SECURITY_VERIFICATION_REQUIRED = 'SECURITY_VERIFICATION_REQUIRED';
++    public const REASON_OTC_CAPACITY_INSUFFICIENT = 'OTC_CAPACITY_INSUFFICIENT';
++    public const REASON_INSUFFICIENT_POWER = 'INSUFFICIENT_POWER';
++    public const REASON_UNDER_REVIEW = 'UNDER_REVIEW';
++    public const REASON_REGION_UNAVAILABLE = 'REGION_UNAVAILABLE';
++    public const REASON_MAINTENANCE = 'MAINTENANCE';
++
++    /** @var bool 是否允许 OTC（默认 deny） */
++    public bool $allowed = false;
++
++    /** @var bool 是否允许买入 */
++    public bool $buy_allowed = false;
++
++    /** @var bool 是否允许卖出 */
++    public bool $sell_allowed = false;
++
++    /** @var string|null 原因码（05 §3 七选一） */
++    public ?string $reason_code = null;
++
++    /** @var string|null 原因文案 I18N key */
++    public ?string $reason_text_key = null;
++
++    /** @var string|null 下一步动作 */
++    public ?string $next_action = null;
++
++    /** @var string|null 策略版本号（未冻结 → null） */
++    public ?string $policy_version = null;
++
++    /** @var string|null 规则版本号（未冻结 → null） */
++    public ?string $rule_version = null;
++
++    /** @var array|null 容量（结构未在 05 明确 → null，Contract Gap G3） */
++    public ?array $capacity = null;
++
++    /** @var array|null Power 影响（依赖 Power 参数 TBC → null） */
++    public ?array $power_impact = null;
++
++    /** @var int|null 过期时间（Unix 秒） */
++    public ?int $expires_at = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/power/PowerImpactPreviewResponse.php b/0.5代码/gainode后端/gainode/library/response/power/PowerImpactPreviewResponse.php
+new file mode 100644
+index 0000000..28e109c
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/power/PowerImpactPreviewResponse.php
+@@ -0,0 +1,65 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response\power;
++
++use support\extend\ProjectionResponse;
++
++/**
++ * PowerImpactPreview 投影响应（05 §3 PowerImpactPreview，非持久投影）。
++ *
++ * 只读聚合/Projection：Power 影响预览只由服务端计算返回（05 §9），不写任何表。
++ * 所有 Power 消耗/冻结/释放规则依赖 AI.power_* 参数（06 TBC），未冻结时 allowed=false。
++ * 金额/Power 一律 decimal string，禁 float。
++ */
++class PowerImpactPreviewResponse extends ProjectionResponse
++{
++    /** @var string|null 动作类型（OTC_SELL / WITHDRAWAL / ROBOT_START） */
++    public ?string $action_type = null;
++
++    /** @var string|null 所需 Power（decimal string，参数 TBC → null） */
++    public ?string $required_power = null;
++
++    /** @var string|null 冻结 Power（decimal string，参数 TBC → null） */
++    public ?string $freeze_power = null;
++
++    /** @var string|null 消耗 Power（decimal string，参数 TBC → null） */
++    public ?string $consume_power = null;
++
++    /** @var string|null 释放 Power（decimal string，参数 TBC → null） */
++    public ?string $release_power = null;
++
++    /** @var string|null 动作前可用 Power（来自 power_positions，可读） */
++    public ?string $available_before = null;
++
++    /** @var string|null 动作后可用 Power（依赖消耗规则 TBC → null） */
++    public ?string $available_after_preview = null;
++
++    /** @var string|null 动作前冻结 Power（来自 power_positions，可读） */
++    public ?string $frozen_before = null;
++
++    /** @var string|null 动作后冻结 Power（依赖冻结规则 TBC → null） */
++    public ?string $frozen_after_preview = null;
++
++    /** @var string|null Robot 等级（可读） */
++    public ?string $robot_level = null;
++
++    /** @var string|null Power 上限（依赖 AI.power_cap_by_robot_level TBC → null） */
++    public ?string $power_cap = null;
++
++    /** @var string|null 规则版本号（未冻结 → null） */
++    public ?string $rule_version = null;
++
++    /** @var string|null 参数发布版本ID（未冻结 → null） */
++    public ?string $parameter_release_id = null;
++
++    /** @var int|null 过期时间（Unix 秒） */
++    public ?int $expires_at = null;
++
++    /** @var bool 是否允许（参数 TBC → false） */
++    public bool $allowed = false;
++
++    /** @var string|null 原因码 */
++    public ?string $reason_code = null;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/auth/LoginAuditProjectionService.php b/0.5代码/gainode后端/gainode/library/service/auth/LoginAuditProjectionService.php
+new file mode 100644
+index 0000000..bd525bd
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/auth/LoginAuditProjectionService.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\auth;
++
++use support\extend\ProjectionService;
++use library\response\auth\LoginAuditResponse;
++
++/**
++ * LoginAudit 投影服务（05 §3，非持久投影）。
++ *
++ * source-of-truth 未在 05 明确（V1.x user_logs vs MC2 audit_events），属 Contract Gap G1。
++ * 未裁决前 source 不可用 → 一律返回 UNAVAILABLE，不读取任何表（避免依赖未裁决 schema）。
++ *
++ * 越权（跨用户）访问返回 UNAVAILABLE 安全 reason，不泄露对象存在性。
++ */
++class LoginAuditProjectionService extends ProjectionService
++{
++    /**
++     * 获取登录审计投影（source 未裁决 → UNAVAILABLE）。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     */
++    public function getAudit(string $viewerUserId, string $targetUserId): LoginAuditResponse
++    {
++        $response = new LoginAuditResponse();
++
++        // 越权：不泄露存在性
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        // source-of-truth 未裁决（Contract Gap G1）→ UNAVAILABLE，不读取任何表
++        $this->applyMetadata($response, $this->unavailableMetadata('projection.source_unavailable'));
++
++        return $response;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/auth/SecurityProfileProjectionService.php b/0.5代码/gainode后端/gainode/library/service/auth/SecurityProfileProjectionService.php
+new file mode 100644
+index 0000000..d0b0e0d
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/auth/SecurityProfileProjectionService.php
+@@ -0,0 +1,65 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\auth;
++
++use support\extend\ProjectionService;
++use library\dao\auth\MfaEnrollmentDao;
++use library\model\auth\MfaEnrollmentModel;
++use library\response\auth\SecurityProfileResponse;
++
++/**
++ * SecurityProfile 投影服务（05 §3，非持久投影）。
++ *
++ * 只读聚合：mfa_enrolled_methods 来自 mfa_enrollments（已建表，可读）；
++ * login_history_window / suspicious_flags / mfa_required_actions 依赖安全策略参数（06 TBC）
++ * → 保持 null/空，source_status=PARTIAL，绝不 mock、绝不回退旧值。
++ *
++ * 越权（跨用户）访问返回 UNAVAILABLE 安全 reason，不泄露对象存在性（05 §11.1）。
++ */
++class SecurityProfileProjectionService extends ProjectionService
++{
++    private MfaEnrollmentDao $mfaEnrollmentDao;
++
++    public function __construct()
++    {
++        $this->mfaEnrollmentDao = new MfaEnrollmentDao();
++    }
++
++    /**
++     * 获取安全画像投影。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     */
++    public function getProfile(string $viewerUserId, string $targetUserId): SecurityProfileResponse
++    {
++        $response = new SecurityProfileResponse();
++
++        // 越权：不泄露存在性，返回安全 reason
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        $response->user_id = $targetUserId;
++
++        // mfa_enrolled_methods 可读（已建表 mfa_enrollments，仅 active 态）
++        $enrollments = $this->mfaEnrollmentDao->fetchAll([
++            'user_id' => $targetUserId,
++            'status' => MfaEnrollmentModel::STATUS_ACTIVE,
++        ]);
++        $methods = [];
++        foreach ($enrollments as $enrollment) {
++            $methods[] = $enrollment->method_type;
++        }
++        $response->mfa_enrolled_methods = $methods;
++
++        // 可读部分为实时数据；安全策略 TBC → source_status=PARTIAL
++        $this->applyMetadata($response, $this->realtimeMetadata());
++        $response->source_status = self::SOURCE_STATUS_PARTIAL;
++
++        return $response;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/auth/SessionDeviceProjectionService.php b/0.5代码/gainode后端/gainode/library/service/auth/SessionDeviceProjectionService.php
+new file mode 100644
+index 0000000..b561fd5
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/auth/SessionDeviceProjectionService.php
+@@ -0,0 +1,82 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\auth;
++
++use support\extend\ProjectionService;
++use library\dao\auth\AuthSessionDao;
++use library\model\auth\AuthSessionModel;
++use library\response\auth\SessionDeviceResponse;
++
++/**
++ * SessionDevice 投影服务（05 §3，非持久投影）。
++ *
++ * 只读聚合：从 auth_sessions.device_info（JSON）派生 os/browser/ip/device_fingerprint/location_region。
++ * 不写任何表。device_info 缺失字段 → null（不回退旧值）。
++ *
++ * revocable 撤销规则未冻结 → 默认 false（fail-closed，不主动暴露可撤销）。
++ * 越权（跨用户）访问返回 UNAVAILABLE 安全 reason，不泄露对象存在性。
++ */
++class SessionDeviceProjectionService extends ProjectionService
++{
++    private AuthSessionDao $authSessionDao;
++
++    public function __construct()
++    {
++        $this->authSessionDao = new AuthSessionDao();
++    }
++
++    /**
++     * 获取会话设备投影。
++     *
++     * @param string $viewerUserId    当前访问者
++     * @param string $sessionId       目标会话ID
++     * @param string|null $currentSessionId 当前请求会话ID（用于 is_current 判定）
++     */
++    public function getDevice(string $viewerUserId, string $sessionId, ?string $currentSessionId = null): SessionDeviceResponse
++    {
++        $response = new SessionDeviceResponse();
++
++        /** @var AuthSessionModel|null $session */
++        $session = $this->authSessionDao->get($sessionId);
++
++        // 越权或不存在：统一返回 UNAVAILABLE，不泄露存在性（存在/不存在不可区分）
++        if ($session === null || (string) $session->user_id !== $viewerUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        $response->session_id = (string) $session->session_id;
++        $response->last_active_at = $this->rawUnix($session, 'updated_time');
++        $response->is_current = ($currentSessionId !== null && $currentSessionId === $sessionId);
++        // 撤销规则未冻结 → fail-closed 默认不可撤销
++        $response->revocable = false;
++
++        // 从 device_info JSON 派生设备字段；缺失 → null
++        $device = $this->decodeDeviceInfo((string) $session->device_info);
++        $response->os = $device['os'] ?? null;
++        $response->browser = $device['browser'] ?? null;
++        $response->device_fingerprint = $device['device_fingerprint'] ?? null;
++        $response->location_region = $device['location_region'] ?? null;
++        $response->ip = $session->ip_address !== null ? (string) $session->ip_address : null;
++
++        $this->applyMetadata($response, $this->realtimeMetadata($this->rawUnix($session, 'updated_time')));
++
++        return $response;
++    }
++
++    /**
++     * 解析 device_info JSON（容错：非法/空 JSON 返回空数组）。
++     *
++     * @return array<string,mixed>
++     */
++    private function decodeDeviceInfo(string $deviceInfo): array
++    {
++        if ($deviceInfo === '') {
++            return [];
++        }
++        $decoded = json_decode($deviceInfo, true);
++        return is_array($decoded) ? $decoded : [];
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/entitlement/FeatureEntitlementProjectionService.php b/0.5代码/gainode后端/gainode/library/service/entitlement/FeatureEntitlementProjectionService.php
+new file mode 100644
+index 0000000..f45bdc7
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/entitlement/FeatureEntitlementProjectionService.php
+@@ -0,0 +1,54 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\entitlement;
++
++use support\extend\ProjectionService;
++use library\response\entitlement\FeatureEntitlementResponse;
++
++/**
++ * FeatureEntitlement 投影服务（05 §3，非持久投影）。
++ *
++ * 功能资格投影。资格规则依赖 06 Feature 参数（TBC）→ 未冻结时默认 deny：
++ *   allowed=false、reason_code=FEATURE_RULE_UNAVAILABLE、data_status=UNAVAILABLE。
++ * allowed_actions 字段在 05 §3 缺失（Contract Gap G2）→ 未裁决前返回空数组，不自行推断。
++ *
++ * 绝不 mock、绝不回退旧值、绝不前端推导（05 §9）。
++ * 越权访问返回 UNAVAILABLE 安全 reason。
++ */
++class FeatureEntitlementProjectionService extends ProjectionService
++{
++    /** @var string 原因码：Feature 规则参数未冻结 */
++    public const REASON_FEATURE_RULE_UNAVAILABLE = 'FEATURE_RULE_UNAVAILABLE';
++
++    /**
++     * 计算功能资格投影。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     * @param string $featureKey   功能键
++     */
++    public function getEntitlement(string $viewerUserId, string $targetUserId, string $featureKey): FeatureEntitlementResponse
++    {
++        $response = new FeatureEntitlementResponse();
++
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        $response->feature_key = $featureKey;
++
++        // Feature 规则参数 TBC → 默认 deny
++        $response->allowed = false;
++        $response->reason_code = self::REASON_FEATURE_RULE_UNAVAILABLE;
++        $response->reason_text_key = 'entitlement.feature_rule_unavailable';
++        // allowed_actions 字段 05 §3 缺失（Contract Gap G2）→ 空数组，不自行推断
++        $response->allowed_actions = [];
++
++        $this->applyMetadata($response, $this->unavailableMetadata());
++
++        return $response;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/otc/OtcCapacityProjectionService.php b/0.5代码/gainode后端/gainode/library/service/otc/OtcCapacityProjectionService.php
+new file mode 100644
+index 0000000..c2a2c3f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/otc/OtcCapacityProjectionService.php
+@@ -0,0 +1,44 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\otc;
++
++use support\extend\ProjectionService;
++use library\response\otc\OtcCapacityResponse;
++
++/**
++ * OtcCapacity 投影服务（05 §3，非持久投影）。
++ *
++ * 容量/储备比例依赖 06 OTC 参数（otc.inventory_limit / otc.settlement_reserve_ratio /
++ * otc.risk_reserve_ratio，全部 TBC）→ 字段 null，data_status=UNAVAILABLE。
++ * 绝不 mock、绝不回退旧值（05 §9）。
++ *
++ * 容量数值一律 decimal string，禁 float。
++ */
++class OtcCapacityProjectionService extends ProjectionService
++{
++    /**
++     * 计算 OTC 容量投影。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     * @param string $direction    BUY/SELL
++     */
++    public function getCapacity(string $viewerUserId, string $targetUserId, string $direction): OtcCapacityResponse
++    {
++        $response = new OtcCapacityResponse();
++
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        $response->direction = $direction;
++
++        // OTC 容量/储备参数 TBC → 无法计算，字段 null（不回退旧值）
++        $this->applyMetadata($response, $this->unavailableMetadata());
++
++        return $response;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/otc/OtcEligibilityProjectionService.php b/0.5代码/gainode后端/gainode/library/service/otc/OtcEligibilityProjectionService.php
+new file mode 100644
+index 0000000..d32c8e5
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/otc/OtcEligibilityProjectionService.php
+@@ -0,0 +1,116 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\otc;
++
++use support\extend\ProjectionService;
++use library\dao\kyc\KycCaseDao;
++use library\model\kyc\KycCaseModel;
++use library\response\otc\OtcEligibilityResponse;
++
++/**
++ * OtcEligibility 投影服务（05 §3，非持久投影，每个请求/用户评估）。
++ *
++ * 读取顺序（默认 deny）：
++ *   1. kyc_cases（2B-2 已建）→ KYC 状态可读，明确非 approved 可确定性 deny；
++ *   2. OTC 参数（06：fee/limit/库存）→ TBC → 资格无法判定，默认 deny（MAINTENANCE）。
++ *
++ * reason_code 使用 05 §3 冻结七选一，不得覆盖 OtcOrder.status。
++ * 越权访问返回 UNAVAILABLE 安全 reason。
++ */
++class OtcEligibilityProjectionService extends ProjectionService
++{
++    private KycCaseDao $kycCaseDao;
++
++    public function __construct()
++    {
++        $this->kycCaseDao = new KycCaseDao();
++    }
++
++    /**
++     * 计算 OTC 资格投影。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     */
++    public function getEligibility(string $viewerUserId, string $targetUserId): OtcEligibilityResponse
++    {
++        $response = new OtcEligibilityResponse();
++
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        // 读取 KYC 案件（最新一条）
++        $kycCases = $this->kycCaseDao->getByUser($targetUserId);
++        $kyc = $kycCases->sortByDesc('created_time')->first();
++
++        $response->allowed = false;
++        $response->buy_allowed = false;
++        $response->sell_allowed = false;
++
++        if ($kyc === null) {
++            // 无 KYC 案件 → not_started → KYC_REQUIRED（确定性 deny，REALTIME）
++            $response->reason_code = OtcEligibilityResponse::REASON_KYC_REQUIRED;
++            $response->reason_text_key = 'otc.eligibility.kyc_required';
++            $this->applyMetadata($response, $this->realtimeMetadata());
++            return $response;
++        }
++
++        // KYC 明确非 approved → 确定性 deny（reason 见映射）
++        $response->reason_code = $this->mapKycReason((string) $kyc->status);
++        $response->reason_text_key = $this->mapKycReasonText((string) $kyc->status);
++        $response->rule_version = $this->nullableString($kyc->rule_version);
++        $response->policy_version = $this->nullableString($kyc->policy_version);
++
++        // KYC 状态可读（REALTIME），但 OTC 参数 TBC → PARTIAL
++        $this->applyMetadata($response, $this->realtimeMetadata($this->rawUnix($kyc, 'updated_time')));
++        $response->source_status = self::SOURCE_STATUS_PARTIAL;
++
++        return $response;
++    }
++
++    /**
++     * KYC 状态 → OtcEligibility reason_code（05 §3 七选一）。
++     *
++     * approved 时 OTC 参数仍 TBC，无法判定资格 → MAINTENANCE（默认 deny）。
++     */
++    private function mapKycReason(string $status): string
++    {
++        switch ($status) {
++            case KycCaseModel::STATUS_APPROVED:
++                return OtcEligibilityResponse::REASON_MAINTENANCE;
++            case KycCaseModel::STATUS_PENDING:
++            case KycCaseModel::STATUS_REVIEW:
++                return OtcEligibilityResponse::REASON_UNDER_REVIEW;
++            case KycCaseModel::STATUS_NOT_STARTED:
++            case KycCaseModel::STATUS_NEEDS_INFO:
++            case KycCaseModel::STATUS_REJECTED:
++            default:
++                return OtcEligibilityResponse::REASON_KYC_REQUIRED;
++        }
++    }
++
++    private function mapKycReasonText(string $status): string
++    {
++        switch ($status) {
++            case KycCaseModel::STATUS_APPROVED:
++                return 'otc.eligibility.maintenance';
++            case KycCaseModel::STATUS_PENDING:
++            case KycCaseModel::STATUS_REVIEW:
++                return 'otc.eligibility.under_review';
++            case KycCaseModel::STATUS_NOT_STARTED:
++            case KycCaseModel::STATUS_NEEDS_INFO:
++            case KycCaseModel::STATUS_REJECTED:
++            default:
++                return 'otc.eligibility.kyc_required';
++        }
++    }
++
++    private function nullableString($value): ?string
++    {
++        return ($value !== null && $value !== '') ? (string) $value : null;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/power/PowerImpactPreviewProjectionService.php b/0.5代码/gainode后端/gainode/library/service/power/PowerImpactPreviewProjectionService.php
+new file mode 100644
+index 0000000..b6b423f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/power/PowerImpactPreviewProjectionService.php
+@@ -0,0 +1,94 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\power;
++
++use support\extend\ProjectionService;
++use library\dao\power\PowerPositionDao;
++use library\response\power\PowerImpactPreviewResponse;
++
++/**
++ * PowerImpactPreview 投影服务（05 §3，非持久投影）。
++ *
++ * 只读聚合：available_before/frozen_before 来自 power_positions（MC1 已建，可读）。
++ * required_power/freeze_power/consume_power/release_power/power_cap/available_after_preview
++ * 依赖 AI.power_* 参数（06 TBC）→ 保持 null，allowed=false（默认 deny，绝不 mock）。
++ *
++ * Power 数值一律 decimal string，禁 float。
++ * 越权访问返回 UNAVAILABLE 安全 reason。
++ */
++class PowerImpactPreviewProjectionService extends ProjectionService
++{
++    // ---- 动作类型（05 §3，冻结）----
++    public const ACTION_OTC_SELL = 'OTC_SELL';
++    public const ACTION_WITHDRAWAL = 'WITHDRAWAL';
++    public const ACTION_ROBOT_START = 'ROBOT_START';
++
++    public const ACTIONS = [
++        self::ACTION_OTC_SELL,
++        self::ACTION_WITHDRAWAL,
++        self::ACTION_ROBOT_START,
++    ];
++
++    /** @var string 原因码：Power 规则参数未冻结 */
++    public const REASON_POWER_RULE_UNAVAILABLE = 'POWER_RULE_UNAVAILABLE';
++
++    private PowerPositionDao $powerPositionDao;
++
++    public function __construct()
++    {
++        $this->powerPositionDao = new PowerPositionDao();
++    }
++
++    /**
++     * 计算 Power 影响预览（仅服务端计算，05 §9）。
++     *
++     * @param string $viewerUserId 当前访问者
++     * @param string $targetUserId 目标用户
++     * @param string $actionType   动作类型（OTC_SELL/WITHDRAWAL/ROBOT_START）
++     */
++    public function preview(string $viewerUserId, string $targetUserId, string $actionType): PowerImpactPreviewResponse
++    {
++        $response = new PowerImpactPreviewResponse();
++
++        if ($viewerUserId !== $targetUserId) {
++            $this->applyMetadata($response, $this->unavailableMetadata('projection.access_denied'));
++            return $response;
++        }
++
++        $response->action_type = $actionType;
++
++        // 读取 power_positions（可读部分：available_before/frozen_before/robot_level）
++        $position = $this->powerPositionDao->getByUser($targetUserId);
++        $positionReadable = $position !== null;
++
++        if ($positionReadable) {
++            $response->available_before = (string) $position->available;
++            $response->frozen_before = (string) $position->frozen;
++            $response->robot_level = $position->power_cap_source_robot_level !== null
++                ? (string) $position->power_cap_source_robot_level
++                : null;
++            $response->rule_version = $position->rule_version !== null && $position->rule_version !== ''
++                ? (string) $position->rule_version
++                : null;
++            $response->parameter_release_id = $position->parameter_release_id !== null && $position->parameter_release_id !== ''
++                ? (string) $position->parameter_release_id
++                : null;
++        }
++
++        // Power 消耗/冻结/释放规则（AI.power_* TBC）→ 无法计算预览 → 默认 deny
++        $response->allowed = false;
++        $response->reason_code = self::REASON_POWER_RULE_UNAVAILABLE;
++
++        if ($positionReadable) {
++            // 持仓可读（实时），但动作规则 TBC → PARTIAL
++            $this->applyMetadata($response, $this->realtimeMetadata($this->rawUnix($position, 'updated_time')));
++            $response->source_status = self::SOURCE_STATUS_PARTIAL;
++        } else {
++            $this->applyMetadata($response, $this->unavailableMetadata());
++        }
++
++        return $response;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/support/extend/ProjectionResponse.php b/0.5代码/gainode后端/gainode/support/extend/ProjectionResponse.php
+new file mode 100644
+index 0000000..8861540
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/support/extend/ProjectionResponse.php
+@@ -0,0 +1,65 @@
++<?php
++
++declare(strict_types=1);
++
++namespace support\extend;
++
++/**
++ * 非持久投影响应基类（05 §10 数据新鲜度契约）。
++ *
++ * 所有投影 Response 必须携带 8 个数据元字段，客户端据此判断数据可信度，
++ * 不得在前端推断资格/Power/容量。TBC/null 一律不回退旧值、不填 mock。
++ *
++ * data_status（05 §10）：
++ *   REALTIME / NEAR_REALTIME / STALE / UNAVAILABLE
++ *
++ * source_status（本包约定，05 §10 未冻结枚举值）：
++ *   READY / PARTIAL / UNAVAILABLE
++ */
++class ProjectionResponse
++{
++    public const DATA_STATUS_REALTIME = 'REALTIME';
++    public const DATA_STATUS_NEAR_REALTIME = 'NEAR_REALTIME';
++    public const DATA_STATUS_STALE = 'STALE';
++    public const DATA_STATUS_UNAVAILABLE = 'UNAVAILABLE';
++
++    public const SOURCE_STATUS_READY = 'READY';
++    public const SOURCE_STATUS_PARTIAL = 'PARTIAL';
++    public const SOURCE_STATUS_UNAVAILABLE = 'UNAVAILABLE';
++
++    /** @var string 数据状态（REALTIME/NEAR_REALTIME/STALE/UNAVAILABLE） */
++    public string $data_status = self::DATA_STATUS_UNAVAILABLE;
++
++    /** @var int|null 数据反映的截止时间点（Unix 秒） */
++    public ?int $as_of = null;
++
++    /** @var int|null 数据最后更新时间（Unix 秒） */
++    public ?int $updated_at = null;
++
++    /** @var int|null 预期下次刷新时间（可 null） */
++    public ?int $next_refresh_at = null;
++
++    /** @var string 刷新建议文案 I18N key */
++    public string $refresh_hint = '';
++
++    /** @var int|null 超过该时长数据视为陈旧（可 null/TBC） */
++    public ?int $stale_after = null;
++
++    /** @var string|null 关联快照 ID */
++    public ?string $snapshot_id = null;
++
++    /** @var string 数据源状态（READY/PARTIAL/UNAVAILABLE） */
++    public string $source_status = self::SOURCE_STATUS_UNAVAILABLE;
++
++    /**
++     * 序列化为响应数组（含全部 public 字段，子类字段一并纳入）。
++     */
++    public function toArray(): array
++    {
++        $out = [];
++        foreach (get_object_vars($this) as $key => $value) {
++            $out[$key] = $value;
++        }
++        return $out;
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/support/extend/ProjectionService.php b/0.5代码/gainode后端/gainode/support/extend/ProjectionService.php
+new file mode 100644
+index 0000000..e75ff7e
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/support/extend/ProjectionService.php
+@@ -0,0 +1,116 @@
++<?php
++
++declare(strict_types=1);
++
++namespace support\extend;
++
++/**
++ * 非持久投影服务基类。
++ *
++ * 投影服务是只读聚合：只从 source-of-truth 读取并计算，绝不写回任何表（NOT_PERSISTED）。
++ * 当聚合依赖（规则参数）未冻结 / 无 Active Release 时，必须默认 deny（返回 UNAVAILABLE，
++ * 不回退旧值、不填 mock），遵守 05 §9 / §10 与 06 约束。
++ */
++class ProjectionService
++{
++    /**
++     * 数据状态常量转发（引用 ProjectionResponse，避免重复定义）。
++     */
++    public const DATA_STATUS_REALTIME = ProjectionResponse::DATA_STATUS_REALTIME;
++    public const DATA_STATUS_NEAR_REALTIME = ProjectionResponse::DATA_STATUS_NEAR_REALTIME;
++    public const DATA_STATUS_STALE = ProjectionResponse::DATA_STATUS_STALE;
++    public const DATA_STATUS_UNAVAILABLE = ProjectionResponse::DATA_STATUS_UNAVAILABLE;
++
++    public const SOURCE_STATUS_READY = ProjectionResponse::SOURCE_STATUS_READY;
++    public const SOURCE_STATUS_PARTIAL = ProjectionResponse::SOURCE_STATUS_PARTIAL;
++    public const SOURCE_STATUS_UNAVAILABLE = ProjectionResponse::SOURCE_STATUS_UNAVAILABLE;
++
++    /**
++     * 当前 Unix 时间戳。
++     */
++    protected function now(): int
++    {
++        return time();
++    }
++
++    /**
++     * 从 Model 读取原始 Unix 时间字段。
++     *
++     * Eloquent 在 $dateFormat='U' 下会把 created_time/updated_time 自动 cast 成 Carbon，
++     * 直接 (int) 强转会报 warning。此处取原始值，兼容 int 与 DateTimeInterface。
++     *
++     * @param \support\extend\Model $model
++     */
++    protected function rawUnix($model, string $field): ?int
++    {
++        $raw = $model->getRawOriginal($field);
++        if ($raw === null || $raw === '') {
++            return null;
++        }
++        if ($raw instanceof \DateTimeInterface) {
++            return $raw->getTimestamp();
++        }
++        return (int) $raw;
++    }
++
++    /**
++     * 构造默认 deny 的元数据（依赖未冻结或越权时使用）。
++     *
++     * 返回数组供子类填充 Response 基类字段；data_status/source_status 均为 UNAVAILABLE，
++     * as_of/updated_at 记为当前时间，refresh_hint 提示数据源不可用或访问拒绝，其余元字段保持 null。
++     *
++     * @param string $refreshHint I18N key（默认 source_unavailable；越权用 access_denied）
++     */
++    protected function unavailableMetadata(string $refreshHint = 'projection.source_unavailable'): array
++    {
++        $now = $this->now();
++        return [
++            'data_status' => self::DATA_STATUS_UNAVAILABLE,
++            'as_of' => $now,
++            'updated_at' => $now,
++            'next_refresh_at' => null,
++            'refresh_hint' => $refreshHint,
++            'stale_after' => null,
++            'snapshot_id' => null,
++            'source_status' => self::SOURCE_STATUS_UNAVAILABLE,
++        ];
++    }
++
++    /**
++     * 构造实时读取的元数据（source 已建表且可读时使用）。
++     *
++     * @param int|null $updatedAt 源数据最后更新时间
++     */
++    protected function realtimeMetadata(?int $updatedAt = null): array
++    {
++        $now = $this->now();
++        return [
++            'data_status' => self::DATA_STATUS_REALTIME,
++            'as_of' => $now,
++            'updated_at' => $updatedAt ?? $now,
++            'next_refresh_at' => null,
++            'refresh_hint' => '',
++            'stale_after' => null,
++            'snapshot_id' => null,
++            'source_status' => self::SOURCE_STATUS_READY,
++        ];
++    }
++
++    /**
++     * 将元数据数组写入响应对象（子类共用，避免重复赋值）。
++     *
++     * @param ProjectionResponse $response
++     * @param array $metadata 由 unavailableMetadata()/realtimeMetadata() 返回
++     */
++    protected function applyMetadata(ProjectionResponse $response, array $metadata): void
++    {
++        $response->data_status = $metadata['data_status'];
++        $response->as_of = $metadata['as_of'];
++        $response->updated_at = $metadata['updated_at'];
++        $response->next_refresh_at = $metadata['next_refresh_at'];
++        $response->refresh_hint = $metadata['refresh_hint'];
++        $response->stale_after = $metadata['stale_after'];
++        $response->snapshot_id = $metadata['snapshot_id'];
++        $response->source_status = $metadata['source_status'];
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/FeatureEntitlementProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/FeatureEntitlementProjectionTest.php
+new file mode 100644
+index 0000000..106cdac
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/FeatureEntitlementProjectionTest.php
+@@ -0,0 +1,49 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * FeatureEntitlement 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 资格规则依赖 06 Feature 参数（TBC）→ 默认 deny。
++ * allowed_actions 字段在 05 §3 缺失（Contract Gap G2）→ 空数组，不自行推断。
++ * 覆盖：
++ *   1. 本人读取 → allowed=false，reason=FEATURE_RULE_UNAVAILABLE；
++ *   2. allowed_actions=[]（Contract Gap G2，不推断）；
++ *   3. 越权 → 安全 reason，不泄露存在性。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\service\entitlement\FeatureEntitlementProjectionService;
++
++echo "=====================================================\n";
++echo "FeatureEntitlement projection test\n";
++echo "=====================================================\n\n";
++
++$svc = new FeatureEntitlementProjectionService();
++
++echo "[1] 本人读取 → Feature 规则 TBC → 默认 deny\n";
++$r = $svc->getEntitlement('90001', '90001', 'robot_upgrade');
++check($r->feature_key === 'robot_upgrade', 'feature_key 正确');
++check($r->allowed === false, 'allowed=false（默认 deny）');
++check($r->reason_code === 'FEATURE_RULE_UNAVAILABLE', 'reason_code=FEATURE_RULE_UNAVAILABLE');
++check($r->data_status === 'UNAVAILABLE', 'data_status=UNAVAILABLE');
++check($r->source_status === 'UNAVAILABLE', 'source_status=UNAVAILABLE');
++check($r->policy_version === null, 'policy_version=null');
++check($r->rule_version === null, 'rule_version=null');
++check($r->expires_at === null, 'expires_at=null');
++echo "\n";
++
++echo "[2] allowed_actions 字段（Contract Gap G2）→ 空数组，不推断\n";
++check($r->allowed_actions === [], 'allowed_actions=[]（05 §3 缺失，不自行推断）');
++echo "\n";
++
++echo "[3] 越权 → 安全 reason\n";
++$denied = $svc->getEntitlement('90002', '90001', 'robot_upgrade');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->feature_key === null, '越权 feature_key=null（不泄露）');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/LoginAuditProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/LoginAuditProjectionTest.php
+new file mode 100644
+index 0000000..7bfb67a
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/LoginAuditProjectionTest.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * LoginAudit 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * source-of-truth 未在 05 明确（Contract Gap G1）→ 一律 UNAVAILABLE，不读取任何表。
++ * 覆盖：
++ *   1. 本人读取 → UNAVAILABLE（source 未裁决，不 mock、不读取未裁决 schema）；
++ *   2. 越权（跨用户）→ UNAVAILABLE，与本人读取在存在性上不可区分。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\service\auth\LoginAuditProjectionService;
++
++echo "=====================================================\n";
++echo "LoginAudit projection test\n";
++echo "=====================================================\n\n";
++
++$svc = new LoginAuditProjectionService();
++
++echo "[1] 本人读取 → source 未裁决 → UNAVAILABLE\n";
++$r = $svc->getAudit('90001', '90001');
++check($r->data_status === 'UNAVAILABLE', 'data_status=UNAVAILABLE');
++check($r->source_status === 'UNAVAILABLE', 'source_status=UNAVAILABLE');
++check($r->audit_id === null, 'audit_id=null（不 mock）');
++check($r->event_type === null, 'event_type=null');
++check($r->ip_address === null, 'ip_address=null（不泄露）');
++check($r->refresh_hint === 'projection.source_unavailable', 'refresh_hint=source_unavailable');
++echo "\n";
++
++echo "[2] 越权 → 安全 reason，不泄露存在性\n";
++$denied = $svc->getAudit('90002', '90001');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->user_id === null, '越权 user_id=null');
++check($denied->refresh_hint === 'projection.access_denied', '越权 refresh_hint=access_denied');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/OtcCapacityProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/OtcCapacityProjectionTest.php
+new file mode 100644
+index 0000000..7819d91
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/OtcCapacityProjectionTest.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * OtcCapacity 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 容量/储备比例依赖 06 OTC 参数（TBC）→ 一律 UNAVAILABLE，字段 null。
++ * 覆盖：
++ *   1. 本人读取 → UNAVAILABLE，容量字段 null（不 mock、不回退旧值）；
++ *   2. decimal string 约束（字段即使未来有值也必须是 string）；
++ *   3. 越权 → 安全 reason，不泄露存在性。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\service\otc\OtcCapacityProjectionService;
++
++echo "=====================================================\n";
++echo "OtcCapacity projection test\n";
++echo "=====================================================\n\n";
++
++$svc = new OtcCapacityProjectionService();
++
++echo "[1] 本人读取 → OTC 参数 TBC → UNAVAILABLE\n";
++$r = $svc->getCapacity('90001', '90001', 'SELL');
++check($r->direction === 'SELL', 'direction 正确');
++check($r->data_status === 'UNAVAILABLE', 'data_status=UNAVAILABLE');
++check($r->source_status === 'UNAVAILABLE', 'source_status=UNAVAILABLE');
++check($r->user_remaining_capacity === null, 'user_remaining_capacity=null（不 mock）');
++check($r->global_remaining_capacity === null, 'global_remaining_capacity=null');
++check($r->reserve_ratio === null, 'reserve_ratio=null（otc.*_reserve_ratio TBC）');
++check($r->rule_version === null, 'rule_version=null');
++check($r->parameter_release_id === null, 'parameter_release_id=null');
++echo "\n";
++
++echo "[2] 越权 → 安全 reason\n";
++$denied = $svc->getCapacity('90002', '90001', 'BUY');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/OtcEligibilityProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/OtcEligibilityProjectionTest.php
+new file mode 100644
+index 0000000..98a1eb3
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/OtcEligibilityProjectionTest.php
+@@ -0,0 +1,90 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * OtcEligibility 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 覆盖：
++ *   1. KYC approved → reason=MAINTENANCE（OTC 参数 TBC，无法判定资格，默认 deny）；
++ *   2. KYC rejected → reason=KYC_REQUIRED（确定性 deny）；
++ *   3. KYC review → reason=UNDER_REVIEW；
++ *   4. 无 KYC 案件 → reason=KYC_REQUIRED；
++ *   5. 越权 → UNAVAILABLE，不泄露存在性；
++ *   6. reason_code 仅使用 05 §3 冻结七选一（不覆盖 OtcOrder.status）。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\model\kyc\KycCaseModel;
++use library\response\otc\OtcEligibilityResponse;
++use library\service\otc\OtcEligibilityProjectionService;
++
++echo "=====================================================\n";
++echo "OtcEligibility projection test\n";
++echo "=====================================================\n\n";
++
++// ---- 种子数据：不同 KYC 状态 ----
++$seed = [
++    ['case_id' => 'K1', 'user_id' => '90001', 'kyc_level' => 'L1', 'status' => KycCaseModel::STATUS_APPROVED, 'submitted_at' => 1700000000, 'reviewed_at' => 1700000000, 'reviewed_by' => 'R1', 'reason_code' => '', 'reason_text_key' => '', 'next_action' => '', 'policy_version' => '', 'rule_version' => '', 'object_version' => 1, 'audit_event_id' => 'AE0001', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++    ['case_id' => 'K2', 'user_id' => '90002', 'kyc_level' => 'L1', 'status' => KycCaseModel::STATUS_REJECTED, 'submitted_at' => 1700000000, 'reviewed_at' => 1700000000, 'reviewed_by' => 'R1', 'reason_code' => '', 'reason_text_key' => '', 'next_action' => '', 'policy_version' => '', 'rule_version' => '', 'object_version' => 1, 'audit_event_id' => 'AE0002', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++    ['case_id' => 'K3', 'user_id' => '90003', 'kyc_level' => 'L1', 'status' => KycCaseModel::STATUS_REVIEW, 'submitted_at' => 1700000000, 'reviewed_at' => 0, 'reviewed_by' => '', 'reason_code' => '', 'reason_text_key' => '', 'next_action' => '', 'policy_version' => '', 'rule_version' => '', 'object_version' => 1, 'audit_event_id' => 'AE0003', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++];
++foreach ($seed as $row) {
++    KycCaseModel::query()->insert($row);
++}
++
++$svc = new OtcEligibilityProjectionService();
++
++echo "[1] KYC approved → MAINTENANCE（OTC 参数 TBC，默认 deny）\n";
++$r1 = $svc->getEligibility('90001', '90001');
++check($r1->allowed === false, 'allowed=false');
++check($r1->buy_allowed === false, 'buy_allowed=false');
++check($r1->sell_allowed === false, 'sell_allowed=false');
++check($r1->reason_code === OtcEligibilityResponse::REASON_MAINTENANCE, 'reason_code=MAINTENANCE');
++check($r1->source_status === 'PARTIAL', 'source_status=PARTIAL（KYC 可读，OTC 参数 TBC）');
++check($r1->data_status === 'REALTIME', 'data_status=REALTIME（KYC 状态实时）');
++echo "\n";
++
++echo "[2] KYC rejected → KYC_REQUIRED\n";
++$r2 = $svc->getEligibility('90002', '90002');
++check($r2->allowed === false, 'allowed=false');
++check($r2->reason_code === OtcEligibilityResponse::REASON_KYC_REQUIRED, 'reason_code=KYC_REQUIRED');
++echo "\n";
++
++echo "[3] KYC review → UNDER_REVIEW\n";
++$r3 = $svc->getEligibility('90003', '90003');
++check($r3->reason_code === OtcEligibilityResponse::REASON_UNDER_REVIEW, 'reason_code=UNDER_REVIEW');
++check($r3->allowed === false, 'allowed=false');
++echo "\n";
++
++echo "[4] 无 KYC 案件 → KYC_REQUIRED\n";
++$r4 = $svc->getEligibility('90004', '90004');
++check($r4->reason_code === OtcEligibilityResponse::REASON_KYC_REQUIRED, '无 KYC reason_code=KYC_REQUIRED');
++check($r4->allowed === false, '无 KYC allowed=false');
++check($r4->data_status === 'REALTIME', '无 KYC data_status=REALTIME（确定性拒绝）');
++echo "\n";
++
++echo "[5] 越权 → 不泄露存在性\n";
++$denied = $svc->getEligibility('90002', '90001');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->reason_code === null, '越权 reason_code=null（不泄露）');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++echo "[6] reason_code 仅用 05 §3 冻结七选一\n";
++$frozen = [
++    OtcEligibilityResponse::REASON_KYC_REQUIRED,
++    OtcEligibilityResponse::REASON_SECURITY_VERIFICATION_REQUIRED,
++    OtcEligibilityResponse::REASON_OTC_CAPACITY_INSUFFICIENT,
++    OtcEligibilityResponse::REASON_INSUFFICIENT_POWER,
++    OtcEligibilityResponse::REASON_UNDER_REVIEW,
++    OtcEligibilityResponse::REASON_REGION_UNAVAILABLE,
++    OtcEligibilityResponse::REASON_MAINTENANCE,
++];
++check(in_array($r1->reason_code, $frozen, true), 'r1 reason_code 在冻结七选一内');
++check(in_array($r2->reason_code, $frozen, true), 'r2 reason_code 在冻结七选一内');
++check(in_array($r3->reason_code, $frozen, true), 'r3 reason_code 在冻结七选一内');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/PowerImpactPreviewProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/PowerImpactPreviewProjectionTest.php
+new file mode 100644
+index 0000000..57cd1e9
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/PowerImpactPreviewProjectionTest.php
+@@ -0,0 +1,83 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * PowerImpactPreview 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 覆盖：
++ *   1. REALTIME + PARTIAL：available_before/frozen_before 来自 power_positions；
++ *   2. Power 消耗/冻结/释放规则（AI.power_* TBC）→ allowed=false，字段 null（无 mock）；
++ *   3. decimal string：available_before/frozen_before 保持字符串（禁 float）；
++ *   4. 越权 → UNAVAILABLE；
++ *   5. 无持仓 → UNAVAILABLE。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\model\power\PowerPositionModel;
++use library\service\power\PowerImpactPreviewProjectionService;
++
++echo "=====================================================\n";
++echo "PowerImpactPreview projection test\n";
++echo "=====================================================\n\n";
++
++// ---- 种子数据 ----
++PowerPositionModel::query()->insert([
++    'user_id' => '90001',
++    'available' => '500.000000000000000000',
++    'frozen' => '100.000000000000000000',
++    'consumed_period' => '0',
++    'released_period' => '0',
++    'recovering' => '0',
++    'limit' => '1000.000000000000000000',
++    'power_cap_source_robot_level' => 5,
++    'last_restore_at' => 1700000000,
++    'next_restore_at' => 1700003600,
++    'rule_version' => 'v1',
++    'parameter_release_id' => 'PR001',
++    'object_version' => 1,
++    'created_time' => 1700000000,
++    'updated_time' => 1700000100,
++]);
++
++$svc = new PowerImpactPreviewProjectionService();
++
++echo "[1] REALTIME + PARTIAL（本人，ROBOT_START）\n";
++$r = $svc->preview('90001', '90001', PowerImpactPreviewProjectionService::ACTION_ROBOT_START);
++check($r->action_type === 'ROBOT_START', 'action_type 正确');
++check($r->data_status === 'REALTIME', 'data_status=REALTIME（持仓可读）');
++check($r->source_status === 'PARTIAL', 'source_status=PARTIAL（Power 规则 TBC）');
++check($r->available_before === '500.000000000000000000', 'available_before 正确');
++check($r->frozen_before === '100.000000000000000000', 'frozen_before 正确');
++check($r->robot_level === '5', 'robot_level 正确');
++check(is_string($r->available_before), 'available_before 为 decimal string（禁 float）');
++echo "\n";
++
++echo "[2] Power 规则 TBC → allowed=false，字段 null（无 mock）\n";
++check($r->allowed === false, 'allowed=false（默认 deny）');
++check($r->reason_code === 'POWER_RULE_UNAVAILABLE', 'reason_code=POWER_RULE_UNAVAILABLE');
++check($r->required_power === null, 'required_power=null');
++check($r->freeze_power === null, 'freeze_power=null');
++check($r->consume_power === null, 'consume_power=null');
++check($r->release_power === null, 'release_power=null');
++check($r->power_cap === null, 'power_cap=null（AI.power_cap_by_robot_level TBC）');
++check($r->available_after_preview === null, 'available_after_preview=null');
++check($r->frozen_after_preview === null, 'frozen_after_preview=null');
++echo "\n";
++
++echo "[3] 越权 → UNAVAILABLE\n";
++$denied = $svc->preview('90002', '90001', PowerImpactPreviewProjectionService::ACTION_OTC_SELL);
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->available_before === null, '越权 available_before=null（不泄露）');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++echo "[4] 无持仓 → UNAVAILABLE\n";
++$none = $svc->preview('99999', '99999', PowerImpactPreviewProjectionService::ACTION_WITHDRAWAL);
++check($none->data_status === 'UNAVAILABLE', '无持仓 data_status=UNAVAILABLE');
++check($none->source_status === 'UNAVAILABLE', '无持仓 source_status=UNAVAILABLE');
++check($none->allowed === false, '无持仓 allowed=false');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/SecurityProfileProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/SecurityProfileProjectionTest.php
+new file mode 100644
+index 0000000..50ec5ce
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/SecurityProfileProjectionTest.php
+@@ -0,0 +1,60 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * SecurityProfile 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 覆盖：
++ *   1. REALTIME + PARTIAL：mfa_enrolled_methods 来自 mfa_enrollments（仅 active）；
++ *   2. 安全策略 TBC 字段 → null（login_history_window/suspicious_flags/policy_version）；
++ *   3. 越权（跨用户）→ UNAVAILABLE，不泄露存在性；
++ *   4. 无 mock：不虚构登录历史/可疑标记。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\model\auth\MfaEnrollmentModel;
++use library\service\auth\SecurityProfileProjectionService;
++
++echo "=====================================================\n";
++echo "SecurityProfile projection test\n";
++echo "=====================================================\n\n";
++
++// ---- 种子数据：一条 active，一条 revoked，一条 pending ----
++$seed = [
++    ['enrollment_id' => 'E1', 'user_id' => '90001', 'method_type' => 'totp', 'status' => MfaEnrollmentModel::STATUS_ACTIVE, 'enrolled_at' => 1700000000, 'last_verified_at' => 1700000000, 'backup_codes_active' => 0, 'object_version' => 1, 'audit_event_id' => 'AE0001', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++    ['enrollment_id' => 'E2', 'user_id' => '90001', 'method_type' => 'sms', 'status' => MfaEnrollmentModel::STATUS_REVOKED, 'enrolled_at' => 1700000000, 'last_verified_at' => 1700000000, 'backup_codes_active' => 0, 'object_version' => 1, 'audit_event_id' => 'AE0002', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++    ['enrollment_id' => 'E3', 'user_id' => '90001', 'method_type' => 'backup', 'status' => MfaEnrollmentModel::STATUS_PENDING, 'enrolled_at' => 1700000000, 'last_verified_at' => 0, 'backup_codes_active' => 0, 'object_version' => 1, 'audit_event_id' => 'AE0003', 'created_time' => 1700000000, 'updated_time' => 1700000000],
++];
++foreach ($seed as $row) {
++    MfaEnrollmentModel::query()->insert($row);
++}
++
++$svc = new SecurityProfileProjectionService();
++
++echo "[1] REALTIME + PARTIAL（本人读取）\n";
++$r = $svc->getProfile('90001', '90001');
++check($r->user_id === '90001', 'user_id 正确');
++check($r->data_status === 'REALTIME', 'data_status=REALTIME（mfa 可读）');
++check($r->source_status === 'PARTIAL', 'source_status=PARTIAL（安全策略 TBC）');
++check($r->mfa_enrolled_methods === ['totp'], 'mfa_enrolled_methods 仅含 active（totp）');
++echo "\n";
++
++echo "[2] 安全策略 TBC 字段 → null（无 mock）\n";
++check($r->login_history_window === null, 'login_history_window=null');
++check($r->suspicious_flags === null, 'suspicious_flags=null');
++check($r->policy_version === null, 'policy_version=null');
++check($r->last_password_change === null, 'last_password_change=null');
++check($r->mfa_required_actions === [], 'mfa_required_actions=[]（TBC，不虚构）');
++echo "\n";
++
++echo "[3] 越权（跨用户）→ 不泄露存在性\n";
++$denied = $svc->getProfile('90002', '90001');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->user_id === null, '越权 user_id=null（不泄露存在性）');
++check($denied->mfa_enrolled_methods === [], '越权 mfa_enrolled_methods=[]');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/SessionDeviceProjectionTest.php b/0.5代码/gainode后端/gainode/tests/projection/SessionDeviceProjectionTest.php
+new file mode 100644
+index 0000000..1b86146
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/SessionDeviceProjectionTest.php
+@@ -0,0 +1,82 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * SessionDevice 投影测试（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 覆盖：
++ *   1. REALTIME 路径：本人读取会话设备，os/browser/ip 正确派生，is_current 判定正确；
++ *   2. 越权（跨用户）→ UNAVAILABLE，不泄露存在性（session_id=null）；
++ *   3. 不存在会话 → UNAVAILABLE（与越权不可区分，不泄露存在性）；
++ *   4. 无 mock：device_info 缺失字段（device_fingerprint/location_region）→ null；
++ *   5. revocable 未冻结 → fail-closed 默认 false。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\model\auth\AuthSessionModel;
++use library\service\auth\SessionDeviceProjectionService;
++
++echo "=====================================================\n";
++echo "SessionDevice projection test\n";
++echo "=====================================================\n\n";
++
++// ---- 种子数据 ----
++AuthSessionModel::query()->insert([
++    'session_id' => '1001',
++    'user_id' => '90001',
++    'token_hash' => 'hash_1',
++    'status' => AuthSessionModel::STATUS_ACTIVE,
++    'device_info' => json_encode(['os' => 'iOS', 'browser' => 'Safari']),
++    'ip_address' => '1.2.3.4',
++    'mfa_verified' => 1,
++    'expires_at' => 1800000000,
++    'object_version' => 1,
++    'audit_event_id' => 'AE0001',
++    'created_time' => 1700000000,
++    'updated_time' => 1700000100,
++]);
++
++$svc = new SessionDeviceProjectionService();
++
++echo "[1] REALTIME 路径（本人读取）\n";
++$r = $svc->getDevice('90001', '1001', '1001');
++check($r->data_status === 'REALTIME', 'data_status=REALTIME');
++check($r->source_status === 'READY', 'source_status=READY');
++check($r->session_id === '1001', 'session_id 正确');
++check($r->os === 'iOS', 'os 从 device_info 派生');
++check($r->browser === 'Safari', 'browser 从 device_info 派生');
++check($r->ip === '1.2.3.4', 'ip 正确');
++check($r->is_current === true, 'is_current=true（当前会话）');
++check($r->revocable === false, 'revocable=false（撤销规则未冻结，fail-closed）');
++echo "\n";
++
++echo "[2] 无 mock（device_info 缺失字段）\n";
++check($r->device_fingerprint === null, 'device_fingerprint 缺失 → null（不 mock）');
++check($r->location_region === null, 'location_region 缺失 → null（不 mock）');
++echo "\n";
++
++echo "[3] 越权（跨用户）→ 不泄露存在性\n";
++$denied = $svc->getDevice('90002', '1001', '1001');
++check($denied->data_status === 'UNAVAILABLE', '越权 data_status=UNAVAILABLE');
++check($denied->source_status === 'UNAVAILABLE', '越权 source_status=UNAVAILABLE');
++check($denied->session_id === null, '越权 session_id=null（不泄露存在性）');
++check($denied->os === null, '越权 os=null');
++check($denied->refresh_hint === 'projection.access_denied', '越权返回安全 reason');
++echo "\n";
++
++echo "[4] 不存在会话 → 与越权不可区分\n";
++$missing = $svc->getDevice('90001', '9999', '9999');
++check($missing->data_status === 'UNAVAILABLE', '不存在 data_status=UNAVAILABLE');
++check($missing->session_id === null, '不存在 session_id=null（不泄露存在性）');
++check($missing->source_status === 'UNAVAILABLE', '不存在 source_status=UNAVAILABLE');
++echo "\n";
++
++echo "[5] 非当前会话 is_current=false\n";
++$other = $svc->getDevice('90001', '1001', '2002');
++check($other->is_current === false, 'is_current=false（非当前会话）');
++check($other->data_status === 'REALTIME', '非当前会话仍 REALTIME（本人可见）');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/projection/_bootstrap.php b/0.5代码/gainode后端/gainode/tests/projection/_bootstrap.php
+new file mode 100644
+index 0000000..fc9d0ec
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/projection/_bootstrap.php
+@@ -0,0 +1,144 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * S01-P06 投影测试公共引导（独立 CLI 脚本，无需 PHPUnit）。
++ *
++ * 1. 加载 autoload；
++ * 2. 建立 SQLite in-memory 连接（命名 'mysql'，匹配各 Model::$connection='mysql'）；
++ * 3. 创建 4 张 source 表（auth_sessions / mfa_enrollments / power_positions / kyc_cases），
++ *    列名/类型与 S01-P05 DDL 对齐（SQLite 对类型宽松）；
++ * 4. 提供 check() 断言脚手架。
++ *
++ * 投影服务只读聚合，不接触真实 MySQL / .env，不新增任何 DDL（NOT_PERSISTED）。
++ */
++
++require __DIR__ . '/../../vendor/autoload.php';
++
++use Illuminate\Container\Container;
++use Illuminate\Database\Capsule\Manager as Capsule;
++
++// 最小引导：SQLite in-memory（命名 'mysql'）
++$capsule = new Capsule(Container::getInstance());
++$capsule->addConnection([
++    'driver' => 'sqlite',
++    'database' => ':memory:',
++    'prefix' => '',
++], 'mysql');
++$capsule->setAsGlobal();
++$capsule->bootEloquent();
++
++$schema = Capsule::connection('mysql')->getSchemaBuilder();
++
++// ---- auth_sessions（S01-P05 DDL 对齐）----
++if (!$schema->hasTable('auth_sessions')) {
++    $schema->create('auth_sessions', function ($table) {
++        $table->string('session_id', 32)->primary();
++        $table->string('user_id', 32);
++        $table->string('token_hash', 128);
++        $table->string('status', 16);
++        $table->text('device_info')->nullable();
++        $table->string('ip_address', 64);
++        $table->integer('mfa_verified');
++        $table->integer('expires_at');
++        $table->integer('object_version');
++        $table->string('idempotency_key', 64)->nullable();
++        $table->string('audit_event_id', 32);
++        $table->integer('created_time');
++        $table->integer('updated_time');
++    });
++}
++
++// ---- mfa_enrollments（S01-P05 DDL 对齐）----
++if (!$schema->hasTable('mfa_enrollments')) {
++    $schema->create('mfa_enrollments', function ($table) {
++        $table->string('enrollment_id', 32)->primary();
++        $table->string('user_id', 32);
++        $table->string('method_type', 32);
++        $table->string('status', 16);
++        $table->integer('enrolled_at');
++        $table->integer('last_verified_at');
++        $table->integer('backup_codes_active');
++        $table->text('device_info')->nullable();
++        $table->integer('object_version');
++        $table->string('idempotency_key', 64)->nullable();
++        $table->string('audit_event_id', 32);
++        $table->integer('created_time');
++        $table->integer('updated_time');
++    });
++}
++
++// ---- power_positions（MC1 DDL 对齐）----
++if (!$schema->hasTable('power_positions')) {
++    $schema->create('power_positions', function ($table) {
++        $table->string('user_id', 32)->primary();
++        $table->string('available', 64);
++        $table->string('frozen', 64);
++        $table->string('consumed_period', 64);
++        $table->string('released_period', 64);
++        $table->string('recovering', 64);
++        $table->string('limit', 64);
++        $table->integer('power_cap_source_robot_level');
++        $table->integer('last_restore_at');
++        $table->integer('next_restore_at');
++        $table->string('rule_version', 16);
++        $table->string('parameter_release_id', 32);
++        $table->integer('object_version');
++        $table->integer('created_time');
++        $table->integer('updated_time');
++    });
++}
++
++// ---- kyc_cases（S01-P05 DDL 对齐）----
++if (!$schema->hasTable('kyc_cases')) {
++    $schema->create('kyc_cases', function ($table) {
++        $table->string('case_id', 32)->primary();
++        $table->string('user_id', 32);
++        $table->string('kyc_level', 16);
++        $table->string('status', 16);
++        $table->integer('submitted_at');
++        $table->integer('reviewed_at');
++        $table->string('reviewed_by', 32);
++        $table->string('reason_code', 64);
++        $table->string('reason_text_key', 64);
++        $table->string('next_action', 64);
++        $table->string('policy_version', 16);
++        $table->string('rule_version', 16);
++        $table->integer('object_version');
++        $table->string('idempotency_key', 64)->nullable();
++        $table->string('audit_event_id', 32);
++        $table->integer('created_time');
++        $table->integer('updated_time');
++    });
++}
++
++// ---- 断言脚手架 ----
++$GLOBALS['__proj_pass'] = 0;
++$GLOBALS['__proj_fail'] = 0;
++
++function check(bool $cond, string $label): void
++{
++    if ($cond) {
++        $GLOBALS['__proj_pass']++;
++        echo "PASS: {$label}\n";
++    } else {
++        $GLOBALS['__proj_fail']++;
++        echo "FAIL: {$label}\n";
++    }
++}
++
++function summary(): void
++{
++    $pass = $GLOBALS['__proj_pass'];
++    $fail = $GLOBALS['__proj_fail'];
++    echo "=====================================================\n";
++    echo "RESULT: pass={$pass} fail={$fail}\n";
++    echo "=====================================================\n";
++    if ($fail > 0) {
++        echo "TEST FAILED\n";
++        exit(1);
++    }
++    echo "ALL PASS\n";
++    exit(0);
++}

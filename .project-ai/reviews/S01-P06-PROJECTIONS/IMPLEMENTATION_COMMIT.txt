@@ -1,0 +1,5 @@
+0e5c0ae1988ebe0309ce25fee838622082ec3c1a
+pandy123321
+131004891+pandy123321@users.noreply.github.com
+Sun Aug 16 12:32:46 2026 +0800
+origin:developer stage:STAGE-01 package:S01-P06 非持久投影服务（7 对象 NOT_PERSISTED，默认 deny，无 mock，Contract Gap 3）
