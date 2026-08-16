@@ -1,0 +1,99 @@
+# Policy / Parameter P0 路径骨架（05 §6 Policy/Parameter）
+# 业务 request/response schema 在 S02-P07 落地。
+
+policy_evaluation_create:
+  post:
+    operationId: policy_evaluation_create
+    summary: 策略评估
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+policy_evaluation_detail:
+  get:
+    operationId: policy_evaluation_detail
+    summary: 策略评估详情
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+parameter_definitions:
+  get:
+    operationId: parameter_definitions
+    summary: 参数定义列表
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+parameter_candidate_create:
+  post:
+    operationId: parameter_candidate_create
+    summary: 创建参数候选
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+parameter_release_create:
+  post:
+    operationId: parameter_release_create
+    summary: 创建参数发布
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+parameter_release_activate:
+  post:
+    operationId: parameter_release_activate
+    summary: 激活参数发布
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+parameter_snapshot_detail:
+  get:
+    operationId: parameter_snapshot_detail
+    summary: 参数快照详情
+    tags: [Policy-Parameter]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

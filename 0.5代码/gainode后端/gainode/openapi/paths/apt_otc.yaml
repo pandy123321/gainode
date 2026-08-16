@@ -1,0 +1,105 @@
+# APT / OTC P0 路径骨架（05 §6 APT/OTC）
+# 业务 request/response schema 在 S02-P03/P06 落地。
+
+asset_ledger:
+  get:
+    operationId: apt_asset_ledger
+    summary: 资产账本
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_order_book:
+  get:
+    operationId: otc_order_book
+    summary: 订单簿
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_quote:
+  post:
+    operationId: otc_quote
+    summary: 报价（不产生账本）
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_order_create:
+  post:
+    operationId: otc_order_create
+    summary: 创建订单
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_order_detail:
+  get:
+    operationId: otc_order_detail
+    summary: 订单详情
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_order_cancel:
+  post:
+    operationId: otc_order_cancel
+    summary: 取消订单
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_trades:
+  get:
+    operationId: otc_trades
+    summary: 成交列表
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_user_orders:
+  get:
+    operationId: otc_user_orders
+    summary: 用户订单列表
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

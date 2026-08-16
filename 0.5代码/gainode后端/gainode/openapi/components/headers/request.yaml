@@ -1,0 +1,34 @@
+# 六请求头（Environment Freeze 候选，见 TASK-20260816-008/design.md §2）
+
+Authorization:
+  schema:
+    type: string
+  description: Bearer JWT 认证（05 §2）
+
+Idempotency-Key:
+  schema:
+    type: string
+    maxLength: 64
+  description: 写操作幂等键（05 §1 WRITE_IDEMPOTENCY）
+
+If-Match:
+  schema:
+    type: string
+  description: object_version 乐观锁（05 §1 CONCURRENCY）
+
+Accept-Language:
+  schema:
+    type: string
+    default: zh-CN
+  description: 7 语言（05/08）
+
+X-Request-Id:
+  schema:
+    type: string
+    maxLength: 64
+  description: 请求追踪 ID（缺失时服务端生成）
+
+X-Timestamp:
+  schema:
+    type: string
+  description: 客户端时钟（Unix 秒，防重放/新鲜度）

@@ -1,0 +1,148 @@
+# Prediction P0 路径骨架（05 §6 Prediction，C 端）
+# 业务 request/response schema 在 S02-P05 落地。
+
+markets:
+  get:
+    operationId: prediction_markets
+    summary: 市场列表
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+market_detail:
+  get:
+    operationId: prediction_market_detail
+    summary: 市场详情
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+market_disclosure:
+  get:
+    operationId: prediction_market_disclosure
+    summary: 市场披露（版本化 disclosure）
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+consent_receipt_create:
+  post:
+    operationId: prediction_consent_receipt_create
+    summary: 创建同意回执
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+order_create:
+  post:
+    operationId: prediction_order_create
+    summary: 提交订单
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '202': { $ref: '../components/responses/common.yaml#/ResultUnknown' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+order_addition:
+  post:
+    operationId: prediction_order_addition
+    summary: 同选项追加
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+order_receipt:
+  get:
+    operationId: prediction_order_receipt
+    summary: 订单回执
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+settlement_detail:
+  get:
+    operationId: prediction_settlement_detail
+    summary: 结算详情
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+refund_detail:
+  get:
+    operationId: prediction_refund_detail
+    summary: 退款详情
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+appeal_create:
+  post:
+    operationId: prediction_appeal_create
+    summary: 发起申诉
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+appeal_detail:
+  get:
+    operationId: prediction_appeal_detail
+    summary: 申诉详情
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

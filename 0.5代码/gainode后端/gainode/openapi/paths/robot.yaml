@@ -1,0 +1,193 @@
+# AI / Robot P0 路径骨架（05 §6 AI/Robot）
+# 业务 request/response schema 在 S02-P02/P04 落地。
+
+user_summary:
+  get:
+    operationId: robot_user_summary
+    summary: 用户 AI 汇总
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+user_eligibility:
+  get:
+    operationId: robot_user_eligibility
+    summary: 用户 AI 资格
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+user_capacity:
+  get:
+    operationId: robot_user_capacity
+    summary: 用户 AI 容量
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+user_yield_coefficient:
+  get:
+    operationId: robot_user_yield_coefficient
+    summary: 用户收益率系数
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+robots:
+  get:
+    operationId: robot_list
+    summary: 机器人列表
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+robot_detail:
+  get:
+    operationId: robot_detail
+    summary: 机器人详情
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+upgrade_eligibility:
+  get:
+    operationId: robot_upgrade_eligibility
+    summary: 升级资格
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+upgrade_orders_create:
+  post:
+    operationId: robot_upgrade_order_create
+    summary: 创建升级订单
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+upgrade_order_detail:
+  get:
+    operationId: robot_upgrade_order_detail
+    summary: 升级订单详情
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+rewards:
+  get:
+    operationId: robot_rewards
+    summary: 奖励列表
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+reward_claim:
+  post:
+    operationId: robot_reward_claim
+    summary: 领取奖励
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+reward_claim_detail:
+  get:
+    operationId: robot_reward_claim_detail
+    summary: 奖励领取详情
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+computing_power:
+  get:
+    operationId: robot_computing_power
+    summary: 计算力
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+computing_power_ledger:
+  get:
+    operationId: robot_computing_power_ledger
+    summary: 计算力账本
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+robot_action:
+  post:
+    operationId: robot_action
+    summary: 机器人启停动作
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+robot_action_detail:
+  get:
+    operationId: robot_action_detail
+    summary: 机器人动作详情
+    tags: [Robot]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

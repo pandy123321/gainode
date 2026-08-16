@@ -1,6 +1,6 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 24
+contextVersion: 25
 status: PUBLISHED
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
@@ -280,3 +280,8 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P09 对象覆盖矩阵）← 07 §S01-P09 步骤 1-4"
+  stage02_p01_general_kernel:
+    value: "COMPLETE 2026-08-16 — S02-P01 可执行通用内核（OpenAPI 3.1 + Environment Contract + General Kernel，不建表不写业务）。交付：.env.example 环境契约（安全关闭值，禁止明文 secret，缺失 fail-closed）；ErrorDict 对齐 05 §7 16 项字符串错误码 + httpStatus() HTTP 映射（RESULT_UNKNOWN→202）；library/response/Envelope.php 统一 success/error 信封（8 数据新鲜度元数据 data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status + WriteResult 最少字段）；support/middleware/RequestContext.php 六请求头（Authorization/Idempotency-Key/If-Match/Accept-Language/X-Request-Id/X-Timestamp）+ 写操作强制 Idempotency-Key（API_ENFORCE_IDEMPOTENCY=true，缺失 fail-closed），注入 admin/api/common 中间件组；library/service/idempotency/{IdempotencyStore,NullIdempotencyStore}.php + outbox/{OutboxStore,NullOutboxStore}.php（接口 + Null fail-closed，isAvailable=false 直至持久化冻结）；library/service/transaction/TransactionBoundary.php（事务 + lockForUpdate object_version CAS）；openapi/gainode-v2.yaml 入口 + components/{schemas/common,headers/request,responses/common}.yaml + paths/{auth,robot,prediction,apt_otc,policy_parameter,admin}.yaml（P0 路径骨架，仅冻结 operationId/security/统一响应，业务 request/response schema 留待 S02-P02~P08）；tests/{Contract/EnvelopeContractTest,Integration/KernelContractTest}.php + Feature/README.md（41 断言全过，不涉数据库）。任务: .project-ai/tasks/TASK-20260816-008/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P01 通用内核）← 07 §S02-P01 固定步骤 1-6 ← 05 §1/§7/§10（数据新鲜度/错误分类/统一信封）← p1_003_two_phase_freeze（第二批 OpenAPI 3.1 + Environment Freeze）"

@@ -1,0 +1,106 @@
+# 通用 Schema（05 §1 统一 envelope + §7 错误分类 + §10 数据新鲜度契约）
+# JSON_SCHEMA = 2020-12（OpenAPI 3.1）
+
+ErrorEnvelope:
+  type: object
+  required: [request_id, result_code, result_message, http_status]
+  properties:
+    request_id:
+      type: string
+      description: 请求追踪 ID（X-Request-Id 透传或服务端生成）
+    result_code:
+      type: string
+      description: 05 §7 错误码
+      enum:
+        - VALIDATION_ERROR
+        - AUTH_UNAUTHENTICATED
+        - AUTH_FORBIDDEN
+        - KYC_REQUIRED
+        - POLICY_DENIED
+        - FEATURE_CLOSED
+        - CONSENT_VERSION_MISMATCH
+        - IDEMPOTENCY_CONFLICT
+        - OBJECT_VERSION_CONFLICT
+        - QUOTE_EXPIRED
+        - INSUFFICIENT_APT
+        - INSUFFICIENT_POWER
+        - MARKET_LOCKED
+        - DEPENDENCY_UNAVAILABLE
+        - RESULT_UNKNOWN
+        - INTERNAL_ERROR
+    result_message:
+      type: string
+    http_status:
+      type: integer
+    details:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+  additionalProperties: false
+
+SuccessEnvelope:
+  type: object
+  required: [request_id, data, data_status, source_status]
+  properties:
+    request_id:
+      type: string
+    data:
+      description: 业务数据（各对象 schema 在对应 S02-P02~P08 落地）
+    data_status:
+      type: string
+      enum: [REALTIME, NEAR_REALTIME, STALE, UNAVAILABLE]
+    as_of:
+      type: integer
+      description: 数据反映截止时间点（Unix 秒）
+    updated_at:
+      type: integer
+      nullable: true
+    next_refresh_at:
+      type: integer
+      nullable: true
+    refresh_hint:
+      type: string
+      nullable: true
+    stale_after:
+      type: integer
+      nullable: true
+    snapshot_id:
+      type: string
+      nullable: true
+    source_status:
+      type: string
+      enum: [OK, DEGRADED, UNAVAILABLE]
+  additionalProperties: true
+
+WriteResult:
+  description: 写操作最少返回字段（05 §1）
+  type: object
+  required: [request_id, idempotency_key, object_type, object_id, status, result_code, result_message]
+  properties:
+    request_id: { type: string }
+    idempotency_key: { type: string }
+    object_type: { type: string }
+    object_id: { type: string }
+    status: { type: string }
+    result_code: { type: string }
+    result_message: { type: string }
+    next_action: { type: string, nullable: true }
+    rule_version: { type: string, nullable: true }
+    parameter_release_id: { type: string, nullable: true }
+    policy_version: { type: string, nullable: true }
+    snapshot_id: { type: string, nullable: true }
+    approval_id: { type: string, nullable: true }
+    audit_event_id: { type: string, nullable: true }
+  additionalProperties: true
+
+PaginationCursor:
+  type: object
+  properties:
+    next_cursor:
+      type: string
+      nullable: true
+    has_more:
+      type: boolean
+    limit:
+      type: integer

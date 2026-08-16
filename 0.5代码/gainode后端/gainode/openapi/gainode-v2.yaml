@@ -1,0 +1,207 @@
+openapi: 3.1.0
+info:
+  title: Gainode V2.0 API
+  version: 2.0.0
+  description: >
+    Gainode AI 体育分析与预测平台后端 API 契约（S02-P01 骨架）。
+    权威契约：05_DATA_STATE_PERMISSION_API_CONTRACT.md（§1/§2/§6/§7/§10）。
+    P0 path 骨架已冻结 operationId/security/统一响应；业务 request/response schema
+    在 S02-P02~P08 落地，不在此虚构未冻结字段。
+servers:
+  - url: /api/v1
+    description: C 端（End User）
+  - url: /api/v1/admin
+    description: 后台（Admin）
+tags:
+  - name: Auth
+  - name: Robot
+  - name: Prediction
+  - name: APT-OTC
+  - name: Policy-Parameter
+  - name: Admin
+paths:
+  # ---- Auth / Session（05 §2.1）----
+  /api/v1/auth/register:
+    $ref: './paths/auth.yaml#/register'
+  /api/v1/auth/login:
+    $ref: './paths/auth.yaml#/login'
+  /api/v1/auth/otp/verify:
+    $ref: './paths/auth.yaml#/otp_verify'
+  /api/v1/auth/otp/resend:
+    $ref: './paths/auth.yaml#/otp_resend'
+  /api/v1/auth/mfa/verify:
+    $ref: './paths/auth.yaml#/mfa_verify'
+  /api/v1/auth/refresh:
+    $ref: './paths/auth.yaml#/refresh'
+  /api/v1/auth/logout:
+    $ref: './paths/auth.yaml#/logout'
+  /api/v1/auth/recovery:
+    $ref: './paths/auth.yaml#/recovery'
+  /api/v1/auth/password/reset:
+    $ref: './paths/auth.yaml#/password_reset'
+  /api/v1/me/sessions:
+    $ref: './paths/auth.yaml#/me_sessions'
+  /api/v1/me/sessions/{id}/revoke:
+    $ref: './paths/auth.yaml#/me_session_revoke'
+  # ---- AI / Robot（05 §6）----
+  /api/v1/ai/users/{id}/summary:
+    $ref: './paths/robot.yaml#/user_summary'
+  /api/v1/ai/users/{id}/eligibility:
+    $ref: './paths/robot.yaml#/user_eligibility'
+  /api/v1/ai/users/{id}/capacity:
+    $ref: './paths/robot.yaml#/user_capacity'
+  /api/v1/ai/users/{id}/yield-coefficient:
+    $ref: './paths/robot.yaml#/user_yield_coefficient'
+  /api/v1/ai/robots:
+    $ref: './paths/robot.yaml#/robots'
+  /api/v1/ai/robots/{robot_id}:
+    $ref: './paths/robot.yaml#/robot_detail'
+  /api/v1/ai/users/{id}/upgrade-eligibility:
+    $ref: './paths/robot.yaml#/upgrade_eligibility'
+  /api/v1/ai/users/{id}/upgrade-orders:
+    $ref: './paths/robot.yaml#/upgrade_orders_create'
+  /api/v1/ai/users/{id}/upgrade-orders/{upgrade_order_id}:
+    $ref: './paths/robot.yaml#/upgrade_order_detail'
+  /api/v1/ai/users/{id}/rewards:
+    $ref: './paths/robot.yaml#/rewards'
+  /api/v1/ai/users/{id}/reward-claims:
+    $ref: './paths/robot.yaml#/reward_claim'
+  /api/v1/ai/users/{id}/reward-claims/{claim_id}:
+    $ref: './paths/robot.yaml#/reward_claim_detail'
+  /api/v1/ai/users/{id}/computing-power:
+    $ref: './paths/robot.yaml#/computing_power'
+  /api/v1/ai/users/{id}/computing-power-ledger:
+    $ref: './paths/robot.yaml#/computing_power_ledger'
+  /api/v1/ai/robots/{robot_id}/actions:
+    $ref: './paths/robot.yaml#/robot_action'
+  /api/v1/ai/robots/{robot_id}/actions/{action_id}:
+    $ref: './paths/robot.yaml#/robot_action_detail'
+  # ---- Prediction C 端（05 §6）----
+  /api/v1/markets:
+    $ref: './paths/prediction.yaml#/markets'
+  /api/v1/markets/{id}:
+    $ref: './paths/prediction.yaml#/market_detail'
+  /api/v1/markets/{id}/disclosure:
+    $ref: './paths/prediction.yaml#/market_disclosure'
+  /api/v1/consent-receipts:
+    $ref: './paths/prediction.yaml#/consent_receipt_create'
+  /api/v1/orders:
+    $ref: './paths/prediction.yaml#/order_create'
+  /api/v1/orders/{id}/additions:
+    $ref: './paths/prediction.yaml#/order_addition'
+  /api/v1/orders/{id}/receipt:
+    $ref: './paths/prediction.yaml#/order_receipt'
+  /api/v1/settlements/{id}:
+    $ref: './paths/prediction.yaml#/settlement_detail'
+  /api/v1/refunds/{id}:
+    $ref: './paths/prediction.yaml#/refund_detail'
+  /api/v1/appeals:
+    $ref: './paths/prediction.yaml#/appeal_create'
+  /api/v1/appeals/{id}:
+    $ref: './paths/prediction.yaml#/appeal_detail'
+  # ---- APT / OTC（05 §6）----
+  /api/v1/users/{id}/asset-ledger:
+    $ref: './paths/apt_otc.yaml#/asset_ledger'
+  /api/v1/otc/order-book:
+    $ref: './paths/apt_otc.yaml#/otc_order_book'
+  /api/v1/otc/quotes:
+    $ref: './paths/apt_otc.yaml#/otc_quote'
+  /api/v1/otc/orders:
+    $ref: './paths/apt_otc.yaml#/otc_order_create'
+  /api/v1/otc/orders/{id}:
+    $ref: './paths/apt_otc.yaml#/otc_order_detail'
+  /api/v1/otc/orders/{id}/cancel:
+    $ref: './paths/apt_otc.yaml#/otc_order_cancel'
+  /api/v1/otc/trades:
+    $ref: './paths/apt_otc.yaml#/otc_trades'
+  /api/v1/otc/users/{id}/orders:
+    $ref: './paths/apt_otc.yaml#/otc_user_orders'
+  # ---- Policy / Parameter（05 §6）----
+  /api/v1/policy/evaluations:
+    $ref: './paths/policy_parameter.yaml#/policy_evaluation_create'
+  /api/v1/policy/evaluations/{id}:
+    $ref: './paths/policy_parameter.yaml#/policy_evaluation_detail'
+  /api/v1/parameter-definitions:
+    $ref: './paths/policy_parameter.yaml#/parameter_definitions'
+  /api/v1/parameter-candidates:
+    $ref: './paths/policy_parameter.yaml#/parameter_candidate_create'
+  /api/v1/parameter-releases:
+    $ref: './paths/policy_parameter.yaml#/parameter_release_create'
+  /api/v1/parameter-releases/{id}/activate:
+    $ref: './paths/policy_parameter.yaml#/parameter_release_activate'
+  /api/v1/parameters/snapshots/{id}:
+    $ref: './paths/policy_parameter.yaml#/parameter_snapshot_detail'
+  # ---- Admin（05 §6 Admin + Prediction 后台）----
+  /api/v1/admin/markets:
+    $ref: './paths/admin.yaml#/market_create'
+  /api/v1/admin/markets/{id}/publish:
+    $ref: './paths/admin.yaml#/market_publish'
+  /api/v1/admin/markets/{id}/lock-evaluations:
+    $ref: './paths/admin.yaml#/market_lock_evaluations'
+  /api/v1/admin/markets/{id}/results:
+    $ref: './paths/admin.yaml#/market_result'
+  /api/v1/admin/settlement-batches:
+    $ref: './paths/admin.yaml#/settlement_batch_create'
+  /api/v1/admin/refunds:
+    $ref: './paths/admin.yaml#/refund_create'
+  /api/v1/admin/corrections:
+    $ref: './paths/admin.yaml#/correction_create'
+  /api/v1/admin/cases:
+    $ref: './paths/admin.yaml#/case_create'
+  /api/v1/approval-tasks/{id}/decisions:
+    $ref: './paths/admin.yaml#/approval_decision'
+  /api/v1/audit-log:
+    $ref: './paths/admin.yaml#/audit_log'
+  /api/v1/async-jobs/{id}:
+    $ref: './paths/admin.yaml#/async_job_detail'
+  /api/v1/export-tasks:
+    $ref: './paths/admin.yaml#/export_task_create'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorEnvelope:
+      $ref: './components/schemas/common.yaml#/ErrorEnvelope'
+    SuccessEnvelope:
+      $ref: './components/schemas/common.yaml#/SuccessEnvelope'
+    WriteResult:
+      $ref: './components/schemas/common.yaml#/WriteResult'
+    PaginationCursor:
+      $ref: './components/schemas/common.yaml#/PaginationCursor'
+  headers:
+    Authorization:
+      $ref: './components/headers/request.yaml#/Authorization'
+    Idempotency-Key:
+      $ref: './components/headers/request.yaml#/Idempotency-Key'
+    If-Match:
+      $ref: './components/headers/request.yaml#/If-Match'
+    Accept-Language:
+      $ref: './components/headers/request.yaml#/Accept-Language'
+    X-Request-Id:
+      $ref: './components/headers/request.yaml#/X-Request-Id'
+    X-Timestamp:
+      $ref: './components/headers/request.yaml#/X-Timestamp'
+  responses:
+    Success:
+      $ref: './components/responses/common.yaml#/Success'
+    BadRequest:
+      $ref: './components/responses/common.yaml#/BadRequest'
+    Unauthenticated:
+      $ref: './components/responses/common.yaml#/Unauthenticated'
+    Forbidden:
+      $ref: './components/responses/common.yaml#/Forbidden'
+    NotFound:
+      $ref: './components/responses/common.yaml#/NotFound'
+    Conflict:
+      $ref: './components/responses/common.yaml#/Conflict'
+    Unprocessable:
+      $ref: './components/responses/common.yaml#/Unprocessable'
+    ResultUnknown:
+      $ref: './components/responses/common.yaml#/ResultUnknown'
+    DependencyUnavailable:
+      $ref: './components/responses/common.yaml#/DependencyUnavailable'
+    InternalError:
+      $ref: './components/responses/common.yaml#/InternalError'

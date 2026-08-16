@@ -1,0 +1,71 @@
+# 通用响应（05 §1 统一 envelope + §7 错误分类）
+
+Success:
+  description: 成功
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/SuccessEnvelope'
+
+BadRequest:
+  description: 参数校验失败（VALIDATION_ERROR）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+Unauthenticated:
+  description: 未认证（AUTH_UNAUTHENTICATED）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+Forbidden:
+  description: 禁止（AUTH_FORBIDDEN / KYC_REQUIRED / POLICY_DENIED / FEATURE_CLOSED）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+NotFound:
+  description: 资源不存在
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+Conflict:
+  description: 冲突（CONSENT_VERSION_MISMATCH / IDEMPOTENCY_CONFLICT / OBJECT_VERSION_CONFLICT / QUOTE_EXPIRED）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+Unprocessable:
+  description: 语义错误（INSUFFICIENT_APT / INSUFFICIENT_POWER / MARKET_LOCKED）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+ResultUnknown:
+  description: 结果未知（RESULT_UNKNOWN，用原 Idempotency-Key 查询原结果）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+DependencyUnavailable:
+  description: 依赖不可用（DEPENDENCY_UNAVAILABLE）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+
+InternalError:
+  description: 内部错误（INTERNAL_ERROR）
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yaml#/ErrorEnvelope'

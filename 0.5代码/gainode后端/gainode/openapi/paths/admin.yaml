@@ -1,0 +1,175 @@
+# Admin P0 路径骨架（05 §6 Admin + Prediction 后台）
+# 业务 request/response schema 在 S02-P05/P07 落地。
+
+market_create:
+  post:
+    operationId: admin_market_create
+    summary: 创建市场
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+market_publish:
+  post:
+    operationId: admin_market_publish
+    summary: 发布市场
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+market_lock_evaluations:
+  post:
+    operationId: admin_market_lock_evaluations
+    summary: 锁定盘口
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+market_result:
+  post:
+    operationId: admin_market_result
+    summary: 录入赛果
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+settlement_batch_create:
+  post:
+    operationId: admin_settlement_batch_create
+    summary: 创建结算批次
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+refund_create:
+  post:
+    operationId: admin_refund_create
+    summary: 创建退款
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+correction_create:
+  post:
+    operationId: admin_correction_create
+    summary: 创建更正
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+case_create:
+  post:
+    operationId: admin_case_create
+    summary: 创建案件
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+approval_decision:
+  post:
+    operationId: admin_approval_decision
+    summary: 审批决策
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+audit_log:
+  get:
+    operationId: admin_audit_log
+    summary: 审计日志查询
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+async_job_detail:
+  get:
+    operationId: admin_async_job_detail
+    summary: 异步任务详情
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+export_task_create:
+  post:
+    operationId: admin_export_task_create
+    summary: 创建导出任务
+    tags: [Admin]
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

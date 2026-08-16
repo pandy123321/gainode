@@ -1,0 +1,153 @@
+# Auth / Session P0 路径骨架（05 §2.1）
+# 业务 request/response schema 在 S02-P02 落地；本包仅 operationId/security/统一响应。
+
+register:
+  post:
+    operationId: auth_register
+    summary: 注册
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+login:
+  post:
+    operationId: auth_login
+    summary: 登录
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otp_verify:
+  post:
+    operationId: auth_otp_verify
+    summary: OTP 验证
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otp_resend:
+  post:
+    operationId: auth_otp_resend
+    summary: OTP 重发
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '429': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+mfa_verify:
+  post:
+    operationId: auth_mfa_verify
+    summary: MFA challenge
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+refresh:
+  post:
+    operationId: auth_refresh
+    summary: 刷新 session
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+logout:
+  post:
+    operationId: auth_logout
+    summary: 当前 session 退出
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+recovery:
+  post:
+    operationId: auth_recovery
+    summary: 发起找回
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+password_reset:
+  post:
+    operationId: auth_password_reset
+    summary: 重置密码
+    tags: [Auth]
+    security: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+me_sessions:
+  get:
+    operationId: auth_me_sessions
+    summary: 已登录会话/设备
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+me_session_revoke:
+  post:
+    operationId: auth_me_session_revoke
+    summary: 撤销其他 session
+    tags: [Auth]
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
+      - $ref: '../components/headers/request.yaml#/If-Match'
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
