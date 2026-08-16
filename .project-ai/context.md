@@ -255,6 +255,7 @@ Admin 13 个角色：`END_USER / SUPPORT_AGENT / OPS_OPERATOR / KYC_REVIEWER / R
 - [ ] V1.x 生产数据库连接信息（用于 Schema 提取和迁移计划）
 - [ ] V1.x 生产环境 URL（H5/Admin/API 域名）
 - [x] 开发启动时间（STAGE-01 已授权启动，状态 = IN_PROGRESS，2026-08-13）
+- [ ] Admin V2 基线（`gainode_admin_v2`，V1.x 拷贝、尚未提交）`build:check`（`vue-tsc --noEmit && vite build`）失败：`@types/node`/`@types/events`/`@types/crypto-js` 缺失（@aws-sdk/@smithy/Buffer/node:stream 报错）、`@layui/layui-vue` 2.23 内部 `@layui/component/*` 类型路径无法解析、`vue-router` 4.6 的 `NoInfer` 需 TS≥5.4（当前基线 TS 4.5 + Vue 3.3），另有大量 V1.x 业务页 `TableColumn`/`fixed`/`type` 类型不匹配。属 **S03-P03 Admin 阶段基线待办，非 H5 阻塞**；届时补 `@types/node`、开 `skipLibCheck`、升级 TS/Vue 或迁 Element Plus 一并收口。
 
 ## 信息来源
 
