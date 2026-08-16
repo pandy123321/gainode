@@ -11,11 +11,6 @@
     "cancel": "Annuler",
     "comingSoon": "Bientôt disponible"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "Le trading OTC comporte des risques. Veuillez lire et confirmer les règles avant de continuer."
-    }
-  },
   "auth": {
     "account_email": "E-mail",
     "account_mobile": "Téléphone",
@@ -158,6 +153,23 @@
     "cap_source_robot_level": "Plafond depuis niveau Robot",
     "next_restore_at": "Prochaine récupération",
     "last_restore_at": "Dernière récupération"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "Le trading OTC comporte des risques. Veuillez lire et confirmer les règles avant de continuer."
+    },
+    "side": { "BUY": "Acheter", "SELL": "Vendre" },
+    "status": {
+      "draft": "Brouillon",
+      "review": "En examen",
+      "matching": "En appariement",
+      "partial": "Partiel",
+      "completed": "Terminé",
+      "cancelled": "Annulé",
+      "expired": "Expiré",
+      "rejected": "Rejeté",
+      "disputed": "Litigieux"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -405,6 +417,63 @@
       "usage_otc_sell": "Vente OTC",
       "frozen_actions_title": "Actions gelées / liées",
       "frozen_actions_empty": "Aucune action gelée ou liée"
+    },
+    "m_otc_001": {
+      "title": "Marché OTC",
+      "description": "Appariement contrôlé, pas un terminal de trading",
+      "primary_action": "Voir les ordres",
+      "otc_buy": "Acheter",
+      "otc_sell": "Vendre",
+      "otc_restricted": "Le placement d'ordre n'est pas encore disponible",
+      "my_orders": "Mes ordres",
+      "capacity_title": "Capacité & Power",
+      "capacity_restricted": "Le quota de capacité n'est pas encore fourni",
+      "orderbook_title": "Ordres du marché",
+      "orderbook_empty": "Aucun ordre du marché",
+      "reference_price_notice": "Le prix de référence requiert source et horodatage ; ce n'est pas un prix de rachat officiel",
+      "liquidity_notice": "L'OTC est un appariement contrôlé à liquidité limitée ; aucun remplissage ni rachat garanti"
+    },
+    "m_otc_002": {
+      "title": "Saisir un ordre",
+      "description": "La saisie achat/vente et le devis ne sont pas encore disponibles",
+      "restricted": "La saisie d'ordre est actuellement indisponible"
+    },
+    "m_otc_003": {
+      "title": "Confirmation d'ordre",
+      "description": "La confirmation d'ordre n'est pas encore disponible",
+      "restricted": "La confirmation d'ordre est actuellement indisponible"
+    },
+    "m_otc_004": {
+      "title": "Résultat de la soumission",
+      "description": "La soumission d'ordre n'est pas encore disponible",
+      "restricted": "Le résultat de soumission est actuellement indisponible"
+    },
+    "m_otc_005": {
+      "title": "Mes ordres OTC",
+      "description": "Voir les ordres en examen, appariement, exécutés ou annulés",
+      "primary_action": "Voir le détail",
+      "empty": "Aucun ordre"
+    },
+    "m_otc_006": {
+      "title": "Détail de l'ordre",
+      "description": "Suivre l'ordre, les exécutions et les changements de Power",
+      "primary_action": "Retour à mes ordres",
+      "side": "Sens",
+      "price": "Prix",
+      "quantity": "Quantité",
+      "filled": "Exécuté",
+      "remaining": "Restant",
+      "fee": "Frais",
+      "power_title": "Impact Power",
+      "power_required": "Power requise",
+      "power_frozen": "Power gelée",
+      "power_consumed": "Power consommée",
+      "trades_title": "Exécutions",
+      "trades_empty": "Aucune exécution",
+      "flow_title": "Flux APT / Power",
+      "flow_empty": "La chronologie du flux n'est pas encore disponible",
+      "cancel_order": "Annuler l'ordre restant",
+      "not_found": "Ordre introuvable"
     }
   }
 }

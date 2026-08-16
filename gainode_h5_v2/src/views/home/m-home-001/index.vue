@@ -153,7 +153,7 @@ onMounted(reloadAll)
       <RouterLink to="/power" class="quick-card">
         <span class="quick-name">{{ t('page.m_home_001.quick_power') }}</span>
       </RouterLink>
-      <RouterLink to="/me" class="quick-card">
+      <RouterLink to="/otc" class="quick-card">
         <span class="quick-name">{{ t('page.m_home_001.quick_otc') }}</span>
       </RouterLink>
     </section>

@@ -11,11 +11,6 @@
     "cancel": "Abbrechen",
     "comingSoon": "Bald verfügbar"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "OTC-Handel birgt Risiken. Bitte lesen und bestätigen Sie die Regeln, bevor Sie fortfahren."
-    }
-  },
   "auth": {
     "account_email": "E-Mail",
     "account_mobile": "Telefonnummer",
@@ -158,6 +153,23 @@
     "cap_source_robot_level": "Obergrenze aus Robot-Level",
     "next_restore_at": "Nächste Wiederherstellung",
     "last_restore_at": "Letzte Wiederherstellung"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC-Handel birgt Risiken. Bitte lesen und bestätigen Sie die Regeln, bevor Sie fortfahren."
+    },
+    "side": { "BUY": "Kaufen", "SELL": "Verkaufen" },
+    "status": {
+      "draft": "Entwurf",
+      "review": "In Prüfung",
+      "matching": "Wird abgeglichen",
+      "partial": "Teilweise",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "expired": "Abgelaufen",
+      "rejected": "Abgelehnt",
+      "disputed": "Beanstandet"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -405,6 +417,63 @@
       "usage_otc_sell": "OTC-Verkauf",
       "frozen_actions_title": "Eingefroren / zugehörige Aktionen",
       "frozen_actions_empty": "Keine eingefrorenen oder zugehörigen Aktionen"
+    },
+    "m_otc_001": {
+      "title": "OTC-Markt",
+      "description": "Kontrollierter Abgleich, kein Handels-Terminal",
+      "primary_action": "Aufträge ansehen",
+      "otc_buy": "Kaufen",
+      "otc_sell": "Verkaufen",
+      "otc_restricted": "Auftragserteilung ist noch nicht verfügbar",
+      "my_orders": "Meine Aufträge",
+      "capacity_title": "Kapazität & Power",
+      "capacity_restricted": "Kapazitätskontingent ist noch nicht bereitgestellt",
+      "orderbook_title": "Marktaufträge",
+      "orderbook_empty": "Keine Marktaufträge",
+      "reference_price_notice": "Der Referenzpreis benötigt Quelle und Zeitpunkt; er ist kein offizieller Rückzahlungspreis",
+      "liquidity_notice": "OTC ist kontrollierter Abgleich mit begrenzter Liquidität; keine garantierten Abschlüsse oder Rücknahmen"
+    },
+    "m_otc_002": {
+      "title": "Auftrag eingeben",
+      "description": "Kauf-/Verkaufseingabe und Angebot sind noch nicht verfügbar",
+      "restricted": "Auftragserfassung ist derzeit nicht verfügbar"
+    },
+    "m_otc_003": {
+      "title": "Auftragsbestätigung",
+      "description": "Auftragsbestätigung ist noch nicht verfügbar",
+      "restricted": "Auftragsbestätigung ist derzeit nicht verfügbar"
+    },
+    "m_otc_004": {
+      "title": "Übermittlungsergebnis",
+      "description": "Auftragsübermittlung ist noch nicht verfügbar",
+      "restricted": "Übermittlungsergebnis ist derzeit nicht verfügbar"
+    },
+    "m_otc_005": {
+      "title": "Meine OTC-Aufträge",
+      "description": "Aufträge in Prüfung, Abgleich, Abschluss oder Stornierung ansehen",
+      "primary_action": "Details ansehen",
+      "empty": "Keine Aufträge"
+    },
+    "m_otc_006": {
+      "title": "Auftragsdetails",
+      "description": "Auftrag, Abschlüsse und Power-Änderungen verfolgen",
+      "primary_action": "Zurück zu meinen Aufträgen",
+      "side": "Seite",
+      "price": "Preis",
+      "quantity": "Menge",
+      "filled": "Ausgeführt",
+      "remaining": "Verbleibend",
+      "fee": "Gebühr",
+      "power_title": "Power-Auswirkung",
+      "power_required": "Benötigte Power",
+      "power_frozen": "Eingefrorene Power",
+      "power_consumed": "Verbrauchte Power",
+      "trades_title": "Abschlüsse",
+      "trades_empty": "Keine Abschlüsse",
+      "flow_title": "APT / Power-Verlauf",
+      "flow_empty": "Verlaufs-Timeline ist noch nicht verfügbar",
+      "cancel_order": "Verbleibenden Auftrag stornieren",
+      "not_found": "Auftrag nicht gefunden"
     }
   }
 }

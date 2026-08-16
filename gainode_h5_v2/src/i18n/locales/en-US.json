@@ -11,11 +11,6 @@
     "cancel": "Cancel",
     "comingSoon": "Coming soon"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "OTC trading involves risks. Please read and confirm the relevant rules before proceeding."
-    }
-  },
   "auth": {
     "account_email": "Email",
     "account_mobile": "Phone",
@@ -166,6 +161,26 @@
     "cap_source_robot_level": "Cap source Robot level",
     "next_restore_at": "Next restore",
     "last_restore_at": "Last restore"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC trading involves risks. Please read and confirm the relevant rules before proceeding."
+    },
+    "side": {
+      "BUY": "Buy",
+      "SELL": "Sell"
+    },
+    "status": {
+      "draft": "Draft",
+      "review": "Under review",
+      "matching": "Matching",
+      "partial": "Partial",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "rejected": "Rejected",
+      "disputed": "Disputed"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -413,6 +428,63 @@
       "usage_otc_sell": "OTC sell",
       "frozen_actions_title": "Frozen / related actions",
       "frozen_actions_empty": "No frozen or related actions"
+    },
+    "m_otc_001": {
+      "title": "OTC Market",
+      "description": "Controlled matching, not a trading terminal",
+      "primary_action": "View orders",
+      "otc_buy": "Buy",
+      "otc_sell": "Sell",
+      "otc_restricted": "Order placement is not available yet",
+      "my_orders": "My orders",
+      "capacity_title": "Capacity & Power",
+      "capacity_restricted": "Capacity quota is not provided yet",
+      "orderbook_title": "Market orders",
+      "orderbook_empty": "No market orders",
+      "reference_price_notice": "Reference price requires source and time; it is not an official redemption price",
+      "liquidity_notice": "OTC is controlled matching with limited liquidity; no guaranteed fill or redemption"
+    },
+    "m_otc_002": {
+      "title": "Place order",
+      "description": "Buy/sell entry and quote are not available yet",
+      "restricted": "Order entry is currently unavailable"
+    },
+    "m_otc_003": {
+      "title": "Order confirmation",
+      "description": "Order confirmation is not available yet",
+      "restricted": "Order confirmation is currently unavailable"
+    },
+    "m_otc_004": {
+      "title": "Submission result",
+      "description": "Order submission is not available yet",
+      "restricted": "Submission result is currently unavailable"
+    },
+    "m_otc_005": {
+      "title": "My OTC orders",
+      "description": "View orders under review, matching, filled or cancelled",
+      "primary_action": "View detail",
+      "empty": "No orders"
+    },
+    "m_otc_006": {
+      "title": "Order detail",
+      "description": "Track order, trades and Power changes",
+      "primary_action": "Back to my orders",
+      "side": "Side",
+      "price": "Price",
+      "quantity": "Quantity",
+      "filled": "Filled",
+      "remaining": "Remaining",
+      "fee": "Fee",
+      "power_title": "Power impact",
+      "power_required": "Power required",
+      "power_frozen": "Power frozen",
+      "power_consumed": "Power consumed",
+      "trades_title": "Trades",
+      "trades_empty": "No trades",
+      "flow_title": "APT / Power flow",
+      "flow_empty": "Flow timeline is not available yet",
+      "cancel_order": "Cancel remaining order",
+      "not_found": "Order not found"
     }
   }
 }

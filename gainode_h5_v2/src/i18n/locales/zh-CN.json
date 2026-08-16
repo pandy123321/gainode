@@ -11,11 +11,6 @@
     "cancel": "取消",
     "comingSoon": "敬请期待"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "OTC 交易存在风险，请在操作前阅读并确认相关规则。"
-    }
-  },
   "auth": {
     "account_email": "邮箱",
     "account_mobile": "手机号",
@@ -166,6 +161,26 @@
     "cap_source_robot_level": "容量来源 Robot 等级",
     "next_restore_at": "下次恢复时间",
     "last_restore_at": "上次恢复时间"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC 交易存在风险，请在操作前阅读并确认相关规则。"
+    },
+    "side": {
+      "BUY": "挂买",
+      "SELL": "挂卖"
+    },
+    "status": {
+      "draft": "草稿",
+      "review": "审核中",
+      "matching": "撮合中",
+      "partial": "部分成交",
+      "completed": "已成交",
+      "cancelled": "已取消",
+      "expired": "已过期",
+      "rejected": "已驳回",
+      "disputed": "争议中"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -413,6 +428,63 @@
       "usage_otc_sell": "OTC 挂卖",
       "frozen_actions_title": "冻结 / 关联操作",
       "frozen_actions_empty": "暂无冻结或关联操作"
+    },
+    "m_otc_001": {
+      "title": "OTC 市场",
+      "description": "受控撮合，非交易终端",
+      "primary_action": "查看订单",
+      "otc_buy": "挂买",
+      "otc_sell": "挂卖",
+      "otc_restricted": "挂单功能尚未开放",
+      "my_orders": "我的订单",
+      "capacity_title": "容量与 Power",
+      "capacity_restricted": "容量额度尚未下发",
+      "orderbook_title": "市场订单",
+      "orderbook_empty": "暂无市场订单",
+      "reference_price_notice": "参考价需带来源与时点，不是官方兑付价",
+      "liquidity_notice": "OTC 为受控撮合，流动性有限，不保证成交或赎回"
+    },
+    "m_otc_002": {
+      "title": "挂单输入",
+      "description": "挂买/挂卖与报价尚未开放",
+      "restricted": "挂单输入暂不可用"
+    },
+    "m_otc_003": {
+      "title": "订单确认",
+      "description": "挂单确认尚未开放",
+      "restricted": "订单确认暂不可用"
+    },
+    "m_otc_004": {
+      "title": "提交结果",
+      "description": "挂单提交尚未开放",
+      "restricted": "提交结果暂不可用"
+    },
+    "m_otc_005": {
+      "title": "我的 OTC 订单",
+      "description": "查看审核、撮合、成交、取消的订单",
+      "primary_action": "查看详情",
+      "empty": "暂无订单"
+    },
+    "m_otc_006": {
+      "title": "订单详情",
+      "description": "追踪订单、成交与 Power 变化",
+      "primary_action": "返回我的订单",
+      "side": "方向",
+      "price": "价格",
+      "quantity": "挂单数量",
+      "filled": "已成交",
+      "remaining": "剩余",
+      "fee": "手续费",
+      "power_title": "Power 影响",
+      "power_required": "所需 Power",
+      "power_frozen": "冻结 Power",
+      "power_consumed": "已消耗 Power",
+      "trades_title": "成交记录",
+      "trades_empty": "暂无成交记录",
+      "flow_title": "APT / Power 流水",
+      "flow_empty": "流水时间线暂不可用",
+      "cancel_order": "取消剩余订单",
+      "not_found": "未找到该订单"
     }
   }
 }

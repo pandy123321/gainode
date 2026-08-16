@@ -11,11 +11,6 @@
     "cancel": "キャンセル",
     "comingSoon": "近日公開"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "OTC 取引にはリスクがあります。操作前にルールをお読みのうえご確認ください。"
-    }
-  },
   "auth": {
     "account_email": "メール",
     "account_mobile": "電話番号",
@@ -158,6 +153,23 @@
     "cap_source_robot_level": "上限由来 Robot レベル",
     "next_restore_at": "次回回復時刻",
     "last_restore_at": "前回回復時刻"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC 取引にはリスクがあります。操作前にルールをお読みのうえご確認ください。"
+    },
+    "side": { "BUY": "買い注文", "SELL": "売り注文" },
+    "status": {
+      "draft": "下書き",
+      "review": "審査中",
+      "matching": "マッチング中",
+      "partial": "部分約定",
+      "completed": "約定済み",
+      "cancelled": "取消済み",
+      "expired": "期限切れ",
+      "rejected": "却下",
+      "disputed": "係争中"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -405,6 +417,63 @@
       "usage_otc_sell": "OTC 売却",
       "frozen_actions_title": "凍結 / 関連操作",
       "frozen_actions_empty": "凍結または関連操作はありません"
+    },
+    "m_otc_001": {
+      "title": "OTC マーケット",
+      "description": "管理されたマッチング。取引端末ではありません",
+      "primary_action": "注文を見る",
+      "otc_buy": "買い注文",
+      "otc_sell": "売り注文",
+      "otc_restricted": "注文はまだ利用できません",
+      "my_orders": "自分の注文",
+      "capacity_title": "容量と Power",
+      "capacity_restricted": "容量枠はまだ提供されていません",
+      "orderbook_title": "マーケット注文",
+      "orderbook_empty": "マーケット注文はありません",
+      "reference_price_notice": "参考価格には出所と時点が必要で、公式の換金価格ではありません",
+      "liquidity_notice": "OTC は管理されたマッチングで流動性は限定的。約定や償還は保証されません"
+    },
+    "m_otc_002": {
+      "title": "注文入力",
+      "description": "買い/売りの入力と見積もりはまだ利用できません",
+      "restricted": "注文入力は現在利用できません"
+    },
+    "m_otc_003": {
+      "title": "注文確認",
+      "description": "注文確認はまだ利用できません",
+      "restricted": "注文確認は現在利用できません"
+    },
+    "m_otc_004": {
+      "title": "送信結果",
+      "description": "注文送信はまだ利用できません",
+      "restricted": "送信結果は現在利用できません"
+    },
+    "m_otc_005": {
+      "title": "自分の OTC 注文",
+      "description": "審査中・マッチング中・約定・取消の注文を確認",
+      "primary_action": "詳細を見る",
+      "empty": "注文はありません"
+    },
+    "m_otc_006": {
+      "title": "注文詳細",
+      "description": "注文・約定・Power の変化を追跡",
+      "primary_action": "自分の注文に戻る",
+      "side": "方向",
+      "price": "価格",
+      "quantity": "数量",
+      "filled": "約定済み",
+      "remaining": "残り",
+      "fee": "手数料",
+      "power_title": "Power への影響",
+      "power_required": "必要 Power",
+      "power_frozen": "凍結 Power",
+      "power_consumed": "消費 Power",
+      "trades_title": "約定記録",
+      "trades_empty": "約定記録はありません",
+      "flow_title": "APT / Power フロー",
+      "flow_empty": "フローのタイムラインはまだ利用できません",
+      "cancel_order": "残りの注文を取消",
+      "not_found": "注文が見つかりません"
     }
   }
 }

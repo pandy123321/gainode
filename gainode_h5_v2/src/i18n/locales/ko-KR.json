@@ -11,11 +11,6 @@
     "cancel": "취소",
     "comingSoon": "곧 제공 예정"
   },
-  "otc": {
-    "risk_disclosure": {
-      "body": "OTC 거래에는 위험이 따릅니다. 진행하기 전에 관련 규칙을 읽고 확인하세요."
-    }
-  },
   "auth": {
     "account_email": "이메일",
     "account_mobile": "휴대폰 번호",
@@ -158,6 +153,23 @@
     "cap_source_robot_level": "상한 출처 Robot 레벨",
     "next_restore_at": "다음 회복 시각",
     "last_restore_at": "마지막 회복 시각"
+  },
+  "otc": {
+    "risk_disclosure": {
+      "body": "OTC 거래에는 위험이 따릅니다. 진행하기 전에 관련 규칙을 읽고 확인하세요."
+    },
+    "side": { "BUY": "매수", "SELL": "매도" },
+    "status": {
+      "draft": "임시",
+      "review": "심사 중",
+      "matching": "매칭 중",
+      "partial": "부분 체결",
+      "completed": "체결됨",
+      "cancelled": "취소됨",
+      "expired": "만료됨",
+      "rejected": "거부됨",
+      "disputed": "분쟁 중"
+    }
   },
   "page": {
     "m_auth_001": {
@@ -405,6 +417,63 @@
       "usage_otc_sell": "OTC 매도",
       "frozen_actions_title": "동결 / 관련 작업",
       "frozen_actions_empty": "동결 또는 관련 작업이 없습니다"
+    },
+    "m_otc_001": {
+      "title": "OTC 마켓",
+      "description": "통제된 매칭이며 거래 터미널이 아닙니다",
+      "primary_action": "주문 보기",
+      "otc_buy": "매수",
+      "otc_sell": "매도",
+      "otc_restricted": "주문은 아직 제공되지 않습니다",
+      "my_orders": "내 주문",
+      "capacity_title": "용량과 Power",
+      "capacity_restricted": "용량 한도가 아직 제공되지 않습니다",
+      "orderbook_title": "마켓 주문",
+      "orderbook_empty": "마켓 주문이 없습니다",
+      "reference_price_notice": "참고 가격에는 출처와 시점이 필요하며 공식 환급 가격이 아닙니다",
+      "liquidity_notice": "OTC는 통제된 매칭으로 유동성이 제한적이며 체결이나 환급을 보장하지 않습니다"
+    },
+    "m_otc_002": {
+      "title": "주문 입력",
+      "description": "매수/매도 입력과 견적은 아직 제공되지 않습니다",
+      "restricted": "주문 입력은 현재 사용할 수 없습니다"
+    },
+    "m_otc_003": {
+      "title": "주문 확인",
+      "description": "주문 확인은 아직 제공되지 않습니다",
+      "restricted": "주문 확인은 현재 사용할 수 없습니다"
+    },
+    "m_otc_004": {
+      "title": "제출 결과",
+      "description": "주문 제출은 아직 제공되지 않습니다",
+      "restricted": "제출 결과는 현재 사용할 수 없습니다"
+    },
+    "m_otc_005": {
+      "title": "내 OTC 주문",
+      "description": "심사·매칭·체결·취소된 주문을 확인",
+      "primary_action": "상세 보기",
+      "empty": "주문이 없습니다"
+    },
+    "m_otc_006": {
+      "title": "주문 상세",
+      "description": "주문·체결·Power 변화를 추적",
+      "primary_action": "내 주문으로 돌아가기",
+      "side": "방향",
+      "price": "가격",
+      "quantity": "수량",
+      "filled": "체결됨",
+      "remaining": "남음",
+      "fee": "수수료",
+      "power_title": "Power 영향",
+      "power_required": "필요 Power",
+      "power_frozen": "동결 Power",
+      "power_consumed": "소비 Power",
+      "trades_title": "체결 기록",
+      "trades_empty": "체결 기록이 없습니다",
+      "flow_title": "APT / Power 흐름",
+      "flow_empty": "흐름 타임라인은 아직 제공되지 않습니다",
+      "cancel_order": "남은 주문 취소",
+      "not_found": "주문을 찾을 수 없습니다"
     }
   }
 }

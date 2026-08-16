@@ -179,6 +179,43 @@ const router = createRouter({
       component: () => import('../views/power/m-power-001/index.vue'),
       meta: { pageId: 'M-POWER-001', auth: true },
     },
+    // ---- H5-07 OTC（M-OTC-001..006）----
+    {
+      path: '/otc',
+      name: 'otc-root',
+      component: () => import('../views/otc/m-otc-001/index.vue'),
+      meta: { pageId: 'M-OTC-001', auth: true },
+    },
+    {
+      path: '/otc/new',
+      name: 'otc-new',
+      component: () => import('../views/otc/m-otc-002/index.vue'),
+      meta: { pageId: 'M-OTC-002', auth: true },
+    },
+    {
+      path: '/otc/confirm',
+      name: 'otc-confirm',
+      component: () => import('../views/otc/m-otc-003/index.vue'),
+      meta: { pageId: 'M-OTC-003', auth: true },
+    },
+    {
+      path: '/otc/result/:id',
+      name: 'otc-result',
+      component: () => import('../views/otc/m-otc-004/index.vue'),
+      meta: { pageId: 'M-OTC-004', auth: true },
+    },
+    {
+      path: '/otc/my',
+      name: 'otc-my',
+      component: () => import('../views/otc/m-otc-005/index.vue'),
+      meta: { pageId: 'M-OTC-005', auth: true },
+    },
+    {
+      path: '/otc/:id',
+      name: 'otc-detail',
+      component: () => import('../views/otc/m-otc-006/index.vue'),
+      meta: { pageId: 'M-OTC-006', auth: true },
+    },
     {
       path: '/me',
       name: 'me-placeholder',
