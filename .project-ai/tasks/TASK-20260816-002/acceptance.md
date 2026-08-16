@@ -43,4 +43,4 @@ DDL 实际建表 = 属 STAGE-05 Sandbox（本包仅 forward-only 脚本）
 ## 交付物
 
 - `0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b1_8_entities.sql`
-- `library/model|dao|service/**` 新增 28 个 PHP 文件（9 对象 + 2 append-only Builder）
+- `library/model|dao|service/**` 新增 29 个 PHP 文件（9 对象 × Model/Dao/Service = 27 + 2 append-only Builder）
