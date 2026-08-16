@@ -1,0 +1,2560 @@
+diff --git a/.project-ai/context.md b/.project-ai/context.md
+index d6217c9..5933386 100644
+--- a/.project-ai/context.md
++++ b/.project-ai/context.md
+@@ -55,7 +55,7 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
+ - Ledger append-only 的 Model/Builder/DAO 防护与 CLI 回归已落地；已记录测试证据为 `67 pass / 0 fail`。这是已完成成果，除有效 Finding 外不得重写。
+ - **MC2 当前进度**：Owner 22 项 + 2 项财务裁决已完成；IR 686 的 1 P1 + 3 P2 修复提交到 `2795e38`，独立复审 Round 7（IR `GAINODE-S01P01-MC2-IR-20260816-001`）已返回 **APPROVED**（0 P0 / 0 P1 / 0 blocking P2；1 非阻塞 P3 = `aggregate_dispute_hold` 标注 DERIVED，后续顺带修正）。MC2 已置 **FROZEN（2026-08-16）**。
+ - **S01-P02（2B-1 状态合同补齐）已完成（2026-08-16，commit `2707938`）**：9 对象状态合同已产出（task `TASK-20260816-001`）。Result/Settlement 复制 05 §4 canonical enum + 转移矩阵（RS1-RS5 / ST1-ST7，候选，待 State Machine gate）；AuditEvent 复用 MC2 `audit_events` DDL；6 缺 enum 实体（SettlementBatch/RefundCase/CorrectionCase/OtcTrade/RobotUpgradeOrder/ConsentReceipt）仅生成 Owner Decision Matrix（2B1-ENUM-01..06），未自创状态，FAIL_CLOSED 不建表。Result `official` ≠ Settlement `paid`；Result confirmer ≠ Settlement approver。
+-- 当前执行包：`S01-P09-STAGE01-CLOSURE`（STAGE-01 全量收口）。已完成（Dev 一开到底，不 push）：S01-P01 MC2 FROZEN；S01-P02 2B-1 状态合同；S01-P03 2B-1 DDL；S01-P04 2B-2 状态合同（IR APPROVED）；S01-P05 2B-2 DDL+骨架（13 对象）；S01-P06 非持久投影（7 对象）；S01-P07 Affiliate/Agent P1 合同盘点（快照 1，候选 Freeze + 11 项 Owner Decision Request，commit `4f01bad`/`f1b28c4`）；S01-P08 AI Operations P1 合同盘点（快照 1，候选 Freeze + 9 项 Owner Decision + 1 LOCKED，commit `799d588`/`cf50829`）。S01-P07/P08 快照 2（建 DDL）阻塞在 Owner 签署决策，未签前 CONTRACT_GAP/FAIL_CLOSED。S01-P09 产出 `STAGE-01-OBJECT-COVERAGE-MATRIX.md`（43 对象：30 持久 + 7 投影 + 6 合同盘点未建表），STAGE-01 Gate 由 Quality Agent 独立输出。
++- 当前执行包：`S02-P01-GENERAL-KERNEL`（OpenAPI 3.1 + Environment Contract + 通用内核）。已完成（Dev 一开到底，不 push）：S01-P01 MC2 FROZEN；S01-P02 2B-1 状态合同；S01-P03 2B-1 DDL；S01-P04 2B-2 状态合同（IR APPROVED）；S01-P05 2B-2 DDL+骨架（13 对象）；S01-P06 非持久投影（7 对象）；S01-P07 Affiliate/Agent P1 合同盘点（候选 Freeze + 11 Owner Decision，commit `4f01bad`/`f1b28c4`）；S01-P08 AI Operations P1 合同盘点（候选 Freeze + 9 Owner Decision + 1 LOCKED，commit `799d588`/`cf50829`）；S01-P09 STAGE-01 全量收口（`STAGE-01-OBJECT-COVERAGE-MATRIX.md`，43 对象 = 30 持久 + 7 投影 + 6 盘点未建表，commit `5e75ade`/`678b61a`）。S02-P01 已落地（不建表、不写业务，纯可执行内核）：`.env.example` 环境契约（安全关闭值 fail-closed）、`ErrorDict` 05 §7 16 项错误分类 + `httpStatus()` 映射、`Envelope` 统一 success/error 响应信封（含 8 数据新鲜度元数据）、`RequestContext` 六请求头中间件（写操作强制 Idempotency-Key，缺失 fail-closed）、`IdempotencyStore`/`OutboxStore` 接口 + Null fail-closed 实现、`TransactionBoundary`（事务 + object_version CAS 乐观锁）、OpenAPI 3.1 拆分（`gainode-v2.yaml` 入口 + 6 P0 路径骨架 + common schema/headers/responses）、Contract/Integration 测试入口（41 断言全过）。后续 S02-P02 起逐 P0 写路径落地 request/response schema。S01-P07/P08 快照 2（建 DDL）阻塞在 Owner 签署决策；2B-1/2B-2 21 写路径仍 CANDIDATE/FAIL_CLOSED。
+ - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
+ - 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.3；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816`。40 个工作包均具备目标、固定步骤、验证、停止条件和验收；Development、Quality 和复审 Agent 必须按该文件执行，V3.2 及更早路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。
+ - 开发采用一个 Development Agent 串行工作包，一开到底：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate 关闭。唯一硬停止 = §0.1 永久禁止项 + 「包未在本文件定义」。所有 Package 的「前置」「停止条件」「Stage Gate」降级为 Quality Agent 审核时的验证项；未冻结合同/未决 Owner 决策按 best-effort 继续并在交接声明，Quality 审核时逐项验证并记为 Finding（CR-20260816-003）。
+diff --git a/.project-ai/manifest.yaml b/.project-ai/manifest.yaml
+index ae8654b..531edfe 100644
+--- a/.project-ai/manifest.yaml
++++ b/.project-ai/manifest.yaml
+@@ -1,6 +1,6 @@
+ schemaVersion: 1
+ projectName: Gainode
+-contextVersion: 24
++contextVersion: 25
+ status: PUBLISHED
+ STAGE_00_COMPLETE: true
+ STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
+@@ -280,3 +280,8 @@ decisionSources:
+     decision_date: "2026-08-16"
+     owner: OWNER
+     provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P09 对象覆盖矩阵）← 07 §S01-P09 步骤 1-4"
++  stage02_p01_general_kernel:
++    value: "COMPLETE 2026-08-16 — S02-P01 可执行通用内核（OpenAPI 3.1 + Environment Contract + General Kernel，不建表不写业务）。交付：.env.example 环境契约（安全关闭值，禁止明文 secret，缺失 fail-closed）；ErrorDict 对齐 05 §7 16 项字符串错误码 + httpStatus() HTTP 映射（RESULT_UNKNOWN→202）；library/response/Envelope.php 统一 success/error 信封（8 数据新鲜度元数据 data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status + WriteResult 最少字段）；support/middleware/RequestContext.php 六请求头（Authorization/Idempotency-Key/If-Match/Accept-Language/X-Request-Id/X-Timestamp）+ 写操作强制 Idempotency-Key（API_ENFORCE_IDEMPOTENCY=true，缺失 fail-closed），注入 admin/api/common 中间件组；library/service/idempotency/{IdempotencyStore,NullIdempotencyStore}.php + outbox/{OutboxStore,NullOutboxStore}.php（接口 + Null fail-closed，isAvailable=false 直至持久化冻结）；library/service/transaction/TransactionBoundary.php（事务 + lockForUpdate object_version CAS）；openapi/gainode-v2.yaml 入口 + components/{schemas/common,headers/request,responses/common}.yaml + paths/{auth,robot,prediction,apt_otc,policy_parameter,admin}.yaml（P0 路径骨架，仅冻结 operationId/security/统一响应，业务 request/response schema 留待 S02-P02~P08）；tests/{Contract/EnvelopeContractTest,Integration/KernelContractTest}.php + Feature/README.md（41 断言全过，不涉数据库）。任务: .project-ai/tasks/TASK-20260816-008/。"
++    decision_date: "2026-08-16"
++    owner: OWNER
++    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P01 通用内核）← 07 §S02-P01 固定步骤 1-6 ← 05 §1/§7/§10（数据新鲜度/错误分类/统一信封）← p1_003_two_phase_freeze（第二批 OpenAPI 3.1 + Environment Freeze）"
+diff --git a/.project-ai/tasks/TASK-20260816-008/acceptance.md b/.project-ai/tasks/TASK-20260816-008/acceptance.md
+new file mode 100644
+index 0000000..2843278
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-008/acceptance.md
+@@ -0,0 +1,45 @@
++# S02-P01 · 验收（Acceptance）
++
++## 机械断言
++
++```text
++OPENAPI_ENTRY_EXISTS            = openapi/gainode-v2.yaml
++ENV_EXAMPLE_EXISTS              = .env.example
++ENV_EXAMPLE_NO_SECRET           = YES（无 password/secret/token 值/真实 URL）
++ERROR_DICT_ALIGNED_05_S7        = 16 错误码 + HTTP 状态映射
++REQUEST_CONTEXT_MIDDLEWARE      = 解析六请求头 + 生成 request_id
++SIX_HEADERS_DEFINED             = 6（Authorization/Idempotency-Key/If-Match/Accept-Language/X-Request-Id/X-Timestamp）
++IDEMPOTENCY_STORE_IFACE         = 接口 + Null 实现（fail-closed）
++OUTBOX_STORE_IFACE              = 接口 + Null 实现（fail-closed）
++AUDIT_EVENT_SERVICE             = append-only 写入 audit_events（FROZEN 表）
++TRANSACTION_BOUNDARY            = DB 事务 + object_version CAS 语义
++TEST_ENTRY_CONTRACT             = tests/Contract/
++TEST_ENTRY_INTEGRATION          = tests/Integration/
++TEST_ENTRY_FEATURE              = tests/Feature/
++NO_P0_BUSINESS_WRITE            = YES（本包不建业务 controller/service）
++NO_SECOND_ROUTING               = YES（复用 Webman 路由）
++SECRET_SCAN                     = PASS
++```
++
++## 非目标验证
++
++```text
++P0 业务写流程            = NOT_RUN（S02-P02~P08）
++正式参数/生产 URL        = NOT_PRESENT（.env.example 仅变量名 + 安全关闭值）
++V1.x arbitrage 改动      = NOT_RUN（只读）
++```
++
++## 验证命令
++
++```text
++php -l 逐个校验新增 PHP 文件
++OpenAPI parse（若本地无 swagger-cli，用 yaml 语法 + $ref 存在性脚本自检）
++.git env 扫描（.env.example 无 secret）
++git diff --check
++```
++
++## 一致性核对
++
++- `ErrorDict` 常量名与 05 §7 错误分类逐项一致（16 项）。
++- 六请求头与 design.md §2 提案一致。
++- `.env.example` 变量名覆盖 `.env` 现有变量（SIGN_PRIVATE_KEY/PWD_SECRET_KEY/MYSQL_*/REDIS_*/MAIL_*），值全部安全关闭。
+diff --git a/.project-ai/tasks/TASK-20260816-008/design.md b/.project-ai/tasks/TASK-20260816-008/design.md
+new file mode 100644
+index 0000000..a7827dd
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-008/design.md
+@@ -0,0 +1,132 @@
++# S02-P01 · 设计（Design）
++
++## 1. API 契约冻结项（源自 05 §1/§2/§6/§7）
++
++```text
++API_STYLE     = REST/JSON
++OPENAPI       = 3.1
++JSON_SCHEMA   = 2020-12
++BASE_URL      = /api/v1（C 端）；/admin/api（后台，沿用现有 admin 路由前缀）
++TIME          = UTC timestamp（Unix 秒，dateFormat='U'），客户端本地化
++DECIMAL       = string（资产/数量/系数，禁 float）
++PAGINATION    = cursor（next_cursor + limit）
++WRITE_IDEMPOTENCY = required（Idempotency-Key）
++CONCURRENCY   = If-Match / object_version
++AUTH          = Bearer JWT（firebase/php-jwt，05 §2）
++```
++
++## 2. 六请求头（提案，Environment Freeze 候选）
++
++```text
++1. Authorization       Bearer <JWT>      认证（05 §2）
++2. Idempotency-Key     写操作幂等键      写入去重（05 §1）
++3. If-Match            object_version    并发乐观锁（05 §1）
++4. Accept-Language     zh-CN/en/...      7 语言（05/08）
++5. X-Request-Id        trace id          缺失时服务端生成（05 §1 request_id）
++6. X-Timestamp         Unix 秒          客户端时钟（防重放/新鲜度，05 §1 TIME）
++```
++
++> 六请求头在 05 未逐字冻结（仅抽象引用「六请求头」）。本包提案为 CANDIDATE，待 Environment Freeze Owner 签；签前按本提案 best-effort 实现，middleware 对缺失头 fail-closed。
++
++## 3. 统一 Success Envelope
++
++```json
++{
++  "request_id": "...",
++  "data": { },
++  "data_status": "REALTIME",
++  "as_of": 0,
++  "updated_at": 0,
++  "next_refresh_at": null,
++  "refresh_hint": null,
++  "stale_after": null,
++  "snapshot_id": null,
++  "source_status": "OK"
++}
++```
++
++写操作附加 05 §1 最少返回字段（idempotency_key / object_type / object_id / status / result_code / result_message / next_action / rule_version / parameter_release_id / policy_version / snapshot_id / approval_id / audit_event_id）。
++
++## 4. 统一 Error Envelope
++
++```json
++{
++  "request_id": "...",
++  "result_code": "VALIDATION_ERROR",
++  "result_message": "...",
++  "http_status": 400,
++  "details": []
++}
++```
++
++## 5. 错误分类（05 §7 → HTTP 状态 + code 常量）
++
++| code | http | 语义 |
++|---|---|---|
++| VALIDATION_ERROR | 400 | 参数校验失败 |
++| AUTH_UNAUTHENTICATED | 401 | 未认证 |
++| AUTH_FORBIDDEN | 403 | 禁止 |
++| KYC_REQUIRED | 403 | 需 KYC |
++| POLICY_DENIED | 403 | 策略拒绝 |
++| FEATURE_CLOSED | 403 | 能力关闭 |
++| CONSENT_VERSION_MISMATCH | 409 | 同意书版本不一致 |
++| IDEMPOTENCY_CONFLICT | 409 | 幂等冲突 |
++| OBJECT_VERSION_CONFLICT | 409 | 版本冲突（乐观锁） |
++| QUOTE_EXPIRED | 409 | 报价过期 |
++| INSUFFICIENT_APT | 422 | APT 不足 |
++| INSUFFICIENT_POWER | 422 | Power 不足 |
++| MARKET_LOCKED | 422 | 盘口锁定 |
++| DEPENDENCY_UNAVAILABLE | 503 | 依赖不可用 |
++| RESULT_UNKNOWN | 202 | 结果未知（用原 Idempotency-Key 查询） |
++| INTERNAL_ERROR | 500 | 内部错误（兜底） |
++
++## 6. 通用内核组件
++
++### 6.1 RequestContext middleware（`support/middleware/RequestContext.php`）
++
++- 解析六请求头 → 存入 `Workerman\Coroutine\Context`。
++- 生成/透传 `X-Request-Id`；写操作校验 `Idempotency-Key` 存在性（缺失→400）。
++- 旧 MD5 签名密钥（`SIGN_PRIVATE_KEY`）迁移到 env，缺失 fail-closed（不再校验 V1.x Sign）。
++
++### 6.2 IdempotencyRecord（未冻结，best-effort 接口）
++
++- 接口 `library/service/idempotency/IdempotencyStore.php` + `NullIdempotencyStore`（默认 deny/无状态，fail-closed）。
++- 语义：按 `(idempotency_key, object_type)` 查原结果；已完成→返回原响应；处理中→返回 RESULT_UNKNOWN；冲突→IDEMPOTENCY_CONFLICT。
++
++### 6.3 Outbox（未冻结，best-effort 接口）
++
++- 接口 `library/service/outbox/OutboxStore.php` + `NullOutboxStore`。
++- 语义：业务事务内追加 outbox 记录；投递失败不回滚业务；dedupe key 与业务对象/idempotency key 关联。
++
++### 6.4 AuditEvent（FROZEN，可建 Service）
++
++- `library/service/audit/AuditEventService.php` 对 `audit_events`（MC2 DDL）append-only 写入。
++- 复用 `library/model/audit/AuditEventModel.php`（若已存在），无 UPDATE/DELETE。
++
++### 6.5 Transaction boundary
++
++- `library/service/transaction/TransactionBoundary.php` 封装 DB 事务 + 复用 MC2 Economic Mutation Lock 语义（`apt_accounts.object_version` CAS），供 S02-P03+ 复用。
++
++## 7. OpenAPI 结构
++
++```text
++openapi/gainode-v2.yaml              入口（info/security/servers/tags + $ref 汇总）
++openapi/components/schemas/          error.yaml / envelope.yaml / pagination.yaml
++openapi/components/headers/          六请求头 + 响应头
++openapi/components/responses/        success / error / 202 / 409 等
++openapi/paths/auth.yaml             （S02-P02 占位，仅冻结 P0 path 骨架）
++openapi/paths/robot.yaml
++openapi/paths/prediction.yaml
++openapi/paths/apt_otc.yaml
++openapi/paths/policy_parameter.yaml
++openapi/paths/admin.yaml
++```
++
++> P0 paths 仅建骨架（operationId/security/summary），request/response schema 在对应 S02-P02~P08 落地；本包不虚构未冻结字段。
++
++## 8. 测试策略
++
++- `tests/Contract/`：envelope 结构、错误分类、ErrorDict 常量映射。
++- `tests/Integration/`：RequestContext 六请求头解析（含缺失 fail-closed）、IdempotencyStore/OutboxStore null 实现。
++- `tests/Feature/`：占位入口（本包无业务写流程，仅骨架 + 空场景标记）。
++- 沿用现有 `tests/*/_bootstrap.php` 纯 PHP 引导（SQLite in-memory 不触真实 MySQL）。
+diff --git a/.project-ai/tasks/TASK-20260816-008/requirement.md b/.project-ai/tasks/TASK-20260816-008/requirement.md
+new file mode 100644
+index 0000000..7089af7
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-008/requirement.md
+@@ -0,0 +1,55 @@
++# S02-P01 · OpenAPI 3.1、Environment 与通用内核
++
++## 目的
++
++STAGE-02 首个实现包。冻结合同后的第一份「可执行内核」：OpenAPI 3.1 规范、环境变量契约（`.env.example`）、统一 Response/Error/RequestContext 中间件、通用内核服务（idempotency / outbox / audit / transaction）、测试入口。本包不实现任何 P0 业务写流程（属 S02-P02~P08）。
++
++## 范围（对齐 07 §S02-P01 固定步骤 1-7）
++
++```text
++1. 从 05 §1/§6/§7 冻结 base URL、六请求头、认证、统一 success/error envelope、cursor pagination、decimal string、日期/时区和错误分类。
++2. 按 Auth→Robot→Prediction→APT/OTC→Policy/Parameter→Admin 顺序拆 paths；schema 只引用 05 已冻结对象。
++3. 每个 operation 补唯一 operationId、security、required、closed schema、错误响应、idempotency、If-Match/object_version、敏感字段可见性和示例（仅 fixture）。
++4. 实现统一 Response/Error/RequestContext middleware，解析六请求头并生成 request_id；旧签名密钥移到 env，缺失 fail-closed。
++5. 实现 IdempotencyRecord、Outbox、AuditEvent 的通用接口和 transaction boundary。
++6. `.env.example` 只写变量名、安全关闭值和说明，禁止 secret / 生产 URL / 正式参数。
++7. 建立 Contract/Integration/Feature 测试入口。
++```
++
++## 目标文件
++
++```text
++openapi/gainode-v2.yaml
++openapi/{schemas,paths,components}/**/*.yaml
++.env.example
++library/dict/ErrorDict.php（对齐 05 §7 错误分类）
++support/middleware/RequestContext.php（六请求头 + request_id）
++library/response/（统一 envelope 基类）
++library/service/{idempotency,outbox,audit,transaction}/
++tests/{Contract,Integration,Feature}/
++```
++
++## 非目标
++
++- 不实现 P0 业务写流程（Auth/KYC/Ledger/Robot/Prediction/OTC/Approval 属 S02-P02~P08）。
++- 不新增第二套路由框架（复用 Webman `config/route/{api,admin}.php` + 数据库驱动 `sys_route`）。
++- 不写生产 secret、真实签名密钥、正式参数或生产 URL。
++- 不改动 V1.x `arbitrage_*` 代码（只读盘点）。
++- 不为未冻结字段补默认值；未冻结合同写路径 fail-closed。
++
++## 依赖与冻结状态
++
++```text
++AuditEvent（audit_events）          = FROZEN（MC2 DDL 已冻结，可建 Service）
++IdempotencyRecord（通用内核表）     = 未冻结（CONSUMED_UNFROZEN_CONTRACT，best-effort 接口 + fail-closed 存储）
++Outbox（通用内核表）                = 未冻结（CONSUMED_UNFROZEN_CONTRACT，best-effort 接口 + fail-closed 存储）
++Transaction boundary                = 复用 MC2 Economic Mutation Lock 语义（apt_accounts.object_version CAS）
++六请求头                            = 候选（本包提案，Environment Freeze 待 Owner 签）
++```
++
++## 验收摘要
++
++- OpenAPI 可解析、无 dangling `$ref`、operationId 唯一。
++- `.env.example` 无 secret，缺失环境变量安全关闭。
++- 统一 envelope + RequestContext 有正反向测试。
++- 错误分类与 05 §7 逐项对齐（16 错误码 + HTTP 状态）。
+diff --git a/0.5代码/gainode后端/gainode/.env.example b/0.5代码/gainode后端/gainode/.env.example
+new file mode 100644
+index 0000000..5079475
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/.env.example
+@@ -0,0 +1,59 @@
++# =============================================================================
++# Gainode V2.0 后端环境变量契约（.env.example）
++# -----------------------------------------------------------------------------
++# 规则（07 §S02-P01 固定步骤 6）：
++#   - 本文件只写变量名、安全关闭值（空值 / false / 占位）和说明。
++#   - 禁止写入任何真实 secret、生产 URL、正式参数、真实密钥。
++#   - 生产配置不在本文件创建；真实值在部署时由运维注入，缺失即 fail-closed。
++# =============================================================================
++
++# ---- 应用基础 ----
++APP_LISTEN=http://0.0.0.0:8787
++APP_DOMAIN=http://127.0.0.1:8787
++APP_PROCESS=4
++APP_REDIS_PROCESS=4
++APP_MAX_REQUEST=1000000
++APP_ENV=test                 # test | staging | production
++APP_DEBUG=false              # 生产必须 false
++APP_PROCESS_LIST=crontab_task
++
++# ---- 安全 / 签名（V2.0：旧 MD5 签名密钥迁移到此，缺失 fail-closed）----
++SIGN_PRIVATE_KEY=             # 旧 MD5 签名共享密钥（V1.x 遗留，V2.0 不再校验；留空安全关闭）
++PWD_SECRET_KEY=               # 密码哈希盐/密钥（缺失 fail-closed）
++JWT_SECRET=                   # JWT 签名密钥（firebase/php-jwt，缺失 fail-closed，禁止硬编码）
++APP_KEY=                      # 应用加密主密钥（对称加密/签名，缺失 fail-closed）
++
++# ---- 数据库 ----
++MYSQL_HOST=127.0.0.1
++MYSQL_PORT=3306
++MYSQL_DB=webman
++MYSQL_USER=root
++MYSQL_PASS=                   # 禁止提交真实密码
++MYSQL_CHARSET=utf8mb4
++
++# ---- Redis ----
++REDIS_HOST=127.0.0.1
++REDIS_PORT=6379
++REDIS_PASS=                   # 禁止提交真实密码
++REDIS_QUEUE=redis://127.0.0.1:6379
++
++# ---- 邮件 ----
++MAIL_DRIVER=smtp
++MAIL_HOST=
++MAIL_PORT=587
++MAIL_USERNAME=
++MAIL_PASSWORD=                # 禁止提交真实密码
++MAIL_ENCRYPTION=tls
++MAIL_FROM_ADDRESS=
++MAIL_FROM_NAME=Gainode
++
++# ---- 对象存储 / 上传（V2.0 预签名 URL，AK/SK 移到此处，缺失 fail-closed）----
++OSS_ACCESS_KEY_ID=
++OSS_ACCESS_KEY_SECRET=
++OSS_BUCKET=
++OSS_ENDPOINT=
++OSS_PRESIGNED_EXPIRE=900
++
++# ---- API 内核开关 ----
++API_ENFORCE_IDEMPOTENCY=true  # 写操作强制 Idempotency-Key（V2.0 fail-closed）
++API_BASE_URL=/api/v1
+diff --git a/0.5代码/gainode后端/gainode/config/middleware.php b/0.5代码/gainode后端/gainode/config/middleware.php
+new file mode 100644
+index 0000000..c8b181f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/config/middleware.php
+@@ -0,0 +1,41 @@
++<?php
++/**
++ * This file is part of webman.
++ *
++ * Licensed under The MIT License
++ * For full copyright and license information, please see the MIT-LICENSE.txt
++ * Redistributions of files must retain the above copyright notice.
++ *
++ * @author    walkor<walkor@workerman.net>
++ * @copyright walkor<walkor@workerman.net>
++ * @link      http://www.workerman.net/
++ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
++ */
++
++return [
++    // 全局中间件
++//    '' => [
++//        support\middleware\Cors::class,
++//        support\middleware\ActionHook::class,
++//    ],
++    // admin应用中间件
++    'admin' => [
++        support\middleware\Cors::class,
++        support\middleware\RequestContext::class,
++//        support\middleware\VerifySign::class,
++        support\middleware\ActionHook::class,
++    ],
++    // api应用中间件
++    'api' => [
++        support\middleware\Cors::class,
++        support\middleware\RequestContext::class,
++//        support\middleware\VerifySign::class,
++        support\middleware\ActionHook::class,
++    ],
++    'common' => [
++        support\middleware\Cors::class,
++        support\middleware\RequestContext::class,
++//        support\middleware\VerifySign::class,
++        support\middleware\ActionHook::class,
++    ],
++];
+diff --git a/0.5代码/gainode后端/gainode/library/dict/ErrorDict.php b/0.5代码/gainode后端/gainode/library/dict/ErrorDict.php
+new file mode 100644
+index 0000000..9dfbf3d
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dict/ErrorDict.php
+@@ -0,0 +1,112 @@
++<?php
++
++namespace library\dict;
++
++
++class ErrorDict
++{
++    const LoginVerifyError = 4000;
++    const TokenVerificationFailed = 4001;
++    const RequestFormatError = 4002;
++    const InterfaceAuthenticationFailed = 4003;
++    const InternalServerError = 5001;
++    const TooManyRequests = 5002;
++    const ParameterInformationError = 5003;
++    const SignatureInformationError = 5004;
++    const ParameterSignatureError = 5005;
++    const CacheSettingFailed = 5006;
++    const CacheDeletionFailed = 5007;
++    const CacheDoesNotExist = 5008;
++    const PleaseDoNotResubmit = 5009;
++    const EncryptionFailed = 5010;
++    const DecryptionFailed = 5011;
++    const CurrentlyHasNoAccessPermission = 5012;
++    const RedisConnectionFailed = 5013;
++    const MySQLConnectionFailed = 5014;
++    const FailedToWriteConfigurationFile = 5015;
++    const FailedToSendEmail = 5016;
++    const SQLExecutionFailed = 5017;
++    const SocketNotConnected = 5018;
++    const SocketMessageSendingFailed = 5019;
++
++    // =========================================================================
++    // V2.0 统一错误分类（05 §7，16 项）— 字符串错误码 + HTTP 状态映射
++    // =========================================================================
++    const VALIDATION_ERROR = 'VALIDATION_ERROR';
++    const AUTH_UNAUTHENTICATED = 'AUTH_UNAUTHENTICATED';
++    const AUTH_FORBIDDEN = 'AUTH_FORBIDDEN';
++    const KYC_REQUIRED = 'KYC_REQUIRED';
++    const POLICY_DENIED = 'POLICY_DENIED';
++    const FEATURE_CLOSED = 'FEATURE_CLOSED';
++    const CONSENT_VERSION_MISMATCH = 'CONSENT_VERSION_MISMATCH';
++    const IDEMPOTENCY_CONFLICT = 'IDEMPOTENCY_CONFLICT';
++    const OBJECT_VERSION_CONFLICT = 'OBJECT_VERSION_CONFLICT';
++    const QUOTE_EXPIRED = 'QUOTE_EXPIRED';
++    const INSUFFICIENT_APT = 'INSUFFICIENT_APT';
++    const INSUFFICIENT_POWER = 'INSUFFICIENT_POWER';
++    const MARKET_LOCKED = 'MARKET_LOCKED';
++    const DEPENDENCY_UNAVAILABLE = 'DEPENDENCY_UNAVAILABLE';
++    const RESULT_UNKNOWN = 'RESULT_UNKNOWN';
++    const INTERNAL_ERROR = 'INTERNAL_ERROR';
++
++    /**
++     * 05 §7 错误码 → HTTP 状态码映射（V2.0 统一 envelope）。
++     * RESULT_UNKNOWN 返回 202：客户端须用原 Idempotency-Key 查询原请求结果，而非重试创建。
++     *
++     * @param string $code
++     * @return int
++     */
++    public static function httpStatus(string $code): int
++    {
++        $map = [
++            self::VALIDATION_ERROR          => 400,
++            self::AUTH_UNAUTHENTICATED      => 401,
++            self::AUTH_FORBIDDEN            => 403,
++            self::KYC_REQUIRED              => 403,
++            self::POLICY_DENIED             => 403,
++            self::FEATURE_CLOSED            => 403,
++            self::CONSENT_VERSION_MISMATCH  => 409,
++            self::IDEMPOTENCY_CONFLICT      => 409,
++            self::OBJECT_VERSION_CONFLICT   => 409,
++            self::QUOTE_EXPIRED             => 409,
++            self::INSUFFICIENT_APT          => 422,
++            self::INSUFFICIENT_POWER        => 422,
++            self::MARKET_LOCKED             => 422,
++            self::DEPENDENCY_UNAVAILABLE    => 503,
++            self::RESULT_UNKNOWN            => 202,
++            self::INTERNAL_ERROR            => 500,
++        ];
++        return $map[$code] ?? 500;
++    }
++
++
++    public function getMessage($code)
++    {
++        $data = [
++            self::LoginVerifyError => '账户名或密码错误',
++            self::TokenVerificationFailed => 'Token验证失败',
++            self::RequestFormatError => '请求格式错误',
++            self::InterfaceAuthenticationFailed=> '接口鉴权失败',
++            self::InternalServerError => '内部服务器错误',
++            self::TooManyRequests => '请求过多',
++            self::ParameterInformationError => '参数信息错误',
++            self::SignatureInformationError => '签名信息错误',
++            self::ParameterSignatureError => '参数签名错误',
++            self::CacheSettingFailed => '设置缓存失败',
++            self::CacheDeletionFailed => '删除缓存失败',
++            self::CacheDoesNotExist => '缓存不存在',
++            self::PleaseDoNotResubmit => '请勿重复提交',
++            self::EncryptionFailed => '加密失败',
++            self::DecryptionFailed => '解密失败',
++            self::CurrentlyHasNoAccessPermission => '暂无访问权限',
++            self::RedisConnectionFailed => 'Redis连接失败',
++            self::MySQLConnectionFailed => 'Mysql连接失败',
++            self::FailedToWriteConfigurationFile => '写入配置文件失败',
++            self::FailedToSendEmail => '发送邮件失败',
++            self::SQLExecutionFailed => 'Sql执行失败',
++            self::SocketNotConnected => 'Socket未连接',
++            self::SocketMessageSendingFailed => 'Socket消息发送失败',
++        ];
++        return $data[$code] ?? '未知错误';
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/response/Envelope.php b/0.5代码/gainode后端/gainode/library/response/Envelope.php
+new file mode 100644
+index 0000000..7674c19
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/response/Envelope.php
+@@ -0,0 +1,82 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\response;
++
++/**
++ * 统一 Response Envelope（05 §1 + §10）。
++ *
++ * 成功响应：request_id + data + 数据新鲜度契约 8 字段。
++ * 写操作通过 $extra 追加 05 §1 最少返回字段（idempotency_key / object_type /
++ * object_id / status / result_code / result_message / next_action / rule_version /
++ * parameter_release_id / policy_version / snapshot_id / approval_id / audit_event_id）。
++ *
++ * 错误响应：request_id + result_code + result_message + http_status + details。
++ *
++ * 数组合并采用 `$base + $extra`（左优先），保证调用方无法覆盖 request_id/data 等
++ * 固定字段，仅能追加写操作元数据。
++ */
++final class Envelope
++{
++    // 数据新鲜度状态（05 §10）
++    public const DATA_STATUS_REALTIME = 'REALTIME';
++    public const DATA_STATUS_NEAR_REALTIME = 'NEAR_REALTIME';
++    public const DATA_STATUS_STALE = 'STALE';
++    public const DATA_STATUS_UNAVAILABLE = 'UNAVAILABLE';
++
++    // 数据源状态
++    public const SOURCE_STATUS_OK = 'OK';
++    public const SOURCE_STATUS_DEGRADED = 'DEGRADED';
++    public const SOURCE_STATUS_UNAVAILABLE = 'UNAVAILABLE';
++
++    /**
++     * 成功响应。
++     *
++     * @param mixed  $data
++     * @param array  $meta      数据新鲜度契约 8 字段（as_of / updated_at / next_refresh_at /
++     *                          refresh_hint / stale_after / snapshot_id / source_status）
++     * @param array  $extra     写操作附加字段（05 §1，不会覆盖固定字段）
++     * @param string $requestId
++     * @return array
++     */
++    public static function success($data, array $meta = [], array $extra = [], string $requestId = ''): array
++    {
++        $base = [
++            'request_id'      => $requestId,
++            'data'            => $data,
++            'data_status'     => $meta['data_status'] ?? self::DATA_STATUS_REALTIME,
++            'as_of'           => $meta['as_of'] ?? time(),
++            'updated_at'      => $meta['updated_at'] ?? null,
++            'next_refresh_at' => $meta['next_refresh_at'] ?? null,
++            'refresh_hint'    => $meta['refresh_hint'] ?? null,
++            'stale_after'     => $meta['stale_after'] ?? null,
++            'snapshot_id'     => $meta['snapshot_id'] ?? null,
++            'source_status'   => $meta['source_status'] ?? self::SOURCE_STATUS_OK,
++        ];
++
++        // 写操作元数据（左优先，禁止覆盖固定字段）
++        return $base + $extra;
++    }
++
++    /**
++     * 错误响应。
++     *
++     * @param string $resultCode    05 §7 错误码（library\dict\ErrorDict）
++     * @param string $resultMessage
++     * @param int    $httpStatus    HTTP 状态码
++     * @param array  $details       结构化错误详情
++     * @param string $requestId
++     * @return array
++     */
++    public static function error(string $resultCode, string $resultMessage, int $httpStatus, array $details = [], string $requestId = ''): array
++    {
++        return [
++            'request_id'     => $requestId,
++            'result_code'    => $resultCode,
++            'result_message' => $resultMessage,
++            'http_status'    => $httpStatus,
++            'details'        => $details,
++        ];
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/idempotency/IdempotencyStore.php b/0.5代码/gainode后端/gainode/library/service/idempotency/IdempotencyStore.php
+new file mode 100644
+index 0000000..99fb1eb
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/idempotency/IdempotencyStore.php
+@@ -0,0 +1,55 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\idempotency;
++
++/**
++ * 幂等记录存储接口（07 §S02-P01 步骤 5）。
++ *
++ * 语义（05 §1 WRITE_IDEMPOTENCY + §7 RESULT_UNKNOWN）：
++ *   - find() 返回已完成/处理中的原结果，调用方据此返回原响应或 RESULT_UNKNOWN；
++ *   - reserve() 在处理开始时登记，防止并发重复；
++ *   - complete() 在成功后记录原响应。
++ *
++ * 冻结状态：IdempotencyRecord 持久表未在 STAGE-01 冻结（CONSUMED_UNFROZEN_CONTRACT）。
++ * 本接口为契约；真实存储实现待表冻结后落盘（快照 2）。
++ */
++interface IdempotencyStore
++{
++    /**
++     * 存储是否可用。返回 false 时调用方必须 fail-closed（拒绝无法保证幂等的写操作）。
++     */
++    public function isAvailable(): bool;
++
++    /**
++     * 查询原请求结果。
++     *
++     * @param string $idempotencyKey
++     * @param string $objectType
++     * @return array|null null=无记录（首次请求）；否则 ['status' => 'completed'|'processing', 'response' => array|null, 'object_id' => string]
++     */
++    public function find(string $idempotencyKey, string $objectType): ?array;
++
++    /**
++     * 登记处理中（预留幂等槽位）。
++     *
++     * @param string $idempotencyKey
++     * @param string $objectType
++     * @param string $objectId
++     * @param string $requestId
++     * @return void
++     */
++    public function reserve(string $idempotencyKey, string $objectType, string $objectId, string $requestId): void;
++
++    /**
++     * 完成并记录原响应。
++     *
++     * @param string $idempotencyKey
++     * @param string $objectType
++     * @param string $objectId
++     * @param array  $response
++     * @return void
++     */
++    public function complete(string $idempotencyKey, string $objectType, string $objectId, array $response): void;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/idempotency/NullIdempotencyStore.php b/0.5代码/gainode后端/gainode/library/service/idempotency/NullIdempotencyStore.php
+new file mode 100644
+index 0000000..859ca00
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/idempotency/NullIdempotencyStore.php
+@@ -0,0 +1,36 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\idempotency;
++
++/**
++ * 空幂等存储（fail-closed 占位）。
++ *
++ * IdempotencyRecord 持久表未冻结（CONSUMED_UNFROZEN_CONTRACT），本实现不持久化任何记录，
++ * isAvailable() 恒返回 false。依赖幂等保证的写流程在接入真实存储前必须 fail-closed：
++ * 检测到 isAvailable() === false 时拒绝执行（返回 DEPENDENCY_UNAVAILABLE），
++ * 不得以「无记录」为由继续重复写入。
++ */
++final class NullIdempotencyStore implements IdempotencyStore
++{
++    public function isAvailable(): bool
++    {
++        return false;
++    }
++
++    public function find(string $idempotencyKey, string $objectType): ?array
++    {
++        return null;
++    }
++
++    public function reserve(string $idempotencyKey, string $objectType, string $objectId, string $requestId): void
++    {
++        // no-op：未冻结存储，不预留
++    }
++
++    public function complete(string $idempotencyKey, string $objectType, string $objectId, array $response): void
++    {
++        // no-op：未冻结存储，不记录
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/outbox/NullOutboxStore.php b/0.5代码/gainode后端/gainode/library/service/outbox/NullOutboxStore.php
+new file mode 100644
+index 0000000..61030c0
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/outbox/NullOutboxStore.php
+@@ -0,0 +1,24 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\outbox;
++
++/**
++ * 空 Outbox 存储（fail-closed 占位）。
++ *
++ * Outbox 持久表未冻结（CONSUMED_UNFROZEN_CONTRACT），本实现不持久化任何记录，
++ * isAvailable() 恒返回 false。需要可靠投递的业务流程在接入真实存储前不得假设消息已入队。
++ */
++final class NullOutboxStore implements OutboxStore
++{
++    public function isAvailable(): bool
++    {
++        return false;
++    }
++
++    public function append(string $dedupeKey, string $eventType, array $payload, string $requestId): void
++    {
++        // no-op：未冻结存储，不追加
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/outbox/OutboxStore.php b/0.5代码/gainode后端/gainode/library/service/outbox/OutboxStore.php
+new file mode 100644
+index 0000000..c1ad888
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/outbox/OutboxStore.php
+@@ -0,0 +1,36 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\outbox;
++
++/**
++ * Outbox 存储接口（07 §S02-P01 步骤 5）。
++ *
++ * 语义（07 §S02-P03/P07，业务事务与通知解耦）：
++ *   - 业务事务内只追加 Outbox 记录；
++ *   - 消费者按 channel/dedupe/retry/backoff 投递，失败进 dead-letter，不回滚业务；
++ *   - dedupe key 与业务对象 / idempotency key 关联。
++ *
++ * 冻结状态：Outbox 持久表未在 STAGE-01 冻结（CONSUMED_UNFROZEN_CONTRACT）。
++ * 本接口为契约；真实存储实现待表冻结后落盘（快照 2）。
++ */
++interface OutboxStore
++{
++    /**
++     * 存储是否可用。返回 false 时调用方对「必须可靠投递」的通知应 fail-closed
++     * （不假装已入队），或明确降级为同步尽力投递。
++     */
++    public function isAvailable(): bool;
++
++    /**
++     * 追加一条 Outbox 记录（业务事务内调用）。
++     *
++     * @param string $dedupeKey 去重键（与业务对象/idempotency key 关联）
++     * @param string $eventType 事件类型
++     * @param array  $payload   投递载荷
++     * @param string $requestId
++     * @return void
++     */
++    public function append(string $dedupeKey, string $eventType, array $payload, string $requestId): void;
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/transaction/TransactionBoundary.php b/0.5代码/gainode后端/gainode/library/service/transaction/TransactionBoundary.php
+new file mode 100644
+index 0000000..d261c34
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/transaction/TransactionBoundary.php
+@@ -0,0 +1,55 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\transaction;
++
++use support\extend\Db;
++use Throwable;
++
++/**
++ * 统一事务边界（07 §S02-P01 步骤 5 / S02-P03 事务模板）。
++ *
++ * 封装 DB 事务执行，供各 Authoritative Writer 复用，保证「业务写入 + AuditEvent +
++ * Outbox」在同一事务内原子提交。
++ *
++ * Economic Mutation Lock 语义（MC2 Freeze，账户级统一锁）：所有改 balance_apt_* /
++ * frozen_apt_* / aggregate_dispute_hold 的操作，须先在事务内以
++ * `apt_accounts.object_version` CAS 锁定；affected rows≠1 统一抛 OBJECT_VERSION_CONFLICT(409)。
++ * 本类提供 `lockForUpdate()` 供调用方对目标行加锁，具体 CAS 判定由调用方执行。
++ */
++final class TransactionBoundary
++{
++    /**
++     * 在事务内执行回调，自动提交/回滚。
++     *
++     * @param callable $callback   事务体，接收 Connection 实例
++     * @param string   $connection 连接名（默认 mysql）
++     * @return mixed 回调返回值
++     * @throws Throwable
++     */
++    public function run(callable $callback, string $connection = 'mysql')
++    {
++        return Db::connection($connection)->transaction(function ($conn) use ($callback) {
++            return $callback($conn);
++        });
++    }
++
++    /**
++     * 对目标表指定主键行加 SELECT ... FOR UPDATE 锁（悲观锁，与 object_version CAS 互补）。
++     *
++     * @param string $table
++     * @param string $primaryKey
++     * @param string $id
++     * @param string $connection
++     * @return void
++     */
++    public function lockForUpdate(string $table, string $primaryKey, string $id, string $connection = 'mysql'): void
++    {
++        Db::connection($connection)
++            ->table($table)
++            ->where($primaryKey, $id)
++            ->lockForUpdate()
++            ->first();
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/openapi/components/headers/request.yaml b/0.5代码/gainode后端/gainode/openapi/components/headers/request.yaml
+new file mode 100644
+index 0000000..f347d53
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/components/headers/request.yaml
+@@ -0,0 +1,34 @@
++# 六请求头（Environment Freeze 候选，见 TASK-20260816-008/design.md §2）
++
++Authorization:
++  schema:
++    type: string
++  description: Bearer JWT 认证（05 §2）
++
++Idempotency-Key:
++  schema:
++    type: string
++    maxLength: 64
++  description: 写操作幂等键（05 §1 WRITE_IDEMPOTENCY）
++
++If-Match:
++  schema:
++    type: string
++  description: object_version 乐观锁（05 §1 CONCURRENCY）
++
++Accept-Language:
++  schema:
++    type: string
++    default: zh-CN
++  description: 7 语言（05/08）
++
++X-Request-Id:
++  schema:
++    type: string
++    maxLength: 64
++  description: 请求追踪 ID（缺失时服务端生成）
++
++X-Timestamp:
++  schema:
++    type: string
++  description: 客户端时钟（Unix 秒，防重放/新鲜度）
+diff --git a/0.5代码/gainode后端/gainode/openapi/components/responses/common.yaml b/0.5代码/gainode后端/gainode/openapi/components/responses/common.yaml
+new file mode 100644
+index 0000000..618d8eb
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/components/responses/common.yaml
+@@ -0,0 +1,71 @@
++# 通用响应（05 §1 统一 envelope + §7 错误分类）
++
++Success:
++  description: 成功
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/SuccessEnvelope'
++
++BadRequest:
++  description: 参数校验失败（VALIDATION_ERROR）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++Unauthenticated:
++  description: 未认证（AUTH_UNAUTHENTICATED）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++Forbidden:
++  description: 禁止（AUTH_FORBIDDEN / KYC_REQUIRED / POLICY_DENIED / FEATURE_CLOSED）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++NotFound:
++  description: 资源不存在
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++Conflict:
++  description: 冲突（CONSENT_VERSION_MISMATCH / IDEMPOTENCY_CONFLICT / OBJECT_VERSION_CONFLICT / QUOTE_EXPIRED）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++Unprocessable:
++  description: 语义错误（INSUFFICIENT_APT / INSUFFICIENT_POWER / MARKET_LOCKED）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++ResultUnknown:
++  description: 结果未知（RESULT_UNKNOWN，用原 Idempotency-Key 查询原结果）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++DependencyUnavailable:
++  description: 依赖不可用（DEPENDENCY_UNAVAILABLE）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
++
++InternalError:
++  description: 内部错误（INTERNAL_ERROR）
++  content:
++    application/json:
++      schema:
++        $ref: '../schemas/common.yaml#/ErrorEnvelope'
+diff --git a/0.5代码/gainode后端/gainode/openapi/components/schemas/common.yaml b/0.5代码/gainode后端/gainode/openapi/components/schemas/common.yaml
+new file mode 100644
+index 0000000..f077f1a
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/components/schemas/common.yaml
+@@ -0,0 +1,106 @@
++# 通用 Schema（05 §1 统一 envelope + §7 错误分类 + §10 数据新鲜度契约）
++# JSON_SCHEMA = 2020-12（OpenAPI 3.1）
++
++ErrorEnvelope:
++  type: object
++  required: [request_id, result_code, result_message, http_status]
++  properties:
++    request_id:
++      type: string
++      description: 请求追踪 ID（X-Request-Id 透传或服务端生成）
++    result_code:
++      type: string
++      description: 05 §7 错误码
++      enum:
++        - VALIDATION_ERROR
++        - AUTH_UNAUTHENTICATED
++        - AUTH_FORBIDDEN
++        - KYC_REQUIRED
++        - POLICY_DENIED
++        - FEATURE_CLOSED
++        - CONSENT_VERSION_MISMATCH
++        - IDEMPOTENCY_CONFLICT
++        - OBJECT_VERSION_CONFLICT
++        - QUOTE_EXPIRED
++        - INSUFFICIENT_APT
++        - INSUFFICIENT_POWER
++        - MARKET_LOCKED
++        - DEPENDENCY_UNAVAILABLE
++        - RESULT_UNKNOWN
++        - INTERNAL_ERROR
++    result_message:
++      type: string
++    http_status:
++      type: integer
++    details:
++      type: array
++      items:
++        type: object
++        additionalProperties: true
++  additionalProperties: false
++
++SuccessEnvelope:
++  type: object
++  required: [request_id, data, data_status, source_status]
++  properties:
++    request_id:
++      type: string
++    data:
++      description: 业务数据（各对象 schema 在对应 S02-P02~P08 落地）
++    data_status:
++      type: string
++      enum: [REALTIME, NEAR_REALTIME, STALE, UNAVAILABLE]
++    as_of:
++      type: integer
++      description: 数据反映截止时间点（Unix 秒）
++    updated_at:
++      type: integer
++      nullable: true
++    next_refresh_at:
++      type: integer
++      nullable: true
++    refresh_hint:
++      type: string
++      nullable: true
++    stale_after:
++      type: integer
++      nullable: true
++    snapshot_id:
++      type: string
++      nullable: true
++    source_status:
++      type: string
++      enum: [OK, DEGRADED, UNAVAILABLE]
++  additionalProperties: true
++
++WriteResult:
++  description: 写操作最少返回字段（05 §1）
++  type: object
++  required: [request_id, idempotency_key, object_type, object_id, status, result_code, result_message]
++  properties:
++    request_id: { type: string }
++    idempotency_key: { type: string }
++    object_type: { type: string }
++    object_id: { type: string }
++    status: { type: string }
++    result_code: { type: string }
++    result_message: { type: string }
++    next_action: { type: string, nullable: true }
++    rule_version: { type: string, nullable: true }
++    parameter_release_id: { type: string, nullable: true }
++    policy_version: { type: string, nullable: true }
++    snapshot_id: { type: string, nullable: true }
++    approval_id: { type: string, nullable: true }
++    audit_event_id: { type: string, nullable: true }
++  additionalProperties: true
++
++PaginationCursor:
++  type: object
++  properties:
++    next_cursor:
++      type: string
++      nullable: true
++    has_more:
++      type: boolean
++    limit:
++      type: integer
+diff --git a/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml b/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
+new file mode 100644
+index 0000000..0e5b634
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/gainode-v2.yaml
+@@ -0,0 +1,207 @@
++openapi: 3.1.0
++info:
++  title: Gainode V2.0 API
++  version: 2.0.0
++  description: >
++    Gainode AI 体育分析与预测平台后端 API 契约（S02-P01 骨架）。
++    权威契约：05_DATA_STATE_PERMISSION_API_CONTRACT.md（§1/§2/§6/§7/§10）。
++    P0 path 骨架已冻结 operationId/security/统一响应；业务 request/response schema
++    在 S02-P02~P08 落地，不在此虚构未冻结字段。
++servers:
++  - url: /api/v1
++    description: C 端（End User）
++  - url: /api/v1/admin
++    description: 后台（Admin）
++tags:
++  - name: Auth
++  - name: Robot
++  - name: Prediction
++  - name: APT-OTC
++  - name: Policy-Parameter
++  - name: Admin
++paths:
++  # ---- Auth / Session（05 §2.1）----
++  /api/v1/auth/register:
++    $ref: './paths/auth.yaml#/register'
++  /api/v1/auth/login:
++    $ref: './paths/auth.yaml#/login'
++  /api/v1/auth/otp/verify:
++    $ref: './paths/auth.yaml#/otp_verify'
++  /api/v1/auth/otp/resend:
++    $ref: './paths/auth.yaml#/otp_resend'
++  /api/v1/auth/mfa/verify:
++    $ref: './paths/auth.yaml#/mfa_verify'
++  /api/v1/auth/refresh:
++    $ref: './paths/auth.yaml#/refresh'
++  /api/v1/auth/logout:
++    $ref: './paths/auth.yaml#/logout'
++  /api/v1/auth/recovery:
++    $ref: './paths/auth.yaml#/recovery'
++  /api/v1/auth/password/reset:
++    $ref: './paths/auth.yaml#/password_reset'
++  /api/v1/me/sessions:
++    $ref: './paths/auth.yaml#/me_sessions'
++  /api/v1/me/sessions/{id}/revoke:
++    $ref: './paths/auth.yaml#/me_session_revoke'
++  # ---- AI / Robot（05 §6）----
++  /api/v1/ai/users/{id}/summary:
++    $ref: './paths/robot.yaml#/user_summary'
++  /api/v1/ai/users/{id}/eligibility:
++    $ref: './paths/robot.yaml#/user_eligibility'
++  /api/v1/ai/users/{id}/capacity:
++    $ref: './paths/robot.yaml#/user_capacity'
++  /api/v1/ai/users/{id}/yield-coefficient:
++    $ref: './paths/robot.yaml#/user_yield_coefficient'
++  /api/v1/ai/robots:
++    $ref: './paths/robot.yaml#/robots'
++  /api/v1/ai/robots/{robot_id}:
++    $ref: './paths/robot.yaml#/robot_detail'
++  /api/v1/ai/users/{id}/upgrade-eligibility:
++    $ref: './paths/robot.yaml#/upgrade_eligibility'
++  /api/v1/ai/users/{id}/upgrade-orders:
++    $ref: './paths/robot.yaml#/upgrade_orders_create'
++  /api/v1/ai/users/{id}/upgrade-orders/{upgrade_order_id}:
++    $ref: './paths/robot.yaml#/upgrade_order_detail'
++  /api/v1/ai/users/{id}/rewards:
++    $ref: './paths/robot.yaml#/rewards'
++  /api/v1/ai/users/{id}/reward-claims:
++    $ref: './paths/robot.yaml#/reward_claim'
++  /api/v1/ai/users/{id}/reward-claims/{claim_id}:
++    $ref: './paths/robot.yaml#/reward_claim_detail'
++  /api/v1/ai/users/{id}/computing-power:
++    $ref: './paths/robot.yaml#/computing_power'
++  /api/v1/ai/users/{id}/computing-power-ledger:
++    $ref: './paths/robot.yaml#/computing_power_ledger'
++  /api/v1/ai/robots/{robot_id}/actions:
++    $ref: './paths/robot.yaml#/robot_action'
++  /api/v1/ai/robots/{robot_id}/actions/{action_id}:
++    $ref: './paths/robot.yaml#/robot_action_detail'
++  # ---- Prediction C 端（05 §6）----
++  /api/v1/markets:
++    $ref: './paths/prediction.yaml#/markets'
++  /api/v1/markets/{id}:
++    $ref: './paths/prediction.yaml#/market_detail'
++  /api/v1/markets/{id}/disclosure:
++    $ref: './paths/prediction.yaml#/market_disclosure'
++  /api/v1/consent-receipts:
++    $ref: './paths/prediction.yaml#/consent_receipt_create'
++  /api/v1/orders:
++    $ref: './paths/prediction.yaml#/order_create'
++  /api/v1/orders/{id}/additions:
++    $ref: './paths/prediction.yaml#/order_addition'
++  /api/v1/orders/{id}/receipt:
++    $ref: './paths/prediction.yaml#/order_receipt'
++  /api/v1/settlements/{id}:
++    $ref: './paths/prediction.yaml#/settlement_detail'
++  /api/v1/refunds/{id}:
++    $ref: './paths/prediction.yaml#/refund_detail'
++  /api/v1/appeals:
++    $ref: './paths/prediction.yaml#/appeal_create'
++  /api/v1/appeals/{id}:
++    $ref: './paths/prediction.yaml#/appeal_detail'
++  # ---- APT / OTC（05 §6）----
++  /api/v1/users/{id}/asset-ledger:
++    $ref: './paths/apt_otc.yaml#/asset_ledger'
++  /api/v1/otc/order-book:
++    $ref: './paths/apt_otc.yaml#/otc_order_book'
++  /api/v1/otc/quotes:
++    $ref: './paths/apt_otc.yaml#/otc_quote'
++  /api/v1/otc/orders:
++    $ref: './paths/apt_otc.yaml#/otc_order_create'
++  /api/v1/otc/orders/{id}:
++    $ref: './paths/apt_otc.yaml#/otc_order_detail'
++  /api/v1/otc/orders/{id}/cancel:
++    $ref: './paths/apt_otc.yaml#/otc_order_cancel'
++  /api/v1/otc/trades:
++    $ref: './paths/apt_otc.yaml#/otc_trades'
++  /api/v1/otc/users/{id}/orders:
++    $ref: './paths/apt_otc.yaml#/otc_user_orders'
++  # ---- Policy / Parameter（05 §6）----
++  /api/v1/policy/evaluations:
++    $ref: './paths/policy_parameter.yaml#/policy_evaluation_create'
++  /api/v1/policy/evaluations/{id}:
++    $ref: './paths/policy_parameter.yaml#/policy_evaluation_detail'
++  /api/v1/parameter-definitions:
++    $ref: './paths/policy_parameter.yaml#/parameter_definitions'
++  /api/v1/parameter-candidates:
++    $ref: './paths/policy_parameter.yaml#/parameter_candidate_create'
++  /api/v1/parameter-releases:
++    $ref: './paths/policy_parameter.yaml#/parameter_release_create'
++  /api/v1/parameter-releases/{id}/activate:
++    $ref: './paths/policy_parameter.yaml#/parameter_release_activate'
++  /api/v1/parameters/snapshots/{id}:
++    $ref: './paths/policy_parameter.yaml#/parameter_snapshot_detail'
++  # ---- Admin（05 §6 Admin + Prediction 后台）----
++  /api/v1/admin/markets:
++    $ref: './paths/admin.yaml#/market_create'
++  /api/v1/admin/markets/{id}/publish:
++    $ref: './paths/admin.yaml#/market_publish'
++  /api/v1/admin/markets/{id}/lock-evaluations:
++    $ref: './paths/admin.yaml#/market_lock_evaluations'
++  /api/v1/admin/markets/{id}/results:
++    $ref: './paths/admin.yaml#/market_result'
++  /api/v1/admin/settlement-batches:
++    $ref: './paths/admin.yaml#/settlement_batch_create'
++  /api/v1/admin/refunds:
++    $ref: './paths/admin.yaml#/refund_create'
++  /api/v1/admin/corrections:
++    $ref: './paths/admin.yaml#/correction_create'
++  /api/v1/admin/cases:
++    $ref: './paths/admin.yaml#/case_create'
++  /api/v1/approval-tasks/{id}/decisions:
++    $ref: './paths/admin.yaml#/approval_decision'
++  /api/v1/audit-log:
++    $ref: './paths/admin.yaml#/audit_log'
++  /api/v1/async-jobs/{id}:
++    $ref: './paths/admin.yaml#/async_job_detail'
++  /api/v1/export-tasks:
++    $ref: './paths/admin.yaml#/export_task_create'
++components:
++  securitySchemes:
++    bearerAuth:
++      type: http
++      scheme: bearer
++      bearerFormat: JWT
++  schemas:
++    ErrorEnvelope:
++      $ref: './components/schemas/common.yaml#/ErrorEnvelope'
++    SuccessEnvelope:
++      $ref: './components/schemas/common.yaml#/SuccessEnvelope'
++    WriteResult:
++      $ref: './components/schemas/common.yaml#/WriteResult'
++    PaginationCursor:
++      $ref: './components/schemas/common.yaml#/PaginationCursor'
++  headers:
++    Authorization:
++      $ref: './components/headers/request.yaml#/Authorization'
++    Idempotency-Key:
++      $ref: './components/headers/request.yaml#/Idempotency-Key'
++    If-Match:
++      $ref: './components/headers/request.yaml#/If-Match'
++    Accept-Language:
++      $ref: './components/headers/request.yaml#/Accept-Language'
++    X-Request-Id:
++      $ref: './components/headers/request.yaml#/X-Request-Id'
++    X-Timestamp:
++      $ref: './components/headers/request.yaml#/X-Timestamp'
++  responses:
++    Success:
++      $ref: './components/responses/common.yaml#/Success'
++    BadRequest:
++      $ref: './components/responses/common.yaml#/BadRequest'
++    Unauthenticated:
++      $ref: './components/responses/common.yaml#/Unauthenticated'
++    Forbidden:
++      $ref: './components/responses/common.yaml#/Forbidden'
++    NotFound:
++      $ref: './components/responses/common.yaml#/NotFound'
++    Conflict:
++      $ref: './components/responses/common.yaml#/Conflict'
++    Unprocessable:
++      $ref: './components/responses/common.yaml#/Unprocessable'
++    ResultUnknown:
++      $ref: './components/responses/common.yaml#/ResultUnknown'
++    DependencyUnavailable:
++      $ref: './components/responses/common.yaml#/DependencyUnavailable'
++    InternalError:
++      $ref: './components/responses/common.yaml#/InternalError'
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/admin.yaml b/0.5代码/gainode后端/gainode/openapi/paths/admin.yaml
+new file mode 100644
+index 0000000..7fb1f39
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/admin.yaml
+@@ -0,0 +1,175 @@
++# Admin P0 路径骨架（05 §6 Admin + Prediction 后台）
++# 业务 request/response schema 在 S02-P05/P07 落地。
++
++market_create:
++  post:
++    operationId: admin_market_create
++    summary: 创建市场
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++market_publish:
++  post:
++    operationId: admin_market_publish
++    summary: 发布市场
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++market_lock_evaluations:
++  post:
++    operationId: admin_market_lock_evaluations
++    summary: 锁定盘口
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++market_result:
++  post:
++    operationId: admin_market_result
++    summary: 录入赛果
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++settlement_batch_create:
++  post:
++    operationId: admin_settlement_batch_create
++    summary: 创建结算批次
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++refund_create:
++  post:
++    operationId: admin_refund_create
++    summary: 创建退款
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++correction_create:
++  post:
++    operationId: admin_correction_create
++    summary: 创建更正
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++case_create:
++  post:
++    operationId: admin_case_create
++    summary: 创建案件
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++approval_decision:
++  post:
++    operationId: admin_approval_decision
++    summary: 审批决策
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++audit_log:
++  get:
++    operationId: admin_audit_log
++    summary: 审计日志查询
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++async_job_detail:
++  get:
++    operationId: admin_async_job_detail
++    summary: 异步任务详情
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++export_task_create:
++  post:
++    operationId: admin_export_task_create
++    summary: 创建导出任务
++    tags: [Admin]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/apt_otc.yaml b/0.5代码/gainode后端/gainode/openapi/paths/apt_otc.yaml
+new file mode 100644
+index 0000000..d904412
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/apt_otc.yaml
+@@ -0,0 +1,105 @@
++# APT / OTC P0 路径骨架（05 §6 APT/OTC）
++# 业务 request/response schema 在 S02-P03/P06 落地。
++
++asset_ledger:
++  get:
++    operationId: apt_asset_ledger
++    summary: 资产账本
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_order_book:
++  get:
++    operationId: otc_order_book
++    summary: 订单簿
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_quote:
++  post:
++    operationId: otc_quote
++    summary: 报价（不产生账本）
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_order_create:
++  post:
++    operationId: otc_order_create
++    summary: 创建订单
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_order_detail:
++  get:
++    operationId: otc_order_detail
++    summary: 订单详情
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_order_cancel:
++  post:
++    operationId: otc_order_cancel
++    summary: 取消订单
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_trades:
++  get:
++    operationId: otc_trades
++    summary: 成交列表
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otc_user_orders:
++  get:
++    operationId: otc_user_orders
++    summary: 用户订单列表
++    tags: [APT-OTC]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/auth.yaml b/0.5代码/gainode后端/gainode/openapi/paths/auth.yaml
+new file mode 100644
+index 0000000..b1c22cf
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/auth.yaml
+@@ -0,0 +1,153 @@
++# Auth / Session P0 路径骨架（05 §2.1）
++# 业务 request/response schema 在 S02-P02 落地；本包仅 operationId/security/统一响应。
++
++register:
++  post:
++    operationId: auth_register
++    summary: 注册
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++login:
++  post:
++    operationId: auth_login
++    summary: 登录
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otp_verify:
++  post:
++    operationId: auth_otp_verify
++    summary: OTP 验证
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++otp_resend:
++  post:
++    operationId: auth_otp_resend
++    summary: OTP 重发
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '429': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++mfa_verify:
++  post:
++    operationId: auth_mfa_verify
++    summary: MFA challenge
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++refresh:
++  post:
++    operationId: auth_refresh
++    summary: 刷新 session
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++logout:
++  post:
++    operationId: auth_logout
++    summary: 当前 session 退出
++    tags: [Auth]
++    security:
++      - bearerAuth: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++recovery:
++  post:
++    operationId: auth_recovery
++    summary: 发起找回
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++password_reset:
++  post:
++    operationId: auth_password_reset
++    summary: 重置密码
++    tags: [Auth]
++    security: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++me_sessions:
++  get:
++    operationId: auth_me_sessions
++    summary: 已登录会话/设备
++    tags: [Auth]
++    security:
++      - bearerAuth: []
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++me_session_revoke:
++  post:
++    operationId: auth_me_session_revoke
++    summary: 撤销其他 session
++    tags: [Auth]
++    security:
++      - bearerAuth: []
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/policy_parameter.yaml b/0.5代码/gainode后端/gainode/openapi/paths/policy_parameter.yaml
+new file mode 100644
+index 0000000..abcb38a
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/policy_parameter.yaml
+@@ -0,0 +1,99 @@
++# Policy / Parameter P0 路径骨架（05 §6 Policy/Parameter）
++# 业务 request/response schema 在 S02-P07 落地。
++
++policy_evaluation_create:
++  post:
++    operationId: policy_evaluation_create
++    summary: 策略评估
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++policy_evaluation_detail:
++  get:
++    operationId: policy_evaluation_detail
++    summary: 策略评估详情
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++parameter_definitions:
++  get:
++    operationId: parameter_definitions
++    summary: 参数定义列表
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++parameter_candidate_create:
++  post:
++    operationId: parameter_candidate_create
++    summary: 创建参数候选
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++parameter_release_create:
++  post:
++    operationId: parameter_release_create
++    summary: 创建参数发布
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++parameter_release_activate:
++  post:
++    operationId: parameter_release_activate
++    summary: 激活参数发布
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++parameter_snapshot_detail:
++  get:
++    operationId: parameter_snapshot_detail
++    summary: 参数快照详情
++    tags: [Policy-Parameter]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/prediction.yaml b/0.5代码/gainode后端/gainode/openapi/paths/prediction.yaml
+new file mode 100644
+index 0000000..14f8341
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/prediction.yaml
+@@ -0,0 +1,148 @@
++# Prediction P0 路径骨架（05 §6 Prediction，C 端）
++# 业务 request/response schema 在 S02-P05 落地。
++
++markets:
++  get:
++    operationId: prediction_markets
++    summary: 市场列表
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++market_detail:
++  get:
++    operationId: prediction_market_detail
++    summary: 市场详情
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++market_disclosure:
++  get:
++    operationId: prediction_market_disclosure
++    summary: 市场披露（版本化 disclosure）
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++consent_receipt_create:
++  post:
++    operationId: prediction_consent_receipt_create
++    summary: 创建同意回执
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++order_create:
++  post:
++    operationId: prediction_order_create
++    summary: 提交订单
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '202': { $ref: '../components/responses/common.yaml#/ResultUnknown' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++order_addition:
++  post:
++    operationId: prediction_order_addition
++    summary: 同选项追加
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++order_receipt:
++  get:
++    operationId: prediction_order_receipt
++    summary: 订单回执
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++settlement_detail:
++  get:
++    operationId: prediction_settlement_detail
++    summary: 结算详情
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++refund_detail:
++  get:
++    operationId: prediction_refund_detail
++    summary: 退款详情
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++appeal_create:
++  post:
++    operationId: prediction_appeal_create
++    summary: 发起申诉
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++appeal_detail:
++  get:
++    operationId: prediction_appeal_detail
++    summary: 申诉详情
++    tags: [Prediction]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/openapi/paths/robot.yaml b/0.5代码/gainode后端/gainode/openapi/paths/robot.yaml
+new file mode 100644
+index 0000000..ee982e1
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/openapi/paths/robot.yaml
+@@ -0,0 +1,193 @@
++# AI / Robot P0 路径骨架（05 §6 AI/Robot）
++# 业务 request/response schema 在 S02-P02/P04 落地。
++
++user_summary:
++  get:
++    operationId: robot_user_summary
++    summary: 用户 AI 汇总
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '403': { $ref: '../components/responses/common.yaml#/Forbidden' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++user_eligibility:
++  get:
++    operationId: robot_user_eligibility
++    summary: 用户 AI 资格
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++user_capacity:
++  get:
++    operationId: robot_user_capacity
++    summary: 用户 AI 容量
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++user_yield_coefficient:
++  get:
++    operationId: robot_user_yield_coefficient
++    summary: 用户收益率系数
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++robots:
++  get:
++    operationId: robot_list
++    summary: 机器人列表
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++robot_detail:
++  get:
++    operationId: robot_detail
++    summary: 机器人详情
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++upgrade_eligibility:
++  get:
++    operationId: robot_upgrade_eligibility
++    summary: 升级资格
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++upgrade_orders_create:
++  post:
++    operationId: robot_upgrade_order_create
++    summary: 创建升级订单
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++upgrade_order_detail:
++  get:
++    operationId: robot_upgrade_order_detail
++    summary: 升级订单详情
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++rewards:
++  get:
++    operationId: robot_rewards
++    summary: 奖励列表
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++reward_claim:
++  post:
++    operationId: robot_reward_claim
++    summary: 领取奖励
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++reward_claim_detail:
++  get:
++    operationId: robot_reward_claim_detail
++    summary: 奖励领取详情
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++computing_power:
++  get:
++    operationId: robot_computing_power
++    summary: 计算力
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++computing_power_ledger:
++  get:
++    operationId: robot_computing_power_ledger
++    summary: 计算力账本
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++robot_action:
++  post:
++    operationId: robot_action
++    summary: 机器人启停动作
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    parameters:
++      - $ref: '../components/headers/request.yaml#/Idempotency-Key'
++      - $ref: '../components/headers/request.yaml#/If-Match'
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '409': { $ref: '../components/responses/common.yaml#/Conflict' }
++      '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
++
++robot_action_detail:
++  get:
++    operationId: robot_action_detail
++    summary: 机器人动作详情
++    tags: [Robot]
++    security: [{ bearerAuth: [] }]
++    responses:
++      '200': { $ref: '../components/responses/common.yaml#/Success' }
++      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
++      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+diff --git a/0.5代码/gainode后端/gainode/support/middleware/RequestContext.php b/0.5代码/gainode后端/gainode/support/middleware/RequestContext.php
+new file mode 100644
+index 0000000..6f4dba2
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/support/middleware/RequestContext.php
+@@ -0,0 +1,102 @@
++<?php
++
++declare(strict_types=1);
++
++namespace support\middleware;
++
++use library\dict\ErrorDict;
++use library\response\Envelope;
++use support\Middleware;
++use Webman\Http\Request;
++use Webman\Http\Response;
++use Workerman\Coroutine\Context;
++
++/**
++ * 统一 RequestContext 中间件（07 §S02-P01 步骤 4）。
++ *
++ * 职责：
++ *   1. 解析六请求头并写入协程上下文（Context）。
++ *   2. 透传 / 生成 X-Request-Id（缺失或超长时服务端生成 32 位 hex）。
++ *   3. 写操作强制 Idempotency-Key（缺失/超长 → 400 fail-closed）。
++ *
++ * 六请求头（Environment Freeze 候选，见 TASK-20260816-008/design.md §2）：
++ *   Authorization / Idempotency-Key / If-Match / Accept-Language / X-Request-Id / X-Timestamp
++ */
++class RequestContext extends Middleware
++{
++    public const HEADER_AUTHORIZATION = 'Authorization';
++    public const HEADER_IDEMPOTENCY_KEY = 'Idempotency-Key';
++    public const HEADER_IF_MATCH = 'If-Match';
++    public const HEADER_ACCEPT_LANGUAGE = 'Accept-Language';
++    public const HEADER_X_REQUEST_ID = 'X-Request-Id';
++    public const HEADER_X_TIMESTAMP = 'X-Timestamp';
++
++    private const WRITE_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE'];
++    private const MAX_KEY_LENGTH = 64;
++
++    public function process(Request $request, callable $next): Response
++    {
++        $requestId = $this->resolveRequestId($request);
++        Context::set('request_id', $requestId);
++        Context::set('request_context', $this->buildContext($request, $requestId));
++
++        if (in_array($request->method(), self::WRITE_METHODS, true)
++            && (bool) env('API_ENFORCE_IDEMPOTENCY', true)) {
++            $idempotencyKey = $request->header(self::HEADER_IDEMPOTENCY_KEY, '');
++            if ($idempotencyKey === '' || strlen($idempotencyKey) > self::MAX_KEY_LENGTH) {
++                return $this->failClosed(
++                    ErrorDict::VALIDATION_ERROR,
++                    '写操作必须携带 Idempotency-Key（1~64 字符）',
++                    400,
++                    $requestId
++                );
++            }
++        }
++
++        return $next($request);
++    }
++
++    /**
++     * 获取当前请求 request_id（协程上下文）。
++     */
++    public static function getRequestId(): string
++    {
++        return Context::get('request_id', '');
++    }
++
++    /**
++     * 获取当前请求上下文（六请求头解析结果）。
++     */
++    public static function getContext(): array
++    {
++        return Context::get('request_context', []);
++    }
++
++    private function resolveRequestId(Request $request): string
++    {
++        $requestId = $request->header(self::HEADER_X_REQUEST_ID, '');
++        if ($requestId === '' || strlen($requestId) > self::MAX_KEY_LENGTH) {
++            return bin2hex(random_bytes(16));
++        }
++        return $requestId;
++    }
++
++    private function buildContext(Request $request, string $requestId): array
++    {
++        return [
++            'request_id'      => $requestId,
++            'authorization'   => $request->header(self::HEADER_AUTHORIZATION, ''),
++            'idempotency_key' => $request->header(self::HEADER_IDEMPOTENCY_KEY, ''),
++            'if_match'        => $request->header(self::HEADER_IF_MATCH, ''),
++            'accept_language' => $request->header(self::HEADER_ACCEPT_LANGUAGE, 'zh-CN'),
++            'x_timestamp'     => $request->header(self::HEADER_X_TIMESTAMP, ''),
++            'method'          => $request->method(),
++        ];
++    }
++
++    private function failClosed(string $code, string $message, int $status, string $requestId): Response
++    {
++        $body = json_encode(Envelope::error($code, $message, $status, [], $requestId), JSON_UNESCAPED_UNICODE);
++        return response($body, $status, ['Content-Type' => 'application/json']);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/tests/Contract/EnvelopeContractTest.php b/0.5代码/gainode后端/gainode/tests/Contract/EnvelopeContractTest.php
+new file mode 100644
+index 0000000..3f15b1b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Contract/EnvelopeContractTest.php
+@@ -0,0 +1,89 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * Envelope + ErrorDict 契约测试（S02-P01）。
++ *
++ * 覆盖：
++ *   1. 成功 envelope 结构（request_id/data/data_status/source_status + 数据新鲜度 8 字段）；
++ *   2. 写操作 extra 字段不能被覆盖（$base + $extra 左优先）；
++ *   3. 错误 envelope 结构；
++ *   4. ErrorDict 05 §7 16 错误码 → HTTP 状态映射逐项正确；
++ *   5. 未知错误码兜底 500。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\dict\ErrorDict;
++use library\response\Envelope;
++
++echo "=====================================================\n";
++echo "Envelope + ErrorDict contract test\n";
++echo "=====================================================\n\n";
++
++// ---- 成功 envelope ----
++echo "[1] 成功 envelope 结构\n";
++$s = Envelope::success(['id' => '1001'], ['snapshot_id' => 'SNAP1'], [], 'REQ123');
++check($s['request_id'] === 'REQ123', 'request_id 透传');
++check($s['data']['id'] === '1001', 'data 正确');
++check($s['data_status'] === 'REALTIME', 'data_status 默认 REALTIME');
++check($s['source_status'] === 'OK', 'source_status 默认 OK');
++check($s['snapshot_id'] === 'SNAP1', 'snapshot_id 来自 meta');
++check(array_key_exists('as_of', $s), 'as_of 存在');
++check(array_key_exists('next_refresh_at', $s), 'next_refresh_at 存在');
++check(array_key_exists('stale_after', $s), 'stale_after 存在');
++echo "\n";
++
++// ---- 写操作 extra 字段 ----
++echo "[2] 写操作 extra 字段（不可覆盖固定字段）\n";
++$w = Envelope::success(['status' => 'processing'], [], [
++    'idempotency_key' => 'IK1',
++    'object_type'     => 'prediction_orders',
++    'object_id'       => '2001',
++    'status'          => 'pending',
++    'result_code'     => 'RESULT_UNKNOWN',
++], 'REQ456');
++check($w['idempotency_key'] === 'IK1', 'idempotency_key 追加');
++check($w['object_type'] === 'prediction_orders', 'object_type 追加');
++check($w['request_id'] === 'REQ456', 'request_id 不可被覆盖');
++check($w['data']['status'] === 'processing', 'data 不可被覆盖');
++echo "\n";
++
++// ---- 错误 envelope ----
++echo "[3] 错误 envelope 结构\n";
++$e = Envelope::error(ErrorDict::OBJECT_VERSION_CONFLICT, '版本冲突', 409, [], 'REQ789');
++check($e['result_code'] === 'OBJECT_VERSION_CONFLICT', 'result_code 正确');
++check($e['http_status'] === 409, 'http_status 正确');
++check($e['request_id'] === 'REQ789', 'request_id 正确');
++check(array_key_exists('details', $e), 'details 存在');
++echo "\n";
++
++// ---- ErrorDict HTTP 状态映射 ----
++echo "[4] ErrorDict 05 §7 映射\n";
++$expected = [
++    'VALIDATION_ERROR'         => 400,
++    'AUTH_UNAUTHENTICATED'     => 401,
++    'AUTH_FORBIDDEN'           => 403,
++    'KYC_REQUIRED'             => 403,
++    'POLICY_DENIED'            => 403,
++    'FEATURE_CLOSED'           => 403,
++    'CONSENT_VERSION_MISMATCH' => 409,
++    'IDEMPOTENCY_CONFLICT'     => 409,
++    'OBJECT_VERSION_CONFLICT'  => 409,
++    'QUOTE_EXPIRED'            => 409,
++    'INSUFFICIENT_APT'         => 422,
++    'INSUFFICIENT_POWER'       => 422,
++    'MARKET_LOCKED'            => 422,
++    'DEPENDENCY_UNAVAILABLE'   => 503,
++    'RESULT_UNKNOWN'           => 202,
++    'INTERNAL_ERROR'           => 500,
++];
++foreach ($expected as $code => $status) {
++    $actual = ErrorDict::httpStatus($code);
++    check($actual === $status, "{$code} → {$status}（实际 {$actual}）");
++}
++check(ErrorDict::httpStatus('UNKNOWN_CODE') === 500, '未知错误码兜底 500');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/Contract/_bootstrap.php b/0.5代码/gainode后端/gainode/tests/Contract/_bootstrap.php
+new file mode 100644
+index 0000000..348fa32
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Contract/_bootstrap.php
+@@ -0,0 +1,39 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * S02-P01 Contract 测试公共引导（独立 CLI 脚本，无需 PHPUnit）。
++ * 仅加载 autoload，不建立数据库连接（envelope/错误分类为纯逻辑）。
++ */
++
++require __DIR__ . '/../../vendor/autoload.php';
++
++$GLOBALS['__contract_pass'] = 0;
++$GLOBALS['__contract_fail'] = 0;
++
++function check(bool $cond, string $label): void
++{
++    if ($cond) {
++        $GLOBALS['__contract_pass']++;
++        echo "PASS: {$label}\n";
++    } else {
++        $GLOBALS['__contract_fail']++;
++        echo "FAIL: {$label}\n";
++    }
++}
++
++function summary(): void
++{
++    $pass = $GLOBALS['__contract_pass'];
++    $fail = $GLOBALS['__contract_fail'];
++    echo "=====================================================\n";
++    echo "RESULT: pass={$pass} fail={$fail}\n";
++    echo "=====================================================\n";
++    if ($fail > 0) {
++        echo "TEST FAILED\n";
++        exit(1);
++    }
++    echo "ALL PASS\n";
++    exit(0);
++}
+diff --git a/0.5代码/gainode后端/gainode/tests/Feature/README.md b/0.5代码/gainode后端/gainode/tests/Feature/README.md
+new file mode 100644
+index 0000000..9ae914b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Feature/README.md
+@@ -0,0 +1,14 @@
++# tests/Feature — 占位入口（S02-P01）
++
++本目录为 Feature 测试入口。S02-P01 为 OpenAPI/环境/通用内核包，**不实现任何 P0 业务写流程**，故无 Feature 测试。
++
++Feature 测试（业务流程级，含 Controller/Validator/Service 集成）自 S02-P02 起随业务写流程落地：
++
++- `S02-P02`：Auth / KYC / User / Eligibility
++- `S02-P03`：Ledger / AptAccount / Power 事务模板
++- `S02-P04`：Robot / Reward / Upgrade
++- `S02-P05`：Prediction P0
++- `S02-P06`：OTC / Power
++- `S02-P07`：Approval / Parameter / Risk / Support / Notice / Audit
++
++本包仅在此建立目录与契约说明，不伪造空通过的 Feature 测试。
+diff --git a/0.5代码/gainode后端/gainode/tests/Integration/KernelContractTest.php b/0.5代码/gainode后端/gainode/tests/Integration/KernelContractTest.php
+new file mode 100644
+index 0000000..33d6749
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Integration/KernelContractTest.php
+@@ -0,0 +1,52 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * 通用内核契约测试（S02-P01，Integration）。
++ *
++ * 覆盖：
++ *   1. NullIdempotencyStore：isAvailable()=false（fail-closed），find/reserve/complete 无副作用；
++ *   2. NullOutboxStore：isAvailable()=false，append 无副作用；
++ *   3. 未冻结存储的 fail-closed 语义：调用方依赖 isAvailable() 判定拒绝写。
++ */
++
++require __DIR__ . '/_bootstrap.php';
++
++use library\service\idempotency\IdempotencyStore;
++use library\service\idempotency\NullIdempotencyStore;
++use library\service\outbox\NullOutboxStore;
++use library\service\outbox\OutboxStore;
++
++echo "=====================================================\n";
++echo "Kernel contract test\n";
++echo "=====================================================\n\n";
++
++// ---- IdempotencyStore 契约 ----
++echo "[1] NullIdempotencyStore fail-closed\n";
++$idem = new NullIdempotencyStore();
++check($idem instanceof IdempotencyStore, '实现 IdempotencyStore 接口');
++check($idem->isAvailable() === false, 'isAvailable()=false（未冻结存储）');
++check($idem->find('IK1', 'prediction_orders') === null, 'find 恒返回 null');
++// reserve/complete 无副作用（不抛异常）
++$idem->reserve('IK1', 'prediction_orders', '2001', 'REQ1');
++$idem->complete('IK1', 'prediction_orders', '2001', ['status' => 'completed']);
++check(true, 'reserve/complete 无副作用不抛异常');
++echo "\n";
++
++// ---- fail-closed 判定契约 ----
++echo "[2] 依赖 isAvailable() 的 fail-closed 判定\n";
++$canWrite = $idem->isAvailable();
++check($canWrite === false, '未冻结存储 → 依赖幂等保证的写必须拒绝');
++echo "\n";
++
++// ---- OutboxStore 契约 ----
++echo "[3] NullOutboxStore fail-closed\n";
++$outbox = new NullOutboxStore();
++check($outbox instanceof OutboxStore, '实现 OutboxStore 接口');
++check($outbox->isAvailable() === false, 'isAvailable()=false（未冻结存储）');
++$outbox->append('DEDUP1', 'prediction_order_created', ['order_id' => '2001'], 'REQ1');
++check(true, 'append 无副作用不抛异常');
++echo "\n";
++
++summary();
+diff --git a/0.5代码/gainode后端/gainode/tests/Integration/_bootstrap.php b/0.5代码/gainode后端/gainode/tests/Integration/_bootstrap.php
+new file mode 100644
+index 0000000..d9ffedc
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/tests/Integration/_bootstrap.php
+@@ -0,0 +1,39 @@
++<?php
++
++declare(strict_types=1);
++
++/**
++ * S02-P01 Integration 测试公共引导（独立 CLI 脚本，无需 PHPUnit）。
++ * Null 内核存储不触数据库，仅加载 autoload。
++ */
++
++require __DIR__ . '/../../vendor/autoload.php';
++
++$GLOBALS['__int_pass'] = 0;
++$GLOBALS['__int_fail'] = 0;
++
++function check(bool $cond, string $label): void
++{
++    if ($cond) {
++        $GLOBALS['__int_pass']++;
++        echo "PASS: {$label}\n";
++    } else {
++        $GLOBALS['__int_fail']++;
++        echo "FAIL: {$label}\n";
++    }
++}
++
++function summary(): void
++{
++    $pass = $GLOBALS['__int_pass'];
++    $fail = $GLOBALS['__int_fail'];
++    echo "=====================================================\n";
++    echo "RESULT: pass={$pass} fail={$fail}\n";
++    echo "=====================================================\n";
++    if ($fail > 0) {
++        echo "TEST FAILED\n";
++        exit(1);
++    }
++    echo "ALL PASS\n";
++    exit(0);
++}

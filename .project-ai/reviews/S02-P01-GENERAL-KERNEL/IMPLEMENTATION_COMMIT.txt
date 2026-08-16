@@ -1,0 +1,1 @@
+097b5cea70660f59e8a88997f1fe7e12dfbce2aa pandy123321 131004891+pandy123321@users.noreply.github.com 1786858573 +0800 origin:developer stage:STAGE-02 package:S02-P01 通用内核（OpenAPI 3.1 契约 + env.example + 统一 Response/Error + RequestContext + Idempotency/Outbox/Transaction 内核 + manifest/context 指针）
