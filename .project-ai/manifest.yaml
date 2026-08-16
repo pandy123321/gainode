@@ -1,6 +1,6 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 27
+contextVersion: 28
 status: PUBLISHED
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
@@ -300,3 +300,8 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P02 六子流程实现，commit 1c37f6b）← 07 §S02-P02 固定步骤 1-6 ← 05 §1/§2.2/§3/§4/§7/§10/§11.1 ← machine_contract_batch2b2_state_contract ← stage02_p01_general_kernel"
+  stage02_p03_ledger_aptaccount_power:
+    value: "COMPLETE 2026-08-16 — S02-P03 Ledger/AptAccount/Power 基础（APT 数量账经济写路径统一事务模板，不新增 DDL）。交付：library/service/ledger/LedgerService.php（append/post/cancel/reverse + dispute/resolveDispute FAIL_CLOSED DEPENDENCY_UNAVAILABLE，白名单三列 state/audit_event_id/object_version 受控状态转移 + appendAudit 追加审计 + getByIdempotencyKey 幂等去重 IDEMPOTENCY_CONFLICT）；library/service/ledger/AptAccountService.php（getAggregateDisputeHold=0 因 dispute fail-closed、getEffectiveAvailable、applyEntryEffect 11 步 CAS 乐观锁 object_version + 负余额保护 INSUFFICIENT_APT 422 + 冲突 OBJECT_VERSION_CONFLICT 409，金额全 bcmath decimal string）；library/service/power/PowerPositionService.php（consume/recover/previewImpact 全部 DEPENDENCY_UNAVAILABLE 503 fail-closed，规则未冻结）；library/model/ledger/AptLedgerEntryModel.php（补 object_version 字段 + ENTRY_DIRECTION_CREDIT=1/DEBIT=-1 + ENTRY_TYPE_LEDGER_REVERSAL + ASSET_APT_I 常量，append-only 未放宽）；OpenAPI components/schemas/ledger.yaml（LedgerEntry/AssetBalance/PowerPosition）+ paths/ledger.yaml（3 只读路径 me/asset、me/ledger-entries、me/power）+ gainode-v2.yaml 注册。测试 48 断言全过（18 Contract 领域常量/append-only 机械强制/append 输入校验/错误码 HTTP 映射 + 30 Integration 守恒/exactly-once/CAS 冲突/负余额/L2 取消无经济 reversal/L3 冲正 LEDGER_REVERSAL/fail-closed）。L1 pending→posted、L2 pending→reversed（ACCOUNT_DELTA=0）、L3 posted→reversed（追加 LEDGER_REVERSAL 反向分录）；L4-L7 dispute 因 RiskCase machine contract CONTRACT_GAP（2B-2 未冻结）FAIL_CLOSED；Power 变更因 Active Rule/Parameter TBC FAIL_CLOSED。任务: .project-ai/tasks/TASK-20260816-010/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P03 经济写路径）← 07 §S02-P03 固定步骤 1-7 ← 05 §3/§10 ← machine_contract_batch1_freeze（MC1 DDL）← machine_contract_batch2_freeze（MC2 State Transition + Ledger Mutation Field Contract + Dispute Hold Matrix + DISPUTE_SHORTFALL_POLICY）← stage02_p01_general_kernel（TransactionBoundary）"

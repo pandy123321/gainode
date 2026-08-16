@@ -1,0 +1,60 @@
+# APT 账本 / 账户 / Power 对象 schema（05 §3；S02-P03 落地）
+
+LedgerEntry:
+  description: APT 账本分录（05 §3 AptLedgerEntry，append-only）
+  type: object
+  required: [ledger_entry_id, account_id, asset, quantity, entry_direction, entry_type, state]
+  properties:
+    ledger_entry_id: { type: string, description: Snowflake 主键 }
+    account_id: { type: string }
+    asset: { type: string, enum: ['APT-I'] }
+    quantity: { type: string, description: 变动数量(decimal(36,18) string，恒正) }
+    entry_direction: { type: integer, enum: [1, -1], description: 1=CREDIT 入账 / -1=DEBIT 出账 }
+    entry_type: { type: string, description: 分录类型(业务事件码) }
+    state: { type: string, enum: [pending, posted, reversed, disputed] }
+    source_object_type: { type: string }
+    source_object_id: { type: string }
+    journal_batch_id: { type: string }
+    reversal_of: { type: string, description: 冲正引用原分录 ID(0=非冲正) }
+    idempotency_key: { type: string, nullable: true }
+    rule_version: { type: string }
+    snapshot_id: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+    created_time: { type: integer }
+
+AssetBalance:
+  description: APT 账户余额（05 §3 AptAccount，scalar 余额 + 聚合投影）
+  type: object
+  required: [account_id, balance_apt_i, effective_available]
+  properties:
+    account_id: { type: string }
+    balance_apt_i: { type: string, description: stored_available(decimal(36,18) string) }
+    balance_apt_c: { type: string, description: Future/OUT_OF_SCOPE }
+    frozen_apt_i: { type: string }
+    frozen_apt_c: { type: string }
+    total_earned_apt: { type: string }
+    total_spent_apt: { type: string }
+    aggregate_dispute_hold: { type: string, description: 账户级 dispute hold 聚合投影(S02-P03 恒 0) }
+    effective_available: { type: string, description: stored_available - aggregate_dispute_hold }
+    rule_version: { type: string }
+    snapshot_id: { type: string }
+    object_version: { type: integer }
+
+PowerPosition:
+  description: Power 持仓（05 §3 PowerPosition，scalar fields，无状态机）
+  type: object
+  required: [user_id, available]
+  properties:
+    user_id: { type: string }
+    available: { type: string }
+    frozen: { type: string }
+    consumed_period: { type: string }
+    released_period: { type: string }
+    recovering: { type: string }
+    limit: { type: string }
+    power_cap_source_robot_level: { type: integer }
+    last_restore_at: { type: integer }
+    next_restore_at: { type: integer }
+    rule_version: { type: string }
+    object_version: { type: integer }

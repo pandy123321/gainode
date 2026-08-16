@@ -136,6 +136,13 @@ paths:
     $ref: './paths/apt_otc.yaml#/otc_trades'
   /api/v1/otc/users/{id}/orders:
     $ref: './paths/apt_otc.yaml#/otc_user_orders'
+  # ---- APT 账本 / Power 基础只读（S02-P03，05 §6）----
+  /api/v1/me/asset:
+    $ref: './paths/ledger.yaml#/asset_balance'
+  /api/v1/me/ledger-entries:
+    $ref: './paths/ledger.yaml#/ledger_entries'
+  /api/v1/me/power:
+    $ref: './paths/ledger.yaml#/power_position'
   # ---- Policy / Parameter（05 §6）----
   /api/v1/policy/evaluations:
     $ref: './paths/policy_parameter.yaml#/policy_evaluation_create'
@@ -207,6 +214,12 @@ components:
       $ref: './components/schemas/eligibility.yaml#/FeatureEntitlement'
     EligibilityResponse:
       $ref: './components/schemas/eligibility.yaml#/EligibilityResponse'
+    LedgerEntry:
+      $ref: './components/schemas/ledger.yaml#/LedgerEntry'
+    AssetBalance:
+      $ref: './components/schemas/ledger.yaml#/AssetBalance'
+    PowerPosition:
+      $ref: './components/schemas/ledger.yaml#/PowerPosition'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

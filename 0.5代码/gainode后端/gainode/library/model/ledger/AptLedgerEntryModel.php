@@ -54,6 +54,7 @@ use support\exception\RunException;
  * @property string $rule_version 生效规则版本号
  * @property string $snapshot_id 关联参数快照ID
  * @property string $audit_event_id 关联审计事件ID(state 流转的证据)
+ * @property int $object_version 并发控制版本号(乐观锁，MC2 补列 CR-20260815-001，CANDIDATE)
  * @property int $created_time 创建时间(Unix秒)
  */
 class AptLedgerEntryModel extends Model
@@ -71,6 +72,13 @@ class AptLedgerEntryModel extends Model
         self::STATE_REVERSED,
         self::STATE_DISPUTED,
     ];
+
+    // 分录方向（MC2 Event Catalog，Owner 裁决 #16）
+    public const ENTRY_DIRECTION_CREDIT = 1;   // 入账
+    public const ENTRY_DIRECTION_DEBIT = -1;   // 出账
+
+    // 分录类型（业务事件码，对齐 Event Catalog；S02-P03 仅 reversal 由本模块产生）
+    public const ENTRY_TYPE_LEDGER_REVERSAL = 'LEDGER_REVERSAL';
 
     // 资产类型（DDL enum 冻结，仅 APT-I；APT-C 为 Future/OUT_OF_SCOPE）
     public const ASSET_APT_I = 'APT-I';
@@ -108,6 +116,7 @@ class AptLedgerEntryModel extends Model
         'rule_version',
         'snapshot_id',
         'audit_event_id',
+        'object_version',
         'created_time',
     ];
 

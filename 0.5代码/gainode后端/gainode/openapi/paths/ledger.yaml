@@ -1,0 +1,36 @@
+# APT 账本 / Power 基础只读路径（05 §6；S02-P03 落地）
+# 经济写路径（post/cancel/reverse/dispute）由内部 Authoritative Writer 触发，
+# 不对外暴露直接改写接口（超级管理员无旁路）。
+
+asset_balance:
+  get:
+    operationId: me_asset_balance
+    summary: 我的 APT 余额（含 effective_available 投影）
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+ledger_entries:
+  get:
+    operationId: me_ledger_entries
+    summary: 我的账本分录列表（append-only，按时间倒序）
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+power_position:
+  get:
+    operationId: me_power_position
+    summary: 我的 Power 持仓（规则未冻结，仅只读投影）
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
