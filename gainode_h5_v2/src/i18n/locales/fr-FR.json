@@ -54,6 +54,33 @@
     "back_to_login": "Retour à la connexion",
     "next_step_home": "Continuer"
   },
+  "kyc": {
+    "status": {
+      "not_started": "Non commencé",
+      "pending": "En cours d'examen",
+      "needs_info": "Informations requises",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "review": "Nouvel examen"
+    },
+    "feature": {
+      "global_p": "Fonctions de base",
+      "ai": "Récompenses IA",
+      "prediction": "Prédictions",
+      "allowed": "Disponible",
+      "restricted": "Restreint"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Mise à niveau Robot",
+      "KYC_UPDATE": "Mise à jour KYC",
+      "OTC_ORDER": "Ordre OTC",
+      "MARKET_SETTLEMENT": "Règlement du marché",
+      "RISK_ACTION": "Alerte de risque",
+      "SYSTEM_ANNOUNCEMENT": "Annonce système"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Se connecter",
@@ -79,6 +106,45 @@
       "title": "Vérification à deux facteurs",
       "description": "Terminez la vérification de sécurité pour continuer",
       "primary_action": "Vérifier"
+    },
+    "m_kyc_001": {
+      "title": "KYC & accès",
+      "description": "Consulter l'avancement et les fonctions disponibles",
+      "primary_action": "Commencer la vérification",
+      "action_supplement": "Fournir plus d'infos",
+      "action_view": "Voir le statut",
+      "action_home": "Retour à l'accueil",
+      "capabilities_title": "Fonctions"
+    },
+    "m_kyc_002": {
+      "title": "Soumettre des documents",
+      "description": "Soumettre des documents d'identité",
+      "primary_action": "Soumettre",
+      "upload_label": "Téléverser un document",
+      "upload_hint": "JPG/PNG, 10MB max par fichier",
+      "upload_success": "Téléversé",
+      "upload_failed": "Échec du téléversement, veuillez réessayer",
+      "consent_label": "J'accepte de soumettre mes informations pour vérification",
+      "consent_required": "Veuillez d'abord accepter la soumission",
+      "attachment_required": "Veuillez téléverser au moins un document",
+      "submit_success": "Soumis, en attente d'examen",
+      "submitting": "Soumission…"
+    },
+    "m_kyc_003": {
+      "title": "Statut KYC",
+      "description": "Consulter l'avancement et le résultat",
+      "primary_action": "Retour",
+      "action_supplement": "Fournir plus d'infos",
+      "timeline_title": "Avancement"
+    },
+    "m_notice_001": {
+      "title": "Centre de messages",
+      "description": "Consulter vos notifications",
+      "primary_action": "Voir",
+      "tab_unread": "Non lues",
+      "tab_all": "Toutes",
+      "mark_all": "Tout marquer comme lu",
+      "empty": "Aucune notification"
     }
   }
 }

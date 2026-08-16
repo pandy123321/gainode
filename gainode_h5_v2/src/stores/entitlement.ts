@@ -1,35 +1,44 @@
 import { defineStore } from 'pinia'
+import { eligibilityApi, type EligibilityResponse, type FeatureEntitlement } from '../api/kyc'
 
-export interface EntitlementState {
+interface EntitlementState {
+  response: EligibilityResponse | null
   loaded: boolean
-  globalPLevel: number
-  aiRewardEligible: boolean
-  predictionEligible: boolean
-  restrictedReason: string | null
+  loading: boolean
+  error: string | null
 }
 
 export const useEntitlementStore = defineStore('entitlement', {
   state: (): EntitlementState => ({
+    response: null,
     loaded: false,
-    globalPLevel: 0,
-    aiRewardEligible: false,
-    predictionEligible: false,
-    restrictedReason: null,
+    loading: false,
+    error: null,
   }),
   getters: {
-    anyEligible: (s) => s.aiRewardEligible || s.predictionEligible,
+    globalP: (s): FeatureEntitlement | null => s.response?.global_p ?? null,
+    ai: (s): FeatureEntitlement | null => s.response?.ai ?? null,
+    prediction: (s): FeatureEntitlement | null => s.response?.prediction ?? null,
   },
   actions: {
-    // S03-P02 接入 /me/entitlement；默认 deny（fail-closed）
-    setLoaded(value: EntitlementState) {
-      Object.assign(this, value, { loaded: true })
+    async fetch() {
+      this.loading = true
+      this.error = null
+      try {
+        const env = await eligibilityApi.me()
+        this.response = env.data
+        this.loaded = true
+      } catch (e) {
+        this.error = e instanceof Error ? e.message : '资格加载失败'
+      } finally {
+        this.loading = false
+      }
     },
     reset() {
+      this.response = null
       this.loaded = false
-      this.globalPLevel = 0
-      this.aiRewardEligible = false
-      this.predictionEligible = false
-      this.restrictedReason = null
+      this.loading = false
+      this.error = null
     },
   },
 })

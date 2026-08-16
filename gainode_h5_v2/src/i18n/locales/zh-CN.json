@@ -54,6 +54,33 @@
     "back_to_login": "返回登录",
     "next_step_home": "继续"
   },
+  "kyc": {
+    "status": {
+      "not_started": "未开始",
+      "pending": "审核中",
+      "needs_info": "需补件",
+      "approved": "已通过",
+      "rejected": "未通过",
+      "review": "复核中"
+    },
+    "feature": {
+      "global_p": "基础功能",
+      "ai": "AI 收益",
+      "prediction": "竞猜",
+      "allowed": "可用",
+      "restricted": "受限"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Robot 升级",
+      "KYC_UPDATE": "KYC 更新",
+      "OTC_ORDER": "OTC 订单",
+      "MARKET_SETTLEMENT": "竞猜结算",
+      "RISK_ACTION": "风险通知",
+      "SYSTEM_ANNOUNCEMENT": "系统公告"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "登录",
@@ -79,6 +106,45 @@
       "title": "二次验证",
       "description": "请完成安全验证以继续",
       "primary_action": "验证"
+    },
+    "m_kyc_001": {
+      "title": "KYC 与功能准入",
+      "description": "查看验证进度与可用功能",
+      "primary_action": "开始验证",
+      "action_supplement": "补充资料",
+      "action_view": "查看结果",
+      "action_home": "返回首页",
+      "capabilities_title": "功能能力"
+    },
+    "m_kyc_002": {
+      "title": "资料提交",
+      "description": "提交身份验证资料",
+      "primary_action": "提交",
+      "upload_label": "上传证件",
+      "upload_hint": "支持 JPG/PNG，单张不超过 10MB",
+      "upload_success": "上传成功",
+      "upload_failed": "上传失败，请重试",
+      "consent_label": "同意提交资料用于身份验证",
+      "consent_required": "请先同意资料提交",
+      "attachment_required": "请至少上传一份证件",
+      "submit_success": "提交成功，等待审核",
+      "submitting": "提交中…"
+    },
+    "m_kyc_003": {
+      "title": "KYC 状态",
+      "description": "查看审核进度与结果",
+      "primary_action": "返回",
+      "action_supplement": "补充资料",
+      "timeline_title": "进度"
+    },
+    "m_notice_001": {
+      "title": "消息中心",
+      "description": "查看你的通知",
+      "primary_action": "查看",
+      "tab_unread": "未读",
+      "tab_all": "全部",
+      "mark_all": "全部已读",
+      "empty": "暂无通知"
     }
   }
 }

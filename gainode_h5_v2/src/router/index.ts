@@ -49,6 +49,31 @@ const router = createRouter({
       component: () => import('../views/auth/m-auth-005/index.vue'),
       meta: { pageId: 'M-AUTH-005' },
     },
+    // ---- H5-02 KYC/Notice（M-KYC-001..003 / M-NOTICE-001）----
+    {
+      path: '/kyc',
+      name: 'kyc-overview',
+      component: () => import('../views/kyc/m-kyc-001/index.vue'),
+      meta: { pageId: 'M-KYC-001', auth: true },
+    },
+    {
+      path: '/kyc/form',
+      name: 'kyc-form',
+      component: () => import('../views/kyc/m-kyc-002/index.vue'),
+      meta: { pageId: 'M-KYC-002', auth: true },
+    },
+    {
+      path: '/kyc/status',
+      name: 'kyc-status',
+      component: () => import('../views/kyc/m-kyc-003/index.vue'),
+      meta: { pageId: 'M-KYC-003', auth: true },
+    },
+    {
+      path: '/notices',
+      name: 'notice-center',
+      component: () => import('../views/notice/m-notice-001/index.vue'),
+      meta: { pageId: 'M-NOTICE-001', auth: true },
+    },
     {
       path: '/:pathMatch(.*)*',
       redirect: '/',

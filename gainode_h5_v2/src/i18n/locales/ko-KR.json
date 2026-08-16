@@ -54,6 +54,33 @@
     "back_to_login": "로그인으로 돌아가기",
     "next_step_home": "계속"
   },
+  "kyc": {
+    "status": {
+      "not_started": "시작 안 함",
+      "pending": "검토 중",
+      "needs_info": "추가 정보 필요",
+      "approved": "승인됨",
+      "rejected": "거부됨",
+      "review": "재검토"
+    },
+    "feature": {
+      "global_p": "기본 기능",
+      "ai": "AI 보상",
+      "prediction": "예측",
+      "allowed": "사용 가능",
+      "restricted": "제한됨"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Robot 업그레이드",
+      "KYC_UPDATE": "KYC 업데이트",
+      "OTC_ORDER": "OTC 주문",
+      "MARKET_SETTLEMENT": "시장 정산",
+      "RISK_ACTION": "리스크 알림",
+      "SYSTEM_ANNOUNCEMENT": "시스템 공지"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "로그인",
@@ -79,6 +106,45 @@
       "title": "2단계 인증",
       "description": "계속하려면 보안 인증을 완료하세요",
       "primary_action": "확인"
+    },
+    "m_kyc_001": {
+      "title": "KYC 및 기능 접근",
+      "description": "인증 진행 상황과 사용 가능한 기능 확인",
+      "primary_action": "인증 시작",
+      "action_supplement": "추가 정보 제공",
+      "action_view": "상태 보기",
+      "action_home": "홈으로 돌아가기",
+      "capabilities_title": "기능"
+    },
+    "m_kyc_002": {
+      "title": "서류 제출",
+      "description": "신원 확인 서류 제출",
+      "primary_action": "제출",
+      "upload_label": "서류 업로드",
+      "upload_hint": "JPG/PNG, 장당 10MB 이하",
+      "upload_success": "업로드 완료",
+      "upload_failed": "업로드 실패, 다시 시도하세요",
+      "consent_label": "신원 확인을 위해 정보 제출에 동의합니다",
+      "consent_required": "먼저 제출에 동의하세요",
+      "attachment_required": "서류를 하나 이상 업로드하세요",
+      "submit_success": "제출 완료, 검토 대기 중",
+      "submitting": "제출 중…"
+    },
+    "m_kyc_003": {
+      "title": "KYC 상태",
+      "description": "검토 진행 상황과 결과 확인",
+      "primary_action": "뒤로",
+      "action_supplement": "추가 정보 제공",
+      "timeline_title": "진행 상황"
+    },
+    "m_notice_001": {
+      "title": "알림 센터",
+      "description": "알림 확인",
+      "primary_action": "보기",
+      "tab_unread": "안 읽음",
+      "tab_all": "전체",
+      "mark_all": "모두 읽음",
+      "empty": "알림 없음"
     }
   }
 }

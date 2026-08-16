@@ -54,6 +54,33 @@
     "back_to_login": "Zurück zur Anmeldung",
     "next_step_home": "Weiter"
   },
+  "kyc": {
+    "status": {
+      "not_started": "Nicht begonnen",
+      "pending": "In Prüfung",
+      "needs_info": "Weitere Infos nötig",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "review": "Erneute Prüfung"
+    },
+    "feature": {
+      "global_p": "Basisfunktionen",
+      "ai": "KI-Belohnungen",
+      "prediction": "Vorhersagen",
+      "allowed": "Verfügbar",
+      "restricted": "Eingeschränkt"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Robot-Upgrade",
+      "KYC_UPDATE": "KYC-Update",
+      "OTC_ORDER": "OTC-Auftrag",
+      "MARKET_SETTLEMENT": "Marktabrechnung",
+      "RISK_ACTION": "Risikohinweis",
+      "SYSTEM_ANNOUNCEMENT": "Systemankündigung"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Anmelden",
@@ -79,6 +106,45 @@
       "title": "Zwei-Faktor-Verifizierung",
       "description": "Schließen Sie die Sicherheitsprüfung ab, um fortzufahren",
       "primary_action": "Verifizieren"
+    },
+    "m_kyc_001": {
+      "title": "KYC & Zugriff",
+      "description": "Verifizierungsfortschritt und verfügbare Funktionen prüfen",
+      "primary_action": "Verifizierung starten",
+      "action_supplement": "Weitere Infos bereitstellen",
+      "action_view": "Status ansehen",
+      "action_home": "Zurück zur Startseite",
+      "capabilities_title": "Funktionen"
+    },
+    "m_kyc_002": {
+      "title": "Dokumente einreichen",
+      "description": "Identitätsdokumente einreichen",
+      "primary_action": "Einreichen",
+      "upload_label": "Dokument hochladen",
+      "upload_hint": "JPG/PNG, max. 10MB pro Datei",
+      "upload_success": "Hochgeladen",
+      "upload_failed": "Upload fehlgeschlagen, bitte erneut versuchen",
+      "consent_label": "Ich stimme der Einreichung zur Identitätsprüfung zu",
+      "consent_required": "Bitte zuerst der Einreichung zustimmen",
+      "attachment_required": "Bitte mindestens ein Dokument hochladen",
+      "submit_success": "Eingereicht, wird geprüft",
+      "submitting": "Wird eingereicht…"
+    },
+    "m_kyc_003": {
+      "title": "KYC-Status",
+      "description": "Prüfungsfortschritt und Ergebnis ansehen",
+      "primary_action": "Zurück",
+      "action_supplement": "Weitere Infos bereitstellen",
+      "timeline_title": "Fortschritt"
+    },
+    "m_notice_001": {
+      "title": "Nachrichten",
+      "description": "Deine Benachrichtigungen ansehen",
+      "primary_action": "Ansehen",
+      "tab_unread": "Ungelesen",
+      "tab_all": "Alle",
+      "mark_all": "Alle als gelesen markieren",
+      "empty": "Keine Benachrichtigungen"
     }
   }
 }

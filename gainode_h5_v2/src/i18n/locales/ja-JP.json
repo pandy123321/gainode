@@ -54,6 +54,33 @@
     "back_to_login": "ログインに戻る",
     "next_step_home": "続ける"
   },
+  "kyc": {
+    "status": {
+      "not_started": "未開始",
+      "pending": "審査中",
+      "needs_info": "追加情報が必要",
+      "approved": "承認済み",
+      "rejected": "却下",
+      "review": "再審査"
+    },
+    "feature": {
+      "global_p": "基本機能",
+      "ai": "AI 報酬",
+      "prediction": "予想",
+      "allowed": "利用可能",
+      "restricted": "制限"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Robot アップグレード",
+      "KYC_UPDATE": "KYC 更新",
+      "OTC_ORDER": "OTC 注文",
+      "MARKET_SETTLEMENT": "市場決済",
+      "RISK_ACTION": "リスク通知",
+      "SYSTEM_ANNOUNCEMENT": "システム告知"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "ログイン",
@@ -79,6 +106,45 @@
       "title": "二段階認証",
       "description": "続行するにはセキュリティ検証を完了してください",
       "primary_action": "検証"
+    },
+    "m_kyc_001": {
+      "title": "KYC と機能アクセス",
+      "description": "検証の進捗と利用可能な機能を確認",
+      "primary_action": "検証を開始",
+      "action_supplement": "追加情報を提供",
+      "action_view": "ステータスを見る",
+      "action_home": "ホームへ戻る",
+      "capabilities_title": "機能"
+    },
+    "m_kyc_002": {
+      "title": "書類提出",
+      "description": "本人確認書類を提出",
+      "primary_action": "送信",
+      "upload_label": "書類をアップロード",
+      "upload_hint": "JPG/PNG、1枚10MBまで",
+      "upload_success": "アップロード完了",
+      "upload_failed": "アップロード失敗、再試行してください",
+      "consent_label": "本人確認のため情報を提出することに同意します",
+      "consent_required": "まず提出に同意してください",
+      "attachment_required": "少なくとも1枚アップロードしてください",
+      "submit_success": "送信しました。審査中です",
+      "submitting": "送信中…"
+    },
+    "m_kyc_003": {
+      "title": "KYC ステータス",
+      "description": "審査の進捗と結果を確認",
+      "primary_action": "戻る",
+      "action_supplement": "追加情報を提供",
+      "timeline_title": "進捗"
+    },
+    "m_notice_001": {
+      "title": "メッセージセンター",
+      "description": "通知を確認",
+      "primary_action": "見る",
+      "tab_unread": "未読",
+      "tab_all": "すべて",
+      "mark_all": "すべて既読",
+      "empty": "通知はありません"
     }
   }
 }

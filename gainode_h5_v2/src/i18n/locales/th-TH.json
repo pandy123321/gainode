@@ -54,6 +54,33 @@
     "back_to_login": "กลับไปเข้าสู่ระบบ",
     "next_step_home": "ดำเนินการต่อ"
   },
+  "kyc": {
+    "status": {
+      "not_started": "ยังไม่เริ่ม",
+      "pending": "กำลังตรวจสอบ",
+      "needs_info": "ต้องการข้อมูลเพิ่มเติม",
+      "approved": "อนุมัติแล้ว",
+      "rejected": "ไม่อนุมัติ",
+      "review": "ตรวจสอบซ้ำ"
+    },
+    "feature": {
+      "global_p": "ฟีเจอร์พื้นฐาน",
+      "ai": "รางวัล AI",
+      "prediction": "การทายผล",
+      "allowed": "ใช้งานได้",
+      "restricted": "ถูกจำกัด"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "อัปเกรด Robot",
+      "KYC_UPDATE": "อัปเดต KYC",
+      "OTC_ORDER": "คำสั่ง OTC",
+      "MARKET_SETTLEMENT": "การชำระตลาด",
+      "RISK_ACTION": "แจ้งเตือนความเสี่ยง",
+      "SYSTEM_ANNOUNCEMENT": "ประกาศระบบ"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "เข้าสู่ระบบ",
@@ -79,6 +106,45 @@
       "title": "ยืนยันสองขั้นตอน",
       "description": "กรุณายืนยันความปลอดภัยเพื่อดำเนินการต่อ",
       "primary_action": "ยืนยัน"
+    },
+    "m_kyc_001": {
+      "title": "KYC และการเข้าถึงฟีเจอร์",
+      "description": "ดูความคืบหน้าการยืนยันและฟีเจอร์ที่ใช้งานได้",
+      "primary_action": "เริ่มการยืนยัน",
+      "action_supplement": "ให้ข้อมูลเพิ่มเติม",
+      "action_view": "ดูสถานะ",
+      "action_home": "กลับหน้าแรก",
+      "capabilities_title": "ฟีเจอร์"
+    },
+    "m_kyc_002": {
+      "title": "ส่งเอกสาร",
+      "description": "ส่งเอกสารยืนยันตัวตน",
+      "primary_action": "ส่ง",
+      "upload_label": "อัปโหลดเอกสาร",
+      "upload_hint": "JPG/PNG ไม่เกิน 10MB ต่อไฟล์",
+      "upload_success": "อัปโหลดสำเร็จ",
+      "upload_failed": "อัปโหลดล้มเหลว กรุณาลองใหม่",
+      "consent_label": "ฉันยินยอมส่งข้อมูลเพื่อยืนยันตัวตน",
+      "consent_required": "กรุณายินยอมก่อนส่ง",
+      "attachment_required": "กรุณาอัปโหลดอย่างน้อยหนึ่งเอกสาร",
+      "submit_success": "ส่งแล้ว กำลังรอตรวจสอบ",
+      "submitting": "กำลังส่ง…"
+    },
+    "m_kyc_003": {
+      "title": "สถานะ KYC",
+      "description": "ดูความคืบหน้าและผลการตรวจสอบ",
+      "primary_action": "กลับ",
+      "action_supplement": "ให้ข้อมูลเพิ่มเติม",
+      "timeline_title": "ความคืบหน้า"
+    },
+    "m_notice_001": {
+      "title": "ศูนย์ข้อความ",
+      "description": "ดูการแจ้งเตือนของคุณ",
+      "primary_action": "ดู",
+      "tab_unread": "ยังไม่อ่าน",
+      "tab_all": "ทั้งหมด",
+      "mark_all": "อ่านทั้งหมด",
+      "empty": "ไม่มีการแจ้งเตือน"
     }
   }
 }

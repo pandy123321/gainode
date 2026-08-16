@@ -54,6 +54,33 @@
     "back_to_login": "Back to sign in",
     "next_step_home": "Continue"
   },
+  "kyc": {
+    "status": {
+      "not_started": "Not started",
+      "pending": "Under review",
+      "needs_info": "More info needed",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "review": "Re-review"
+    },
+    "feature": {
+      "global_p": "Basic features",
+      "ai": "AI rewards",
+      "prediction": "Predictions",
+      "allowed": "Available",
+      "restricted": "Restricted"
+    }
+  },
+  "notice": {
+    "type": {
+      "ROBOT_UPGRADE": "Robot upgrade",
+      "KYC_UPDATE": "KYC update",
+      "OTC_ORDER": "OTC order",
+      "MARKET_SETTLEMENT": "Market settlement",
+      "RISK_ACTION": "Risk notice",
+      "SYSTEM_ANNOUNCEMENT": "System announcement"
+    }
+  },
   "page": {
     "m_auth_001": {
       "title": "Sign in",
@@ -79,6 +106,45 @@
       "title": "Two-factor verification",
       "description": "Complete security verification to continue",
       "primary_action": "Verify"
+    },
+    "m_kyc_001": {
+      "title": "KYC & Access",
+      "description": "Check verification progress and available features",
+      "primary_action": "Start verification",
+      "action_supplement": "Provide more info",
+      "action_view": "View status",
+      "action_home": "Back to home",
+      "capabilities_title": "Features"
+    },
+    "m_kyc_002": {
+      "title": "Submit documents",
+      "description": "Submit identity verification documents",
+      "primary_action": "Submit",
+      "upload_label": "Upload document",
+      "upload_hint": "JPG/PNG, up to 10MB each",
+      "upload_success": "Uploaded",
+      "upload_failed": "Upload failed, please retry",
+      "consent_label": "I agree to submit my information for identity verification",
+      "consent_required": "Please agree to submit first",
+      "attachment_required": "Please upload at least one document",
+      "submit_success": "Submitted, awaiting review",
+      "submitting": "Submitting…"
+    },
+    "m_kyc_003": {
+      "title": "KYC status",
+      "description": "Check review progress and result",
+      "primary_action": "Back",
+      "action_supplement": "Provide more info",
+      "timeline_title": "Progress"
+    },
+    "m_notice_001": {
+      "title": "Notifications",
+      "description": "View your notifications",
+      "primary_action": "View",
+      "tab_unread": "Unread",
+      "tab_all": "All",
+      "mark_all": "Mark all read",
+      "empty": "No notifications"
     }
   }
 }
