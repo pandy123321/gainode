@@ -1,0 +1,333 @@
+# Decision Sources Archive（决策登记归档）
+
+> 归档时间：2026-08-16
+> 归档原因：manifest.yaml 的 decisionSources 累积至约 50K 字符，触发 complete_project_context_update 的 60,000 字符上下文上限。
+> 权威性：本文件是 decisionSources 的不可变历史归档，内容与 2026-08-16 归档前的 manifest.yaml 完全一致。
+> 恢复方式：manifest.yaml 现仅保留近期关键决策 + archived 指针；如需完整历史，以本文件为准。
+decisionSources:
+  # --- 技术栈决策 ---
+  backend_framework:
+    value: "PHP >=8.2, Webman (Workerman)"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — composer.json + Dockerfile in 0.5代码/gainode后端/gainode"
+  php_version:
+    value: "8.2"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "INFERRED_FROM_ARTIFACT — Dockerfile uses php:8.2-cli"
+  database:
+    value: "MySQL 8.4.9, illuminate/database ORM"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — composer.json + config/database.php"
+  frontend_h5:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  frontend_admin:
+    value: "Vue 3 + TypeScript"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11; scope: Admin Web"
+  frontend_app:
+    value: "Flutter"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 开发策略决策 ---
+  dev_strategy:
+    value: "Backend-first: all module domain objects (Model/DAO/Service) built before frontend integration. True frontend/backend separation with OpenAPI 3.1 contract alignment."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  codebase_basis:
+    value: "Upgrade on existing PHP/Webman backend at 0.5代码/gainode后端/gainode; new V6.1 modules embed into existing library/{model,dao,service}/ structure. Frontend H5 and Admin upgrade from V1.x production repos (gainode_h5, gainode_admin) at _existing_prod/."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11/12; repos provided 2026-08-12"
+  arbitrage_disposition:
+    value: "Plan B — retained as AI economic engine foundation; BetBurger signals not exposed to users"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 基础设施决策 ---
+  db_migration:
+    value: "Two-phase: SQL files (YYYYMMDD_description.sql) → Phinx after 10+ DDL changes"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  test_framework:
+    value: "PHPUnit 10+, tests/Unit|Integration|Feature"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  openapi_strategy:
+    value: "Manual openapi.yaml + sys_route table scan for validation"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ci_strategy:
+    value: "Three-stage progressive: lint → php-cs-fixer + DDL discipline → PHPUnit + i18n scan"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- V1.x 生产代码基线 ---
+  v1_h5_baseline:
+    value: "Vue 3.5 + TS 6.0 + Vite 8, custom reactive stores (no Pinia), custom i18n (~260 keys), dark theme only, 19 views across 17+ routes, hand-built UI (no component library), Web3 wallet integration (V2.0 removed). Repo: _existing_prod/gainode_h5"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_h5.git on 2026-08-12"
+  v1_admin_baseline:
+    value: "Vue 3.3 + TS 4.5 + Vite 4, Pinia 2 + persistedstate, Layui Vue 2.23 + JSON Schema Form, schema-driven architecture (backend controls table/form), hash history, 46 routes across ~64 .vue files, 3 languages (zh_CN/en_US/ko), v-permission directive, ECharts. Repo: _existing_prod/gainode_admin"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned from https://github.com/Xfd100/gainode_admin.git on 2026-08-12"
+  v1_backend_baseline:
+    value: "PHP 8.2 + Webman, MySQL 8.4.9, 60+ tables, arbitrage engine with BetBurger/API-Football integration, JWT + Casbin RBAC, DB-driven routing (sys_route table), Redis queue + crontab, Docker Compose deployment. V1.x 曾含 Web3 能力（BSC/ETH/TRON），V2.0 已移除（OWNER_DIRECTIVE 2026-08-12）。Code at: 0.5代码/gainode后端/gainode"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — existing code in 0.5代码/gainode后端/gainode. Updated 2026-08-12: Web3 dropped"
+  v1_api_signing:
+    value: "MD5-based request signing with shared key 'projectApi'. Headers: Timestamp, Version=1.0, Language, TraceId, Token, Sign. V2.0 to migrate key to env var / Secret Manager."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — src/api/http.ts in both V1.x frontends"
+
+  # --- 业务范围决策 ---
+  affiliate_scope:
+    value: "INCLUDED in V6.1. Agent/Affiliate module (4 Admin pages + 7 Agent Portal pages) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  api_football_contract:
+    value: "SIGNED. API-Football provider contract confirmed."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  betburger_contract:
+    value: "SIGNED. BetBurger provider contract confirmed."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ai_strategy_scope:
+    value: "INCLUDED in V6.1. AI strategy simulation (A-AI-004) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  ai_suggestion_scope:
+    value: "INCLUDED in V6.1. AI suggestion pipeline (A-AI-001/2/3/5/6) restored to scope."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+
+  # --- 治理/操作决策 ---
+  admin_proto_phase:
+    value: "Interactive HTML prototype at 0.5代码/admin-proto/ : 8-Root sidebar, collapsible nav, 17 interactive modals, full Chinese UI, V2.4.1 governance alignment (58 Page IDs, 35 CONTRACT_FROZEN + 22 CONTRACT_GAP + 1 FUTURE). Product scope confirmed for 16 additional pages via Owner directive 2026-08-11; 05/06 Machine Contract NOT frozen for those 16 — blocked from development. Audit finding IR-001 P1-007."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "COMMIT — series of commits ca2486d through 08b0836 after reviews #491-#507"
+  admin_proto_governance_docs:
+    value: "0.5代码/Gainode_Admin_Prototype_Planning_V2.4.1_CN/ : canonical Page Map, Contract Gap Register, Permission Matrix, Navigation Migration, HIFI Interaction Spec"
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "COMMIT — 4106b82 initial package + subsequent revisions"
+  asset_adjustment_policy:
+    value: "Only super admin (ADMIN_SECURITY role) can execute. A-USER-004 unblocked."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed in Cursor chat session 2026-08-11"
+  owner_override_policy:
+    value: "Super admin determines override scope. Formal Override Contract (trigger, eligible actor, SoD exception, MFA, case_id, reason, evidence, expiry, post-review, ledger/audit) NOT YET FROZEN — blocked by GAP-015. Current status: FAIL_CLOSED until contract finalized per Admin V2.4.1."
+    decision_date: "2026-08-11"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-11. Re-evaluated 2026-08-12 per IR-001 P1-010: Override Contract formalized 2026-08-12 per OWNER_DIRECTIVE."
+
+  p0_001_s3_remediated:
+    value: "FULLY CLOSED 2026-08-12. OWNER_DIRECTIVE: V2.0 改用后端预签名 URL（POST /api/upload/presigned-url → S3 presigned PUT）。旧 Access Key AKIA-ROTATED-OLD-KEY 已在 AWS IAM 控制台完成轮换（Owner confirmed 2026-08-12 15:58 UTC+8）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE + RUNTIME_EVIDENCE — user confirmed key rotation completed 2026-08-12"
+  p0_002_web3_dropped:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: V2.0 APT 改为纯中心化账本，不保留任何链上能力（BSC/ETH/TRON）。RBAC_OR_SIGNER_OWNER = N/A。web3.php 依赖移除。P0-002 signer contract 不需要。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: 'V2.0 先砍掉链上能力，APT 纯中心化账本'"
+  p1_003_two_phase_freeze:
+    value: "Machine Contract Freeze 分两批。第一批（STAGE-01 前）：DB DDL（8 核心实体）+ Canonical State Freeze。第二批（STAGE-01~02 并行）：OpenAPI 3.1 + Event Catalog + Environment Freeze。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意分两批'"
+  p1_004_owner_freeze:
+    value: "CLOSED. OWNER_DIRECTIVE 2026-08-12: 11 角色全部由 OWNER（单人）兼任。RBAC_OR_SIGNER_OWNER=N/A（无链上资产）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: implicit from single-person project"
+  p1_010_override_contract:
+    value: "CLOSED. Owner Override 正式 Contract：「ADMIN_SECURITY 发起 Override 时，自身不得同时充当唯一审批人。紧急 Override 需 MFA + 事后 48 小时内向独立审计方提交 case_id/reason/evidence。」SELF_APPROVAL = FORBIDDEN（非紧急）。"
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '同意。紧急可单人 + 事后审计通知'"
+  h5_component_library:
+    value: "Vant 4 — mobile-first Vue 3 component library. 70+ mobile-specific components (Tabbar, ActionSheet, PullRefresh, Swipe). Lightweight (~50KB gzip), CSS Variables theming, tree-shakeable. V1.x 19 pages all have 1:1 Vant equivalents."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  admin_component_library:
+    value: "Element Plus — migrate from Layui Vue. Vue 3 native, 100+ components, ~24K GitHub stars, ProTable/ProForm built-in, CSS Variables theming. Layui Vue (1.2K stars, slow maintenance) abandoned. Schema-driven components (TableSearchSchema, FormOpenSchema, etc.) to be re-rendered with <el-*> elements while preserving the schema-driven architecture."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  data_migration_strategy:
+    value: "Big Bang (one-shot) migration. V1.x wallet (flat table: balance+frozen) → V2.0 four-ledger (append-only: available/frozen/pending/held/payable) is structurally incompatible for dual-write. V1.x Mining (hashrate/cycle) → V2.0 Robot (56-level AI agent) is semantically incompatible. ~4-hour planned downtime, full-snapshot migration, 3+ sandbox rehearsals required before production."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE — user confirmed 2026-08-12: '按照你的建议执行就行'"
+  v1_api_repo:
+    value: "https://github.com/Xfd100/gainode_api.git — 8188 files, identical to 0.5代码/gainode后端/gainode (Webman PHP backend). No Dockerfile in Git repo (Docker files exist only in local 0.5代码/副本)."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "CODE_ANALYSIS — cloned and compared byte-by-byte on 2026-08-12"
+
+  # --- 独立审核注册 ---
+  stg00_ir_20260812_001:
+    value: "REVIEW_ID=GAINODE-STAGE00-IR-20260812-001. VERDICT=CHANGES_REQUIRED. P0_OPEN=0 (ALL CLOSED via OWNER_DIRECTIVE 2026-08-12). P1_OPEN=0. P2_OPEN=0. Remediation complete as of contextVersion 15. Ready for re-review."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "INDEPENDENT_REVIEW — cloud review agent against Commit 0188276, PACKAGE_SHA256=94d1f849fbbadb9db516b11566fce7722a85fed59546c40898722359b49ede5f. Remediation follow-up 2026-08-12."
+  ir_findings_remediated:
+    value: "ALL 15 FINDINGS CLOSED. STAGE-00 Remediation VERIFIED by IR-002.
+      VERDICT=CONDITIONAL_APPROVAL. 0 P0 open. 0 P1 open. 0 blocking P2.
+      1 documentation note (P2-002 route count alignment)."
+    decision_date: "2026-08-12"
+    owner: OWNER
+    provenance: "REMEDIATION — 2-round fix cycle against IR GAINODE-STAGE00-IR-20260812-001. contextVersion 14: 13 P1+P2 closed. contextVersion 15: 2 P0 closed via OWNER_DIRECTIVE. contextVersion 16: P0-001 RUNTIME_EVIDENCE (key rotation confirmed). contextVersion 17: IR-002 CONDITIONAL_APPROVAL, all 15 findings closed."
+  machine_contract_batch1_freeze:
+    value: "FROZEN 2026-08-13 — Independent Review（GAINODE-MC1-IR）三轮复审通过，最终记录 543 结论=建议合并（0 P0 / 0 P1 / 0 P2）。Machine Contract 第一批（8 核心实体 DDL + Canonical State Freeze）正式冻结。8 表：apt_accounts / apt_ledger_entries / robots / robot_rewards / prediction_markets / prediction_orders / otc_orders / power_positions。6 个状态机枚举与 05 §4 canonical 严格一致（Robot / AI Reward / Ledger / Market / Prediction Order / OTC）；apt_accounts + power_positions 为 scalar（无状态机）。主键 Snowflake(bigint unsigned，禁 AUTO_INCREMENT)；金额 string decimal；账本 append-only（经济字段不可改，仅 state 流转，reversal_of 追加）。DDL: 0.5代码/gainode后端/gainode/sql/20260813_machine_contract_batch1_8_core_entities.sql；Freeze: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH1_CANONICAL_STATE_FREEZE.md。STAGE-01 各模块骨架（Model/DAO/Service）为后续任务。"
+    decision_date: "2026-08-13"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-13 (Owner Signoff: MC1 → FROZEN) ← EXECUTOR_DELIVERY 2026-08-13 ← INDEPENDENT_REVIEW GAINODE-MC1-IR 记录 541/542/543"
+  machine_contract_batch2_freeze:
+    value: "FROZEN 2026-08-16 — Machine Contract 第二批（State Transition Freeze）冻结。范围：8 核心实体的状态转移矩阵（Ledger/Robot/AI Reward/Market/Prediction Order/OTC 6 个状态机）+ Event Catalog（entry_type/entry_direction 对齐）+ audit_events 表 DDL（append-only，对齐 05 §3 AuditLog）。22 项待确认 + 2 项财务硬骨头已由 Owner 逐项裁决（2026-08-15）。角色裁决（IR 629 P1-5 / IR 638 P1-3 / IR 659 P2-1 修订）：财务裁决/审批=05 canonical 分工（RISK_APPROVER 批准风险处置 + FINANCE_REVIEWER 对账只读、仅提交 RiskCase risk_type=LEDGER_RECONCILIATION_DISPUTE，ADMIN_SECURITY 不涉财），state 写入归 Authoritative Writer/系统；无未冻结 DisputeCase 实体。争议冻结=方案 A 精确化（Ledger Mutation Field Contract：state+audit_event_id+object_version 三列受控可变，object_version 经 dated migration 补列 + CAS 乐观锁，附 Change Request CR-20260815-001）；Dispute Hold Matrix 四格（origin×entry_direction）：stored_balance 不变 + dispute_hold 投影，posted DEBIT 保持扣款不恢复、pending DEBIT 预留冻结。pending reversal 语义：pending→reversed / pending-origin disputed→reversed = ACCOUNT_DELTA=0 无经济 reversal（仅 posted 冲正才生成 reversal）。DISPUTE_SHORTFALL_POLICY（IR 679 P1-1 + IR 682 P1-1/P1-2 + IR 686 P1-1/P2-1/P2-2）：PRE_HOLD_MUTATION_GUARD（shortfall=max(0, projected_aggregate_hold-stored_available)，projected_effective_available<0 → L4/L5=DENY，只写 REJECTED 审计）；dispute_hold=ACCOUNT-LEVEL AGGREGATE，effective_available=stored_available-aggregate_dispute_hold；账户级并发=统一 Economic Mutation Lock（apt_accounts.object_version CAS，覆盖所有改 balance_apt_i/balance_apt_c/frozen_apt_i/frozen_apt_c/aggregate_dispute_hold 的操作，11 步同事务原子，ACCOUNT_LEVEL_HOLD_OVERSUBSCRIPTION=0 / ACCOUNT_ECONOMIC_OVERSUBSCRIPTION=0 / CONCURRENT_L5_CAPACITY_GUARD=PASS / L5_WITHDRAWAL_CONCURRENCY=PASS / L5_PREDICTION_STAKE_CONCURRENCY=PASS / NEGATIVE_EFFECTIVE_AVAILABLE=0）；并发错误码统一 OBJECT_VERSION_CONFLICT(409)（ACCOUNT_LOCK_CONFLICT 仅 INTERNAL_ONLY）。禁止负余额/部分冲正/自动债务，未定义维度 deferred 至 2B-2。RiskCase 冻结状态（IR 679 P2-1）= object schema DEFINED + machine contract CONTRACT_GAP + TARGET_BATCH 2B-2；risk_type=LEDGER_RECONCILIATION_DISPUTE 标 CANDIDATE/PENDING_2B2_FREEZE，L4/L5 dependency gate=RISK_CASE_CONTRACT_FROZEN。投注结算=下注先扣/赢本金+盈利入账/输不追加/走盘退本金。settling→refunding（P5）改由结算异常+RefundCase 审批触发（不依赖 void）。快照引用=typed reference（snapshot_type+snapshot_id）。非核心实体 DDL（19 表）拆 2B-1/2B-2 两小批另交付。Freeze 候选: MACHINE_CONTRACT_BATCH2_STATE_TRANSITION_FREEZE.md；DDL: 20260815_..._audit_events.sql + 20260815_..._ledger_object_version.sql；CR: CHANGE_REQUEST_CR-20260815-001.md。状态: Owner Signoff ✅ 2026-08-15；IR 629 = CHANGES_REQUIRED（6 P1 + 2 P2）已修复；IR 638（复审）= CHANGES_REQUIRED（4 P1 + 2 P2）已按 Owner 二次裁决修复；IR 659（三审）= CHANGES_REQUIRED（2 P1 + 3 P2）已修复；IR 679（四审）= CHANGES_REQUIRED（1 P1 + 2 P2：posted CREDIT shortfall 边界 / RiskCase 冻结状态矛盾 / 证据截断）已修复；IR 682（五审）= CHANGES_REQUIRED（2 P1 + 1 P2：shortfall 检查时机 / dispute_hold 账户级并发 / 证据完整性）已修复；IR 686（六审）= CHANGES_REQUIRED（1 P1 + 3 P2：账户级统一经济锁域 / PRE_HOLD_MUTATION_GUARD 通用化 / 并发错误码统一 / 证据截断）修复已提交至 2795e38；独立复审 Round 7（IR GAINODE-S01P01-MC2-IR-20260816-001）= APPROVED（0 P0 / 0 P1 / 0 blocking P2；1 非阻塞 P3：aggregate_dispute_hold 标注 DERIVED，后续顺带修正），已置 FROZEN。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-15 (Owner Signoff: MC2 候选 → 提交提审) ← Owner 逐项裁决 22 项 + 2 财务硬骨头 2026-08-15 ← 草案 EXECUTOR_DELIVERY 2026-08-15（.project-ai/tasks/TASK-20260815-001）。INDEPENDENT_REVIEW IR 629（2026-08-15）= CHANGES_REQUIRED（6 P1 + 2 P2）→ Owner 二次裁决（P1-4 方案 A / P1-5 改 05 canonical）→ 修复。INDEPENDENT_REVIEW IR 638（2026-08-15，复审）= CHANGES_REQUIRED（4 P1 + 2 P2）→ Owner 二次裁决（P1-2 方案 A：Ledger 新增 object_version / P1-4 方案 A：settling 退款走结算异常+RefundCase）→ 修复。INDEPENDENT_REVIEW IR 659（2026-08-15，三审）= CHANGES_REQUIRED（2 P1 + 3 P2：P1-1 dispute hold 四格 / P1-2 pending reversal 语义 / P2-1 DisputeCase→RiskCase / P2-2 object_version 补 CR / P2-3 证据完整性）→ 修复。INDEPENDENT_REVIEW IR 679（2026-08-15，四审）= CHANGES_REQUIRED（1 P1 + 2 P2：P1-1 posted CREDIT shortfall 边界 → DISPUTE_SHORTFALL_POLICY / P2-1 RiskCase 冻结状态矛盾 → CONTRACT_GAP 统一 + L4/L5 dependency gate / P2-2 证据截断 → max_diff_chars 25000→100000）→ 修复。INDEPENDENT_REVIEW IR 682（2026-08-15，五审）= CHANGES_REQUIRED（2 P1 + 1 P2：P1-1 shortfall 检查时机 → SHORTFALL_CHECK_PHASE=PRE_L5 / P1-2 dispute_hold 账户级并发 → apt_accounts.object_version CAS + ACCOUNT-LEVEL AGGREGATE / P2-1 证据完整性 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。INDEPENDENT_REVIEW IR 686（2026-08-15，六审）= CHANGES_REQUIRED（1 P1 + 3 P2：P1-1 账户级统一经济锁域 → APT_ACCOUNT_ECONOMIC_MUTATION_LOCK=apt_accounts.object_version / P2-1 PRE_L5→PRE_HOLD_MUTATION_GUARD（L4+L5）/ P2-2 并发错误码统一 OBJECT_VERSION_CONFLICT(409) / P2-3 证据截断 → REVIEW_PACKAGE_TRUNCATED=NO）→ 修复。状态: Round 7（IR GAINODE-S01P01-MC2-IR-20260816-001）APPROVED 后置 FROZEN。"
+  machine_contract_batch2b1_state_contract:
+    value: "CANDIDATE 2026-08-16 — Machine Contract 第二批 2B-1 小批状态合同补齐（S01-P02）。范围：9 对象 = Result / Settlement / SettlementBatch / RefundCase / CorrectionCase / OtcTrade / RobotUpgradeOrder / ConsentReceipt / AuditEvent。Result enum 复制 05 §4（provisional/official/disputed/corrected）+ 转移矩阵 RS1-RS5（候选）；Settlement enum 复制 05 §4（queued/calculating/review/payable/paid/failed）+ 转移矩阵 ST1-ST7（候选）。不变量：Result official ≠ Settlement paid；Result confirmer ≠ Settlement approver（05 §8）。AuditEvent 复用 MC2 audit_events DDL，不重复创建。6 缺 enum 实体经 Owner 逐项裁决（2026-08-16，全部采纳各 D.x 的 RECOMMENDED_OPTION）：SettlementBatch = created/processing/completed/partially_failed/failed；RefundCase = pending/approved/executing/completed/rejected/failed；CorrectionCase = pending/approved/executing/completed/rejected/failed；OtcTrade = completed（append-only 单态）；RobotUpgradeOrder = pending/processing/completed/failed/cancelled；ConsentReceipt = active/expired。已补入 05 §4（V2.3），解除 CONTRACT_GAP / FAIL_CLOSED 阻塞，S01-P03 可建表。Result/Settlement 转移矩阵待 Independent Review（State Machine gate）；6 实体 enum 待独立审核通过后置 FROZEN。Independent Review Round 1（GAINODE-S01P02-2B1-IR-20260816-001）= CHANGES_REQUIRED（1 BLOCKING_P2：corrected 重结算 Market settlement→settled 协同缺口；2 P3：RobotUpgradeOrder 大额人工确认引用措辞 / 协同表漏 ST7-M10）；Owner 裁决 2026-08-16 方案 C（corrected 重结算协同 deferred 至 STAGE-02，S01-P03 仅建骨架 fail-closed）；质量修复提交 fa3258f（origin:quality），待 Round 2 复审。任务: .project-ai/tasks/TASK-20260816-001/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（Owner 逐项裁决 6 缺 enum 实体 = 2B1-ENUM-01..06，全部采纳各 D.x RECOMMENDED_OPTION）← EXECUTOR_DELIVERY 2026-08-16（S01-P02 合同补齐，commit 2707938/c2d57ce）← 05 §3/§4 canonical ← MC2 Freeze 协同关系（M6/M7/M9/M10/M12、P3/P5/P6/P7/P10/P11/P12、结算会计矩阵）← Owner 裁决 #19/#21（拆 2B-1/2B-2、缺 enum 补 05 §4）"
+  machine_contract_batch2b2_state_contract:
+    value: "CANDIDATE 2026-08-16 — Machine Contract 第二批 2B-2 小批状态合同补齐（S01-P04）。范围：13 对象 = ApprovalRequest / ParameterRelease / ParameterSnapshot / Notice / NotificationDelivery / AuthSession / MfaEnrollment / KycCase / RiskCase / Ticket / TicketMessage / TicketAttachment / SettlementMethod。5 复用对象 enum 复制 05（Approval 8 态 / Parameter Release 8 态 / AuthSession 5 态 §2.2 / KYC 6 态 / Ticket 6 态，未新增状态值）；3 缺 enum 对象经 Owner 逐项裁决（2026-08-16，全部采纳 OPTION_A）并补入 05 §4 V2.4：NotificationDelivery = pending/delivered/failed/cancelled；MfaEnrollment = pending/active/revoked；RiskCase = open/investigating/under_review/resolved/closed。5 值对象/只读聚合无状态机。职责分离：PARAM_EDITOR != PARAM_APPROVER != RELEASE_OPERATOR；RISK_ANALYST != RISK_APPROVER。Parameter approved ≠ active + ParameterSnapshot。Notice 与业务解耦 + NotificationDelivery 失败不回滚。转移矩阵均为候选（未 FROZEN），FAIL_CLOSED。Independent Review Round 1（GAINODE-S01P04-2B2-IR-20260816-001）= APPROVED（1 非阻塞 P3：快照 range 字符串精度）。任务: .project-ai/tasks/TASK-20260816-003/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（Owner 逐项裁决 3 缺 enum 实体 = 2B2-ENUM-01..03，全部采纳 OPTION_A）← EXECUTOR_DELIVERY 2026-08-16（S01-P04 合同补齐，commit 884cdf9/5d57704）← 05 §2.2/§3/§4/§8/§11 canonical ← 2B-1 Owner Decision Matrix 格式先例"
+  development_execution_plan_v32_approval:
+    value: "APPROVED 2026-08-16 — Owner 认可 07 开发执行计划 V3.2（CR-20260816-002 OPTION_A 全量批准）。V3.2 为 V3.1 的详细化，不改变 Formal Stage / Package ID / 顺序：补充 OBJECT_COVERAGE_MATRIX（S01 每包强制输出）、contract test（tests/contract/Stage01Batch2B*Test.php）、显式对象批次顺序 + 禁止建表对象清单（S01-P05）、STAGE-02 固定实现顺序（Contract→Controller→Application→Domain→Transaction→Tests）、Page ID 注册表 + Admin 逐导航批次（STAGE-03）、STAGE-01-OBJECT-COVERAGE-MATRIX.md（S01-P09）。已完成的 S01-P01/P02/P03/P04 不追溯补合同测试；B1~B6 自 S01-P05 起适用。开发 Agent 已提交 V3.2 于 057e810 并自标 FROZEN_FOR_EXECUTION，本批准补足治理可追溯性，冻结状态维持。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user selected approve_v32）← CR-20260816-002 ← QUALITY-01 发现开发 Agent 冻结计划未提交全量重构"
+  development_execution_plan_v33_gate_relocation:
+    value: "APPROVED 2026-08-16 — Owner 决定把开发执行者的开发进度门禁全部删除（CR-20260816-003 OPTION_A），Development Agent 一开到底：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate 关闭。唯一硬停止 = §0.1 永久禁止项 + 「包未在本文件定义」。未冻结合同按 05/Freeze 已知内容 best-effort 实现，受影响写路径 fail-closed，交接声明 CONSUMED_UNFROZEN_CONTRACT；Owner 决策未决时生成 Decision Request 后继续无依赖部分，声明 OPEN_OWNER_DECISION。所有 Package 的「前置」「停止条件」「Stage Gate」字段降级为 Quality Agent 审核时的验证项与风险登记点，不再阻塞 Dev。Quality Agent 审核每包时逐项验证门禁违反情况并记为 Finding（07 §15 DEV_GATE_VIOLATIONS）。07 升版 V3.3（SHA256=FD37FCA6AA1D513517EEC2C825CD9CEC0136056ED3FDCA36828E290681A167EB，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816）。V3.2 起为 SUPERSEDED_DO_NOT_EXECUTE。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 开发 agent 一开到底，删除阻挡开发进度门禁，改为质量 agent 审核提审时遵守）← CR-20260816-003"
+  development_execution_plan_v34_role_discipline:
+    value: "APPROVED 2026-08-16 — Owner 指示将创世DOG git-review-worktree 通用多角色协作框架整合进 Gainode 角色纪律并补进 07 §3（CR-20260816-004），计划升版 V3.4。变更：07 §3.1 五角色表（新增 Scheduler 显式化）；§3.2 双流水线；§3.3 提交来源 trailer 统一为 Code-Origin+Git-Operator（V3.3 origin:developer/quality 视为等价追溯）；新增 §3.4 独立审核 worktree（gainode/review/<stage-id>，base=master）+ 11 项门禁清单；§14/§15 提示词引用 rules/roles.md+workflow.md+git-review-worktree.md；§16 新增变更流水。不改变 40 Package 的 ID/顺序/范围/步骤/停止条件/验收/Gate 语义。SHA256=E48D6B8B22AF1C575528D2FB270D625C1EDEB2BF3B2C718C06171473A08CC8E8。V3.3 凭证标 SUPERSEDED_DO_NOT_EXECUTE。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 把这套角色纪律补进 07 §3）← CR-20260816-004 ← 创世DOG tools/git-review-worktree/{README,ROLES,WORKFLOW}.md"
+  machine_contract_affiliate_agent_p1:
+    value: "CANDIDATE 2026-08-16 — S01-P07 Affiliate/Agent P1 合同盘点（快照 1，不建表）。三对象 Agent / Referral / AgentEarning 字段候选表 + Decision Matrix（11 项 Owner Decision D1~D11：状态×3/层级深度/重复归属/解绑/确认时点/预算来源/回滚/税务/PII）+ Freeze 候选 + Decision Request。Owner 未签 → 三对象 CONTRACT_GAP/FAIL_CLOSED，不建表不建 Service；P0 增长奖励写路径 fail-closed；不继承 V1.x 佣金语义（invite_income_money/team_income_money/reward 不迁移）；V1.x member_user_team 只读盘点。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md。快照 2（建 DDL）已解除阻塞（Owner 签 2026-08-16 全 OPTION_A）。任务: .project-ai/tasks/TASK-20260816-006/。commit 4f01bad（实现）/ f1b28c4（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。Owner 签核 2026-08-16：D1~D11 全 OPTION_A（见 affiliate_agent_p1_owner_signoff）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P07 合同盘点，commit 4f01bad/f1b28c4）← 07 §S01-P07 固定步骤 1-4 ← 01 §P1 / 02 §Team/Referral / 06 §Growth / V1.x member_user_team"
+  machine_contract_ai_operations_p1:
+    value: "CANDIDATE 2026-08-16 — S01-P08 AI Operations P1 合同盘点（快照 1，不建表）。三对象 AISignal / AIRecommendation / SimulationRun 字段候选表 + V1.x arbitrage 盘点（arbitrage_signal/raw=ADAPT；fixture/attempt/day_plan/position=KEEP_INTERNAL；project*=RETIRE）+ Decision Matrix（9 项 Owner Decision D1~D9 + 1 LOCKED D10）+ Freeze 候选 + Decision Request。C 端泄露边界 FORBIDDEN（signal/profit/position/payload 禁止 C 端，D10 LOCKED）；AI/Prediction 预算隔离（02 §11 双向 FORBIDDEN）；不继承 V1.x 矿机套利语义；不沿用硬编码 secret。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md。快照 2（建 DDL）已解除阻塞（Owner 签 2026-08-16 全 OPTION_A）。任务: .project-ai/tasks/TASK-20260816-007/。commit 799d588（实现）/ cf50829（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。Owner 签核 2026-08-16：D1~D9 全 OPTION_A（见 ai_operations_p1_owner_signoff）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P08 合同盘点，commit 799d588/cf50829）← 07 §S01-P08 固定步骤 1-5 ← 01 §P1 / 02 §5.4/§11 / 06 §4 / V1.x arbitrage_*"
+  stage01_closure_progress:
+    value: "LOCAL_APPROVED 2026-08-16 — S01-P09 STAGE-01 全量收口 + STAGE-01 全包本地独立审核通过 + STAGE-01 Gate 本地版 APPROVED_WITH_CONDITIONS。对象覆盖矩阵 43 对象 = 30 持久（MC1 8 + audit_events 1 + 2B-1 8 + 2B-2 13）+ 7 非持久投影 + 6 合同盘点未建表。S01-P01~P09 全部本地 APPROVED（0 P0/P1/P2；P3×2 非阻塞）。Gate 条件：①外部 ChatGPT 审核待补（浏览器自动化不稳定，稍后补）②S01-P07/P08 Owner Decision 待签。机械比对：重复 DDL=0 / unknown writer=0 / NOT_PERSISTED 无表=0 / CONTRACT_GAP 无表=0。未冻结可写路径=21（2B-1 8 + 2B-2 13，FAIL_CLOSED），Production=NO-GO。Gate 文件 .project-ai/reviews/STAGE-01-QUALITY-GATE-V3.md。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P09 对象覆盖矩阵）← QUALITY-01 本地独立审核 2026-08-16（S01-P05~P09 全 APPROVED + STAGE-01 Gate 本地版）← 07 §S01-P09 步骤 1-7"
+  stage02_p01_general_kernel:
+    value: "APPROVED 2026-08-16 — S02-P01 可执行通用内核（OpenAPI 3.1 + Environment Contract + General Kernel，不建表不写业务）。交付：.env.example 环境契约（安全关闭值，禁止明文 secret，缺失 fail-closed）；ErrorDict 对齐 05 §7 16 项字符串错误码 + httpStatus() HTTP 映射（RESULT_UNKNOWN→202）；library/response/Envelope.php 统一 success/error 信封（8 数据新鲜度元数据 data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status + WriteResult 最少字段）；support/middleware/RequestContext.php 六请求头（Authorization/Idempotency-Key/If-Match/Accept-Language/X-Request-Id/X-Timestamp）+ 写操作强制 Idempotency-Key（API_ENFORCE_IDEMPOTENCY=true，缺失 fail-closed），注入 admin/api/common 中间件组；library/service/idempotency/{IdempotencyStore,NullIdempotencyStore}.php + outbox/{OutboxStore,NullOutboxStore}.php（接口 + Null fail-closed，isAvailable=false 直至持久化冻结）；library/service/transaction/TransactionBoundary.php（事务 + lockForUpdate object_version CAS）；openapi/gainode-v2.yaml 入口 + components/{schemas/common,headers/request,responses/common}.yaml + paths/{auth,robot,prediction,apt_otc,policy_parameter,admin}.yaml（P0 路径骨架，仅冻结 operationId/security/统一响应，业务 request/response schema 留待 S02-P02~P08）；tests/{Contract/EnvelopeContractTest,Integration/KernelContractTest}.php + Feature/README.md（41 断言全过，不涉数据库）。任务: .project-ai/tasks/TASK-20260816-008/。Independent Review: QUALITY-01 APPROVED（Round 1，0 P0/P1/P2/P3，41 断言独立复跑 33+8，OpenAPI 10/10 解析 + $ref/anchor 完整）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P01 通用内核）← QUALITY-01 本地独立审核 2026-08-16 APPROVED（0 P0/P1/P2/P3）← 07 §S02-P01 固定步骤 1-6 ← 05 §1/§7/§10（数据新鲜度/错误分类/统一信封）← p1_003_two_phase_freeze（第二批 OpenAPI 3.1 + Environment Freeze）"
+  machine_contract_batch2b2_ddl_skeleton:
+    value: "APPROVED 2026-08-16 — S01-P05 2B-2 DDL + Model/DAO/Service 骨架（13 对象，无状态转移逻辑，FAIL_CLOSED）。13 表：approval_requests / parameter_releases / parameter_snapshots / notices / notification_deliveries / auth_sessions / mfa_enrollments / kyc_cases / risk_cases / tickets / ticket_messages / ticket_attachments / settlement_methods。约束：Snowflake bigint unsigned PK（$incrementing=false/$keyType='string'）、object_version、idempotency_key（notification_deliveries 用 dedupe_key）、decimal 三档（36,18/18,8/18,4）、append-only 3 对象（parameter_snapshots/ticket_messages/ticket_attachments，无 updated_time/object_version，Model/Builder/DAO 三层 FAIL_CLOSED 抛 RunException）、enum 对齐 05 §4 V2.4、状态机未冻结故 Service 无状态转移方法。Independent Review：QUALITY-01 APPROVED（P3：PACKAGE_SHA256 聚合算法未文档化，非阻塞）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P05 2B-2 DDL+骨架）← QUALITY-01 本地独立审核 2026-08-16 APPROVED ← 07 §S01-P05 ← machine_contract_batch2b2_state_contract"
+  projections_not_persisted:
+    value: "APPROVED 2026-08-16 — S01-P06 非持久投影服务（7 对象，无表，读已冻结数据，DEFAULT_DENY）。7 投影：OtcEligibilityProjection / SessionDeviceProjection / PowerImpactPreviewProjection / AptBalanceProjection / RobotPortfolioProjection / PredictionMarketProjection / SettlementStatusProjection。约束：NOT_PERSISTED（无 CREATE TABLE）、8 数据新鲜度元数据（data_status/as_of/updated_at/next_refresh_at/refresh_hint/stale_after/snapshot_id/source_status）、DEFAULT_DENY（未冻结依赖返回 UNAVAILABLE + allowed=false）、DECIMAL_STRING（所有金额字符串化）、CROSS_USER_ACCESS=FORBIDDEN（越权返回 UNAVAILABLE + access_denied）、NO_MOCK_FALLBACK、CONSUMED_UNFROZEN_CONTRACT 显式标注。测试：7 投影单测 105 断言全过（SQLite 内存库）。Independent Review：QUALITY-01 APPROVED（P3：PAYLOAD_MANIFEST 缺逐文件 SHA256，非阻塞）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P06 投影）← QUALITY-01 本地独立审核 2026-08-16 APPROVED ← 07 §S01-P06 ← machine_contract_batch2b2_state_contract"
+  stage02_p02_auth_kyc_user_eligibility:
+    value: "APPROVED 2026-08-16 — S02-P02 Auth/KYC/User/Eligibility 六子流程实现（不新增 DDL，只写 Service/Controller/Validator，复用 V1.x 认证 + 桥接 V2 状态机）。交付：app/api/controller/{Auth,Kyc,User}Controller.php（support\\controller\\ApiV2 基类统一 envelope 输出，写操作经 RequestContext 强制 Idempotency-Key）；library/service/auth/{AuthApplicationService,SessionApplicationService,MfaApplicationService}.php + library/service/kyc/KycApplicationService.php + library/service/user/UserApplicationService.php + library/service/entitlement/EligibilityApplicationService.php（global_p/AI/Prediction 三分支独立、默认 deny）；library/dict/SecurityReasonMap.php（防枚举安全文案映射，未知 code 回落 auth.generic_error）；support/exception/DomainException.php（05 §7 字符串码 + httpStatus() 映射）；library/validator/{Auth,Kyc,Eligibility}Validation.php；OpenAPI 补齐 components/schemas/{auth,user,kyc,eligibility}.yaml + paths/{auth,user,kyc,eligibility}.yaml（11 权威接口 + 5 只读路径）。状态机：AuthSession（issue/refresh/revoke/revokeAll/isExpired）、MfaEnrollment（setup→pending、confirm/challenge FAIL_CLOSED DEPENDENCY_UNAVAILABLE 因 secret DDL 未冻结、disable→revoked）、KycCase（submit/startReview/requestInfo/approve/reject + 自审守卫）。测试 69 断言全过（23 Contract SecurityReasonMap/DomainException + 46 Integration SQLite 内存库状态机）。CONSUMED_UNFROZEN_CONTRACT=2B-2 状态转移矩阵；OPEN_OWNER_DECISION：OTP 供应商、KYC 地区/年龄门槛、MFA 恢复政策、FeatureEntitlement 06 参数。任务: .project-ai/tasks/TASK-20260816-009/。Independent Review: QUALITY-01 APPROVED（Round 1，0 P0/P1/BLOCKING_P2；2 NON_BLOCKING P2：①KYC reviewer 角色校验缺失②敏感操作未写审计，留 S02-P07/Admin 层闭环）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P02 六子流程实现，commit 1c37f6b）← QUALITY-01 本地独立审核 2026-08-16 APPROVED（0 P0/P1/BLOCKING_P2；2 NON_BLOCKING P2）← 07 §S02-P02 固定步骤 1-6 ← 05 §1/§2.2/§3/§4/§7/§10/§11.1 ← machine_contract_batch2b2_state_contract ← stage02_p01_general_kernel"
+  stage02_p03_ledger_aptaccount_power:
+    value: "APPROVED 2026-08-16 — S02-P03 Ledger/AptAccount/Power 基础（APT 数量账经济写路径统一事务模板，不新增 DDL）。交付：library/service/ledger/LedgerService.php（append/post/cancel/reverse + dispute/resolveDispute FAIL_CLOSED DEPENDENCY_UNAVAILABLE，白名单三列 state/audit_event_id/object_version 受控状态转移 + appendAudit 追加审计 + getByIdempotencyKey 幂等去重 IDEMPOTENCY_CONFLICT）；library/service/ledger/AptAccountService.php（getAggregateDisputeHold=0 因 dispute fail-closed、getEffectiveAvailable、applyEntryEffect 11 步 CAS 乐观锁 object_version + 负余额保护 INSUFFICIENT_APT 422 + 冲突 OBJECT_VERSION_CONFLICT 409，金额全 bcmath decimal string）；library/service/power/PowerPositionService.php（consume/recover/previewImpact 全部 DEPENDENCY_UNAVAILABLE 503 fail-closed，规则未冻结）；library/model/ledger/AptLedgerEntryModel.php（补 object_version 字段 + ENTRY_DIRECTION_CREDIT=1/DEBIT=-1 + ENTRY_TYPE_LEDGER_REVERSAL + ASSET_APT_I 常量，append-only 未放宽）；OpenAPI components/schemas/ledger.yaml（LedgerEntry/AssetBalance/PowerPosition）+ paths/ledger.yaml（3 只读路径 me/asset、me/ledger-entries、me/power）+ gainode-v2.yaml 注册。测试 48 断言全过（18 Contract 领域常量/append-only 机械强制/append 输入校验/错误码 HTTP 映射 + 30 Integration 守恒/exactly-once/CAS 冲突/负余额/L2 取消无经济 reversal/L3 冲正 LEDGER_REVERSAL/fail-closed）。L1 pending→posted、L2 pending→reversed（ACCOUNT_DELTA=0）、L3 posted→reversed（追加 LEDGER_REVERSAL 反向分录）；L4-L7 dispute 因 RiskCase machine contract CONTRACT_GAP（2B-2 未冻结）FAIL_CLOSED；Power 变更因 Active Rule/Parameter TBC FAIL_CLOSED。任务: .project-ai/tasks/TASK-20260816-010/。Independent Review: QUALITY-01 APPROVED（Round 1，0 P0/P1/BLOCKING_P2；1 P3 负余额口径 stored_balance vs effective_available，dispute 冻结后需同步）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P03 经济写路径）← QUALITY-01 本地独立审核 2026-08-16 APPROVED（0 P0/P1/BLOCKING_P2；1 P3）← 07 §S02-P03 固定步骤 1-7 ← 05 §3/§10 ← machine_contract_batch1_freeze（MC1 DDL）← machine_contract_batch2_freeze（MC2 State Transition + Ledger Mutation Field Contract + Dispute Hold Matrix + DISPUTE_SHORTFALL_POLICY）← stage02_p01_general_kernel（TransactionBoundary）"
+  stage02_p04_robot_reward_upgrade:
+    value: "COMPLETE 2026-08-16 — S02-P04 Robot / Reward / Upgrade 基础（56 级规则读取器 + 只读投影 + 状态机骨架，不新增 DDL）。交付：library/service/robot/RobotRuleReader.php（从 Active Release→Snapshot 解析 06 §4 AI.* 参数：standard_capacity_rule_version / power_cap_by_robot_level / upgrade_apt_requirement / ai_reward_budget_cap / ai_reward_claim_enabled / daily_yield_coefficient_source+precision，无 Active Release → source_status=UNAVAILABLE + reason_code=AI_RULE_NOT_ACTIVE，零写入，decimal string 禁 float，0 系数合法）；library/service/robot/RobotService.php（summary/detail/allowedActions 只读投影 + start/stop FAIL_CLOSED DEPENDENCY_UNAVAILABLE 因 Power 消耗/释放规则 TBC + R2/R4-R12 纯状态转移审计+object_version CAS，inactive→paused 非法 Owner 裁决）；library/service/robot/RobotRewardService.php（W2/W3/W7/W8 纯状态转移 + W1 hold/W4 completeClaim/W5 expire/W9,W10 reverse FAIL_CLOSED 因预算/资格/观察期/过期窗口/系数 TBC + listByUser）；library/service/robot/RobotUpgradeOrderService.php（quote/submit FAIL_CLOSED 因升级成本/资金去向 TBC + pending→processing→completed/failed/cancelled 纯状态转移，大额人工确认=OPS_OPERATOR+RISK_APPROVER）；dao/parameter/ParameterReleaseDao.php getActive()（status=active 最新 release）；dao/robot/RobotRewardDao.php getByUser()。OpenAPI components/schemas/robot.yaml（RobotSummary/RobotDetail/RobotRuleSnapshot/AIReward/RobotUpgradeOrder）+ paths/robot.yaml（只读 GET + 写 POST 补 503 DependencyUnavailable）+ gainode-v2.yaml 注册。测试 82 断言全过（26 Contract 状态常量冻结/RobotRuleReader 键名/fail-closed/错误码映射 + 56 Integration SQLite 内存库 56 级边界解析/状态机合法非法转移/CAS 冲突/fail-closed/无 Release 投影 UNAVAILABLE）。停止条件已确认：56 级规则/预算/系数/Power/升级成本全部 TBC → 写操作 closed，未用旧 Mining 值补洞。任务: .project-ai/tasks/TASK-20260816-011/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P04 56 级规则读取器 + 状态机骨架 + 只读投影）← 07 §S02-P04 固定步骤 1-7 ← 05 §3/§6/§7 ← 06 §4（AI.* 全 TBC）← machine_contract_batch1_freeze（MC1 Robot/Reward DDL + Canonical State）← machine_contract_batch2_freeze（MC2 Robot R1-R12 / AI Reward W1-W10 状态转移）← stage02_p03_ledger_aptaccount_power（经济事务模板先例）"
+  affiliate_agent_p1_owner_signoff:
+    value: "OWNER_SIGNED 2026-08-16 — S01-P07 Affiliate/Agent P1 合同 Owner 签核（11 项 D1~D11 全部采纳 OPTION_A）。落定：Agent=active/suspended/terminated；Referral=active/revoked/expired；AgentEarning=candidate/held/confirmed/reversed；层级≤2代；一 invitee 唯一 inviter + 禁解绑/更换；佣金平台收入确认后确认；预算=独立 growth treasury budget；回滚=append-only reversal；税务/地区预留字段 P1 不启用；PII 最小化。三对象 CONTRACT_GAP 解除，可进快照 2（建 DDL/Model/DAO/Service 骨架）；转移矩阵仍待 Independent Review，状态机 FAIL_CLOSED。enum 已回填 05 §4，层级/预算回填 06 §9 + 02 §12。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 全盘接受推荐选项 A）← TASK-20260816-006 decision_request D1~D11"
+  ai_operations_p1_owner_signoff:
+    value: "OWNER_SIGNED 2026-08-16 — S01-P08 AI Operations P1 合同 Owner 签核（9 项 D1~D9 全部采纳 OPTION_A + D10 LOCKED）。落定：AISignal=active/expired/consumed/closed/invalid；AIRecommendation=draft/active/expired/superseded；SimulationRun=pending/running/completed/failed/cancelled；retention raw 30 天/归一化 90 天；供应商仅内部使用；writer=系统内部进程；dedupe_key 唯一 + 模拟不自动重试；预算连接 P1 不启用；模型版本复用 06 参数生命周期。三对象 CONTRACT_GAP 解除，可进快照 2；C 端泄露边界 FORBIDDEN（D10 LOCKED，非 Owner 决策）。enum 已回填 05 §4。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 全盘接受推荐选项 A）← TASK-20260816-007 decision_request D1~D9"
+  stage02_p05_prediction_p0:
+    value: "COMPLETE 2026-08-16 — S02-P05 Prediction P0 八对象状态机骨架 + 只读投影 + fail-closed（不新增 DDL）。交付：library/service/prediction/{PredictionMarketService,PredictionOrderService,ResultService,SettlementService,SettlementBatchService,RefundCaseService,CorrectionCaseService}.php + library/service/policy/ConsentReceiptService.php。Market（M1-M12 纯状态转移 draft→open→closing→locked→awaiting_result→settlement→settled + void/exception 旁路；createMarket 依赖 Fixture 源 FAIL_CLOSED DEPENDENCY_UNAVAILABLE）；PredictionOrder（P1-P4 纯转移 submitted→locked→awaiting_result→settling→settled；submit/startRefund/completeRefund/startCorrect/completeCorrect FAIL_CLOSED 因 06 锁盘参数 TBC / RefundCase/CorrectionCase 契约未冻结）；Result（RS3 uphold disputed→official / RS4+RS5 correctFromDisputed/Official→corrected 仅一次 MC2 #11 守卫；confirm/dispute FAIL_CLOSED 因赛果源/RiskCase）；Settlement（ST1/ST3/ST4/ST6/ST7 纯转移；calculate/pay FAIL_CLOSED 因 06 结算参数/账本过账）；SettlementBatch（process/complete/partiallyFail/retry/fail 纯转移；createBatch FAIL_CLOSED）；RefundCase/CorrectionCase（approve/reject/execute/fail/retry 纯转移；createCase/complete FAIL_CLOSED）；ConsentReceipt（grant 幂等去重完整实现 + expire 纯转移，active→expired 两态）。全部状态转移走 TransactionBoundary + object_version CAS + appendAudit 审计（Market 无 audit_event_id 列单向关联）；金额 decimal string；allowedActions 下单候选因锁盘参数 TBC 进 blocked_actions。OpenAPI components/schemas/prediction.yaml（PredictionMarket/PredictionOrder/PredictionResult/PredictionSettlement/SettlementBatch/RefundCase/CorrectionCase/ConsentReceipt）+ paths/prediction.yaml（写 POST 补 503 DependencyUnavailable）+ gainode-v2.yaml 注册。测试 113 断言全过（35 Contract 状态常量冻结/Event Catalog/fail-closed/错误码 HTTP 映射 + 78 Integration SQLite 内存库状态机合法非法转移/CAS 冲突/幂等去重/只读投影/fail-closed）。任务: .project-ai/tasks/TASK-20260816-012/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P05 Prediction P0 状态机骨架 + 只读投影 + fail-closed）← 07 §S02-P05 固定步骤 1-7 ← 05 §3/§4/§6/§7 ← machine_contract_batch1_freeze（MC1 Market/Order DDL + Canonical State）← machine_contract_batch2_freeze（MC2 Market M1-M12 / Order P1-P12 状态转移）← machine_contract_batch2b1_state_contract（2B-1 Result/Settlement/SettlementBatch/RefundCase/CorrectionCase/ConsentReceipt enum + RS1-RS5/ST1-ST7）← stage02_p04_robot_reward_upgrade（fail-closed 只读投影 + CAS 状态转移先例）"
+  stage02_p06_otc_power:
+    value: "COMPLETE 2026-08-16 — S02-P06 OTC/Power 状态机骨架 + 只读投影 + fail-closed（不新增 DDL）。交付：library/service/otc/OtcOrderService.php + library/service/otc/OtcTradeService.php。OtcOrder（O1-O12 纯状态转移 draft→review→matching→partial→completed + cancelled/expired/rejected/disputed 旁路；O11 completed→disputed 可重复争议 + O12 disputed→cancelled/completed 二选一；quote/createOrder 依赖 06 OTC 参数 min/max/fee/库存 TBC FAIL_CLOSED DEPENDENCY_UNAVAILABLE）；OtcTrade（单态 completed append-only + recordTrade 依赖撮合/Ledger/Power TBC FAIL_CLOSED + listByOrder/listByBuyer/listBySeller 只读查询）。全部状态转移走 TransactionBoundary + object_version CAS + appendAudit + audit_event_id 回写；金额 decimal string；Power 字段不触碰（freeze/consume/release 由参数冻结后附加）。OpenAPI components/schemas/otc.yaml（OtcOrder/OtcTrade/OtcEligibility/OtcCapacity）+ paths/apt_otc.yaml（写 POST 补 503 DependencyUnavailable）+ gainode-v2.yaml 注册。测试 61 断言全过（26 Contract 状态常量冻结/Event Catalog/fail-closed/错误码 HTTP 映射 + 35 Integration SQLite 内存库 O1-O12 合法非法转移/CAS/audit_event_id 回写/只读投影/fail-closed）。任务: .project-ai/tasks/TASK-20260816-013/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P06 OTC/Power 状态机骨架 + 只读投影 + fail-closed）← 07 §S02-P06 固定步骤 1-8 ← 05 §3/§4/§6/§7 ← machine_contract_batch1_freeze（MC1 OtcOrder DDL + Canonical State）← machine_contract_batch2_freeze（MC2 OTC O1-O12 状态转移 + Event Catalog）← machine_contract_batch2b1_state_contract（2B-1 OtcTrade append-only enum，Owner 2B1-ENUM-04）← stage02_p05_prediction_p0（fail-closed 只读投影 + CAS 状态转移先例）"
+  stage02_p07_approval_parameter_risk_support_notice_audit:
+    value: "COMPLETE 2026-08-16 — S02-P07 治理六域 Approval/Parameter/Risk/Support/Notice/Audit 状态机 + SoD 守卫 + fail-closed + 只读投影（不新增 DDL，10 对象）。交付：library/service/approval/ApprovalRequestService.php（AR1-AR8 八态 draft→pending→changes_requested→approved→executing→executed + rejected/failed 旁路；guardNotSelf 自批 SoD → POLICY_DENIED 403）；library/service/parameter/ParameterReleaseService.php（PR1/PR2/PR5-PR11 八态 draft→pending_approval→approved→scheduled→active→paused→rolled_back→archived；guardNotApprover SoD 操作者≠审批人；PR3/PR4 因 changes_requested 不在 2B-2 canonical 8 态内合同缺口不实现 fail-closed）；library/service/parameter/ParameterSnapshotService.php（append-only 只读投影）；library/service/risk/RiskCaseService.php（五态 open→investigating→under_review→resolved→closed + 误报 open→closed + 申诉 resolved→investigating appeal_eligible 守卫；guardNotDetector SoD 审批人≠检测人；execute 依赖风险策略 TBC FAIL_CLOSED DEPENDENCY_UNAVAILABLE 503）；library/service/support/TicketService.php（TK1-TK8 六态 submitted→in_progress→waiting_user→under_review→resolved→closed + 重开 resolved→in_progress appeal_eligible 守卫）；library/service/support/TicketMessageService.php（append-only 只读投影）；library/service/support/TicketAttachmentService.php（create 依赖对象存储/病毒 TBC FAIL_CLOSED + 只读投影）；library/service/notice/NoticeService.php（markRead unread→read 幂等 CAS+审计）；library/service/notice/NotificationDeliveryService.php（四态 pending→delivered/failed/cancelled + failed→pending 重试 attempt_count 递增；deliver 依赖通知渠道 TBC FAIL_CLOSED）；library/service/audit/AuditEventService.php（append-only + listAdmin/detail AUDITOR 脱敏查询）。全部状态转移走 TransactionBoundary + object_version CAS + appendAudit + actor 回写。OpenAPI components/schemas/governance.yaml（10 schema）+ paths/policy_parameter.yaml/admin.yaml 补 fail-closed + gainode-v2.yaml 注册。测试 95 断言全过（34 Contract + 61 Integration）。停止条件已确认：通知渠道/对象存储/风险策略/紧急操作合同 TBC → 写操作 closed；合同缺口 PR3/PR4（changes_requested）登记 NEEDS_OWNER_DECISION。任务: .project-ai/tasks/TASK-20260816-014/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P07 治理六域状态机 + SoD + fail-closed + 只读投影）← 07 §S02-P07 固定步骤 1-7 ← 05 §3/§4/§8/§11 ← machine_contract_batch2b2_state_contract（2B-2 13 对象状态合同）← machine_contract_batch2b2_ddl_skeleton（S01-P05 建 DDL/骨架）← stage02_p06_otc_power（状态机 + CAS + fail-closed 先例）"
+  stage02_p08_internal_ai_economic_engine:
+    value: "COMPLETE 2026-08-16 — S02-P08 内部 AI 经济引擎（纯计算流水线 + fail-closed，不新增 DDL，不触碰用户 APT）。交付：library/service/aiops/ConfirmedProfitAdapter.php（已确认/可追溯/去重内部结果适配：confirmed=true + source_object_type/id/hash/currency/confirmed_at + source_hash sha256 + dedupe_key；未确认/不可追溯/非法金额/float VALIDATION_ERROR + 重复经 IdempotencyStore IDEMPOTENCY_CONFLICT）；ReferenceProfitService.php（confirmed_profit<=0 确定性 reference_profit=0 ZERO_SHORTCUT；>0 smoothing 06 TBC FAIL_CLOSED DEPENDENCY_UNAVAILABLE）；AptBudgetMappingService.php（mapped=reference/price*multiplier bcmath scale=18，price/multiplier 缺失/<=0 不除零不回退 mock FAIL_CLOSED）；DailyAIBudgetService.php（min 五 cap 纯函数 + 任一 required cap 缺失 DEPENDENCY_UNAVAILABLE）；AiBudgetParameterReader.php（Parameter/Snapshot adapter 读 AI.* 参数，06 全 TBC 恒 UNAVAILABLE）；BudgetDecision.php（内部 DTO forInternal 完整/forExternal 脱敏仅四字段+source_status + SENSITIVE_KEYS 负向扫描）；AiBudgetEngine.php（compute 纯计算 + generateFromActiveRelease/persist 参数未激活/预算对象未冻结 fail-closed + buildIdempotencyKey=sha256(source|release|snapshot|business_date)）。OpenAPI components/schemas/aiops.yaml（AiBudgetDecision/AiBudgetDecisionExternal/AiBudgetParameterSnapshot，INTERNAL_ONLY）+ gainode-v2.yaml 注册。测试 80 断言全过（56 Contract + 24 Integration）。停止条件：smoothing/price/multiplier/四 cap/rounding 06 全 TBC + 预算持久对象未冻结 → 引擎 closed；合同缺口 S02-P08-BUDGET-PERSISTENCE/S02-P08-PARAMS NEEDS_OWNER_DECISION。任务: .project-ai/tasks/TASK-20260816-015/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P08 内部 AI 经济引擎）← 07 §S02-P08 固定步骤 1-8 ← 02 §5.4/§11 ← 06 §4（AI.* 全 TBC）← machine_contract_ai_operations_p1（D8 预算连接 P1 不启用）← stage02_p07_approval_parameter_risk_support_notice_audit（fail-closed 先例）"
+  role_workflow_rules:
+    value: "EXECUTION_RULES_ADDED 2026-08-16 — 将创世DOG tools/git-review-worktree 通用多角色协作框架整合为 Gainode 项目执行规则：新增 .project-ai/rules/roles.md（5 角色 Owner/Scheduler/Developer/Quality/Reviewer 分工 + 权限矩阵 + 推理强度 + Gainode 参数表）、.project-ai/rules/workflow.md（双流水线 + 状态词 + 提交 trailer Code-Origin + 问题分级 + Verdict + 11 项门禁清单 + Stage 交接格式 + worktree 拓扑）、.project-ai/rules/git-review-worktree.md（独立审核 worktree 手工命令 + 必查清单 + 回滚）。定位为执行层细化，不推翻 MASTER_PROJECT_GOVERNANCE / 07 V3.3；DEV_GATE_MODEL=NO_PROGRESS_GATES_QUALITY_ENFORCES 与双流水线一致。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 读取创世DOG 三份通用方案整合进本项目 rules）← E:\\github\\AItradeos\\创世狗\\tools\\git-review-worktree\\{README,ROLES,WORKFLOW}.md"
+  stage03_p00_frontend_directory_freeze:
+    value: "COMPLETE 2026-08-16 — S03-P00 前端开发目录冻结（只读盘点 + baseline + Owner 路径决策 + 最小集复制）。Owner 已签批方案 A（2026-08-16「按照你的推荐执行」）：H5_TARGET_ROOT=E:\github\sports\gainode_h5_v2、ADMIN_TARGET_ROOT=E:\github\sports\gainode_admin_v2，MIGRATION_MODE=INCREMENTAL，PACKAGE_MANAGER_ADMIN=pnpm@8.14.0，TARGET_ROOT_WRITE_POLICY=DEVELOPMENT_ONLY，_existing_prod/** 全程只读。交付：.project-ai/decisions/FRONTEND_BASELINE_INVENTORY.md（gainode_h5 quiz V1.x H5 Vue3.5+Vite8+TS6/22 views(Home+login+my+robot+team)/链上依赖 solana+ethers+tronweb+ConnectWallet.vue DO_NOT_COPY；gainode_admin layui-vue-admin 模板 pnpm@8.14.0/Vue3.3+Vite4+TS4.5/layui-vue+Pinia+axios+echarts KEEP/crypto-js+md5+js-base64+@aws-sdk S3 REPLACE/mockjs REMOVE_LATER/mining+signal+arbitrage+redEnvelope+team+assets 旧业务残留 + form+table+component+workSpace+error+result 模板演示 + 地图 JSON DO_NOT_COPY）+ .project-ai/decisions/FRONTEND_TARGET_ROOT_DECISION.md（FROZEN，方案 A）+ .project-ai/decisions/FRONTEND_COPY_MANIFEST.md（复制清单 72+539 files，排除 .git/node_modules/dist/.env/.pnpm-debug.log）。baseline 三仓库 git HEAD+tree：H5=5e4b88b0/7a6c6358、Admin=e0d2224a/caa4800e、API=55e266fa/0b20918f；secret 扫描 0 匹配。containment 校验 PASS。迁移前基线工具链 node=22.17.1/npm=10.9.2/pnpm=9.15.9；遗留风险：H5 engines.node 要求 ^22.18.0、Admin packageManager pnpm@8.14.0 版本偏差待 S03-P01 对齐。任务: .project-ai/tasks/TASK-20260816-017/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S03-P00 前端开发目录冻结）+ OWNER_DIRECTIVE 2026-08-16（方案 A「按照你的推荐执行」）← 07 §S03-P00 固定步骤 1-6 ← 07 §8 STAGE-03 阶段边界 ← context.md V1.x 生产代码关键发现"
+  stage03_p01_h5_infrastructure:
+    value: "COMPLETE 2026-08-16 — S03-P01 H5 基础设施（strangler fig 增量迁移，保留 Vue3+TS+可复用 route/view/component，不重写 22 旧 view）。交付：src/api/http.ts（V2 六请求头 Authorization/Idempotency-Key/If-Match/Accept-Language/X-Request-Id/X-Timestamp + auth refresh single-flight + RESULT_UNKNOWN 202 不自动重 POST，成功写操作带 result_code 不误判为错误）+ src/api/types.ts（Envelope/16 错误码/数据新鲜度 8 字段/ApiError/UnknownResultError）+ src/api/legacy.ts（旧 MD5 http shim）+ src/api/services.ts 与旧 view 改 import legacy；src/stores/{session,entitlement,robot,prediction,asset,notice}.ts（Pinia+persistedstate，白名单仅 token/语言/安全偏好，不持久化 secret/权威余额）；src/router/{index,meta}.ts（pageId/auth/restricted/feature + 深链无权限安全降级）；src/tokens/{color,spacing,typography,radius,elevation}.ts+tokens.css（08 §2-6 映射，CSS 变量，禁硬编码品牌色）；src/i18n/（vue-i18n 7 语言 + legacy t/setLanguage 兼容 + ui-copy-manifest/terminology-lock/sensitive-copy-review.json，敏感文案 otc.risk_disclosure.body PENDING_HUMAN_REVIEW）；src/utils/request-id.ts；五态组件 src/components/{ApiErrorBoundary,FiveStateContainer,RestrictedState,UnknownResult}.vue；vitest.config.ts/playwright.config.ts + tests/unit/{http,tokens,i18n,components}.spec.ts（19 断言）+ tests/e2e/smoke.spec.ts。链上依赖 @solana/web3.js/ethers/tronweb + ConnectWallet.vue 移除（引用清单 0，单独提交）；硬编码 S3 AK/SK 移除，s3Upload 改后端 presigned。验证：type-check 0 error / build vite 122 modules / test:unit 19/19 / secret 扫描 0 匹配。合同缺口 S03-P01-UPLOAD-PRESIGNED-URL（p0_001 提 POST /api/upload/presigned-url vs 03 原型 POST /api/v1/uploads，OpenAPI 未冻结 uploads 路径）/ S03-P01-VISUAL-BASELINE（375-390-430 截图基线已配置，逐页截图归 S03-P02）登记 NEEDS_OWNER_DECISION。任务: .project-ai/tasks/TASK-20260816-018/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S03-P01 H5 基础设施）← 07 §S03-P01 固定步骤 1-9 ← stage03_p00_frontend_directory_freeze（H5_TARGET_ROOT 已冻结）← 05 §1/§7/§10（六请求头/错误分类/数据新鲜度）← 08 §2-6（tokens）← h5_component_library（Vant4）"
