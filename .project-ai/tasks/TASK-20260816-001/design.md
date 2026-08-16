@@ -2,8 +2,8 @@
 
 ## 状态
 
-- **Owner Signoff：未完成（6 实体 enum 待 Owner 裁决）**
-- **Independent Review：未开始（Result/Settlement 转移矩阵候选，待 State Machine gate）**
+- **Owner Signoff：完成（6 实体 enum 已逐项裁决，2026-08-16，全部采纳各 D.x 的 RECOMMENDED_OPTION）**
+- **Independent Review：未开始（Result/Settlement 转移矩阵候选 + 6 实体 enum，待 State Machine gate）**
 - **冻结状态：CANDIDATE（未 FROZEN）**
 
 ## 权威依据与角色（05 canonical）
@@ -90,8 +90,8 @@
 
 ## Part D — 6 缺 enum 实体 Owner Decision Matrix
 
-> 依据 Owner 裁决 #21：`settlement_batches` / `otc_trades` / `refund_cases` / `correction_cases`（以及 2B-2 的 `mfa_enrollments` / `risk_cases`）的 status **冻结前须补进 05 §4**（走 05 变更流程），否则 **FAIL_CLOSED 不建表**。
-> 本 part 只提出候选 enum 方案供 Owner 裁决，**不自创状态**。裁决通过后先补 05 §4，再在 S01-P03 建 DDL。
+> 依据 Owner 裁决 #21：`settlement_batches` / `otc_trades` / `refund_cases` / `correction_cases` 的 status **冻结前须补进 05 §4**（走 05 变更流程），否则 **FAIL_CLOSED 不建表**。
+> **Owner 已于 2026-08-16 逐项裁决（2B1-ENUM-01..06 全部采纳各 D.x 的 RECOMMENDED_OPTION），已补入 05 §4（V2.3），解除 FAIL_CLOSED，S01-P03 可建表。** 以下 D.1-D.6 保留完整决策矩阵作追溯（RECOMMENDED_OPTION 即已确认项），D.7 为已确认 enum 的状态合同摘要（转移仍候选，待 Independent Review，未 FROZEN）。
 
 ### D.1 SettlementBatch（`settlement_batches`）
 
@@ -195,9 +195,9 @@ SAFE_WORK_CONTINUING = 不受阻塞
 RESUME_CONDITION = Owner 裁决后补 05 §4，再 S01-P03 建 DDL
 ```
 
-### D.7 候选状态合同摘要（依赖 enum 裁决，非冻结）
+### D.7 状态合同摘要（enum 已 Owner 裁决，转移候选，未 FROZEN）
 
-> 依据 S01-P02 步骤 3：每项 Owner Decision 表必须列初态、合法转移、终态、触发者、Authoritative Writer、失败态、重试、幂等、审计、账本副作用。以下为 6 缺 enum 实体的**候选摘要**（enum 待 Owner 裁决，转移为候选，不冻结；未裁决前全部 FAIL_CLOSED）。触发者仅用 05 §8 已有角色。
+> 依据 S01-P02 步骤 3：每项表必须列初态、合法转移、终态、触发者、Authoritative Writer、失败态、重试、幂等、审计、账本副作用。以下为 6 缺 enum 实体的**状态合同摘要**（enum 已 Owner 裁决 = OPTION_A，2026-08-16；转移为候选，不冻结；独立审核通过前置 FROZEN）。触发者仅用 05 §8 已有角色。
 
 #### D.7.1 SettlementBatch
 
@@ -278,7 +278,7 @@ Writer = RobotUpgradeOrderService
 
 ```text
 初态 = active
-合法转移（候选）= active→expired / active→withdrawn / active→superseded（后两项取决于 OPTION_A/B 裁决）
+合法转移（候选）= active→expired（两态，Owner 裁决 OPTION_B：撤回/取代不新增状态值，由新版本 receipt + consent_version 表达）
 终态 = expired
 触发者 = END_USER 同意（active）；系统（到期 expired）
 Writer = ConsentReceiptService

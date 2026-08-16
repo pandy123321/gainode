@@ -1,6 +1,6 @@
 # 05 · Gainode 数据、状态、权限与 API 契约
 
-> 版本：V2.2 · Full Object & State Machine Closure
+> 版本：V2.3 · 2B-1 canonical enum supplement（Owner 裁决 2026-08-16）
 > 目标：让前后端不再靠页面截图猜字段；所有 P0 核心对象均有最低字段定义或明确对象类型标注
 
 ## 1. API 全局规则
@@ -754,6 +754,28 @@ updated_at
 
 ### Settlement
 `queued / calculating / review / payable / paid / failed`
+
+### SettlementBatch
+`created / processing / completed / partially_failed / failed`
+
+### RefundCase
+`pending / approved / executing / completed / rejected / failed`
+
+### CorrectionCase
+`pending / approved / executing / completed / rejected / failed`
+
+### OtcTrade
+`completed`
+
+> OtcTrade 是 append-only 成交事实（单态）。争议/冲正不覆盖 Trade，走 RiskCase + ledger reversal；OtcOrder 的争议结果作用在 OtcOrder 而非 OtcTrade。
+
+### RobotUpgradeOrder
+`pending / processing / completed / failed / cancelled`
+
+### ConsentReceipt
+`active / expired`
+
+> `consent_version` + `content_hash` 表达版本演进；「撤回/取代」不新增状态值，由新版本 receipt 表达。到期为唯一终态。
 
 ### Prediction Order
 `submitted / locked / awaiting_result / settling / settled / refunding / refunded / correcting / corrected`
