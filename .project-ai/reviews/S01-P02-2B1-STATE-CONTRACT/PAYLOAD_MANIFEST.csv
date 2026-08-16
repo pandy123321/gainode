@@ -1,4 +1,6 @@
 path,git_status,sha256,bytes
 .project-ai/tasks/TASK-20260816-001/requirement.md,A,1faeef94a786f79a2a074f91b6c13239442f824a8ea17eb72a8c3de76340ef84,3083
-.project-ai/tasks/TASK-20260816-001/design.md,A,e650bdfb584b68d692ee9c9780510fd09fd997c87d766240a88ca75b7e5b683a,18292
-.project-ai/tasks/TASK-20260816-001/acceptance.md,A,a4fc50f44d63eb3163eee80560dc21dddc63164f93287772df0e201c7ea55010,2967
+.project-ai/tasks/TASK-20260816-001/design.md,A,e943a59d5d8748908caa6690bd95bceb295639ce4b376cbeb615fdedd6a96f6e,18611
+.project-ai/tasks/TASK-20260816-001/acceptance.md,A,9e128a6e76152804872b0f3b5b5b3b75a08dbfec6abfd4723d75a34bc45a8041,3199
+Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md,M,75ad77bde805a0aac4abe7e19c2d8a5c3a3bd6402d0bfcd67330e11f87c5e6fe,27984
+0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2B1_STATE_FREEZE.md,M,794cc7763b62f77503cfa00aa1db607e63122745b916e06c45c498d808e1b306,13895

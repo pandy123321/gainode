@@ -4,25 +4,25 @@
 
 ```text
 git diff --check          = PASS（无 trailing whitespace / 冲突标记）
-diff 完整性（未截断）      = PASS（DIFF.txt = 25522 字符）
+diff 完整性（未截断）      = PASS（DIFF.txt = 42282 字符）
 Secret Scan               = PASS（0 hits）
 每文件 SHA-256            = PASS（见 PAYLOAD_MANIFEST.csv）
-总包 SHA-256              = PASS（eba2536266f9950605ba4aa599cd3ecd286e17a5998ebd215c3781623cf2a2df）
-REVIEW_RANGE 文件清单     = PASS（3 新增文件，无产品代码 / 无 DDL）
+总包 SHA-256              = PASS（4cb17ee80e5cd47d802181fafe71b8ee4f046d0e4caaa24a86f92765cd64d20f）
+REVIEW_RANGE 文件清单     = PASS（3 新增 + 05 修改 + 1 新增 Freeze Candidate，无产品代码 / 无 DDL）
 V3 策划/上一包隔离         = PASS（S01-P01 的 5 文件与 MC1 DDL 均不在本包）
 ```
 
-## 机械一致性断言（本包 design/acceptance 声称）
+## 机械一致性断言（本包声称）
 
 ```text
 RESULT_ENUM_MATCHES_05 = YES
 SETTLEMENT_ENUM_MATCHES_05 = YES
+SIX_ENTITY_ENUM_MATCHES_05_V23 = YES
 NO_SELF_INVENTED_STATE = YES
 NO_SELF_INVENTED_ROLE = YES
 AUDIT_EVENTS_REUSED_NOT_RECREATED = YES
 OWNER_DECISION_MATRIX_COUNT = 6
-CANDIDATE_STATE_SUMMARY_NOT_FROZEN = YES
-UNFROZEN_STATE_FAIL_CLOSED = YES
+TRANSITION_MATRICES_NOT_FROZEN = YES
 ```
 
 ## 未执行验证（NOT_RUN）
@@ -43,4 +43,4 @@ DDL parse      = NOT_RUN（本包不生成 DDL，属 S01-P03）
 - 总包哈希：`PACKAGE_SHA256.txt`
 - 实现 commit：`IMPLEMENTATION_COMMIT.txt`
 - 复审范围：`REVIEW_RANGE.txt`
-- 快照内容（c2d57ce 全文）：`files_at_impl/*.txt`
+- 快照内容（a32918c 全文）：`files_at_impl/*.txt`

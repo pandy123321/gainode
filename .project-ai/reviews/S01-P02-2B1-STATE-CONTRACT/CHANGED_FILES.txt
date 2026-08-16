@@ -1,3 +1,5 @@
 A	.project-ai/tasks/TASK-20260816-001/requirement.md
 A	.project-ai/tasks/TASK-20260816-001/design.md
 A	.project-ai/tasks/TASK-20260816-001/acceptance.md
+M	Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md
+M	0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2B1_STATE_FREEZE.md

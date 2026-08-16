@@ -2,8 +2,8 @@
 
 ## 扫描对象
 
-- `DIFF.txt`（完整 diff，25522 字符）
-- `files_at_impl/*.txt`（3 个变更文件全文快照）
+- `DIFF.txt`（完整 diff，42282 字符）
+- `files_at_impl/*.txt`（5 个变更文件全文快照）
 
 ## 扫描规则
 
