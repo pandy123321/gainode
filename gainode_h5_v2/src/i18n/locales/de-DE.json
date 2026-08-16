@@ -6,6 +6,7 @@
     "error": "Etwas ist schiefgelaufen, bitte erneut versuchen",
     "retry": "Erneut versuchen",
     "restricted": "Eingeschränkt",
+    "unknown": "Unbekannt",
     "unknownResult": "Ergebnis wird bestätigt…",
     "confirm": "Bestätigen",
     "cancel": "Abbrechen",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "Prognosen",
     "me": "Mein Bereich"
+  },
+  "user": {
+    "status": {
+      "active": "Aktiv",
+      "restricted": "Eingeschränkt",
+      "suspended": "Gesperrt",
+      "closed": "Geschlossen"
+    },
+    "global_p_level": "Basisstufe"
   },
   "robot": {
     "status": {
@@ -474,6 +484,68 @@
       "flow_empty": "Verlaufs-Timeline ist noch nicht verfügbar",
       "cancel_order": "Verbleibenden Auftrag stornieren",
       "not_found": "Auftrag nicht gefunden"
+    },
+    "m_me_001": {
+      "title": "Mein Bereich",
+      "description": "Vermögen, Power, OTC und Konto-Einstiege",
+      "primary_action": "Ansehen",
+      "unknown_user": "Kein Spitzname gesetzt",
+      "kyc_status": "KYC-Status",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "Eingerichtet",
+      "mfa_not_enrolled": "Nicht eingerichtet",
+      "entry_asset": "APT-Vermögen",
+      "entry_power": "Power",
+      "entry_otc": "OTC-Markt",
+      "entry_kyc": "KYC & Zugriff",
+      "entry_notice": "Nachrichten",
+      "entry_security": "Sicherheit",
+      "entry_settings": "Einstellungen",
+      "entry_support": "Hilfe & Tickets"
+    },
+    "m_sec_001": {
+      "title": "Sicherheit",
+      "description": "MFA, Geräte und Sitzungssicherheit verwalten",
+      "primary_action": "Verwalten",
+      "manage": "Verwalten",
+      "mfa_methods": "Eingerichtete MFA-Methoden",
+      "active_sessions": "Aktive Sitzungen",
+      "suspicious_flags": "Zu prüfende Punkte",
+      "mfa_title": "Zwei-Faktor-Authentifizierung",
+      "mfa_manage": "Authenticator einrichten / verwalten",
+      "devices_title": "Geräte & Sitzungen",
+      "devices_manage": "Andere Sitzungen ansehen und widerrufen",
+      "audit_title": "Anmeldeverlauf",
+      "audit_restricted": "Quelle des Anmeldeverlaufs ist ungeklärt und nicht verfügbar",
+      "password_title": "Passwortsicherheit",
+      "password_manage": "Passwort ändern"
+    },
+    "m_sec_002": {
+      "title": "MFA / Geräte / Sitzungen",
+      "description": "Authenticator einrichten und andere Sitzungen verwalten",
+      "primary_action": "Speichern",
+      "mfa_title": "MFA-Einrichtung",
+      "mfa_none": "Kein Authenticator eingerichtet",
+      "mfa_bind": "Authenticator einrichten",
+      "mfa_restricted": "MFA-Einrichtung (Schreiben) ist noch nicht verfügbar",
+      "sessions_title": "Sitzungen / Geräte",
+      "current": "Aktuell",
+      "revocable": "Widerrufbar",
+      "not_revocable": "Nicht widerrufbar",
+      "unknown_device": "Unbekanntes Gerät",
+      "never_active": "Keine letzte Aktivität",
+      "revoke": "Widerrufen",
+      "revoke_restricted": "Sitzungswiderruf (Schreiben) ist noch nicht verfügbar"
+    },
+    "m_settings_001": {
+      "title": "Einstellungen",
+      "description": "Sprache, Zeitzone, Benachrichtigungen und App-Einstellungen",
+      "primary_action": "Speichern",
+      "language_title": "Sprache",
+      "preferences_title": "Zeitzone & Benachrichtigungseinstellungen",
+      "preferences_restricted": "Einstellungs-Endpunkte sind noch nicht verfügbar",
+      "legal_notices": "Ankündigungen & Benachrichtigungen",
+      "logout": "Abmelden"
     }
   }
 }

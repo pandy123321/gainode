@@ -6,6 +6,7 @@
     "error": "Something went wrong, please try again",
     "retry": "Retry",
     "restricted": "Restricted",
+    "unknown": "Unknown",
     "unknownResult": "Confirming result…",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "Predictions",
     "me": "Me"
+  },
+  "user": {
+    "status": {
+      "active": "Active",
+      "restricted": "Restricted",
+      "suspended": "Suspended",
+      "closed": "Closed"
+    },
+    "global_p_level": "Base level"
   },
   "robot": {
     "status": {
@@ -485,6 +495,68 @@
       "flow_empty": "Flow timeline is not available yet",
       "cancel_order": "Cancel remaining order",
       "not_found": "Order not found"
+    },
+    "m_me_001": {
+      "title": "Me",
+      "description": "Assets, Power, OTC and account entry points",
+      "primary_action": "View",
+      "unknown_user": "No nickname set",
+      "kyc_status": "KYC status",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "Enrolled",
+      "mfa_not_enrolled": "Not enrolled",
+      "entry_asset": "APT Assets",
+      "entry_power": "Power",
+      "entry_otc": "OTC Market",
+      "entry_kyc": "KYC & Access",
+      "entry_notice": "Notifications",
+      "entry_security": "Security",
+      "entry_settings": "Settings",
+      "entry_support": "Help & Tickets"
+    },
+    "m_sec_001": {
+      "title": "Security",
+      "description": "Manage MFA, devices and session security",
+      "primary_action": "Manage",
+      "manage": "Manage",
+      "mfa_methods": "Enrolled MFA methods",
+      "active_sessions": "Active sessions",
+      "suspicious_flags": "Items to review",
+      "mfa_title": "Two-factor authentication",
+      "mfa_manage": "Enroll / manage authenticator",
+      "devices_title": "Devices & sessions",
+      "devices_manage": "View and revoke other sessions",
+      "audit_title": "Login history",
+      "audit_restricted": "Login history source is undecided and unavailable",
+      "password_title": "Password security",
+      "password_manage": "Change password"
+    },
+    "m_sec_002": {
+      "title": "MFA / Devices / Sessions",
+      "description": "Enroll an authenticator and manage other sessions",
+      "primary_action": "Save",
+      "mfa_title": "MFA enrollment",
+      "mfa_none": "No authenticator enrolled",
+      "mfa_bind": "Enroll authenticator",
+      "mfa_restricted": "MFA enrollment write is not available yet",
+      "sessions_title": "Sessions / devices",
+      "current": "Current",
+      "revocable": "Revocable",
+      "not_revocable": "Not revocable",
+      "unknown_device": "Unknown device",
+      "never_active": "No recent activity",
+      "revoke": "Revoke",
+      "revoke_restricted": "Session revocation write is not available yet"
+    },
+    "m_settings_001": {
+      "title": "Settings",
+      "description": "Language, timezone, notifications and app preferences",
+      "primary_action": "Save",
+      "language_title": "Language",
+      "preferences_title": "Timezone & notification preferences",
+      "preferences_restricted": "Preference endpoints are not available yet",
+      "legal_notices": "Announcements & notifications",
+      "logout": "Sign out"
     }
   }
 }

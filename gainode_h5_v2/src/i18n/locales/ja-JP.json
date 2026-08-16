@@ -6,6 +6,7 @@
     "error": "エラーが発生しました。もう一度お試しください",
     "retry": "再試行",
     "restricted": "制限されています",
+    "unknown": "不明",
     "unknownResult": "結果を確認中…",
     "confirm": "確認",
     "cancel": "キャンセル",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "予想",
     "me": "マイ"
+  },
+  "user": {
+    "status": {
+      "active": "正常",
+      "restricted": "制限",
+      "suspended": "停止",
+      "closed": "解約済み"
+    },
+    "global_p_level": "基本レベル"
   },
   "robot": {
     "status": {
@@ -474,6 +484,68 @@
       "flow_empty": "フローのタイムラインはまだ利用できません",
       "cancel_order": "残りの注文を取消",
       "not_found": "注文が見つかりません"
+    },
+    "m_me_001": {
+      "title": "マイ",
+      "description": "資産・Power・OTC・アカウントの入口",
+      "primary_action": "見る",
+      "unknown_user": "ニックネーム未設定",
+      "kyc_status": "KYC ステータス",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "登録済み",
+      "mfa_not_enrolled": "未登録",
+      "entry_asset": "APT 資産",
+      "entry_power": "Power",
+      "entry_otc": "OTC マーケット",
+      "entry_kyc": "KYC とアクセス",
+      "entry_notice": "メッセージセンター",
+      "entry_security": "セキュリティ",
+      "entry_settings": "設定",
+      "entry_support": "ヘルプとチケット"
+    },
+    "m_sec_001": {
+      "title": "セキュリティ",
+      "description": "MFA・デバイス・セッションを管理",
+      "primary_action": "管理",
+      "manage": "管理",
+      "mfa_methods": "登録済み MFA 方式",
+      "active_sessions": "アクティブセッション",
+      "suspicious_flags": "要確認項目",
+      "mfa_title": "二段階認証",
+      "mfa_manage": "認証アプリの登録 / 管理",
+      "devices_title": "デバイスとセッション",
+      "devices_manage": "他のセッションを確認・取消",
+      "audit_title": "ログイン履歴",
+      "audit_restricted": "ログイン履歴のソースは未確定のため利用できません",
+      "password_title": "パスワードの安全",
+      "password_manage": "パスワード変更"
+    },
+    "m_sec_002": {
+      "title": "MFA / デバイス / セッション",
+      "description": "認証アプリの登録と他のセッションの管理",
+      "primary_action": "保存",
+      "mfa_title": "MFA 登録",
+      "mfa_none": "認証アプリが未登録です",
+      "mfa_bind": "認証アプリを登録",
+      "mfa_restricted": "MFA 登録の書き込みはまだ利用できません",
+      "sessions_title": "セッション / デバイス",
+      "current": "現在",
+      "revocable": "取消可能",
+      "not_revocable": "取消不可",
+      "unknown_device": "不明なデバイス",
+      "never_active": "活動記録なし",
+      "revoke": "取消",
+      "revoke_restricted": "セッション取消の書き込みはまだ利用できません"
+    },
+    "m_settings_001": {
+      "title": "設定",
+      "description": "言語・タイムゾーン・通知・アプリ設定",
+      "primary_action": "保存",
+      "language_title": "言語",
+      "preferences_title": "タイムゾーンと通知設定",
+      "preferences_restricted": "設定エンドポイントはまだ利用できません",
+      "legal_notices": "告知と通知",
+      "logout": "ログアウト"
     }
   }
 }

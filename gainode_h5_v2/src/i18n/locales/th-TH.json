@@ -6,6 +6,7 @@
     "error": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง",
     "retry": "ลองใหม่",
     "restricted": "ถูกจำกัด",
+    "unknown": "ไม่ทราบ",
     "unknownResult": "กำลังยืนยันผล…",
     "confirm": "ยืนยัน",
     "cancel": "ยกเลิก",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "ทายผล",
     "me": "ของฉัน"
+  },
+  "user": {
+    "status": {
+      "active": "ปกติ",
+      "restricted": "ถูกจำกัด",
+      "suspended": "ถูกระงับ",
+      "closed": "ปิดบัญชีแล้ว"
+    },
+    "global_p_level": "ระดับพื้นฐาน"
   },
   "robot": {
     "status": {
@@ -474,6 +484,68 @@
       "flow_empty": "ไทม์ไลน์กระแสยังไม่พร้อมใช้งาน",
       "cancel_order": "ยกเลิกคำสั่งคงเหลือ",
       "not_found": "ไม่พบคำสั่ง"
+    },
+    "m_me_001": {
+      "title": "ของฉัน",
+      "description": "จุดเข้าสินทรัพย์ Power OTC และบัญชี",
+      "primary_action": "ดู",
+      "unknown_user": "ยังไม่ได้ตั้งชื่อเล่น",
+      "kyc_status": "สถานะ KYC",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "ผูกแล้ว",
+      "mfa_not_enrolled": "ยังไม่ได้ผูก",
+      "entry_asset": "สินทรัพย์ APT",
+      "entry_power": "Power",
+      "entry_otc": "ตลาด OTC",
+      "entry_kyc": "KYC และการเข้าถึง",
+      "entry_notice": "ศูนย์ข้อความ",
+      "entry_security": "ความปลอดภัย",
+      "entry_settings": "การตั้งค่า",
+      "entry_support": "ช่วยเหลือและตั๋ว"
+    },
+    "m_sec_001": {
+      "title": "ความปลอดภัย",
+      "description": "จัดการ MFA อุปกรณ์ และความปลอดภัยของเซสชัน",
+      "primary_action": "จัดการ",
+      "manage": "จัดการ",
+      "mfa_methods": "วิธี MFA ที่ผูกแล้ว",
+      "active_sessions": "เซสชันที่ใช้งาน",
+      "suspicious_flags": "รายการที่ต้องตรวจสอบ",
+      "mfa_title": "การยืนยันสองขั้นตอน",
+      "mfa_manage": "ผูก / จัดการแอปยืนยัน",
+      "devices_title": "อุปกรณ์และเซสชัน",
+      "devices_manage": "ดูและเพิกถอนเซสชันอื่น",
+      "audit_title": "ประวัติการเข้าสู่ระบบ",
+      "audit_restricted": "แหล่งประวัติการเข้าสู่ระบบยังไม่ตัดสิน จึงไม่พร้อมใช้งาน",
+      "password_title": "ความปลอดภัยของรหัสผ่าน",
+      "password_manage": "เปลี่ยนรหัสผ่าน"
+    },
+    "m_sec_002": {
+      "title": "MFA / อุปกรณ์ / เซสชัน",
+      "description": "ผูกแอปยืนยันและจัดการเซสชันอื่น",
+      "primary_action": "บันทึก",
+      "mfa_title": "การลงทะเบียน MFA",
+      "mfa_none": "ยังไม่ได้ผูกแอปยืนยัน",
+      "mfa_bind": "ผูกแอปยืนยัน",
+      "mfa_restricted": "การเขียนการลงทะเบียน MFA ยังไม่พร้อมใช้งาน",
+      "sessions_title": "เซสชัน / อุปกรณ์",
+      "current": "ปัจจุบัน",
+      "revocable": "เพิกถอนได้",
+      "not_revocable": "เพิกถอนไม่ได้",
+      "unknown_device": "อุปกรณ์ไม่รู้จัก",
+      "never_active": "ไม่มีกิจกรรมล่าสุด",
+      "revoke": "เพิกถอน",
+      "revoke_restricted": "การเขียนเพิกถอนเซสชันยังไม่พร้อมใช้งาน"
+    },
+    "m_settings_001": {
+      "title": "การตั้งค่า",
+      "description": "ภาษา เขตเวลา การแจ้งเตือน และการตั้งค่าแอป",
+      "primary_action": "บันทึก",
+      "language_title": "ภาษา",
+      "preferences_title": "เขตเวลาและการแจ้งเตือน",
+      "preferences_restricted": "ปลายทางการตั้งค่ายังไม่พร้อมใช้งาน",
+      "legal_notices": "ประกาศและการแจ้งเตือน",
+      "logout": "ออกจากระบบ"
     }
   }
 }

@@ -6,6 +6,7 @@
     "error": "出错了，请稍后重试",
     "retry": "重试",
     "restricted": "暂时受限",
+    "unknown": "未知",
     "unknownResult": "正在确认结果…",
     "confirm": "确认",
     "cancel": "取消",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "竞猜",
     "me": "我的"
+  },
+  "user": {
+    "status": {
+      "active": "正常",
+      "restricted": "受限",
+      "suspended": "已停用",
+      "closed": "已注销"
+    },
+    "global_p_level": "基础等级"
   },
   "robot": {
     "status": {
@@ -485,6 +495,68 @@
       "flow_empty": "流水时间线暂不可用",
       "cancel_order": "取消剩余订单",
       "not_found": "未找到该订单"
+    },
+    "m_me_001": {
+      "title": "我的",
+      "description": "资产、Power、OTC 与账户入口",
+      "primary_action": "查看",
+      "unknown_user": "未设置昵称",
+      "kyc_status": "KYC 状态",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "已绑定",
+      "mfa_not_enrolled": "未绑定",
+      "entry_asset": "APT 资产",
+      "entry_power": "Power",
+      "entry_otc": "OTC 市场",
+      "entry_kyc": "KYC 与准入",
+      "entry_notice": "消息中心",
+      "entry_security": "安全中心",
+      "entry_settings": "设置",
+      "entry_support": "帮助与工单"
+    },
+    "m_sec_001": {
+      "title": "安全中心",
+      "description": "集中管理 MFA、设备与会话安全",
+      "primary_action": "管理",
+      "manage": "管理",
+      "mfa_methods": "已绑定的 MFA 方式",
+      "active_sessions": "活跃会话",
+      "suspicious_flags": "待关注风险项",
+      "mfa_title": "MFA 二次验证",
+      "mfa_manage": "绑定 / 管理验证器",
+      "devices_title": "设备与会话",
+      "devices_manage": "查看并撤销其他会话",
+      "audit_title": "登录记录",
+      "audit_restricted": "登录记录来源未裁决，暂不可用",
+      "password_title": "密码安全",
+      "password_manage": "修改密码"
+    },
+    "m_sec_002": {
+      "title": "MFA / 设备 / 会话",
+      "description": "绑定验证器、查看并管理其他会话",
+      "primary_action": "保存",
+      "mfa_title": "MFA 注册",
+      "mfa_none": "尚未绑定验证器",
+      "mfa_bind": "绑定验证器",
+      "mfa_restricted": "MFA 绑定写操作尚未开放",
+      "sessions_title": "会话 / 设备",
+      "current": "当前会话",
+      "revocable": "可撤销",
+      "not_revocable": "不可撤销",
+      "unknown_device": "未知设备",
+      "never_active": "暂无活动记录",
+      "revoke": "撤销",
+      "revoke_restricted": "会话撤销写操作尚未开放"
+    },
+    "m_settings_001": {
+      "title": "设置",
+      "description": "语言、时区、通知与应用偏好",
+      "primary_action": "保存",
+      "language_title": "语言",
+      "preferences_title": "时区与通知偏好",
+      "preferences_restricted": "偏好设置端点尚未开放",
+      "legal_notices": "公告与消息",
+      "logout": "退出登录"
     }
   }
 }

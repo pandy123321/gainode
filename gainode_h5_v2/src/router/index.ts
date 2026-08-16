@@ -216,12 +216,30 @@ const router = createRouter({
       component: () => import('../views/otc/m-otc-006/index.vue'),
       meta: { pageId: 'M-OTC-006', auth: true },
     },
+    // ---- H5-08 Me/Security/Settings（M-ME-001 / M-SEC-001..002 / M-SETTINGS-001）----
     {
       path: '/me',
-      name: 'me-placeholder',
-      component: () => import('../views/common/ComingSoonView.vue'),
-      props: { pageTitle: 'Me', navActive: 'me' },
+      name: 'me',
+      component: () => import('../views/me/m-me-001/index.vue'),
       meta: { pageId: 'M-ME-001', auth: true },
+    },
+    {
+      path: '/security',
+      name: 'security',
+      component: () => import('../views/security/m-sec-001/index.vue'),
+      meta: { pageId: 'M-SEC-001', auth: true },
+    },
+    {
+      path: '/security/sessions',
+      name: 'security-sessions',
+      component: () => import('../views/security/m-sec-002/index.vue'),
+      meta: { pageId: 'M-SEC-002', auth: true },
+    },
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('../views/settings/m-settings-001/index.vue'),
+      meta: { pageId: 'M-SETTINGS-001', auth: true },
     },
     {
       path: '/:pathMatch(.*)*',

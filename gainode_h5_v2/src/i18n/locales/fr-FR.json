@@ -6,6 +6,7 @@
     "error": "Une erreur est survenue, veuillez réessayer",
     "retry": "Réessayer",
     "restricted": "Restreint",
+    "unknown": "Inconnu",
     "unknownResult": "Confirmation du résultat…",
     "confirm": "Confirmer",
     "cancel": "Annuler",
@@ -82,6 +83,15 @@
     "robot": "Robot",
     "prediction": "Pronostics",
     "me": "Mon compte"
+  },
+  "user": {
+    "status": {
+      "active": "Actif",
+      "restricted": "Restreint",
+      "suspended": "Suspendu",
+      "closed": "Clôturé"
+    },
+    "global_p_level": "Niveau de base"
   },
   "robot": {
     "status": {
@@ -474,6 +484,68 @@
       "flow_empty": "La chronologie du flux n'est pas encore disponible",
       "cancel_order": "Annuler l'ordre restant",
       "not_found": "Ordre introuvable"
+    },
+    "m_me_001": {
+      "title": "Mon compte",
+      "description": "Points d'entrée vers les actifs, Power, OTC et le compte",
+      "primary_action": "Voir",
+      "unknown_user": "Aucun pseudonyme défini",
+      "kyc_status": "Statut KYC",
+      "mfa_status": "MFA",
+      "mfa_enrolled": "Configurée",
+      "mfa_not_enrolled": "Non configurée",
+      "entry_asset": "Actifs APT",
+      "entry_power": "Power",
+      "entry_otc": "Marché OTC",
+      "entry_kyc": "KYC et accès",
+      "entry_notice": "Messages",
+      "entry_security": "Sécurité",
+      "entry_settings": "Paramètres",
+      "entry_support": "Aide et tickets"
+    },
+    "m_sec_001": {
+      "title": "Sécurité",
+      "description": "Gérer MFA, appareils et sécurité des sessions",
+      "primary_action": "Gérer",
+      "manage": "Gérer",
+      "mfa_methods": "Méthodes MFA configurées",
+      "active_sessions": "Sessions actives",
+      "suspicious_flags": "Éléments à vérifier",
+      "mfa_title": "Authentification à deux facteurs",
+      "mfa_manage": "Configurer / gérer l'authentificateur",
+      "devices_title": "Appareils et sessions",
+      "devices_manage": "Voir et révoquer les autres sessions",
+      "audit_title": "Historique de connexion",
+      "audit_restricted": "La source de l'historique de connexion est indécise et indisponible",
+      "password_title": "Sécurité du mot de passe",
+      "password_manage": "Changer le mot de passe"
+    },
+    "m_sec_002": {
+      "title": "MFA / Appareils / Sessions",
+      "description": "Configurer un authentificateur et gérer les autres sessions",
+      "primary_action": "Enregistrer",
+      "mfa_title": "Configuration MFA",
+      "mfa_none": "Aucun authentificateur configuré",
+      "mfa_bind": "Configurer l'authentificateur",
+      "mfa_restricted": "La configuration MFA (écriture) n'est pas encore disponible",
+      "sessions_title": "Sessions / appareils",
+      "current": "Actuelle",
+      "revocable": "Révocable",
+      "not_revocable": "Non révocable",
+      "unknown_device": "Appareil inconnu",
+      "never_active": "Aucune activité récente",
+      "revoke": "Révoquer",
+      "revoke_restricted": "La révocation de session (écriture) n'est pas encore disponible"
+    },
+    "m_settings_001": {
+      "title": "Paramètres",
+      "description": "Langue, fuseau horaire, notifications et préférences",
+      "primary_action": "Enregistrer",
+      "language_title": "Langue",
+      "preferences_title": "Fuseau horaire et notifications",
+      "preferences_restricted": "Les points de terminaison des préférences ne sont pas encore disponibles",
+      "legal_notices": "Annonces et notifications",
+      "logout": "Se déconnecter"
     }
   }
 }

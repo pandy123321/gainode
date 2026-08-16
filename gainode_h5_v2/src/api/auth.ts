@@ -106,4 +106,6 @@ export const authApi = {
     post<EmptyData>('/api/v1/auth/recovery', body),
   passwordReset: (body: PasswordResetRequest): Promise<Envelope<EmptyData>> =>
     post<EmptyData>('/api/v1/auth/password/reset', body),
+  logout: (): Promise<Envelope<EmptyData>> =>
+    post<EmptyData>('/api/v1/auth/logout'),
 }
