@@ -1,0 +1,3770 @@
+diff --git a/.project-ai/tasks/TASK-20260816-004/acceptance.md b/.project-ai/tasks/TASK-20260816-004/acceptance.md
+new file mode 100644
+index 0000000..f049bb5
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-004/acceptance.md
+@@ -0,0 +1,58 @@
++# Acceptance: Machine Contract 第二批 2B-2（DDL 与骨架）
++
++## 状态
++
++- **Owner Signoff：完成（3 缺 enum 对象已裁决，见 S01-P04）**
++- **Independent Review：未开始**
++- **冻结状态：2B-2 状态合同 CANDIDATE；本包骨架 + fail-closed**
++
++## 验收清单
++
++| # | 验收项 | 状态 |
++|---|---|---|
++| 1 | DDL 创建 13 张新表，forward-only，无 DROP/IF NOT EXISTS | 待独立审核 |
++| 2 | 主键 Snowflake bigint unsigned，无 AUTO_INCREMENT | 待独立审核 |
++| 3 | 5 复用对象 enum 严格对齐 05 §4/§2.2（8/8/5/6/6 态） | 待独立审核 |
++| 4 | 3 裁决对象 enum 对齐 Owner 裁决（4/3/5 态，2B2-ENUM-01..03） | 待独立审核 |
++| 5 | append-only 对象（ParameterSnapshot/TicketMessage/TicketAttachment）三层防护，无 object_version/updated_time | 待独立审核 |
++| 6 | 可变对象（10 个）含 object_version + idempotency_key + audit_event_id + created_time + updated_time | 待独立审核 |
++| 7 | NotificationDelivery 用 dedupe_key 幂等，无额外 idempotency_key | 待独立审核 |
++| 8 | Model 映射冻结表名/主键/时间列/enum，未加未冻结字段 | 待独立审核 |
++| 9 | DAO 只读查询；append-only 表覆写 destructive | 待独立审核 |
++| 10 | Service 唯一写入者标 @authoritative_writer，未实现状态转移 | 待独立审核 |
++| 11 | php -l 全部 PASS | 待执行 |
++| 12 | git diff --check 无空白错误 | 待执行 |
++| 13 | enum(DDL) == enum(Model) == enum(Freeze) | 待独立审核 |
++
++## 机械一致性断言（冻结前 gate）
++
++```text
++DDL_TABLE_COUNT = 13
++ENUM_DDL_EQ_ENUM_MODEL_EQ_ENUM_FREEZE = YES
++NO_SELF_INVENTED_STATE = YES
++NO_SELF_INVENTED_FIELD = YES
++SERVICE_AUTHORITATIVE_WRITER_COUNT = 13
++TRANSITION_LOGIC_NOT_IMPLEMENTED = YES（状态流转一律 FAIL_CLOSED）
++APPEND_ONLY_COUNT = 3（ParameterSnapshot/TicketMessage/TicketAttachment）
++APPEND_ONLY_BUILDER_DENY_SET = 12 方法（与 OtcTradeAppendOnlyBuilder 一致）
++SNOWFLAKE_PRIMARY_KEY = YES
++DECIMAL_NO_FLOAT = YES
++```
++
++## 非目标验证（明确 NOT_RUN，属后续包）
++
++```text
++DDL 实际建表 = NOT_RUN（属 STAGE-05 Sandbox）
++运行时/数据库验证 = NOT_RUN
++状态转移业务验证 = NOT_RUN（转移矩阵 FROZEN 后）
++OpenAPI/路由/控制器 = NOT_RUN
++composer test = 需在 DDL 骨架落盘后评估（本包为骨架，无业务逻辑）
++```
++
++## 交付物
++
++- `.project-ai/tasks/TASK-20260816-004/requirement.md`
++- `.project-ai/tasks/TASK-20260816-004/design.md`
++- `.project-ai/tasks/TASK-20260816-004/acceptance.md`
++- `0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b2_13_entities.sql`
++- 13 Model + 3 Builder + 13 DAO + 13 Service（见 design.md 目标文件）
+diff --git a/.project-ai/tasks/TASK-20260816-004/design.md b/.project-ai/tasks/TASK-20260816-004/design.md
+new file mode 100644
+index 0000000..341d93b
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-004/design.md
+@@ -0,0 +1,110 @@
++# Design: Machine Contract 第二批 2B-2（DDL 与骨架）
++
++## 状态
++
++- **Owner Signoff：完成（3 缺 enum 对象已裁决，见 S01-P04）**
++- **Independent Review：未开始**
++- **冻结状态：2B-2 状态合同 CANDIDATE；本包骨架 + fail-closed**
++
++## 权威依据
++
++- 角色（05 §8）：`END_USER/SUPPORT_AGENT/OPS_OPERATOR/KYC_REVIEWER/RISK_ANALYST/RISK_APPROVER/LEDGER_OPERATOR/FINANCE_REVIEWER/PARAM_EDITOR/PARAM_APPROVER/RELEASE_OPERATOR/AUDITOR/ADMIN_SECURITY`。
++- 职责分离（05 §8/§11）：`PARAM_EDITOR != PARAM_APPROVER != RELEASE_OPERATOR`；`RISK_ANALYST != RISK_APPROVER`；申请人不得审批本人申请。
++
++## 表设计（13 表）
++
++> 主键 Snowflake bigint unsigned；时间 int unsigned Unix 秒；enum 严格对齐 05 §4 V2.4 / Owner 裁决。
++> 分类：**标准（可变）** = object_version + idempotency_key + audit_event_id + created_time + updated_time；
++> **append-only（不可变）** = idempotency_key + audit_event_id + created_time（无 object_version / updated_time）。
++
++### 1. approval_requests（ApprovalRequest，工作流，标准）
++
++主键 `approval_id`。字段：`approval_id, request_type, request_object_type, request_object_id, status(enum 8态), submitted_by, submitter_role, assigned_to, decided_by, decided_at, reason_key, changes_requested_reason, execution_id, case_id` + 标准工程字段。
++
++### 2. parameter_releases（ParameterRelease，工作流，标准）
++
++主键 `release_id`。字段：`release_id, parameter_keys(json), status(enum 8态), draft_version, approved_by, scheduled_at, activated_at, paused_at, rolled_back_at, archived_at, monitoring_job_id, snapshot_id, case_id, audit_event_ids(json)` + 标准工程字段。
++
++### 3. parameter_snapshots（ParameterSnapshot，只读聚合，append-only）
++
++主键 `snapshot_id`。字段：`snapshot_id, release_id, parameter_keys(json), parameter_values(json), version, created_by` + append-only 工程字段（idempotency_key + audit_event_id + created_time）。
++
++### 4. notices（Notice，只读聚合，标准——read_state 可变）
++
++主键 `notice_id`。字段：`notice_id, user_id, notice_type, title_key, body_key, priority(enum INFO/WARNING/CRITICAL), related_object_type, related_object_id, read_state(enum unread/read), content_version, locale, expires_at` + 标准工程字段。
++
++### 5. notification_deliveries（NotificationDelivery，工作流，标准）
++
++主键 `delivery_id`。字段：`delivery_id, notice_id, channel(enum PUSH/EMAIL/SMS/IN_APP), delivery_status(enum 4态), dedupe_key(UNIQUE), attempt_count, last_attempt_at, next_retry_at, delivered_at, failure_reason_code` + 标准工程字段（**幂等用 dedupe_key，不加 idempotency_key**）。
++
++### 6. auth_sessions（AuthSession，实体，标准）
++
++主键 `session_id`。字段：`session_id, user_id, token_hash, status(enum 5态), device_info(json), ip_address, mfa_verified(tinyint), expires_at` + 标准工程字段。
++
++### 7. mfa_enrollments（MfaEnrollment，实体，标准）
++
++主键 `enrollment_id`。字段：`enrollment_id, user_id, method_type, status(enum 3态), enrolled_at, last_verified_at, backup_codes_active(tinyint), device_info(json)` + 标准工程字段。
++
++### 8. kyc_cases（KycCase，工作流，标准）
++
++主键 `case_id`。字段：`case_id, user_id, kyc_level, status(enum 6态), submitted_at, reviewed_at, reviewed_by, reason_code, reason_text_key, next_action, policy_version, rule_version` + 标准工程字段。
++
++### 9. risk_cases（RiskCase，工作流，标准）
++
++主键 `case_id`。字段：`case_id, user_id, risk_type, severity, status(enum 5态), detected_at, detected_by, reviewed_by, disposition, disposition_reason_key, restrictions(json), appeal_eligible(tinyint)` + 标准工程字段。
++
++### 10. tickets（Ticket，工作流，标准）
++
++主键 `ticket_id`。字段：`ticket_id, user_id, category, status(enum 6态), assigned_to, last_activity_at, resolution_type, resolution_summary_key, appeal_eligible(tinyint), ticket_message_ids(json), case_id` + 标准工程字段。
++
++### 11. ticket_messages（TicketMessage，值对象，append-only）
++
++主键 `message_id`。字段：`message_id, ticket_id, sender_role, body_key, attachments(json)` + append-only 工程字段。
++
++### 12. ticket_attachments（TicketAttachment，值对象，append-only）
++
++主键 `attachment_id`。字段：`attachment_id, ticket_id, ticket_message_id, file_type, file_url, file_hash, uploaded_by` + append-only 工程字段。
++
++### 13. settlement_methods（SettlementMethod，值对象/只读聚合，标准——verification_status 可变）
++
++主键 `method_id`。字段：`method_id, user_id, currency, method_type, is_default(tinyint), verification_status` + 标准工程字段。
++
++## enum 全集（05 §4 V2.4 / §2.2 / Owner 裁决）
++
++```text
++ApprovalRequest = draft/pending/changes_requested/approved/rejected/executing/executed/failed
++ParameterRelease = draft/pending_approval/approved/scheduled/active/paused/rolled_back/archived
++AuthSession = active/mfa_required/restricted/expired/revoked
++KycCase = not_started/pending/needs_info/approved/rejected/review
++Ticket = submitted/in_progress/waiting_user/under_review/resolved/closed
++NotificationDelivery = pending/delivered/failed/cancelled（Owner 2B2-ENUM-01）
++MfaEnrollment = pending/active/revoked（Owner 2B2-ENUM-02）
++RiskCase = open/investigating/under_review/resolved/closed（Owner 2B2-ENUM-03）
++```
++
++## 工程约束
++
++| 维度 | 约束 |
++|---|---|
++| 主键 | Snowflake bigint unsigned（`$incrementing=false`，`$keyType='string'`） |
++| 并发 | 可变表 `object_version int unsigned` CAS 乐观锁（append-only 表无） |
++| 幂等 | 可变表 `idempotency_key varchar(64) UNIQUE` 可空；NotificationDelivery 用 `dedupe_key` |
++| 审计 | 每表 `audit_event_id` 指针 + append `audit_events` |
++| 时间 | `created_time/updated_time` int unsigned（Unix 秒）；append-only 无 updated_time |
++| 状态列 | 领域状态 ENUM（冻结 enum） |
++| 失败安全 | 转移矩阵未冻结，状态流转 FAIL_CLOSED，不写业务 |
++
++## append-only 三层防护（同 OtcTrade/AuditEvent）
++
++- ParameterSnapshot、TicketMessage、TicketAttachment 三个值对象/只读聚合创建后不可变。
++- **Model 层**：`$timestamps=false` + `UPDATED_AT=null` + `save()`（已落盘抛异常）+ `delete()`（抛异常）+ `newEloquentBuilder()` 注入 Builder。
++- **Builder 层**：`*AppendOnlyBuilder` 覆盖 12 个 destructive 方法（同 OtcTradeAppendOnlyBuilder deny set），仅改表名/错误信息。
++- **DAO 层**：覆写 `delete/deleteAll/update/updateAll/updateOrCreate` 全部 fail-closed。
++
++## 信息来源
++
++- 05 §2.2/§3/§4 V2.4/§8/§11
++- `MACHINE_CONTRACT_BATCH2B2_STATE_FREEZE.md`
++- `.project-ai/tasks/TASK-20260816-003/design.md`
++- `20260816_machine_contract_batch2b1_8_entities.sql`
++- `OtcTradeAppendOnlyBuilder.php` / `OtcTradeModel.php` / `OtcTradeDao.php`（append-only 模板）
+diff --git a/.project-ai/tasks/TASK-20260816-004/requirement.md b/.project-ai/tasks/TASK-20260816-004/requirement.md
+new file mode 100644
+index 0000000..94f0df0
+--- /dev/null
++++ b/.project-ai/tasks/TASK-20260816-004/requirement.md
+@@ -0,0 +1,76 @@
++# Requirement: Machine Contract 第二批 2B-2（DDL 与骨架）
++
++## 状态
++
++- **Owner Signoff：完成（3 缺 enum 对象已裁决，2026-08-16，见 S01-P04）**
++- **Independent Review：未开始**
++- **冻结状态：2B-2 状态合同 CANDIDATE（转移矩阵未 FROZEN）**
++
++## 背景
++
++S01-P04（`TASK-20260816-003`）已完成 2B-2 状态合同补齐：5 复用对象 enum 复制 05；3 缺 enum 对象（NotificationDelivery/MfaEnrollment/RiskCase）已 Owner 裁决并补入 05 §4（V2.4）；5 值对象/只读聚合无状态机。
++
++本 task（S01-P05）执行 **2B-2 DDL 与 Model/DAO/Service 骨架**。转移矩阵未 FROZEN，故**本包仅骨架 + fail-closed guard，不实现状态转移业务**（同 S01-P03 先例）。
++
++## 范围
++
++固定对象（13 个，全部建表）：
++
++```text
++ApprovalRequest
++ParameterRelease
++ParameterSnapshot
++Notice
++NotificationDelivery
++AuthSession
++MfaEnrollment
++KycCase
++RiskCase
++Ticket
++TicketMessage
++TicketAttachment
++SettlementMethod
++```
++
++## 目标文件
++
++```text
++sql/20260816_machine_contract_batch2b2_13_entities.sql
++library/{model,dao,service}/approval/ApprovalRequest*
++library/{model,dao,service}/parameter/{ParameterRelease,ParameterSnapshot}*
++library/{model,dao,service}/notice/{Notice,NotificationDelivery}*
++library/{model,dao,service}/auth/{AuthSession,MfaEnrollment}*
++library/{model,dao,service}/kyc/KycCase*
++library/{model,dao,service}/risk/RiskCase*
++library/{model,dao,service}/support/{Ticket,TicketMessage,TicketAttachment}*
++library/{model,dao,service}/settlement/SettlementMethod*
++```
++
++## 规则（约束）
++
++1. **DDL forward-only**，不改 MC1/MC2/2B-1 历史文件；全新表，禁止 DROP/CREATE IF NOT EXISTS。
++2. **Snowflake 主键** bigint unsigned，`$incrementing=false`，`$keyType='string'`。
++3. **enum 严格对齐 05 §4**（复用对象）+ Owner 裁决（3 对象），禁止自创状态值。
++4. **金额 decimal 禁 float**；本包无 APT 金额（P1/P2 对象），decimal 仅用于字段约定占位（如有）。
++5. **时间** `created_time/updated_time` int unsigned（Unix 秒）。
++6. **append-only 对象**（ParameterSnapshot/TicketMessage/TicketAttachment）无 `object_version`、无 `updated_time`，用三层防护（Builder + Model + DAO），同 OtcTrade/AuditEvent 先例。
++7. **可变对象**（其余 10 个）标准字段：object_version + idempotency_key + audit_event_id + created_time + updated_time。
++8. **NotificationDelivery 幂等用 `dedupe_key`**（05 §4 Notice 原则 3），不额外加 idempotency_key。
++9. **DAO 只提供查询**；Service 唯一写入者标 `@authoritative_writer`。
++10. **转移矩阵未 FROZEN**：任何状态流转 MUST FAIL_CLOSED，不实现结算/审批/投递业务。
++
++## 非目标（NON_GOALS）
++
++- 不实现任何状态转移方法（审批/参数激活/MFA 验证/风控处置/工单流转/通知投递全部 FAIL_CLOSED）。
++- 不新增未冻结字段（仅 05 §3 最低字段 + 冻结工程字段）。
++- 不修改 MC1/MC2/2B-1 冻结文件。
++- 不触碰 S01-P04 锁定文件（05 §4 V2.4 已冻结，本包不修改）。
++- 不实现 OpenAPI / 路由 / 控制器（属后续包）。
++
++## 信息来源
++
++- `Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md`（§2.2/§3/§4 V2.4/§8/§11）
++- `0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_BATCH2B2_STATE_FREEZE.md`（2B-2 Freeze Candidate）
++- `.project-ai/tasks/TASK-20260816-003/design.md`（Part A/B/C/D）
++- `0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b1_8_entities.sql`（2B-1 DDL 先例）
++- `.project-ai/rules/coding.md`（数据库规则）
+diff --git a/0.5代码/gainode后端/gainode/library/dao/approval/ApprovalRequestDao.php b/0.5代码/gainode后端/gainode/library/dao/approval/ApprovalRequestDao.php
+new file mode 100644
+index 0000000..f3fef9e
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/approval/ApprovalRequestDao.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\approval;
++
++use support\extend\Dao;
++use library\model\approval\ApprovalRequestModel;
++
++/**
++ * ApprovalRequest DAO — approval_requests 表查询封装
++ */
++class ApprovalRequestDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = ApprovalRequestModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return ApprovalRequestModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按申请对象查询（类型 + ID）
++     *
++     * @param string $objectType
++     * @param string $objectId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByObject(string $objectType, string $objectId)
++    {
++        return $this->fetchAll([
++            'request_object_type' => $objectType,
++            'request_object_id' => $objectId,
++        ]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/auth/AuthSessionDao.php b/0.5代码/gainode后端/gainode/library/dao/auth/AuthSessionDao.php
+new file mode 100644
+index 0000000..c44d30d
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/auth/AuthSessionDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\auth;
++
++use support\extend\Dao;
++use library\model\auth\AuthSessionModel;
++
++/**
++ * AuthSession DAO — auth_sessions 表查询封装
++ */
++class AuthSessionDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = AuthSessionModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return AuthSessionModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询会话
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/auth/MfaEnrollmentDao.php b/0.5代码/gainode后端/gainode/library/dao/auth/MfaEnrollmentDao.php
+new file mode 100644
+index 0000000..71a8fb2
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/auth/MfaEnrollmentDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\auth;
++
++use support\extend\Dao;
++use library\model\auth\MfaEnrollmentModel;
++
++/**
++ * MfaEnrollment DAO — mfa_enrollments 表查询封装
++ */
++class MfaEnrollmentDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = MfaEnrollmentModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return MfaEnrollmentModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询 MFA 注册
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/kyc/KycCaseDao.php b/0.5代码/gainode后端/gainode/library/dao/kyc/KycCaseDao.php
+new file mode 100644
+index 0000000..de7c7cc
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/kyc/KycCaseDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\kyc;
++
++use support\extend\Dao;
++use library\model\kyc\KycCaseModel;
++
++/**
++ * KycCase DAO — kyc_cases 表查询封装
++ */
++class KycCaseDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = KycCaseModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return KycCaseModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询 KYC 案件
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/notice/NoticeDao.php b/0.5代码/gainode后端/gainode/library/dao/notice/NoticeDao.php
+new file mode 100644
+index 0000000..a64877c
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/notice/NoticeDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\notice;
++
++use support\extend\Dao;
++use library\model\notice\NoticeModel;
++
++/**
++ * Notice DAO — notices 表查询封装
++ */
++class NoticeDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = NoticeModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return NoticeModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询通知
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/notice/NotificationDeliveryDao.php b/0.5代码/gainode后端/gainode/library/dao/notice/NotificationDeliveryDao.php
+new file mode 100644
+index 0000000..fa9a164
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/notice/NotificationDeliveryDao.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\notice;
++
++use support\extend\Dao;
++use library\model\notice\NotificationDeliveryModel;
++
++/**
++ * NotificationDelivery DAO — notification_deliveries 表查询封装
++ *
++ * 幂等：dedupe_key（去重 key），不设 idempotency_key。
++ */
++class NotificationDeliveryDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = NotificationDeliveryModel::class;
++    }
++
++    /**
++     * 按去重 key 查询（幂等）
++     *
++     * @param string $dedupeKey
++     * @return NotificationDeliveryModel|null
++     */
++    public function getByDedupeKey(string $dedupeKey)
++    {
++        return $this->fetch(['dedupe_key' => $dedupeKey]);
++    }
++
++    /**
++     * 按通知查询投递
++     *
++     * @param string $noticeId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByNotice(string $noticeId)
++    {
++        return $this->fetchAll(['notice_id' => $noticeId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterReleaseDao.php b/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterReleaseDao.php
+new file mode 100644
+index 0000000..705cb92
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterReleaseDao.php
+@@ -0,0 +1,30 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\parameter;
++
++use support\extend\Dao;
++use library\model\parameter\ParameterReleaseModel;
++
++/**
++ * ParameterRelease DAO — parameter_releases 表查询封装
++ */
++class ParameterReleaseDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = ParameterReleaseModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return ParameterReleaseModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterSnapshotDao.php b/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterSnapshotDao.php
+new file mode 100644
+index 0000000..d0e9097
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/parameter/ParameterSnapshotDao.php
+@@ -0,0 +1,96 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\parameter;
++
++use support\extend\Dao;
++use support\exception\RunException;
++use library\model\parameter\ParameterSnapshotModel;
++
++/**
++ * ParameterSnapshot DAO — parameter_snapshots 表查询封装（append-only）
++ *
++ * 注意：append-only 只读聚合禁止物理删除/覆盖。本 DAO 对继承的 delete/deleteAll/update/
++ * updateAll/updateOrCreate 全部 fail-closed 覆写，从代码层面机械阻断 DAO 层的删除/覆盖路径。
++ * 仅保留只读查询与追加（create/insert）。
++ */
++class ParameterSnapshotDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = ParameterSnapshotModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return ParameterSnapshotModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按发布查询快照
++     *
++     * @param string $releaseId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByRelease(string $releaseId)
++    {
++        return $this->fetchAll(['release_id' => $releaseId]);
++    }
++
++    /**
++     * append-only 只读聚合：禁止删除单条。
++     *
++     * @throws RunException
++     */
++    public function delete($id, bool $force = false)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止删除快照');
++    }
++
++    /**
++     * append-only 只读聚合：禁止批量删除。
++     *
++     * @throws RunException
++     */
++    public function deleteAll(array $params, bool $force = false)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止批量删除快照');
++    }
++
++    /**
++     * append-only 只读聚合：禁止 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function update($id, array $data)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 UPDATE 快照');
++    }
++
++    /**
++     * append-only 只读聚合：禁止批量 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function updateAll(array $params, array $data)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止批量 UPDATE 快照');
++    }
++
++    /**
++     * append-only 只读聚合：禁止 updateOrCreate。
++     *
++     * @throws RunException
++     */
++    public function updateOrCreate(array $params, array $data)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 updateOrCreate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/risk/RiskCaseDao.php b/0.5代码/gainode后端/gainode/library/dao/risk/RiskCaseDao.php
+new file mode 100644
+index 0000000..5eeef4b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/risk/RiskCaseDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\risk;
++
++use support\extend\Dao;
++use library\model\risk\RiskCaseModel;
++
++/**
++ * RiskCase DAO — risk_cases 表查询封装
++ */
++class RiskCaseDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = RiskCaseModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return RiskCaseModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询风控案件
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/settlement/SettlementMethodDao.php b/0.5代码/gainode后端/gainode/library/dao/settlement/SettlementMethodDao.php
+new file mode 100644
+index 0000000..7d15f87
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/settlement/SettlementMethodDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\settlement;
++
++use support\extend\Dao;
++use library\model\settlement\SettlementMethodModel;
++
++/**
++ * SettlementMethod DAO — settlement_methods 表查询封装
++ */
++class SettlementMethodDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = SettlementMethodModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return SettlementMethodModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询结算方式
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/support/TicketAttachmentDao.php b/0.5代码/gainode后端/gainode/library/dao/support/TicketAttachmentDao.php
+new file mode 100644
+index 0000000..0537a9c
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/support/TicketAttachmentDao.php
+@@ -0,0 +1,96 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\support;
++
++use support\extend\Dao;
++use support\exception\RunException;
++use library\model\support\TicketAttachmentModel;
++
++/**
++ * TicketAttachment DAO — ticket_attachments 表查询封装（append-only）
++ *
++ * 注意：append-only 值对象禁止物理删除/覆盖。本 DAO 对继承的 delete/deleteAll/update/
++ * updateAll/updateOrCreate 全部 fail-closed 覆写，从代码层面机械阻断 DAO 层的删除/覆盖路径。
++ * 仅保留只读查询与追加（create/insert）。
++ */
++class TicketAttachmentDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = TicketAttachmentModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return TicketAttachmentModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按工单查询附件
++     *
++     * @param string $ticketId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByTicket(string $ticketId)
++    {
++        return $this->fetchAll(['ticket_id' => $ticketId]);
++    }
++
++    /**
++     * append-only 值对象：禁止删除单条。
++     *
++     * @throws RunException
++     */
++    public function delete($id, bool $force = false)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止删除附件');
++    }
++
++    /**
++     * append-only 值对象：禁止批量删除。
++     *
++     * @throws RunException
++     */
++    public function deleteAll(array $params, bool $force = false)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止批量删除附件');
++    }
++
++    /**
++     * append-only 值对象：禁止 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function update($id, array $data)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 UPDATE 附件');
++    }
++
++    /**
++     * append-only 值对象：禁止批量 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function updateAll(array $params, array $data)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止批量 UPDATE 附件');
++    }
++
++    /**
++     * append-only 值对象：禁止 updateOrCreate。
++     *
++     * @throws RunException
++     */
++    public function updateOrCreate(array $params, array $data)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 updateOrCreate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/support/TicketDao.php b/0.5代码/gainode后端/gainode/library/dao/support/TicketDao.php
+new file mode 100644
+index 0000000..6962ab7
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/support/TicketDao.php
+@@ -0,0 +1,41 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\support;
++
++use support\extend\Dao;
++use library\model\support\TicketModel;
++
++/**
++ * Ticket DAO — tickets 表查询封装
++ */
++class TicketDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = TicketModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return TicketModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按用户查询工单
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->fetchAll(['user_id' => $userId]);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/dao/support/TicketMessageDao.php b/0.5代码/gainode后端/gainode/library/dao/support/TicketMessageDao.php
+new file mode 100644
+index 0000000..325a175
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/dao/support/TicketMessageDao.php
+@@ -0,0 +1,96 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\dao\support;
++
++use support\extend\Dao;
++use support\exception\RunException;
++use library\model\support\TicketMessageModel;
++
++/**
++ * TicketMessage DAO — ticket_messages 表查询封装（append-only）
++ *
++ * 注意：append-only 值对象禁止物理删除/覆盖。本 DAO 对继承的 delete/deleteAll/update/
++ * updateAll/updateOrCreate 全部 fail-closed 覆写，从代码层面机械阻断 DAO 层的删除/覆盖路径。
++ * 仅保留只读查询与追加（create/insert）。
++ */
++class TicketMessageDao extends Dao
++{
++    public function __construct()
++    {
++        $this->model = TicketMessageModel::class;
++    }
++
++    /**
++     * 按幂等键查询
++     *
++     * @param string $idempotencyKey
++     * @return TicketMessageModel|null
++     */
++    public function getByIdempotencyKey(string $idempotencyKey)
++    {
++        return $this->fetch(['idempotency_key' => $idempotencyKey]);
++    }
++
++    /**
++     * 按工单查询消息
++     *
++     * @param string $ticketId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByTicket(string $ticketId)
++    {
++        return $this->fetchAll(['ticket_id' => $ticketId]);
++    }
++
++    /**
++     * append-only 值对象：禁止删除单条。
++     *
++     * @throws RunException
++     */
++    public function delete($id, bool $force = false)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止删除消息');
++    }
++
++    /**
++     * append-only 值对象：禁止批量删除。
++     *
++     * @throws RunException
++     */
++    public function deleteAll(array $params, bool $force = false)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止批量删除消息');
++    }
++
++    /**
++     * append-only 值对象：禁止 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function update($id, array $data)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 UPDATE 消息');
++    }
++
++    /**
++     * append-only 值对象：禁止批量 UPDATE。
++     *
++     * @throws RunException
++     */
++    public function updateAll(array $params, array $data)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止批量 UPDATE 消息');
++    }
++
++    /**
++     * append-only 值对象：禁止 updateOrCreate。
++     *
++     * @throws RunException
++     */
++    public function updateOrCreate(array $params, array $data)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 updateOrCreate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/approval/ApprovalRequestModel.php b/0.5代码/gainode后端/gainode/library/model/approval/ApprovalRequestModel.php
+new file mode 100644
+index 0000000..a0e1f43
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/approval/ApprovalRequestModel.php
+@@ -0,0 +1,94 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\approval;
++
++use support\extend\Model;
++
++/**
++ * approval_requests 表映射 — 审批请求（05 §3 ApprovalRequest + §4 Approval 状态机）
++ *
++ * 领域状态机（canonical enum，复制 05 §4 Approval，冻结，禁止自创）：
++ *   draft / pending / changes_requested / approved / rejected / executing / executed / failed
++ *   - 关键不变量：Approval 回滚不修改旧 Approval 状态，形成新执行对象 + 审计链
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $approval_id 审批ID(Snowflake，主键)
++ * @property string $request_type 申请类型
++ * @property string $request_object_type 申请对象类型
++ * @property string $request_object_id 申请对象ID
++ * @property string $status 审批状态(05 §4 canonical，8态)
++ * @property string $submitted_by 申请人 user_id
++ * @property string $submitter_role 申请人角色
++ * @property string $assigned_to 审批人 user_id
++ * @property string $decided_by 裁决人 user_id
++ * @property int $decided_at 裁决时间(Unix秒)
++ * @property string $reason_key 裁决理由 I18N key
++ * @property string $changes_requested_reason 要求修改理由
++ * @property string $execution_id 执行对象ID
++ * @property string $case_id 关联案件ID
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class ApprovalRequestModel extends Model
++{
++    // ---- 审批状态常量（05 §4 canonical）----
++    public const STATUS_DRAFT = 'draft';
++    public const STATUS_PENDING = 'pending';
++    public const STATUS_CHANGES_REQUESTED = 'changes_requested';
++    public const STATUS_APPROVED = 'approved';
++    public const STATUS_REJECTED = 'rejected';
++    public const STATUS_EXECUTING = 'executing';
++    public const STATUS_EXECUTED = 'executed';
++    public const STATUS_FAILED = 'failed';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_DRAFT,
++        self::STATUS_PENDING,
++        self::STATUS_CHANGES_REQUESTED,
++        self::STATUS_APPROVED,
++        self::STATUS_REJECTED,
++        self::STATUS_EXECUTING,
++        self::STATUS_EXECUTED,
++        self::STATUS_FAILED,
++    ];
++
++    public $table = 'approval_requests';
++    public $primaryKey = 'approval_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'approval_id',
++        'request_type',
++        'request_object_type',
++        'request_object_id',
++        'status',
++        'submitted_by',
++        'submitter_role',
++        'assigned_to',
++        'decided_by',
++        'decided_at',
++        'reason_key',
++        'changes_requested_reason',
++        'execution_id',
++        'case_id',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/auth/AuthSessionModel.php b/0.5代码/gainode后端/gainode/library/model/auth/AuthSessionModel.php
+new file mode 100644
+index 0000000..fec1e92
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/auth/AuthSessionModel.php
+@@ -0,0 +1,77 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\auth;
++
++use support\extend\Model;
++
++/**
++ * auth_sessions 表映射 — 会话（05 §3 AuthSession + §2.2 Session 状态机）
++ *
++ * 领域状态机（canonical enum，复制 05 §2.2 Session，冻结，禁止自创）：
++ *   active / mfa_required / restricted / expired / revoked
++ *   - mfa_required：登录已通过但 MFA 未验证，仅限 MFA 相关接口
++ *   - restricted：风控限制；expired：到期；revoked：登出/安全吊销
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $session_id 会话ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $token_hash token 哈希
++ * @property string $status 会话状态(05 §2.2 canonical，5态)
++ * @property string|null $device_info 设备信息(JSON)
++ * @property string $ip_address IP 地址
++ * @property int $mfa_verified MFA 是否已验证
++ * @property int $expires_at 过期时间(Unix秒)
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class AuthSessionModel extends Model
++{
++    // ---- 会话状态常量（05 §2.2 canonical）----
++    public const STATUS_ACTIVE = 'active';
++    public const STATUS_MFA_REQUIRED = 'mfa_required';
++    public const STATUS_RESTRICTED = 'restricted';
++    public const STATUS_EXPIRED = 'expired';
++    public const STATUS_REVOKED = 'revoked';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_ACTIVE,
++        self::STATUS_MFA_REQUIRED,
++        self::STATUS_RESTRICTED,
++        self::STATUS_EXPIRED,
++        self::STATUS_REVOKED,
++    ];
++
++    public $table = 'auth_sessions';
++    public $primaryKey = 'session_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'session_id',
++        'user_id',
++        'token_hash',
++        'status',
++        'device_info',
++        'ip_address',
++        'mfa_verified',
++        'expires_at',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/auth/MfaEnrollmentModel.php b/0.5代码/gainode后端/gainode/library/model/auth/MfaEnrollmentModel.php
+new file mode 100644
+index 0000000..f54933f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/auth/MfaEnrollmentModel.php
+@@ -0,0 +1,74 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\auth;
++
++use support\extend\Model;
++
++/**
++ * mfa_enrollments 表映射 — MFA 注册（05 §3 MfaEnrollment + §4 V2.4）
++ *
++ * 领域状态机（canonical enum，Owner 裁决 2B2-ENUM-02，冻结于 05 §4 V2.4，禁止自创）：
++ *   pending / active / revoked
++ *   - pending=已发起注册、尚未验证（enrolled_at 与 last_verified_at 分离表达）；
++ *   - active=已验证生效；revoked=用户移除/安全吊销。
++ *   - backup_codes_active 为字段非状态。
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $enrollment_id 注册ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $method_type MFA 方法类型
++ * @property string $status 注册状态(05 §4 V2.4 canonical，3态)
++ * @property int $enrolled_at 注册发起时间(Unix秒)
++ * @property int $last_verified_at 最后验证时间(Unix秒)
++ * @property int $backup_codes_active 备份码是否激活
++ * @property string|null $device_info 设备信息(JSON)
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class MfaEnrollmentModel extends Model
++{
++    // ---- 注册状态常量（05 §4 V2.4 canonical）----
++    public const STATUS_PENDING = 'pending';
++    public const STATUS_ACTIVE = 'active';
++    public const STATUS_REVOKED = 'revoked';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_PENDING,
++        self::STATUS_ACTIVE,
++        self::STATUS_REVOKED,
++    ];
++
++    public $table = 'mfa_enrollments';
++    public $primaryKey = 'enrollment_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'enrollment_id',
++        'user_id',
++        'method_type',
++        'status',
++        'enrolled_at',
++        'last_verified_at',
++        'backup_codes_active',
++        'device_info',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/kyc/KycCaseModel.php b/0.5代码/gainode后端/gainode/library/model/kyc/KycCaseModel.php
+new file mode 100644
+index 0000000..02d7645
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/kyc/KycCaseModel.php
+@@ -0,0 +1,86 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\kyc;
++
++use support\extend\Model;
++
++/**
++ * kyc_cases 表映射 — KYC 案件（05 §3 KycCase + §4 KYC 状态机）
++ *
++ * 领域状态机（canonical enum，复制 05 §4 KYC，冻结，禁止自创）：
++ *   not_started / pending / needs_info / approved / rejected / review
++ *   - needs_info：需补充材料；review：需人工复核；approved/rejected 为终态
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $case_id 案件ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $kyc_level KYC 等级
++ * @property string $status KYC 状态(05 §4 canonical，6态)
++ * @property int $submitted_at 提交时间(Unix秒)
++ * @property int $reviewed_at 复核时间(Unix秒)
++ * @property string $reviewed_by 复核人 user_id
++ * @property string $reason_code 原因码
++ * @property string $reason_text_key 原因文案 I18N key
++ * @property string $next_action 下一步动作
++ * @property string $policy_version 策略版本号
++ * @property string $rule_version 规则版本号
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class KycCaseModel extends Model
++{
++    // ---- KYC 状态常量（05 §4 canonical）----
++    public const STATUS_NOT_STARTED = 'not_started';
++    public const STATUS_PENDING = 'pending';
++    public const STATUS_NEEDS_INFO = 'needs_info';
++    public const STATUS_APPROVED = 'approved';
++    public const STATUS_REJECTED = 'rejected';
++    public const STATUS_REVIEW = 'review';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_NOT_STARTED,
++        self::STATUS_PENDING,
++        self::STATUS_NEEDS_INFO,
++        self::STATUS_APPROVED,
++        self::STATUS_REJECTED,
++        self::STATUS_REVIEW,
++    ];
++
++    public $table = 'kyc_cases';
++    public $primaryKey = 'case_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'case_id',
++        'user_id',
++        'kyc_level',
++        'status',
++        'submitted_at',
++        'reviewed_at',
++        'reviewed_by',
++        'reason_code',
++        'reason_text_key',
++        'next_action',
++        'policy_version',
++        'rule_version',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/notice/NoticeModel.php b/0.5代码/gainode后端/gainode/library/model/notice/NoticeModel.php
+new file mode 100644
+index 0000000..d646ba7
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/notice/NoticeModel.php
+@@ -0,0 +1,86 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\notice;
++
++use support\extend\Model;
++
++/**
++ * notices 表映射 — 通知（05 §3 Notice，只读聚合，read_state 可变）
++ *
++ * read_state（unread/read）为通知可变字段，已读状态流转在 State Machine gate 冻结后实现。
++ * 本骨架不实现状态转移，任何流转 MUST FAIL_CLOSED。
++ *
++ * @property string $notice_id 通知ID(Snowflake，主键)
++ * @property string $user_id 目标用户ID
++ * @property string $notice_type 通知事件类型
++ * @property string $title_key I18N 标题 key
++ * @property string $body_key I18N 正文 key
++ * @property string $priority 优先级(INFO/WARNING/CRITICAL)
++ * @property string $related_object_type 关联对象类型
++ * @property string $related_object_id 关联对象ID
++ * @property string $read_state 已读状态(unread/read)
++ * @property string $content_version 文案版本号
++ * @property string $locale 生成时 locale
++ * @property int $expires_at 过期时间(Unix秒)
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class NoticeModel extends Model
++{
++    // ---- 优先级常量（05 §3 Notice）----
++    public const PRIORITY_INFO = 'INFO';
++    public const PRIORITY_WARNING = 'WARNING';
++    public const PRIORITY_CRITICAL = 'CRITICAL';
++
++    /** @var string[] 冻结的优先级全集 */
++    public const PRIORITIES = [
++        self::PRIORITY_INFO,
++        self::PRIORITY_WARNING,
++        self::PRIORITY_CRITICAL,
++    ];
++
++    // ---- 已读状态常量（05 §3 Notice）----
++    public const READ_UNREAD = 'unread';
++    public const READ_READ = 'read';
++
++    /** @var string[] 冻结的已读状态全集 */
++    public const READ_STATES = [
++        self::READ_UNREAD,
++        self::READ_READ,
++    ];
++
++    public $table = 'notices';
++    public $primaryKey = 'notice_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'notice_id',
++        'user_id',
++        'notice_type',
++        'title_key',
++        'body_key',
++        'priority',
++        'related_object_type',
++        'related_object_id',
++        'read_state',
++        'content_version',
++        'locale',
++        'expires_at',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/notice/NotificationDeliveryModel.php b/0.5代码/gainode后端/gainode/library/model/notice/NotificationDeliveryModel.php
+new file mode 100644
+index 0000000..b608dbe
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/notice/NotificationDeliveryModel.php
+@@ -0,0 +1,99 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\notice;
++
++use support\extend\Model;
++
++/**
++ * notification_deliveries 表映射 — 通知投递（05 §3 NotificationDelivery + §4 V2.4）
++ *
++ * 领域状态机（canonical enum，Owner 裁决 2B2-ENUM-01，冻结于 05 §4 V2.4，禁止自创）：
++ *   pending / delivered / failed / cancelled
++ *   - pending=待投递；delivered=成功；failed=失败待重试（attempt_count/next_retry_at 驱动，不新增 processing 态）；
++ *   - cancelled=业务对象失效/用户已读不再投递。投递失败不回滚业务（05 §4 Notice 设计原则 1）。
++ *
++ * 幂等：dedupe_key（去重 key），不额外设 idempotency_key。
++ * 本骨架不实现状态转移，任何流转 MUST FAIL_CLOSED。
++ *
++ * @property string $delivery_id 投递ID(Snowflake，主键)
++ * @property string $notice_id 通知ID(notices.notice_id)
++ * @property string $channel 投递渠道(PUSH/EMAIL/SMS/IN_APP)
++ * @property string $delivery_status 投递状态(05 §4 V2.4 canonical，4态)
++ * @property string $dedupe_key 去重 key(幂等)
++ * @property int $attempt_count 尝试次数
++ * @property int $last_attempt_at 最后尝试时间(Unix秒)
++ * @property int $next_retry_at 下次重试时间(Unix秒)
++ * @property int $delivered_at 投递成功时间(Unix秒)
++ * @property string $failure_reason_code 失败原因码
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class NotificationDeliveryModel extends Model
++{
++    // ---- 投递状态常量（05 §4 V2.4 canonical）----
++    public const STATUS_PENDING = 'pending';
++    public const STATUS_DELIVERED = 'delivered';
++    public const STATUS_FAILED = 'failed';
++    public const STATUS_CANCELLED = 'cancelled';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_PENDING,
++        self::STATUS_DELIVERED,
++        self::STATUS_FAILED,
++        self::STATUS_CANCELLED,
++    ];
++
++    // ---- 投递渠道常量（05 §3 NotificationDelivery）----
++    public const CHANNEL_PUSH = 'PUSH';
++    public const CHANNEL_EMAIL = 'EMAIL';
++    public const CHANNEL_SMS = 'SMS';
++    public const CHANNEL_IN_APP = 'IN_APP';
++
++    /** @var string[] 冻结的渠道全集 */
++    public const CHANNELS = [
++        self::CHANNEL_PUSH,
++        self::CHANNEL_EMAIL,
++        self::CHANNEL_SMS,
++        self::CHANNEL_IN_APP,
++    ];
++
++    public $table = 'notification_deliveries';
++    public $primaryKey = 'delivery_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'delivery_id',
++        'notice_id',
++        'channel',
++        'delivery_status',
++        'dedupe_key',
++        'attempt_count',
++        'last_attempt_at',
++        'next_retry_at',
++        'delivered_at',
++        'failure_reason_code',
++        'object_version',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++
++    /**
++     * 关联通知（同模块 FK）
++     */
++    public function notice()
++    {
++        return $this->belongsTo(NoticeModel::class, 'notice_id', 'notice_id');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/parameter/ParameterReleaseModel.php b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterReleaseModel.php
+new file mode 100644
+index 0000000..f38be31
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterReleaseModel.php
+@@ -0,0 +1,102 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\parameter;
++
++use support\extend\Model;
++
++/**
++ * parameter_releases 表映射 — 参数发布（05 §3 ParameterRelease + §4 Parameter Release 状态机）
++ *
++ * 领域状态机（canonical enum，复制 05 §4 Parameter Release，冻结，禁止自创）：
++ *   draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived
++ *   - 关键不变量：approved ≠ active（批准后可排期延迟生效）；历史对象使用 snapshot
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $release_id 发布ID(Snowflake，主键)
++ * @property string|null $parameter_keys 参数键列表(JSON 数组)
++ * @property string $status 发布状态(05 §4 canonical，8态)
++ * @property string $draft_version 草稿版本号
++ * @property string $approved_by 批准人 user_id
++ * @property int $scheduled_at 排期激活时间(Unix秒)
++ * @property int $activated_at 实际激活时间(Unix秒)
++ * @property int $paused_at 暂停时间(Unix秒)
++ * @property int $rolled_back_at 回滚时间(Unix秒)
++ * @property int $archived_at 归档时间(Unix秒)
++ * @property string $monitoring_job_id 监控任务ID
++ * @property string $snapshot_id 关联参数快照ID
++ * @property string $case_id 关联案件ID
++ * @property string|null $audit_event_ids 审计事件ID列表(JSON 数组)
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class ParameterReleaseModel extends Model
++{
++    // ---- 发布状态常量（05 §4 canonical）----
++    public const STATUS_DRAFT = 'draft';
++    public const STATUS_PENDING_APPROVAL = 'pending_approval';
++    public const STATUS_APPROVED = 'approved';
++    public const STATUS_SCHEDULED = 'scheduled';
++    public const STATUS_ACTIVE = 'active';
++    public const STATUS_PAUSED = 'paused';
++    public const STATUS_ROLLED_BACK = 'rolled_back';
++    public const STATUS_ARCHIVED = 'archived';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_DRAFT,
++        self::STATUS_PENDING_APPROVAL,
++        self::STATUS_APPROVED,
++        self::STATUS_SCHEDULED,
++        self::STATUS_ACTIVE,
++        self::STATUS_PAUSED,
++        self::STATUS_ROLLED_BACK,
++        self::STATUS_ARCHIVED,
++    ];
++
++    public $table = 'parameter_releases';
++    public $primaryKey = 'release_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'release_id',
++        'parameter_keys',
++        'status',
++        'draft_version',
++        'approved_by',
++        'scheduled_at',
++        'activated_at',
++        'paused_at',
++        'rolled_back_at',
++        'archived_at',
++        'monitoring_job_id',
++        'snapshot_id',
++        'case_id',
++        'audit_event_ids',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++
++    /**
++     * 关联参数快照（同模块 FK）
++     */
++    public function snapshot()
++    {
++        return $this->belongsTo(ParameterSnapshotModel::class, 'snapshot_id', 'snapshot_id');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotAppendOnlyBuilder.php b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotAppendOnlyBuilder.php
+new file mode 100644
+index 0000000..26f5266
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotAppendOnlyBuilder.php
+@@ -0,0 +1,173 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\parameter;
++
++use Illuminate\Database\Eloquent\Builder;
++use Illuminate\Database\Query\Builder as QueryBuilder;
++use support\exception\RunException;
++
++/**
++ * parameter_snapshots 专用 append-only Eloquent Builder。
++ *
++ * 阻断所有 destructive mutation，只保留 INSERT（追加）与只读查询。
++ * parameter_snapshots 为 append-only 只读聚合（05 §3 ParameterSnapshot），
++ * 快照一经写入永不覆盖，参数演进由新 snapshot + version 表达。
++ *
++ * 单一事实来源：DESTRUCTIVE_METHODS 覆盖「当前锁定 Illuminate/Database v10.38.1 已审核的
++ * ORM destructive mutation」，分两层（与本模块 OtcTradeAppendOnlyBuilder 同 denyset）：
++ *   - Eloquent Builder 层：update / upsert / increment / decrement / touch / delete / forceDelete
++ *   - Query Builder 层（经 Eloquent Builder __call() 转发）：updateOrInsert / truncate /
++ *     incrementEach / decrementEach / updateFrom
++ *
++ * __call() 兜底：任何未显式定义但落入 DESTRUCTIVE_METHODS 的方法名，在转发到底层 Query
++ * Builder 之前一律 fail-closed。
++ *
++ * 安全声明边界：DESTRUCTIVE_METHODS 是「当前已审核的锁定版本」deny set，静态清单本身无法
++ * 自动识别 Illuminate 未来升级新增的 mutation API；依赖升级须经 contract 测试人工复核。
++ *
++ * Protection boundary：本类只覆盖 ORM 正常路径。显式取得底层 Query Builder / DB facade /
++ * PDO raw SQL 属数据库直连层，应用层不在此封堵；需数据库级硬约束时另走 Change Request。
++ */
++class ParameterSnapshotAppendOnlyBuilder extends Builder
++{
++    /**
++     * parameter_snapshots 的 destructive mutation deny set（小写方法名）。
++     */
++    public const DESTRUCTIVE_METHODS = [
++        'update',
++        'upsert',
++        'increment',
++        'decrement',
++        'touch',
++        'delete',
++        'forcedelete',
++        'updateorinsert',
++        'truncate',
++        'incrementeach',
++        'decrementeach',
++        'updatefrom',
++    ];
++
++    public function __construct(QueryBuilder $query)
++    {
++        parent::__construct($query);
++    }
++
++    /**
++     * 兜底：阻断经 Eloquent Builder __call() 转发到底层 Query Builder 的 destructive mutation。
++     *
++     * @param string $method
++     * @param array  $parameters
++     * @return mixed
++     *
++     * @throws RunException
++     */
++    public function __call($method, $parameters)
++    {
++        if (in_array(strtolower($method), self::DESTRUCTIVE_METHODS, true)) {
++            throw new RunException(
++                "parameter_snapshots 为 append-only 只读聚合：禁止 destructive mutation `{$method}`"
++            );
++        }
++
++        return parent::__call($method, $parameters);
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function update(array $values)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder UPDATE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function upsert(array $values, $uniqueBy, $update = null)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder upsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function increment($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder increment');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrement($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder decrement');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function touch($column = null)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder touch');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder DELETE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function forceDelete()
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Eloquent Builder forceDelete');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateOrInsert(array $attributes, array $values = [])
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Query Builder updateOrInsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateFrom(array $values)
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Query Builder updateFrom');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function incrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Query Builder incrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Query Builder decrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function truncate()
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 Query Builder truncate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotModel.php b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotModel.php
+new file mode 100644
+index 0000000..ab885dd
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/parameter/ParameterSnapshotModel.php
+@@ -0,0 +1,92 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\parameter;
++
++use support\extend\Model;
++use support\exception\RunException;
++
++/**
++ * parameter_snapshots 表映射 — 参数快照（05 §3 ParameterSnapshot，append-only 只读聚合）
++ *
++ * 只读聚合/Projection：快照一经写入永不覆盖（无 updated_time、无 object_version），
++ * 参数演进由新 snapshot + version 表达。禁止 UPDATE / DELETE。
++ *
++ * @property string $snapshot_id 快照ID(Snowflake，主键)
++ * @property string $release_id 发布ID(parameter_releases.release_id)
++ * @property string|null $parameter_keys 参数键列表(JSON 数组)
++ * @property string|null $parameter_values 参数值(JSON 键值对)
++ * @property string $version 快照版本号
++ * @property string $created_by 创建人 user_id
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ */
++class ParameterSnapshotModel extends Model
++{
++    public $table = 'parameter_snapshots';
++    public $primaryKey = 'snapshot_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    // append-only：无 updated_time
++    public $timestamps = false;
++    public const UPDATED_AT = null;
++
++    public $delete_field = '';
++
++    public $fields = [
++        'snapshot_id',
++        'release_id',
++        'parameter_keys',
++        'parameter_values',
++        'version',
++        'created_by',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++    ];
++
++    /**
++     * 关联参数发布（同模块 FK）
++     */
++    public function release()
++    {
++        return $this->belongsTo(ParameterReleaseModel::class, 'release_id', 'release_id');
++    }
++
++    /**
++     * 注入 append-only Builder，封堵 ORM 正常路径的 destructive mutation。
++     */
++    public function newEloquentBuilder($query)
++    {
++        return new ParameterSnapshotAppendOnlyBuilder($query);
++    }
++
++    /**
++     * append-only 兜底：已落盘对象禁止 save（UPDATE）。
++     *
++     * @throws RunException
++     */
++    public function save(array $options = [])
++    {
++        if ($this->exists) {
++            throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 UPDATE');
++        }
++        return parent::save($options);
++    }
++
++    /**
++     * append-only 兜底：禁止 delete。
++     *
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('parameter_snapshots 为 append-only 只读聚合：禁止 DELETE');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/risk/RiskCaseModel.php b/0.5代码/gainode后端/gainode/library/model/risk/RiskCaseModel.php
+new file mode 100644
+index 0000000..7cef21b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/risk/RiskCaseModel.php
+@@ -0,0 +1,87 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\risk;
++
++use support\extend\Model;
++
++/**
++ * risk_cases 表映射 — 风控案件（05 §3 RiskCase + §4 V2.4）
++ *
++ * 领域状态机（canonical enum，Owner 裁决 2B2-ENUM-03，冻结于 05 §4 V2.4，禁止自创）：
++ *   open / investigating / under_review / resolved / closed
++ *   - open=检测到风险；investigating=RISK_ANALYST 分析；
++ *   - under_review=RISK_APPROVER 审批处置（RISK_ANALYST != RISK_APPROVER）；
++ *   - resolved=处置措施已执行（申诉窗口内保持此态）；closed=案件归档终态。
++ *   - appeal_eligible 为字段非状态。
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $case_id 案件ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $risk_type 风险类型
++ * @property string $severity 严重等级
++ * @property string $status 风控状态(05 §4 V2.4 canonical，5态)
++ * @property int $detected_at 检测时间(Unix秒)
++ * @property string $detected_by 检测人 user_id
++ * @property string $reviewed_by 处置审批人 user_id
++ * @property string $disposition 处置结论
++ * @property string $disposition_reason_key 处置理由 I18N key
++ * @property string|null $restrictions 限制措施(JSON 数组)
++ * @property int $appeal_eligible 是否可申诉
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class RiskCaseModel extends Model
++{
++    // ---- 风控状态常量（05 §4 V2.4 canonical）----
++    public const STATUS_OPEN = 'open';
++    public const STATUS_INVESTIGATING = 'investigating';
++    public const STATUS_UNDER_REVIEW = 'under_review';
++    public const STATUS_RESOLVED = 'resolved';
++    public const STATUS_CLOSED = 'closed';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_OPEN,
++        self::STATUS_INVESTIGATING,
++        self::STATUS_UNDER_REVIEW,
++        self::STATUS_RESOLVED,
++        self::STATUS_CLOSED,
++    ];
++
++    public $table = 'risk_cases';
++    public $primaryKey = 'case_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'case_id',
++        'user_id',
++        'risk_type',
++        'severity',
++        'status',
++        'detected_at',
++        'detected_by',
++        'reviewed_by',
++        'disposition',
++        'disposition_reason_key',
++        'restrictions',
++        'appeal_eligible',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/settlement/SettlementMethodModel.php b/0.5代码/gainode后端/gainode/library/model/settlement/SettlementMethodModel.php
+new file mode 100644
+index 0000000..1567cc6
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/settlement/SettlementMethodModel.php
+@@ -0,0 +1,52 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\settlement;
++
++use support\extend\Model;
++
++/**
++ * settlement_methods 表映射 — 结算方式（05 §3 SettlementMethod，值对象/只读聚合）
++ *
++ * verification_status 为可变字段（验证状态流转在 State Machine gate 冻结后实现）。
++ * 本骨架不实现状态转移，任何流转 MUST FAIL_CLOSED。
++ *
++ * @property string $method_id 结算方式ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $currency 币种
++ * @property string $method_type 结算方式类型
++ * @property int $is_default 是否默认
++ * @property string $verification_status 验证状态
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class SettlementMethodModel extends Model
++{
++    public $table = 'settlement_methods';
++    public $primaryKey = 'method_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'method_id',
++        'user_id',
++        'currency',
++        'method_type',
++        'is_default',
++        'verification_status',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentAppendOnlyBuilder.php b/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentAppendOnlyBuilder.php
+new file mode 100644
+index 0000000..af934a2
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentAppendOnlyBuilder.php
+@@ -0,0 +1,164 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\support;
++
++use Illuminate\Database\Eloquent\Builder;
++use Illuminate\Database\Query\Builder as QueryBuilder;
++use support\exception\RunException;
++
++/**
++ * ticket_attachments 专用 append-only Eloquent Builder。
++ *
++ * 阻断所有 destructive mutation，只保留 INSERT（追加）与只读查询。
++ * ticket_attachments 为 append-only 值对象（05 §3 TicketAttachment），
++ * 附件一经写入永不覆盖，修订以新附件追加表达。
++ *
++ * 单一事实来源：DESTRUCTIVE_METHODS 覆盖「当前锁定 Illuminate/Database v10.38.1 已审核的
++ * ORM destructive mutation」，分两层（与本模块 OtcTradeAppendOnlyBuilder 同 denyset）。
++ *
++ * __call() 兜底：任何未显式定义但落入 DESTRUCTIVE_METHODS 的方法名，在转发到底层 Query
++ * Builder 之前一律 fail-closed。
++ *
++ * Protection boundary：本类只覆盖 ORM 正常路径；数据库直连层需 DB 级硬约束另走 Change Request。
++ */
++class TicketAttachmentAppendOnlyBuilder extends Builder
++{
++    /**
++     * ticket_attachments 的 destructive mutation deny set（小写方法名）。
++     */
++    public const DESTRUCTIVE_METHODS = [
++        'update',
++        'upsert',
++        'increment',
++        'decrement',
++        'touch',
++        'delete',
++        'forcedelete',
++        'updateorinsert',
++        'truncate',
++        'incrementeach',
++        'decrementeach',
++        'updatefrom',
++    ];
++
++    public function __construct(QueryBuilder $query)
++    {
++        parent::__construct($query);
++    }
++
++    /**
++     * @param string $method
++     * @param array  $parameters
++     * @return mixed
++     *
++     * @throws RunException
++     */
++    public function __call($method, $parameters)
++    {
++        if (in_array(strtolower($method), self::DESTRUCTIVE_METHODS, true)) {
++            throw new RunException(
++                "ticket_attachments 为 append-only 值对象：禁止 destructive mutation `{$method}`"
++            );
++        }
++
++        return parent::__call($method, $parameters);
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function update(array $values)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder UPDATE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function upsert(array $values, $uniqueBy, $update = null)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder upsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function increment($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder increment');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrement($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder decrement');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function touch($column = null)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder touch');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder DELETE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function forceDelete()
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Eloquent Builder forceDelete');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateOrInsert(array $attributes, array $values = [])
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Query Builder updateOrInsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateFrom(array $values)
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Query Builder updateFrom');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function incrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Query Builder incrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Query Builder decrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function truncate()
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 Query Builder truncate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentModel.php b/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentModel.php
+new file mode 100644
+index 0000000..1f8cec1
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/support/TicketAttachmentModel.php
+@@ -0,0 +1,102 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\support;
++
++use support\extend\Model;
++use support\exception\RunException;
++
++/**
++ * ticket_attachments 表映射 — 工单附件（05 §3 TicketAttachment，append-only 值对象）
++ *
++ * 值对象：附件一经写入永不覆盖（无 updated_time、无 object_version），
++ * 修订以新附件追加表达。禁止 UPDATE / DELETE。
++ *
++ * @property string $attachment_id 附件ID(Snowflake，主键)
++ * @property string $ticket_id 工单ID(tickets.ticket_id)
++ * @property string $ticket_message_id 工单消息ID(ticket_messages.message_id)
++ * @property string $file_type 文件类型
++ * @property string $file_url 文件URL
++ * @property string $file_hash 文件哈希
++ * @property string $uploaded_by 上传人 user_id
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ */
++class TicketAttachmentModel extends Model
++{
++    public $table = 'ticket_attachments';
++    public $primaryKey = 'attachment_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    // append-only：无 updated_time
++    public $timestamps = false;
++    public const UPDATED_AT = null;
++
++    public $delete_field = '';
++
++    public $fields = [
++        'attachment_id',
++        'ticket_id',
++        'ticket_message_id',
++        'file_type',
++        'file_url',
++        'file_hash',
++        'uploaded_by',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++    ];
++
++    /**
++     * 关联工单（同模块 FK）
++     */
++    public function ticket()
++    {
++        return $this->belongsTo(TicketModel::class, 'ticket_id', 'ticket_id');
++    }
++
++    /**
++     * 关联工单消息（同模块 FK）
++     */
++    public function message()
++    {
++        return $this->belongsTo(TicketMessageModel::class, 'ticket_message_id', 'message_id');
++    }
++
++    /**
++     * 注入 append-only Builder，封堵 ORM 正常路径的 destructive mutation。
++     */
++    public function newEloquentBuilder($query)
++    {
++        return new TicketAttachmentAppendOnlyBuilder($query);
++    }
++
++    /**
++     * append-only 兜底：已落盘对象禁止 save（UPDATE）。
++     *
++     * @throws RunException
++     */
++    public function save(array $options = [])
++    {
++        if ($this->exists) {
++            throw new RunException('ticket_attachments 为 append-only 值对象：禁止 UPDATE');
++        }
++        return parent::save($options);
++    }
++
++    /**
++     * append-only 兜底：禁止 delete。
++     *
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('ticket_attachments 为 append-only 值对象：禁止 DELETE');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/support/TicketMessageAppendOnlyBuilder.php b/0.5代码/gainode后端/gainode/library/model/support/TicketMessageAppendOnlyBuilder.php
+new file mode 100644
+index 0000000..66ae922
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/support/TicketMessageAppendOnlyBuilder.php
+@@ -0,0 +1,164 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\support;
++
++use Illuminate\Database\Eloquent\Builder;
++use Illuminate\Database\Query\Builder as QueryBuilder;
++use support\exception\RunException;
++
++/**
++ * ticket_messages 专用 append-only Eloquent Builder。
++ *
++ * 阻断所有 destructive mutation，只保留 INSERT（追加）与只读查询。
++ * ticket_messages 为 append-only 值对象（05 §3 TicketMessage），
++ * 消息一经写入永不覆盖，修订以新消息追加表达。
++ *
++ * 单一事实来源：DESTRUCTIVE_METHODS 覆盖「当前锁定 Illuminate/Database v10.38.1 已审核的
++ * ORM destructive mutation」，分两层（与本模块 OtcTradeAppendOnlyBuilder 同 denyset）。
++ *
++ * __call() 兜底：任何未显式定义但落入 DESTRUCTIVE_METHODS 的方法名，在转发到底层 Query
++ * Builder 之前一律 fail-closed。
++ *
++ * Protection boundary：本类只覆盖 ORM 正常路径；数据库直连层需 DB 级硬约束另走 Change Request。
++ */
++class TicketMessageAppendOnlyBuilder extends Builder
++{
++    /**
++     * ticket_messages 的 destructive mutation deny set（小写方法名）。
++     */
++    public const DESTRUCTIVE_METHODS = [
++        'update',
++        'upsert',
++        'increment',
++        'decrement',
++        'touch',
++        'delete',
++        'forcedelete',
++        'updateorinsert',
++        'truncate',
++        'incrementeach',
++        'decrementeach',
++        'updatefrom',
++    ];
++
++    public function __construct(QueryBuilder $query)
++    {
++        parent::__construct($query);
++    }
++
++    /**
++     * @param string $method
++     * @param array  $parameters
++     * @return mixed
++     *
++     * @throws RunException
++     */
++    public function __call($method, $parameters)
++    {
++        if (in_array(strtolower($method), self::DESTRUCTIVE_METHODS, true)) {
++            throw new RunException(
++                "ticket_messages 为 append-only 值对象：禁止 destructive mutation `{$method}`"
++            );
++        }
++
++        return parent::__call($method, $parameters);
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function update(array $values)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder UPDATE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function upsert(array $values, $uniqueBy, $update = null)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder upsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function increment($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder increment');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrement($column, $amount = 1, array $extra = [])
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder decrement');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function touch($column = null)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder touch');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder DELETE');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function forceDelete()
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Eloquent Builder forceDelete');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateOrInsert(array $attributes, array $values = [])
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Query Builder updateOrInsert');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function updateFrom(array $values)
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Query Builder updateFrom');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function incrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Query Builder incrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function decrementEach(array $columns, array $extra = [])
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Query Builder decrementEach');
++    }
++
++    /**
++     * @throws RunException
++     */
++    public function truncate()
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 Query Builder truncate');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/support/TicketMessageModel.php b/0.5代码/gainode后端/gainode/library/model/support/TicketMessageModel.php
+new file mode 100644
+index 0000000..da957ef
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/support/TicketMessageModel.php
+@@ -0,0 +1,90 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\support;
++
++use support\extend\Model;
++use support\exception\RunException;
++
++/**
++ * ticket_messages 表映射 — 工单消息（05 §3 TicketMessage，append-only 值对象）
++ *
++ * 值对象：消息一经写入永不覆盖（无 updated_time、无 object_version），
++ * 修订以新消息追加表达。禁止 UPDATE / DELETE。
++ *
++ * @property string $message_id 消息ID(Snowflake，主键)
++ * @property string $ticket_id 工单ID(tickets.ticket_id)
++ * @property string $sender_role 发送方角色
++ * @property string $body_key 正文 I18N key
++ * @property string|null $attachments 附件列表(JSON 数组)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ */
++class TicketMessageModel extends Model
++{
++    public $table = 'ticket_messages';
++    public $primaryKey = 'message_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    // append-only：无 updated_time
++    public $timestamps = false;
++    public const UPDATED_AT = null;
++
++    public $delete_field = '';
++
++    public $fields = [
++        'message_id',
++        'ticket_id',
++        'sender_role',
++        'body_key',
++        'attachments',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++    ];
++
++    /**
++     * 关联工单（同模块 FK）
++     */
++    public function ticket()
++    {
++        return $this->belongsTo(TicketModel::class, 'ticket_id', 'ticket_id');
++    }
++
++    /**
++     * 注入 append-only Builder，封堵 ORM 正常路径的 destructive mutation。
++     */
++    public function newEloquentBuilder($query)
++    {
++        return new TicketMessageAppendOnlyBuilder($query);
++    }
++
++    /**
++     * append-only 兜底：已落盘对象禁止 save（UPDATE）。
++     *
++     * @throws RunException
++     */
++    public function save(array $options = [])
++    {
++        if ($this->exists) {
++            throw new RunException('ticket_messages 为 append-only 值对象：禁止 UPDATE');
++        }
++        return parent::save($options);
++    }
++
++    /**
++     * append-only 兜底：禁止 delete。
++     *
++     * @throws RunException
++     */
++    public function delete()
++    {
++        throw new RunException('ticket_messages 为 append-only 值对象：禁止 DELETE');
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/model/support/TicketModel.php b/0.5代码/gainode后端/gainode/library/model/support/TicketModel.php
+new file mode 100644
+index 0000000..9714aa1
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/model/support/TicketModel.php
+@@ -0,0 +1,83 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\model\support;
++
++use support\extend\Model;
++
++/**
++ * tickets 表映射 — 工单（05 §3 Ticket + §4 Ticket 状态机）
++ *
++ * 领域状态机（canonical enum，复制 05 §4 Ticket，冻结，禁止自创）：
++ *   submitted / in_progress / waiting_user / under_review / resolved / closed
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED。
++ *
++ * @property string $ticket_id 工单ID(Snowflake，主键)
++ * @property string $user_id 用户ID
++ * @property string $category 工单分类
++ * @property string $status 工单状态(05 §4 canonical，6态)
++ * @property string $assigned_to 处理人 user_id
++ * @property int $last_activity_at 最后活动时间(Unix秒)
++ * @property string $resolution_type 解决类型
++ * @property string $resolution_summary_key 解决摘要 I18N key
++ * @property int $appeal_eligible 是否可申诉
++ * @property string|null $ticket_message_ids 工单消息ID列表(JSON 数组)
++ * @property string $case_id 关联案件ID
++ * @property int $object_version 并发控制版本号(乐观锁)
++ * @property string|null $idempotency_key 幂等键
++ * @property string $audit_event_id 关联审计事件ID
++ * @property int $created_time 创建时间(Unix秒)
++ * @property int $updated_time 更新时间(Unix秒)
++ */
++class TicketModel extends Model
++{
++    // ---- 工单状态常量（05 §4 canonical）----
++    public const STATUS_SUBMITTED = 'submitted';
++    public const STATUS_IN_PROGRESS = 'in_progress';
++    public const STATUS_WAITING_USER = 'waiting_user';
++    public const STATUS_UNDER_REVIEW = 'under_review';
++    public const STATUS_RESOLVED = 'resolved';
++    public const STATUS_CLOSED = 'closed';
++
++    /** @var string[] 冻结的合法状态全集 */
++    public const STATUSES = [
++        self::STATUS_SUBMITTED,
++        self::STATUS_IN_PROGRESS,
++        self::STATUS_WAITING_USER,
++        self::STATUS_UNDER_REVIEW,
++        self::STATUS_RESOLVED,
++        self::STATUS_CLOSED,
++    ];
++
++    public $table = 'tickets';
++    public $primaryKey = 'ticket_id';
++    public $connection = 'mysql';
++
++    // Snowflake 主键（bigint unsigned，应用层生成），非自增；字符串键避免 64 位溢出
++    public $incrementing = false;
++    public $keyType = 'string';
++
++    public $delete_field = '';
++
++    public $fields = [
++        'ticket_id',
++        'user_id',
++        'category',
++        'status',
++        'assigned_to',
++        'last_activity_at',
++        'resolution_type',
++        'resolution_summary_key',
++        'appeal_eligible',
++        'ticket_message_ids',
++        'case_id',
++        'object_version',
++        'idempotency_key',
++        'audit_event_id',
++        'created_time',
++        'updated_time',
++    ];
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/approval/ApprovalRequestService.php b/0.5代码/gainode后端/gainode/library/service/approval/ApprovalRequestService.php
+new file mode 100644
+index 0000000..0319ab1
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/approval/ApprovalRequestService.php
+@@ -0,0 +1,46 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\approval;
++
++use library\dao\approval\ApprovalRequestDao;
++use library\model\approval\ApprovalRequestModel;
++use support\extend\Service;
++
++/**
++ * 审批请求 Service — approval_requests 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer approval_requests
++ *
++ * 状态机说明（05 §4 canonical Approval，复制冻结）：
++ *   draft / pending / changes_requested / approved / rejected / executing / executed / failed
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method ApprovalRequestModel create($data)
++ * @method ApprovalRequestModel get($id, string $field = null)
++ * @method ApprovalRequestModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class ApprovalRequestService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = ApprovalRequestDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按申请对象查询（只读透传）
++     *
++     * @param string $objectType
++     * @param string $objectId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByObject(string $objectType, string $objectId)
++    {
++        return $this->getNewDao()->getByObject($objectType, $objectId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/auth/AuthSessionService.php b/0.5代码/gainode后端/gainode/library/service/auth/AuthSessionService.php
+new file mode 100644
+index 0000000..d5afdd8
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/auth/AuthSessionService.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\auth;
++
++use library\dao\auth\AuthSessionDao;
++use library\model\auth\AuthSessionModel;
++use support\extend\Service;
++
++/**
++ * 会话 Service — auth_sessions 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer auth_sessions
++ *
++ * 状态机说明（05 §2.2 canonical Session，复制冻结）：
++ *   active / mfa_required / restricted / expired / revoked
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method AuthSessionModel create($data)
++ * @method AuthSessionModel get($id, string $field = null)
++ * @method AuthSessionModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class AuthSessionService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = AuthSessionDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询会话（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/auth/MfaEnrollmentService.php b/0.5代码/gainode后端/gainode/library/service/auth/MfaEnrollmentService.php
+new file mode 100644
+index 0000000..936f8f1
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/auth/MfaEnrollmentService.php
+@@ -0,0 +1,47 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\auth;
++
++use library\dao\auth\MfaEnrollmentDao;
++use library\model\auth\MfaEnrollmentModel;
++use support\extend\Service;
++
++/**
++ * MFA 注册 Service — mfa_enrollments 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer mfa_enrollments
++ *
++ * 状态机说明（05 §4 V2.4 canonical，Owner 2B2-ENUM-02）：
++ *   pending / active / revoked
++ *   - pending=已发起注册、尚未验证（enrolled_at 与 last_verified_at 分离表达）；
++ *   - backup_codes_active 为字段非状态。
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method MfaEnrollmentModel create($data)
++ * @method MfaEnrollmentModel get($id, string $field = null)
++ * @method MfaEnrollmentModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class MfaEnrollmentService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = MfaEnrollmentDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询 MFA 注册（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/kyc/KycCaseService.php b/0.5代码/gainode后端/gainode/library/service/kyc/KycCaseService.php
+new file mode 100644
+index 0000000..0aa665f
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/kyc/KycCaseService.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\kyc;
++
++use library\dao\kyc\KycCaseDao;
++use library\model\kyc\KycCaseModel;
++use support\extend\Service;
++
++/**
++ * KYC 案件 Service — kyc_cases 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer kyc_cases
++ *
++ * 状态机说明（05 §4 canonical KYC，复制冻结）：
++ *   not_started / pending / needs_info / approved / rejected / review
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method KycCaseModel create($data)
++ * @method KycCaseModel get($id, string $field = null)
++ * @method KycCaseModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class KycCaseService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = KycCaseDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询 KYC 案件（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/notice/NoticeService.php b/0.5代码/gainode后端/gainode/library/service/notice/NoticeService.php
+new file mode 100644
+index 0000000..cbc7e1b
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/notice/NoticeService.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\notice;
++
++use library\dao\notice\NoticeDao;
++use library\model\notice\NoticeModel;
++use support\extend\Service;
++
++/**
++ * 通知 Service — notices 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer notices
++ *
++ * read_state 说明（05 §3 Notice）：
++ *   unread / read（已读状态为通知可变字段）
++ *
++ * 本骨架不实现已读流转（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method NoticeModel create($data)
++ * @method NoticeModel get($id, string $field = null)
++ * @method NoticeModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class NoticeService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = NoticeDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询通知（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/notice/NotificationDeliveryService.php b/0.5代码/gainode后端/gainode/library/service/notice/NotificationDeliveryService.php
+new file mode 100644
+index 0000000..9fd9042
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/notice/NotificationDeliveryService.php
+@@ -0,0 +1,47 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\notice;
++
++use library\dao\notice\NotificationDeliveryDao;
++use library\model\notice\NotificationDeliveryModel;
++use support\extend\Service;
++
++/**
++ * 通知投递 Service — notification_deliveries 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer notification_deliveries
++ *
++ * 状态机说明（05 §4 V2.4 canonical，Owner 2B2-ENUM-01）：
++ *   pending / delivered / failed / cancelled
++ *   - failed=失败待重试（attempt_count/next_retry_at 驱动，不新增 processing 态）；
++ *   - cancelled=业务对象失效/用户已读不再投递；投递失败不回滚业务（05 §4 Notice 设计原则 1）。
++ *
++ * 幂等：dedupe_key（去重 key）。本骨架不实现投递流转（属 State Machine gate）。
++ * 转移矩阵 FROZEN 前，任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method NotificationDeliveryModel create($data)
++ * @method NotificationDeliveryModel get($id, string $field = null)
++ * @method NotificationDeliveryModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class NotificationDeliveryService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = NotificationDeliveryDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按通知查询投递（只读透传）
++     *
++     * @param string $noticeId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByNotice(string $noticeId)
++    {
++        return $this->getNewDao()->getByNotice($noticeId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/parameter/ParameterReleaseService.php b/0.5代码/gainode后端/gainode/library/service/parameter/ParameterReleaseService.php
+new file mode 100644
+index 0000000..58f2218
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/parameter/ParameterReleaseService.php
+@@ -0,0 +1,35 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\parameter;
++
++use library\dao\parameter\ParameterReleaseDao;
++use library\model\parameter\ParameterReleaseModel;
++use support\extend\Service;
++
++/**
++ * 参数发布 Service — parameter_releases 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer parameter_releases
++ *
++ * 状态机说明（05 §4 canonical Parameter Release，复制冻结）：
++ *   draft / pending_approval / approved / scheduled / active / paused / rolled_back / archived
++ *   - 关键不变量：approved != active（批准后可排期延迟生效）；历史对象使用 snapshot
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method ParameterReleaseModel create($data)
++ * @method ParameterReleaseModel get($id, string $field = null)
++ * @method ParameterReleaseModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class ParameterReleaseService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = ParameterReleaseDao::class;
++        parent::__construct();
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/parameter/ParameterSnapshotService.php b/0.5代码/gainode后端/gainode/library/service/parameter/ParameterSnapshotService.php
+new file mode 100644
+index 0000000..371aefb
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/parameter/ParameterSnapshotService.php
+@@ -0,0 +1,46 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\parameter;
++
++use library\dao\parameter\ParameterSnapshotDao;
++use library\model\parameter\ParameterSnapshotModel;
++use support\extend\Service;
++
++/**
++ * 参数快照 Service — parameter_snapshots 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer parameter_snapshots
++ *
++ * append-only 只读聚合（05 §3 ParameterSnapshot）：
++ *   - 快照一经写入永不覆盖，参数演进由新 snapshot + version 表达。
++ *   - 机械强制见 ParameterSnapshotModel / ParameterSnapshotAppendOnlyBuilder / ParameterSnapshotDao。
++ *
++ * 本骨架不实现快照生成业务（属 State Machine gate）。生成/写入流转 FROZEN 前，
++ * 任何写入必须符合 append-only 约束，不得自创覆盖/删除路径。
++ *
++ * @method ParameterSnapshotModel create($data)
++ * @method ParameterSnapshotModel get($id, string $field = null)
++ * @method ParameterSnapshotModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class ParameterSnapshotService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = ParameterSnapshotDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按发布查询快照（只读透传）
++     *
++     * @param string $releaseId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByRelease(string $releaseId)
++    {
++        return $this->getNewDao()->getByRelease($releaseId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/risk/RiskCaseService.php b/0.5代码/gainode后端/gainode/library/service/risk/RiskCaseService.php
+new file mode 100644
+index 0000000..53f6b2c
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/risk/RiskCaseService.php
+@@ -0,0 +1,47 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\risk;
++
++use library\dao\risk\RiskCaseDao;
++use library\model\risk\RiskCaseModel;
++use support\extend\Service;
++
++/**
++ * 风控案件 Service — risk_cases 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer risk_cases
++ *
++ * 状态机说明（05 §4 V2.4 canonical，Owner 2B2-ENUM-03）：
++ *   open / investigating / under_review / resolved / closed
++ *   - under_review=RISK_APPROVER 审批处置（RISK_ANALYST != RISK_APPROVER）；
++ *   - appeal_eligible 为字段非状态。
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method RiskCaseModel create($data)
++ * @method RiskCaseModel get($id, string $field = null)
++ * @method RiskCaseModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class RiskCaseService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = RiskCaseDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询风控案件（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/settlement/SettlementMethodService.php b/0.5代码/gainode后端/gainode/library/service/settlement/SettlementMethodService.php
+new file mode 100644
+index 0000000..a36868a
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/settlement/SettlementMethodService.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\settlement;
++
++use library\dao\settlement\SettlementMethodDao;
++use library\model\settlement\SettlementMethodModel;
++use support\extend\Service;
++
++/**
++ * 结算方式 Service — settlement_methods 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer settlement_methods
++ *
++ * 值对象/只读聚合（05 §3 SettlementMethod）：
++ *   verification_status 为可变字段（验证状态流转在 State Machine gate 冻结后实现）。
++ *
++ * 本骨架不实现验证状态流转（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method SettlementMethodModel create($data)
++ * @method SettlementMethodModel get($id, string $field = null)
++ * @method SettlementMethodModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class SettlementMethodService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = SettlementMethodDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询结算方式（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/support/TicketAttachmentService.php b/0.5代码/gainode后端/gainode/library/service/support/TicketAttachmentService.php
+new file mode 100644
+index 0000000..05c9833
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/support/TicketAttachmentService.php
+@@ -0,0 +1,46 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\support;
++
++use library\dao\support\TicketAttachmentDao;
++use library\model\support\TicketAttachmentModel;
++use support\extend\Service;
++
++/**
++ * 工单附件 Service — ticket_attachments 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer ticket_attachments
++ *
++ * append-only 值对象（05 §3 TicketAttachment）：
++ *   - 附件一经写入永不覆盖，修订以新附件追加表达。
++ *   - 机械强制见 TicketAttachmentModel / TicketAttachmentAppendOnlyBuilder / TicketAttachmentDao。
++ *
++ * 本骨架不实现附件上传业务（属 State Machine gate）。写入流转 FROZEN 前，
++ * 任何写入必须符合 append-only 约束，不得自创覆盖/删除路径。
++ *
++ * @method TicketAttachmentModel create($data)
++ * @method TicketAttachmentModel get($id, string $field = null)
++ * @method TicketAttachmentModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class TicketAttachmentService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = TicketAttachmentDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按工单查询附件（只读透传）
++     *
++     * @param string $ticketId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByTicket(string $ticketId)
++    {
++        return $this->getNewDao()->getByTicket($ticketId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/support/TicketMessageService.php b/0.5代码/gainode后端/gainode/library/service/support/TicketMessageService.php
+new file mode 100644
+index 0000000..1f90c3d
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/support/TicketMessageService.php
+@@ -0,0 +1,46 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\support;
++
++use library\dao\support\TicketMessageDao;
++use library\model\support\TicketMessageModel;
++use support\extend\Service;
++
++/**
++ * 工单消息 Service — ticket_messages 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer ticket_messages
++ *
++ * append-only 值对象（05 §3 TicketMessage）：
++ *   - 消息一经写入永不覆盖，修订以新消息追加表达。
++ *   - 机械强制见 TicketMessageModel / TicketMessageAppendOnlyBuilder / TicketMessageDao。
++ *
++ * 本骨架不实现消息追加业务（属 State Machine gate）。写入流转 FROZEN 前，
++ * 任何写入必须符合 append-only 约束，不得自创覆盖/删除路径。
++ *
++ * @method TicketMessageModel create($data)
++ * @method TicketMessageModel get($id, string $field = null)
++ * @method TicketMessageModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class TicketMessageService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = TicketMessageDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按工单查询消息（只读透传）
++     *
++     * @param string $ticketId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByTicket(string $ticketId)
++    {
++        return $this->getNewDao()->getByTicket($ticketId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/library/service/support/TicketService.php b/0.5代码/gainode后端/gainode/library/service/support/TicketService.php
+new file mode 100644
+index 0000000..647616e
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/library/service/support/TicketService.php
+@@ -0,0 +1,45 @@
++<?php
++
++declare(strict_types=1);
++
++namespace library\service\support;
++
++use library\dao\support\TicketDao;
++use library\model\support\TicketModel;
++use support\extend\Service;
++
++/**
++ * 工单 Service — tickets 表唯一 Authoritative Writer（STAGE-01 骨架）
++ *
++ * @authoritative_writer tickets
++ *
++ * 状态机说明（05 §4 canonical Ticket，复制冻结）：
++ *   submitted / in_progress / waiting_user / under_review / resolved / closed
++ *
++ * 本骨架不实现状态转移（属 State Machine gate）。转移矩阵 FROZEN 前，
++ * 任何状态流转 MUST FAIL_CLOSED，不得自创转移规则。
++ *
++ * @method TicketModel create($data)
++ * @method TicketModel get($id, string $field = null)
++ * @method TicketModel fetch(array $params = [], array $orderBy = [], array $fields = [])
++ * @method \Illuminate\Database\Eloquent\Collection fetchAll(array $params = [], array $orderBy = [], array $fields = [])
++ */
++class TicketService extends Service
++{
++    public function __construct()
++    {
++        $this->dao = TicketDao::class;
++        parent::__construct();
++    }
++
++    /**
++     * 按用户查询工单（只读透传）
++     *
++     * @param string $userId
++     * @return \Illuminate\Database\Eloquent\Collection
++     */
++    public function getByUser(string $userId)
++    {
++        return $this->getNewDao()->getByUser($userId);
++    }
++}
+diff --git a/0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b2_13_entities.sql b/0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b2_13_entities.sql
+new file mode 100644
+index 0000000..d0bd453
+--- /dev/null
++++ b/0.5代码/gainode后端/gainode/sql/20260816_machine_contract_batch2b2_13_entities.sql
+@@ -0,0 +1,347 @@
++-- =============================================================================
++-- Machine Contract 第二批 2B-2 — 13 个非核心实体 DDL（State Contract Freeze CANDIDATE）
++-- =============================================================================
++-- 变更原因：
++--   MC1 冻结 8 核心实体 DDL；MC2 冻结状态转移矩阵 + audit_events + ledger object_version；
++--   2B-1（S01-P03）落 8 非核心实体 DDL。本文件落 2B-2 小批的 13 个 P1/P2 实体表 DDL
++--   （S01-P05），对应 S01-P04 已 Owner 裁决并补入 05 §4（V2.4）的 canonical enum。
++--
++-- 影响范围：
++--   本文件在默认主库 `webman` 中创建 13 张 V2.0 实体表（全新表，不触碰任何 V1.x 表）：
++--   - approval_requests：审批请求（ApprovalRequest）
++--   - parameter_releases / parameter_snapshots：参数发布 / 参数快照
++--   - notices / notification_deliveries：通知 / 通知投递
++--   - auth_sessions / mfa_enrollments：会话 / MFA 注册
++--   - kyc_cases：KYC 案件
++--   - risk_cases：风控案件
++--   - tickets / ticket_messages / ticket_attachments：工单 / 工单消息 / 工单附件
++--   - settlement_methods：结算方式
++--
++-- 权威契约：
++--   Gainode_Development_Ready_V6.1_Latest/05_DATA_STATE_PERMISSION_API_CONTRACT.md
++--   §2.2（Session 状态）+ §3（对象最低字段）+ §4（统一状态机，V2.4）+ §8（RBAC）。
++--   领域状态枚举严格取自 05 §4 V2.4 / Owner 裁决（2B2-ENUM-01..03），禁止自创。
++--
++-- 与 V1.x 表的关键差异（同 MC1/MC2/2B-1 约定）：
++--   1. 主键：Snowflake ID（bigint unsigned），不使用 AUTO_INCREMENT。
++--   2. 领域状态：ENUM 冻结（canonical enum），不使用 V1.x 的 status tinyint 软删模式。
++--   3. 金额：本批 P1/P2 对象无 APT 金额；如需金额沿用 decimal(36,18)/decimal(18,8)/decimal(18,4)，禁 float。
++--   4. 时间戳：created_time / updated_time 为 Unix 秒（int unsigned）。
++--   5. append-only：parameter_snapshots / ticket_messages / ticket_attachments 无 updated_time、
++--      无 object_version（不可变值对象/只读聚合），一经写入永不覆盖/删除。
++--
++-- 执行方式：forward-only migration（一次性建表，禁止内置 DROP/CREATE）。
++-- 迁移阶段：阶段一（sql/YYYYMMDD_description.sql）。
++-- =============================================================================
++
++SET NAMES utf8mb4;
++
++-- =============================================================================
++-- 1. approval_requests — 审批请求（05 §3 ApprovalRequest + §4 Approval 状态机）
++-- =============================================================================
++CREATE TABLE `approval_requests` (
++  `approval_id` bigint unsigned NOT NULL COMMENT '审批ID(Snowflake，主键)',
++  `request_type` varchar(32) NOT NULL DEFAULT '' COMMENT '申请类型',
++  `request_object_type` varchar(32) NOT NULL DEFAULT '' COMMENT '申请对象类型',
++  `request_object_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '申请对象ID',
++  `status` enum('draft','pending','changes_requested','approved','rejected','executing','executed','failed') NOT NULL DEFAULT 'draft' COMMENT '审批状态(05 §4 canonical)',
++  `submitted_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '申请人 user_id',
++  `submitter_role` varchar(32) NOT NULL DEFAULT '' COMMENT '申请人角色',
++  `assigned_to` bigint unsigned NOT NULL DEFAULT '0' COMMENT '审批人 user_id',
++  `decided_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '裁决人 user_id',
++  `decided_at` int unsigned NOT NULL DEFAULT '0' COMMENT '裁决时间(Unix秒)',
++  `reason_key` varchar(64) NOT NULL DEFAULT '' COMMENT '裁决理由 I18N key',
++  `changes_requested_reason` varchar(255) NOT NULL DEFAULT '' COMMENT '要求修改理由',
++  `execution_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '执行对象ID',
++  `case_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联案件ID',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`approval_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_status` (`status`),
++  KEY `idx_object` (`request_object_type`, `request_object_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='审批请求(状态机 draft/pending/changes_requested/approved/rejected/executing/executed/failed)';
++
++-- =============================================================================
++-- 2. parameter_releases — 参数发布（05 §3 ParameterRelease + §4 Parameter Release 状态机）
++-- =============================================================================
++CREATE TABLE `parameter_releases` (
++  `release_id` bigint unsigned NOT NULL COMMENT '发布ID(Snowflake，主键)',
++  `parameter_keys` json DEFAULT NULL COMMENT '参数键列表(JSON 数组)',
++  `status` enum('draft','pending_approval','approved','scheduled','active','paused','rolled_back','archived') NOT NULL DEFAULT 'draft' COMMENT '发布状态(05 §4 canonical)',
++  `draft_version` varchar(64) NOT NULL DEFAULT '' COMMENT '草稿版本号',
++  `approved_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '批准人 user_id',
++  `scheduled_at` int unsigned NOT NULL DEFAULT '0' COMMENT '排期激活时间(Unix秒)',
++  `activated_at` int unsigned NOT NULL DEFAULT '0' COMMENT '实际激活时间(Unix秒)',
++  `paused_at` int unsigned NOT NULL DEFAULT '0' COMMENT '暂停时间(Unix秒)',
++  `rolled_back_at` int unsigned NOT NULL DEFAULT '0' COMMENT '回滚时间(Unix秒)',
++  `archived_at` int unsigned NOT NULL DEFAULT '0' COMMENT '归档时间(Unix秒)',
++  `monitoring_job_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '监控任务ID',
++  `snapshot_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联参数快照ID',
++  `case_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联案件ID',
++  `audit_event_ids` json DEFAULT NULL COMMENT '审计事件ID列表(JSON 数组)',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`release_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_status` (`status`),
++  KEY `idx_snapshot` (`snapshot_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='参数发布(状态机 draft/pending_approval/approved/scheduled/active/paused/rolled_back/archived)';
++
++-- =============================================================================
++-- 3. parameter_snapshots — 参数快照（05 §3 ParameterSnapshot，append-only 只读聚合）
++-- =============================================================================
++CREATE TABLE `parameter_snapshots` (
++  `snapshot_id` bigint unsigned NOT NULL COMMENT '快照ID(Snowflake，主键)',
++  `release_id` bigint unsigned NOT NULL COMMENT '发布ID(parameter_releases.release_id)',
++  `parameter_keys` json DEFAULT NULL COMMENT '参数键列表(JSON 数组)',
++  `parameter_values` json DEFAULT NULL COMMENT '参数值(JSON 键值对)',
++  `version` varchar(64) NOT NULL DEFAULT '' COMMENT '快照版本号',
++  `created_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '创建人 user_id',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  PRIMARY KEY (`snapshot_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_release` (`release_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='参数快照(append-only 只读聚合，无UPDATE/DELETE)';
++
++-- =============================================================================
++-- 4. notices — 通知（05 §3 Notice，只读聚合，read_state 可变）
++-- =============================================================================
++CREATE TABLE `notices` (
++  `notice_id` bigint unsigned NOT NULL COMMENT '通知ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '目标用户ID',
++  `notice_type` varchar(32) NOT NULL DEFAULT '' COMMENT '通知事件类型',
++  `title_key` varchar(64) NOT NULL DEFAULT '' COMMENT 'I18N 标题 key',
++  `body_key` varchar(64) NOT NULL DEFAULT '' COMMENT 'I18N 正文 key',
++  `priority` enum('INFO','WARNING','CRITICAL') NOT NULL DEFAULT 'INFO' COMMENT '优先级',
++  `related_object_type` varchar(32) NOT NULL DEFAULT '' COMMENT '关联对象类型',
++  `related_object_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联对象ID',
++  `read_state` enum('unread','read') NOT NULL DEFAULT 'unread' COMMENT '已读状态',
++  `content_version` varchar(64) NOT NULL DEFAULT '' COMMENT '文案版本号',
++  `locale` varchar(16) NOT NULL DEFAULT '' COMMENT '生成时 locale',
++  `expires_at` int unsigned NOT NULL DEFAULT '0' COMMENT '过期时间(Unix秒)',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`notice_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_read` (`read_state`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通知(只读聚合，read_state unread/read)';
++
++-- =============================================================================
++-- 5. notification_deliveries — 通知投递（05 §3 NotificationDelivery + §4 V2.4）
++-- =============================================================================
++CREATE TABLE `notification_deliveries` (
++  `delivery_id` bigint unsigned NOT NULL COMMENT '投递ID(Snowflake，主键)',
++  `notice_id` bigint unsigned NOT NULL COMMENT '通知ID(notices.notice_id)',
++  `channel` enum('PUSH','EMAIL','SMS','IN_APP') NOT NULL DEFAULT 'IN_APP' COMMENT '投递渠道',
++  `delivery_status` enum('pending','delivered','failed','cancelled') NOT NULL DEFAULT 'pending' COMMENT '投递状态(05 §4 V2.4 canonical)',
++  `dedupe_key` varchar(64) NOT NULL DEFAULT '' COMMENT '去重 key(幂等)',
++  `attempt_count` int unsigned NOT NULL DEFAULT '0' COMMENT '尝试次数',
++  `last_attempt_at` int unsigned NOT NULL DEFAULT '0' COMMENT '最后尝试时间(Unix秒)',
++  `next_retry_at` int unsigned NOT NULL DEFAULT '0' COMMENT '下次重试时间(Unix秒)',
++  `delivered_at` int unsigned NOT NULL DEFAULT '0' COMMENT '投递成功时间(Unix秒)',
++  `failure_reason_code` varchar(64) NOT NULL DEFAULT '' COMMENT '失败原因码',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`delivery_id`),
++  UNIQUE KEY `uk_dedupe` (`dedupe_key`),
++  KEY `idx_notice` (`notice_id`),
++  KEY `idx_status` (`delivery_status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='通知投递(状态机 pending/delivered/failed/cancelled)';
++
++-- =============================================================================
++-- 6. auth_sessions — 会话（05 §3 AuthSession + §2.2 Session 状态机）
++-- =============================================================================
++CREATE TABLE `auth_sessions` (
++  `session_id` bigint unsigned NOT NULL COMMENT '会话ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `token_hash` varchar(64) NOT NULL DEFAULT '' COMMENT 'token 哈希',
++  `status` enum('active','mfa_required','restricted','expired','revoked') NOT NULL DEFAULT 'active' COMMENT '会话状态(05 §2.2 canonical)',
++  `device_info` json DEFAULT NULL COMMENT '设备信息(JSON)',
++  `ip_address` varchar(45) NOT NULL DEFAULT '' COMMENT 'IP 地址',
++  `mfa_verified` tinyint unsigned NOT NULL DEFAULT '0' COMMENT 'MFA 是否已验证',
++  `expires_at` int unsigned NOT NULL DEFAULT '0' COMMENT '过期时间(Unix秒)',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`session_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_status` (`status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会话(状态机 active/mfa_required/restricted/expired/revoked)';
++
++-- =============================================================================
++-- 7. mfa_enrollments — MFA 注册（05 §3 MfaEnrollment + §4 V2.4）
++-- =============================================================================
++CREATE TABLE `mfa_enrollments` (
++  `enrollment_id` bigint unsigned NOT NULL COMMENT '注册ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `method_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'MFA 方法类型',
++  `status` enum('pending','active','revoked') NOT NULL DEFAULT 'pending' COMMENT '注册状态(05 §4 V2.4 canonical)',
++  `enrolled_at` int unsigned NOT NULL DEFAULT '0' COMMENT '注册发起时间(Unix秒)',
++  `last_verified_at` int unsigned NOT NULL DEFAULT '0' COMMENT '最后验证时间(Unix秒)',
++  `backup_codes_active` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '备份码是否激活',
++  `device_info` json DEFAULT NULL COMMENT '设备信息(JSON)',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`enrollment_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_status` (`status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MFA注册(状态机 pending/active/revoked)';
++
++-- =============================================================================
++-- 8. kyc_cases — KYC 案件（05 §3 KycCase + §4 KYC 状态机）
++-- =============================================================================
++CREATE TABLE `kyc_cases` (
++  `case_id` bigint unsigned NOT NULL COMMENT '案件ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `kyc_level` varchar(32) NOT NULL DEFAULT '' COMMENT 'KYC 等级',
++  `status` enum('not_started','pending','needs_info','approved','rejected','review') NOT NULL DEFAULT 'not_started' COMMENT 'KYC 状态(05 §4 canonical)',
++  `submitted_at` int unsigned NOT NULL DEFAULT '0' COMMENT '提交时间(Unix秒)',
++  `reviewed_at` int unsigned NOT NULL DEFAULT '0' COMMENT '复核时间(Unix秒)',
++  `reviewed_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '复核人 user_id',
++  `reason_code` varchar(64) NOT NULL DEFAULT '' COMMENT '原因码',
++  `reason_text_key` varchar(64) NOT NULL DEFAULT '' COMMENT '原因文案 I18N key',
++  `next_action` varchar(32) NOT NULL DEFAULT '' COMMENT '下一步动作',
++  `policy_version` varchar(64) NOT NULL DEFAULT '' COMMENT '策略版本号',
++  `rule_version` varchar(64) NOT NULL DEFAULT '' COMMENT '规则版本号',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`case_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_status` (`status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KYC案件(状态机 not_started/pending/needs_info/approved/rejected/review)';
++
++-- =============================================================================
++-- 9. risk_cases — 风控案件（05 §3 RiskCase + §4 V2.4）
++-- =============================================================================
++CREATE TABLE `risk_cases` (
++  `case_id` bigint unsigned NOT NULL COMMENT '案件ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `risk_type` varchar(32) NOT NULL DEFAULT '' COMMENT '风险类型',
++  `severity` varchar(16) NOT NULL DEFAULT '' COMMENT '严重等级',
++  `status` enum('open','investigating','under_review','resolved','closed') NOT NULL DEFAULT 'open' COMMENT '风控状态(05 §4 V2.4 canonical)',
++  `detected_at` int unsigned NOT NULL DEFAULT '0' COMMENT '检测时间(Unix秒)',
++  `detected_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '检测人 user_id',
++  `reviewed_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '处置审批人 user_id',
++  `disposition` varchar(32) NOT NULL DEFAULT '' COMMENT '处置结论',
++  `disposition_reason_key` varchar(64) NOT NULL DEFAULT '' COMMENT '处置理由 I18N key',
++  `restrictions` json DEFAULT NULL COMMENT '限制措施(JSON 数组)',
++  `appeal_eligible` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '是否可申诉',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`case_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_status` (`status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='风控案件(状态机 open/investigating/under_review/resolved/closed)';
++
++-- =============================================================================
++-- 10. tickets — 工单（05 §3 Ticket + §4 Ticket 状态机）
++-- =============================================================================
++CREATE TABLE `tickets` (
++  `ticket_id` bigint unsigned NOT NULL COMMENT '工单ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `category` varchar(32) NOT NULL DEFAULT '' COMMENT '工单分类',
++  `status` enum('submitted','in_progress','waiting_user','under_review','resolved','closed') NOT NULL DEFAULT 'submitted' COMMENT '工单状态(05 §4 canonical)',
++  `assigned_to` bigint unsigned NOT NULL DEFAULT '0' COMMENT '处理人 user_id',
++  `last_activity_at` int unsigned NOT NULL DEFAULT '0' COMMENT '最后活动时间(Unix秒)',
++  `resolution_type` varchar(32) NOT NULL DEFAULT '' COMMENT '解决类型',
++  `resolution_summary_key` varchar(64) NOT NULL DEFAULT '' COMMENT '解决摘要 I18N key',
++  `appeal_eligible` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '是否可申诉',
++  `ticket_message_ids` json DEFAULT NULL COMMENT '工单消息ID列表(JSON 数组)',
++  `case_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联案件ID',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`ticket_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`),
++  KEY `idx_status` (`status`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单(状态机 submitted/in_progress/waiting_user/under_review/resolved/closed)';
++
++-- =============================================================================
++-- 11. ticket_messages — 工单消息（05 §3 TicketMessage，append-only 值对象）
++-- =============================================================================
++CREATE TABLE `ticket_messages` (
++  `message_id` bigint unsigned NOT NULL COMMENT '消息ID(Snowflake，主键)',
++  `ticket_id` bigint unsigned NOT NULL COMMENT '工单ID(tickets.ticket_id)',
++  `sender_role` varchar(32) NOT NULL DEFAULT '' COMMENT '发送方角色',
++  `body_key` varchar(64) NOT NULL DEFAULT '' COMMENT '正文 I18N key',
++  `attachments` json DEFAULT NULL COMMENT '附件列表(JSON 数组)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  PRIMARY KEY (`message_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_ticket` (`ticket_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单消息(append-only 值对象，无UPDATE/DELETE)';
++
++-- =============================================================================
++-- 12. ticket_attachments — 工单附件（05 §3 TicketAttachment，append-only 值对象）
++-- =============================================================================
++CREATE TABLE `ticket_attachments` (
++  `attachment_id` bigint unsigned NOT NULL COMMENT '附件ID(Snowflake，主键)',
++  `ticket_id` bigint unsigned NOT NULL COMMENT '工单ID(tickets.ticket_id)',
++  `ticket_message_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '工单消息ID(ticket_messages.message_id)',
++  `file_type` varchar(32) NOT NULL DEFAULT '' COMMENT '文件类型',
++  `file_url` varchar(512) NOT NULL DEFAULT '' COMMENT '文件URL',
++  `file_hash` varchar(64) NOT NULL DEFAULT '' COMMENT '文件哈希',
++  `uploaded_by` bigint unsigned NOT NULL DEFAULT '0' COMMENT '上传人 user_id',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  PRIMARY KEY (`attachment_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_ticket` (`ticket_id`),
++  KEY `idx_message` (`ticket_message_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工单附件(append-only 值对象，无UPDATE/DELETE)';
++
++-- =============================================================================
++-- 13. settlement_methods — 结算方式（05 §3 SettlementMethod，值对象/只读聚合）
++-- =============================================================================
++CREATE TABLE `settlement_methods` (
++  `method_id` bigint unsigned NOT NULL COMMENT '结算方式ID(Snowflake，主键)',
++  `user_id` bigint unsigned NOT NULL COMMENT '用户ID',
++  `currency` varchar(16) NOT NULL DEFAULT '' COMMENT '币种',
++  `method_type` varchar(32) NOT NULL DEFAULT '' COMMENT '结算方式类型',
++  `is_default` tinyint unsigned NOT NULL DEFAULT '0' COMMENT '是否默认',
++  `verification_status` varchar(32) NOT NULL DEFAULT '' COMMENT '验证状态',
++  `object_version` int unsigned NOT NULL DEFAULT '0' COMMENT '并发控制版本号(乐观锁)',
++  `idempotency_key` varchar(64) DEFAULT NULL COMMENT '幂等键',
++  `audit_event_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '关联审计事件ID',
++  `created_time` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间(Unix秒)',
++  `updated_time` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间(Unix秒)',
++  PRIMARY KEY (`method_id`),
++  UNIQUE KEY `uk_idempotency` (`idempotency_key`),
++  KEY `idx_user` (`user_id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='结算方式(值对象，verification_status 可变)';
