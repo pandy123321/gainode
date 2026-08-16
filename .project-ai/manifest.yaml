@@ -265,3 +265,18 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE 2026-08-16（user: 开发 agent 一开到底，删除阻挡开发进度门禁，改为质量 agent 审核提审时遵守）← CR-20260816-003"
+  machine_contract_affiliate_agent_p1:
+    value: "CANDIDATE 2026-08-16 — S01-P07 Affiliate/Agent P1 合同盘点（快照 1，不建表）。三对象 Agent / Referral / AgentEarning 字段候选表 + Decision Matrix（11 项 Owner Decision D1~D11：状态×3/层级深度/重复归属/解绑/确认时点/预算来源/回滚/税务/PII）+ Freeze 候选 + Decision Request。Owner 未签 → 三对象 CONTRACT_GAP/FAIL_CLOSED，不建表不建 Service；P0 增长奖励写路径 fail-closed；不继承 V1.x 佣金语义（invite_income_money/team_income_money/reward 不迁移）；V1.x member_user_team 只读盘点。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md。快照 2（建 DDL）阻塞在 Owner 签署 D1~D11。任务: .project-ai/tasks/TASK-20260816-006/。commit 4f01bad（实现）/ f1b28c4（复审包）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P07 合同盘点，commit 4f01bad/f1b28c4）← 07 §S01-P07 固定步骤 1-4 ← 01 §P1 / 02 §Team/Referral / 06 §Growth / V1.x member_user_team"
+  machine_contract_ai_operations_p1:
+    value: "CANDIDATE 2026-08-16 — S01-P08 AI Operations P1 合同盘点（快照 1，不建表）。三对象 AISignal / AIRecommendation / SimulationRun 字段候选表 + V1.x arbitrage 盘点（arbitrage_signal/raw=ADAPT；fixture/attempt/day_plan/position=KEEP_INTERNAL；project*=RETIRE）+ Decision Matrix（9 项 Owner Decision D1~D9 + 1 LOCKED D10）+ Freeze 候选 + Decision Request。C 端泄露边界 FORBIDDEN（signal/profit/position/payload 禁止 C 端，D10 LOCKED）；AI/Prediction 预算隔离（02 §11 双向 FORBIDDEN）；不继承 V1.x 矿机套利语义；不沿用硬编码 secret。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AI_OPERATIONS_P1_FREEZE.md。快照 2（建 DDL）阻塞在 Owner 签署 D1~D9。任务: .project-ai/tasks/TASK-20260816-007/。commit 799d588（实现）/ cf50829（复审包）。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P08 合同盘点，commit 799d588/cf50829）← 07 §S01-P08 固定步骤 1-5 ← 01 §P1 / 02 §5.4/§11 / 06 §4 / V1.x arbitrage_*"
+  stage01_closure_progress:
+    value: "IN_PROGRESS 2026-08-16 — S01-P09 STAGE-01 全量收口。对象覆盖矩阵已产出（43 对象 = 30 持久 + 7 非持久投影 + 6 合同盘点未建表），文件 .project-ai/reviews/STAGE-01-OBJECT-COVERAGE-MATRIX.md。机械比对：重复 DDL=0 / unknown writer=0 / NOT_PERSISTED 无表=0 / CONTRACT_GAP 无表=0。STAGE-01 Gate 由 Quality Agent 独立输出（STAGE-01-QUALITY-GATE.md），未冻结可写路径=21（2B-1 8 + 2B-2 13，FAIL_CLOSED），Production=NO-GO。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S01-P09 对象覆盖矩阵）← 07 §S01-P09 步骤 1-4"
