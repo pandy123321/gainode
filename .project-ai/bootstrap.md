@@ -335,7 +335,7 @@ Machine Contract 分两批策略（OWNER_DIRECTIVE 2026-08-12）：
 
 唯一详细执行基线：
 
-`Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.2（`FROZEN_FOR_EXECUTION`，40 个工作包全部 L1 细化）。
+`Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.3（`FROZEN_FOR_EXECUTION`，40 个工作包全部 L1 细化；Dev 一开到底，进度门禁移交 Quality）。
 
 本节只保存当前状态和 Stage 指针，禁止复制另一份相似路线。
 
@@ -344,9 +344,10 @@ PROJECT = Gainode
 WORKSPACE = E:\github\sports
 EXECUTION_MODEL = ONE_DEVELOPMENT_AGENT_SERIAL_PACKAGES
 QUALITY_MODEL = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
-EXECUTION_PLAN_VERSION = V3.2
+DEV_GATE_MODEL = NO_PROGRESS_GATES_QUALITY_ENFORCES
+EXECUTION_PLAN_VERSION = V3.3
 EXECUTION_PLAN_STATUS = FROZEN_FOR_EXECUTION
-EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.2-20260816
+EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816
 EXECUTION_PLAN_CHANGE_CONTROL = OWNER_APPROVAL_REQUIRED
 DEVELOPMENT_AGENT_MUST_FOLLOW_FROZEN_PLAN = YES
 QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN = YES
@@ -396,10 +397,10 @@ S01_P02_BLOCKED_OBJECTS = SettlementBatch/RefundCase/CorrectionCase/OtcTrade/Rob
 开发与审核节奏：
 
 ```text
-Developer 完成 Package
-→ 锁定 commit/path/hash Snapshot
-→ Quality 只读审核该 Snapshot
-→ Developer 在路径不重叠且不消费未冻结合同的前提下继续下一 Package
+Developer 一开到底：完成 Package
+→ 锁定 commit/path/hash Snapshot 交 Quality
+→ 立即继续下一个已定义 Package，不停下等待
+Quality 只读审核该 Snapshot，逐项验证门禁违反（未冻结合同消费 / Owner 决策未决实现 / 路径重叠 / 前置与停止条件风险）
 ```
 
 必须区分：
@@ -408,9 +409,10 @@ Developer 完成 Package
 DEV_NEXT_PACKAGE_ALLOWED != CURRENT_PACKAGE_MERGE_APPROVED
 SNAPSHOT_LOCKED != REVIEW_APPROVED
 FORMAL_STAGE_GATE != PRODUCTION_APPROVAL
+DEV_GATE_VIOLATIONS != CURRENT_PACKAGE_MERGE_APPROVED
 ```
 
-Quality 报告只能写入 `.project-ai/reviews/**`；默认不得修改产品代码。正式 Stage 关闭仍要求其全部工作包通过独立审核，但开发 Agent 不因非重叠 Snapshot 审核而空等。
+Quality 报告只能写入 `.project-ai/reviews/**`；默认不得修改产品代码。正式 Stage 关闭仍要求其全部工作包通过独立审核。Development Agent 的唯二硬停止是 §0.1 永久禁止项与「包未在本文件定义」；未冻结合同/未决 Owner 决策按 best-effort 继续并在交接声明。
 
 ---
 

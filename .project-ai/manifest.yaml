@@ -1,17 +1,18 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 23
+contextVersion: 24
 status: PUBLISHED
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
 STAGE_01_STATUS: IN_PROGRESS
 MC1_FREEZE_STATUS: FROZEN
 MC2_FREEZE_STATUS: FROZEN
-DEVELOPMENT_EXECUTION_PLAN_VERSION: "V3.2"
+DEVELOPMENT_EXECUTION_PLAN_VERSION: "V3.3"
 DEVELOPMENT_EXECUTION_PLAN_STATUS: "FROZEN_FOR_EXECUTION"
-DEVELOPMENT_EXECUTION_PLAN_FREEZE_ID: "GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.2-20260816"
+DEVELOPMENT_EXECUTION_PLAN_FREEZE_ID: "GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816"
 DEVELOPMENT_EXECUTION_PLAN_PATH: "Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md"
 DEVELOPMENT_EXECUTION_PLAN_CHANGE_CONTROL: "OWNER_APPROVAL_REQUIRED"
+DEV_GATE_MODEL: "NO_PROGRESS_GATES_QUALITY_ENFORCES"
 QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN: true
 enabledDocuments:
   - bootstrap.md
@@ -31,7 +32,7 @@ excludedPaths:
 governanceBaselineCommit: 08b0836
 governanceBaseline: "V2.4.1 Admin Governance + V1.x Production Code Baseline Audit"
 projectionBuiltAt: "2026-08-12"
-note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), CODE_ANALYSIS (from V1.x production code audit), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). All 30 decisionSources owner=OWNER (single-owner project, Owner Freeze completed 2026-08-12)."
+note: "provenance types: OWNER_DIRECTIVE (user confirmed in chat), INFERRED_FROM_ARTIFACT (derived from existing project files), CODE_ANALYSIS (from V1.x production code audit), ADR (formal Architecture Decision Record, not yet established), COMMIT (traceable to specific commit SHA). All decisionSources owner=OWNER (single-owner project, Owner Freeze completed 2026-08-12)."
 decisionSources:
   # --- 技术栈决策 ---
   backend_framework:
@@ -259,3 +260,8 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE 2026-08-16（user selected approve_v32）← CR-20260816-002 ← QUALITY-01 发现开发 Agent 冻结计划未提交全量重构"
+  development_execution_plan_v33_gate_relocation:
+    value: "APPROVED 2026-08-16 — Owner 决定把开发执行者的开发进度门禁全部删除（CR-20260816-003 OPTION_A），Development Agent 一开到底：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate 关闭。唯一硬停止 = §0.1 永久禁止项 + 「包未在本文件定义」。未冻结合同按 05/Freeze 已知内容 best-effort 实现，受影响写路径 fail-closed，交接声明 CONSUMED_UNFROZEN_CONTRACT；Owner 决策未决时生成 Decision Request 后继续无依赖部分，声明 OPEN_OWNER_DECISION。所有 Package 的「前置」「停止条件」「Stage Gate」字段降级为 Quality Agent 审核时的验证项与风险登记点，不再阻塞 Dev。Quality Agent 审核每包时逐项验证门禁违反情况并记为 Finding（07 §15 DEV_GATE_VIOLATIONS）。07 升版 V3.3（SHA256=FD37FCA6AA1D513517EEC2C825CD9CEC0136056ED3FDCA36828E290681A167EB，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816）。V3.2 起为 SUPERSEDED_DO_NOT_EXECUTE。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 开发 agent 一开到底，删除阻挡开发进度门禁，改为质量 agent 审核提审时遵守）← CR-20260816-003"

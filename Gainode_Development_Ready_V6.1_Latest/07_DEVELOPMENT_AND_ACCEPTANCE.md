@@ -1,8 +1,8 @@
 # 07 · Gainode 开发执行计划、Agent 派发规则与功能验收
 
-> 版本：V3.2 · Fully Detailed 40-Packages + Single Developer Serial + Independent Quality Review
+> 版本：V3.3 · Fully Detailed 40-Packages + Single Developer Serial + Independent Quality Review（Dev 一开到底，门禁移交 Quality）
 > 文档状态：`FROZEN_FOR_EXECUTION`
-> 冻结 ID：`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.2-20260816`
+> 冻结 ID：`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816`
 > 冻结日期：2026-08-16（Asia/Shanghai）
 > 生效项目：Gainode 体育预测、竞猜与内部套利经济引擎
 > 唯一工作区：`E:\github\sports`
@@ -15,17 +15,18 @@
 
 ### 0.1 冻结执行基线
 
-本文件 V3.2 是 Gainode 当前唯一、最新且已冻结的开发步骤基线。Development Agent、Quality Agent 和后续复审 Agent 必须按本文件定义的 Formal Stage、Package ID、包顺序、范围、停止条件、提审节奏和 Gate 条件执行。
+本文件 V3.3 是 Gainode 当前唯一、最新且已冻结的开发步骤基线。Development Agent、Quality Agent 和后续复审 Agent 必须按本文件定义的 Formal Stage、Package ID、包顺序、范围、停止条件、提审节奏和 Gate 条件执行。V3.3 起 Development Agent 一开到底，进度门禁由 Quality Agent 在审核时验证（见 §3.2 与 §5 门禁语义统一覆盖条款）。
 
 ```text
 LATEST_EXECUTION_PLAN = Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md
-LATEST_EXECUTION_PLAN_VERSION = V3.2
+LATEST_EXECUTION_PLAN_VERSION = V3.3
 EXECUTION_PLAN_STATUS = FROZEN_FOR_EXECUTION
-EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.2-20260816
+EXECUTION_PLAN_FREEZE_ID = GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816
 DEVELOPMENT_AGENT_MUST_FOLLOW_FROZEN_PLAN = YES
 QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN = YES
 OLDER_EXECUTION_PLAN_STATUS = SUPERSEDED_DO_NOT_EXECUTE
 PLAN_CHANGE_CONTROL = OWNER_APPROVAL_REQUIRED
+DEV_GATE_MODEL = NO_PROGRESS_GATES_QUALITY_ENFORCES
 ```
 
 冻结含义：
@@ -33,7 +34,7 @@ PLAN_CHANGE_CONTROL = OWNER_APPROVAL_REQUIRED
 - 不得自行新增、删除、合并、拆分、跳过或重排本文件定义的工作包。
 - 不得自行改变 Package 的输入、允许路径、锁定路径、非目标、验收条件或 Stage Gate。
 - Quality Agent 必须逐 Package 锁定快照和审核；每个 Formal Stage 必须单独提交 Stage Gate 审核。
-- Development Agent 在快照锁定且下一包路径不重叠、不消费未冻结合同时仍可继续，不得因 Quality 排队而无条件等待。
+- Development Agent 串行推进所有已定义 Package，**一开到底**，不因任何进度门禁（合同未冻结、审核未返回、Owner 决策未决、Stage Gate 未关闭）而停止；这些门禁由 Quality Agent 在审核/提审时验证（见 §3.2 与 §15）。
 - 修正文案、补充证据或关闭已确认 Finding，可以按当前 Package 的最小范围执行；改变业务、经济、状态、API、DDL、权限、依赖、正式参数或执行路线时，必须先生成 Change Request 并获得 Owner 明确批准。
 - 任何批准后的计划修改必须升级版本、重新生成 Freeze ID、更新冻结凭证并同步 `.project-ai/bootstrap.md`、`.project-ai/context.md` 和 `.project-ai/manifest.yaml`；未完成这些步骤的新草案不得用于开发或审核。
 
@@ -160,28 +161,30 @@ S01_P03_REVIEW_STATUS = APPROVED
 - Development Agent 对 Finding 先复核再修复；Quality Agent 负责独立复审，执行者不能自关 Finding。
 - Quality Agent 不得把自己的建议写进 Development Agent 的提交；任何获授权的质量修复也必须使用独立分支和 `origin:quality` 提交，默认流程不启用该例外。
 
-### 3.2 不等待审核的条件
+### 3.2 开发进度门禁移交 Quality
 
-Development Agent 完成一个包后，先生成快照并等待 Quality 返回：
+自 V3.3 起，Development Agent **一开到底**：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、不等待合同冻结、不等待 Owner 决策、不等待 Stage Gate 关闭。
+
+Development Agent 的绝对硬停止（不可解除，非进度门禁）：
+
+- §0.1 永久禁止项（修改其他仓库、改语言、改链上、执行生产 DDL/数据/部署/密钥/链上广播/真实价值、删除已完成冻结代码）。
+- 下一包未在本文件定义（不得自行新增/删除/合并/拆分/跳过/重排 Package）。
+
+其余原本会阻塞 Development Agent 进度的条件，一律降级为 Quality Agent 审核时的验证项（见 §15）。Development Agent 遇到这些条件时不停下，改为 best-effort 继续，并在交接文件显式声明：
 
 ```text
-SNAPSHOT_LOCKED = YES
-SNAPSHOT_COMMIT = <sha>
-SNAPSHOT_PATHS = <exact paths>
-NEXT_PACKAGE_OVERLAP = NO
+CONSUMED_UNFROZEN_CONTRACT = <合同名>
+OPEN_OWNER_DECISION = <决策 ID>
+OVERLAPS_LOCKED_SNAPSHOT = <path>
 ```
 
-四项满足后，Development Agent 可立即开始下一个已定义、路径不重叠、且不消费未冻结合同的工作包，不需要等待审核结论。
+best-effort 继续的规则：
 
-Development Agent 必须等待的情况：
+- 消费未冻结合同：按 05/Freeze 已知内容实现，受影响写路径保持 fail-closed；不得用旧值或 mock 补洞。
+- Owner 决策未决：生成 Decision Request 后继续无依赖部分；依赖该决策的对象保持 fail-closed。
+- 与 Quality 已锁定快照路径重叠：继续，但必须在交接声明重叠范围，供 Quality 复审。
 
-- 下一包依赖当前包的合同被置为 `FROZEN`。
-- 下一包会修改 Quality 已锁定的同一文件。
-- 当前 Finding 可能导致资金、状态、API 或数据库合同变化。
-- Snapshot/commit/hash 不匹配。
-- 下一包未在本文件定义。
-
-注意：
+不变式（仍成立）：
 
 ```text
 DEV_NEXT_PACKAGE_ALLOWED != CURRENT_PACKAGE_MERGE_APPROVED
@@ -215,14 +218,14 @@ Development Agent 对每个工作包严格执行以下 12 步，不得自行调�
 2. 读取本工作包列出的 `INPUTS`，不读取历史文档补业务。
 3. 输出 `REUSE_MATRIX`：`KEEP / EXTEND / NEW / FORBIDDEN_TO_TOUCH`。
 4. 输出准确的 `ALLOWED_PATHS`、`LOCKED_PATHS`、`NON_GOALS`。
-5. 先写或验证机器合同，再写代码；合同未冻结时实现必须 fail-closed。
+5. 已冻结合同先验证再写代码；未冻结合同按 05/Freeze 已知内容 best-effort 实现，受影响写路径 fail-closed，并在交接声明 `CONSUMED_UNFROZEN_CONTRACT`。
 6. 按本工作包文件/对象顺序逐项实施；完成一项立即运行局部验证。
 7. 完成包级静态检查、测试和 `git diff --check`。
 8. 自审：业务规则、状态、幂等、并发、权限、账本、通知、安全、历史兼容。
 9. 生成单一提交；禁止混入无关格式化、依赖升级或历史重构。
 10. 生成快照、变更清单、测试证据、未执行项和风险清单。
 11. 锁定 Snapshot 后交 Quality；报告必须附可直接使用的审核提示词和审核范围。
-12. 若下一包满足 §3.2，继续下一包；否则只停止受依赖部分，不扩大范围。
+12. 不停下等待，继续下一个已定义包；未决合同/决策在交接文件声明（见 §3.2）。
 
 每包交接文件必须包含：
 
@@ -240,10 +243,12 @@ NOT_IMPLEMENTED =
 VALIDATIONS_RUN =
 VALIDATIONS_NOT_RUN =
 KNOWN_LIMITATIONS =
+CONSUMED_UNFROZEN_CONTRACT =
+OPEN_OWNER_DECISION =
+OVERLAPS_LOCKED_SNAPSHOT =
 SNAPSHOT_LOCKED =
 NEXT_PACKAGE =
-NEXT_PACKAGE_OVERLAP =
-DEV_NEXT_PACKAGE_ALLOWED =
+DEV_NEXT_PACKAGE_ALLOWED = YES（一开到底，见 §3.2）
 CURRENT_PACKAGE_MERGE_APPROVED = NO
 PRODUCTION_APPROVED = NO
 ```
@@ -261,6 +266,10 @@ PRODUCTION_APPROVED = NO
 | STAGE-04 | Flutter App | P0 Page ID、状态、视觉和 API 联调通过 |
 | STAGE-05 | Sandbox E2E 与迁移演练 | 15 个极端场景、账本守恒、回滚演练通过 |
 | STAGE-06 | 发布就绪审查 | 安全、性能、观测、运维材料就绪；仍不自动部署生产 |
+
+### 门禁语义统一覆盖条款（V3.3）
+
+自 V3.3 起，本文件所有 Package 内的「前置」「停止条件」「Stage Gate」字段**不再作为 Development Agent 的进度阻塞条件**。Development Agent 一开到底，这些字段统一解释为 Quality Agent 审核/提审时的验证项与风险登记点（见 §3.2 与 §15）。Development Agent 触达这些字段时不停下，按 best-effort 继续并在交接声明；Quality Agent 审核时逐项核对是否违反，违反则记为 Finding。唯二硬停止是 §0.1 永久禁止项与「包未在本文件定义」。
 
 ---
 
@@ -1330,10 +1339,10 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 
 严格执行 07 §4 的 12 步和当前 Package 的目标/固定步骤/验证/停止条件/验收。先从 manifest、Quality Progress Ledger、task 和 Git 确认首个未关闭 Package；不得使用本提示词中的历史包号覆盖实时证据，不自行创造 Stage、业务规则、状态、API、DDL、依赖或正式参数。
 
-已完成的 MC1 8 实体和 Ledger append-only 防护禁止重做。Quality 锁定快照后，如果下一包路径不重叠且不消费未冻结合同，继续下一个已定义包；不得把“继续开发”写成“上一包审核通过/允许合并”。
+已完成的 MC1 8 实体和 Ledger append-only 防护禁止重做。你**一开到底**：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate；唯一硬停止是 §0.1 永久禁止项与「包未在本文件定义」。未冻结合同/未决决策按 best-effort 实现并在交接声明，受影响写路径 fail-closed。
 
-每包结束必须输出完整交接字段、审核提示词、精确文件范围、验证证据和 NEXT_PACKAGE_OVERLAP。
-涉及规则性修改时只生成 Change Request/Decision Matrix，等待 Owner；不得猜测。
+每包结束必须输出完整交接字段（含 `CONSUMED_UNFROZEN_CONTRACT`、`OPEN_OWNER_DECISION`、`OVERLAPS_LOCKED_SNAPSHOT`）、审核提示词、精确文件范围、验证证据和 NEXT_PACKAGE。
+涉及规则性修改时生成 Change Request/Decision Request 后继续无依赖部分，不停下等待；不得猜测，不得把推测写进代码。
 允许为当前 Package 创建一个范围纯净的本地 `origin:developer` 提交；禁止 push、merge、deploy，除非派发单另有明确授权。
 ```
 
@@ -1344,9 +1353,16 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 ```text
 你是 Gainode Independent Quality Agent，默认只读。工作区只能是 E:\github\sports。
 
-唯一审核计划基线是本文件 V3.2，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.2-20260816，状态必须为 FROZEN_FOR_EXECUTION。先读取 DEVELOPMENT_EXECUTION_PLAN_FREEZE_V3.2.md，并按凭证规定的 `UTF8_LF_NO_BOM` 规范化方式核对本文件 SHA-256；不一致时输出 EXECUTION_PLAN_FREEZE_MISMATCH 并停止使用该快照，不得自行选择旧版计划。
+唯一审核计划基线是本文件 V3.3，Freeze ID=GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816，状态必须为 FROZEN_FOR_EXECUTION。先读取 DEVELOPMENT_EXECUTION_PLAN_FREEZE_V3.3.md，并按凭证规定的 `UTF8_LF_NO_BOM` 规范化方式核对本文件 SHA-256；不一致时输出 EXECUTION_PLAN_FREEZE_MISMATCH 并停止使用该快照，不得自行选择旧版计划。
 
 必须按本文件定义的 Package 顺序逐包锁定 Snapshot 和审核，并在每个 Formal Stage 的全部 Package 完成后单独执行 Stage Gate。不得新增、删除、合并、拆分、跳过或重排 Package；计划变更必须先取得 Owner 明确批准并生成新版本和新 Freeze ID。
+
+自 V3.3 起，Development Agent 一开到底、不因门禁停止，因此你承担全部进度门禁的验证职责。审核每包时必须逐项验证并记入 Finding：
+- 消费了未冻结合同（CONSUMED_UNFROZEN_CONTRACT 是否如实声明、受影响写路径是否 fail-closed、是否用旧值/mock 补洞）。
+- Owner 决策未决即被实现（OPEN_OWNER_DECISION 是否声明、依赖对象是否 fail-closed）。
+- 与已锁定快照路径重叠（OVERLAPS_LOCKED_SNAPSHOT 是否声明）。
+- 本包「前置」字段（合同 FROZEN / 目录冻结 / Decision Gate）是否被违反。
+- 本包「停止条件」所述风险是否已如实登记而未掩盖。
 
 先验证 PROJECT/STAGE/PACKAGE/BASE_COMMIT/SNAPSHOT_COMMIT/REVIEW_RANGE/PACKAGE_SHA256/SNAPSHOT_PATHS。
 只审核锁定快照，不把 Developer 后续提交混进本轮，不修改产品代码。
@@ -1356,14 +1372,14 @@ PRODUCTION_REAL_VALUE = NO-GO_UNTIL_SEPARATE_OWNER_APPROVAL
 
 区分：
 - 当前包代码是否可合并；
-- Development Agent 是否可继续路径不重叠的下一包；
+- Development Agent 是否违反了进度门禁（即使违反，Dev 仍可继续，但必须记为 Finding 并要求修复）；
 - Formal Stage 是否关闭；
 - Production 是否授权。
 
 禁止把它们合并成一个结论。报告末尾必须输出：
 SNAPSHOT_LOCKED
 CODE_MERGE_RECOMMENDATION
-DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW
+DEV_GATE_VIOLATIONS
 FORMAL_STAGE_GATE
 PRODUCTION_APPROVAL = NO
 ```
