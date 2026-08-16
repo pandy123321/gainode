@@ -31,6 +31,7 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 1 | 0 | CHANGES_REQUIRED | YES | NOT_APPLICABLE |
 | STAGE-03 | S03-P02-H5-AUTH | 23e2a63 | 87136de | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
+| STAGE-03 | S03-P02-H5-KYC-NOTICE | 87136de | a90310f | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
 
 ## 明细
 
@@ -58,9 +59,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 继续逐个外部复审历史 commit（S02-P07/P08、S03-P00/P01、S02-P06 修复 f088d7f、密钥脱敏 b50767e）；S03-P02 外审 CHANGES_REQUIRED 待 Developer 修复后复审
-NEXT_DEVELOPER_ACTION = 按外审 record_id=739 修复 S03-P02：①统一 Auth base path /v1/api/②删除 consent_version 硬编码③关闭 Recovery verify 合同冲突④OTP retry_after 服务端化⑤Refresh 生命周期闭环⑥补三尺寸视觉验收
-OWNER_DECISION_REQUIRED = YES（①S03-P02 P1-3 Recovery verify 合同冲突；②逐个复审历史 commit 的 HEAD 回退策略）
+NEXT_QUALITY_ACTION = 继续逐个外部复审：S03-P02 H5-02 已审（CHANGES_REQUIRED）；待审历史业务 commit（S02-P07 bc7daf4、S02-P08 4e68838、S03-P00 e2ea3c2/c30315a、S02-P06 修复 f088d7f、密钥脱敏 b50767e、S03-P01 23e2a63）
+NEXT_DEVELOPER_ACTION = 按外审 record_id=739/741 修复 S03-P02 H5-01/H5-02：fail-closed 收紧 Contract Gap 处置（KYC form meta/consent、attachment_ref、Notice markRead、created_at、entitlement 刷新）
+OWNER_DECISION_REQUIRED = YES（①S03-P02 P1-3 Recovery verify 合同冲突；②H5-02 P1-1/P1-2/P1-3 涉及 Contract Gap 是否可 best-effort 的边界；③逐个复审历史 commit 的 HEAD 回退策略）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -316,6 +317,36 @@ PACKAGE_MERGE_RECOMMENDATION = CHANGES_REQUIRED
 DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO（V3.4 一开到底；外审 Finding 转 Developer 修复队列）
 FORMAL_STAGE_GATE = NOT_APPLICABLE
 LAST_CHECKED_AT = 2026-08-17T01:35+08:00
+```
+
+### S03-P02-H5-KYC-NOTICE（外部审核 CHANGES_REQUIRED）
+
+```text
+DEVELOPER_BASE_COMMIT = 87136de（S03-P02 H5-01 Auth）
+DEVELOPER_SNAPSHOT_COMMIT = a90310f
+SNAPSHOT_LOCKED = YES
+REVIEW_ROUND = 1（外部 ChatGPT 独立审核）
+REVIEW_STATUS = CHANGES_REQUIRED
+P0_OPEN = 0
+P1_OPEN = 3
+BLOCKING_P2_OPEN = 0
+NON_BLOCKING_FINDINGS = 3（P2-001 Notice created_at 缺失；P2-002 M-KYC-003 未刷新 entitlement；P2-003 审核 Diff 不完整）
+EXTERNAL_REVIEW_ID = 741（2026-08-17T01:45:24 完成）
+EXTERNAL_VERDICT = CHANGES_REQUIRED（不建议合并）
+EXTERNAL_FINDINGS =
+  P1-1 = KYC 策略元数据未冻结却用本地 standard/2026-08-01 开放真实 Submit
+  P1-2 = attachment_refs 未冻结却用 object_url 冒充 server-issued ref
+  P1-3 = Notice C 端路径未冻结却开放 markRead POST
+  P2-1 = Notice created_at 与 05/03 合同不一致（时间分组降级）
+  P2-2 = M-KYC-003 未在 KYC 结果变化后重新拉取 FeatureEntitlement
+  P2-3 = Review 包 Diff 截断，核心实现无法独立验证
+DEVELOPER_ADJUDICATION_RECEIVED = N/A
+FIX_COMMIT = N/A（待 Developer 修复）
+RE_REVIEW_STATUS = N/A
+PACKAGE_MERGE_RECOMMENDATION = CHANGES_REQUIRED
+DEV_NEXT_PACKAGE_BLOCKED_BY_REVIEW = NO（V3.4 一开到底；Finding 转 Developer 修复队列）
+FORMAL_STAGE_GATE = NOT_APPLICABLE
+LAST_CHECKED_AT = 2026-08-17T01:50+08:00
 ```
 
 ## 关键约束（全程保持）
