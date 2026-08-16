@@ -1,5 +1,9 @@
 # APT / OTC P0 路径骨架（05 §6 APT/OTC）
-# 业务 request/response schema 在 S02-P03/P06 落地。
+# S02-P06：OtcOrder/OtcTrade 状态机骨架 + fail-closed + 只读投影落地。
+#   - otc_quote：报价依赖 06 fee/limit/库存（TBC）→ 503 fail-closed。
+#   - otc_order_create：挂单依赖 min/max/fee/inventory + Power freeze（TBC）→ 503 fail-closed。
+#   - otc_order_cancel：取消依赖 Power release 规则（TBC）→ 503 fail-closed。
+#   - 只读（order-book/detail/trades/user-orders/asset-ledger）保持。
 
 asset_ledger:
   get:
@@ -26,7 +30,7 @@ otc_order_book:
 otc_quote:
   post:
     operationId: otc_quote
-    summary: 报价（不产生账本）
+    summary: 报价（不产生账本，fee/limit/库存 TBC → fail-closed）
     tags: [APT-OTC]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -36,12 +40,13 @@ otc_quote:
       '400': { $ref: '../components/responses/common.yaml#/BadRequest' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 otc_order_create:
   post:
     operationId: otc_order_create
-    summary: 创建订单
+    summary: 创建订单（min/max/fee/inventory/Power TBC → fail-closed）
     tags: [APT-OTC]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -53,6 +58,7 @@ otc_order_create:
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
       '422': { $ref: '../components/responses/common.yaml#/Unprocessable' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 otc_order_detail:
@@ -70,7 +76,7 @@ otc_order_detail:
 otc_order_cancel:
   post:
     operationId: otc_order_cancel
-    summary: 取消订单
+    summary: 取消订单（Power release 规则 TBC → fail-closed）
     tags: [APT-OTC]
     security: [{ bearerAuth: [] }]
     parameters:
@@ -80,6 +86,7 @@ otc_order_cancel:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '409': { $ref: '../components/responses/common.yaml#/Conflict' }
+      '503': { $ref: '../components/responses/common.yaml#/DependencyUnavailable' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 otc_trades:

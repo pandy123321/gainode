@@ -7,9 +7,9 @@ STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
 STAGE_01_STATUS: IN_PROGRESS
 MC1_FREEZE_STATUS: FROZEN
 MC2_FREEZE_STATUS: FROZEN
-DEVELOPMENT_EXECUTION_PLAN_VERSION: "V3.3"
+DEVELOPMENT_EXECUTION_PLAN_VERSION: "V3.4"
 DEVELOPMENT_EXECUTION_PLAN_STATUS: "FROZEN_FOR_EXECUTION"
-DEVELOPMENT_EXECUTION_PLAN_FREEZE_ID: "GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.3-20260816"
+DEVELOPMENT_EXECUTION_PLAN_FREEZE_ID: "GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816"
 DEVELOPMENT_EXECUTION_PLAN_PATH: "Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md"
 DEVELOPMENT_EXECUTION_PLAN_CHANGE_CONTROL: "OWNER_APPROVAL_REQUIRED"
 DEV_GATE_MODEL: "NO_PROGRESS_GATES_QUALITY_ENFORCES"
@@ -265,6 +265,11 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE 2026-08-16（user: 开发 agent 一开到底，删除阻挡开发进度门禁，改为质量 agent 审核提审时遵守）← CR-20260816-003"
+  development_execution_plan_v34_role_discipline:
+    value: "APPROVED 2026-08-16 — Owner 指示将创世DOG git-review-worktree 通用多角色协作框架整合进 Gainode 角色纪律并补进 07 §3（CR-20260816-004），计划升版 V3.4。变更：07 §3.1 五角色表（新增 Scheduler 显式化）；§3.2 双流水线；§3.3 提交来源 trailer 统一为 Code-Origin+Git-Operator（V3.3 origin:developer/quality 视为等价追溯）；新增 §3.4 独立审核 worktree（gainode/review/<stage-id>，base=master）+ 11 项门禁清单；§14/§15 提示词引用 rules/roles.md+workflow.md+git-review-worktree.md；§16 新增变更流水。不改变 40 Package 的 ID/顺序/范围/步骤/停止条件/验收/Gate 语义。SHA256=E48D6B8B22AF1C575528D2FB270D625C1EDEB2BF3B2C718C06171473A08CC8E8。V3.3 凭证标 SUPERSEDED_DO_NOT_EXECUTE。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE 2026-08-16（user: 把这套角色纪律补进 07 §3）← CR-20260816-004 ← 创世DOG tools/git-review-worktree/{README,ROLES,WORKFLOW}.md"
   machine_contract_affiliate_agent_p1:
     value: "CANDIDATE 2026-08-16 — S01-P07 Affiliate/Agent P1 合同盘点（快照 1，不建表）。三对象 Agent / Referral / AgentEarning 字段候选表 + Decision Matrix（11 项 Owner Decision D1~D11：状态×3/层级深度/重复归属/解绑/确认时点/预算来源/回滚/税务/PII）+ Freeze 候选 + Decision Request。Owner 未签 → 三对象 CONTRACT_GAP/FAIL_CLOSED，不建表不建 Service；P0 增长奖励写路径 fail-closed；不继承 V1.x 佣金语义（invite_income_money/team_income_money/reward 不迁移）；V1.x member_user_team 只读盘点。Freeze 候选: 0.5代码/gainode后端/gainode/sql/MACHINE_CONTRACT_AFFILIATE_AGENT_P1_FREEZE.md。快照 2（建 DDL）已解除阻塞（Owner 签 2026-08-16 全 OPTION_A）。任务: .project-ai/tasks/TASK-20260816-006/。commit 4f01bad（实现）/ f1b28c4（复审包）。Independent Review：QUALITY-01 APPROVED（无 Finding）。Owner 签核 2026-08-16：D1~D11 全 OPTION_A（见 affiliate_agent_p1_owner_signoff）。"
     decision_date: "2026-08-16"
@@ -325,6 +330,11 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P05 Prediction P0 状态机骨架 + 只读投影 + fail-closed）← 07 §S02-P05 固定步骤 1-7 ← 05 §3/§4/§6/§7 ← machine_contract_batch1_freeze（MC1 Market/Order DDL + Canonical State）← machine_contract_batch2_freeze（MC2 Market M1-M12 / Order P1-P12 状态转移）← machine_contract_batch2b1_state_contract（2B-1 Result/Settlement/SettlementBatch/RefundCase/CorrectionCase/ConsentReceipt enum + RS1-RS5/ST1-ST7）← stage02_p04_robot_reward_upgrade（fail-closed 只读投影 + CAS 状态转移先例）"
+  stage02_p06_otc_power:
+    value: "COMPLETE 2026-08-16 — S02-P06 OTC/Power 状态机骨架 + 只读投影 + fail-closed（不新增 DDL）。交付：library/service/otc/OtcOrderService.php + library/service/otc/OtcTradeService.php。OtcOrder（O1-O12 纯状态转移 draft→review→matching→partial→completed + cancelled/expired/rejected/disputed 旁路；O11 completed→disputed 可重复争议 + O12 disputed→cancelled/completed 二选一；quote/createOrder 依赖 06 OTC 参数 min/max/fee/库存 TBC FAIL_CLOSED DEPENDENCY_UNAVAILABLE）；OtcTrade（单态 completed append-only + recordTrade 依赖撮合/Ledger/Power TBC FAIL_CLOSED + listByOrder/listByBuyer/listBySeller 只读查询）。全部状态转移走 TransactionBoundary + object_version CAS + appendAudit + audit_event_id 回写；金额 decimal string；Power 字段不触碰（freeze/consume/release 由参数冻结后附加）。OpenAPI components/schemas/otc.yaml（OtcOrder/OtcTrade/OtcEligibility/OtcCapacity）+ paths/apt_otc.yaml（写 POST 补 503 DependencyUnavailable）+ gainode-v2.yaml 注册。测试 61 断言全过（26 Contract 状态常量冻结/Event Catalog/fail-closed/错误码 HTTP 映射 + 35 Integration SQLite 内存库 O1-O12 合法非法转移/CAS/audit_event_id 回写/只读投影/fail-closed）。任务: .project-ai/tasks/TASK-20260816-013/。"
+    decision_date: "2026-08-16"
+    owner: OWNER
+    provenance: "EXECUTOR_DELIVERY 2026-08-16（S02-P06 OTC/Power 状态机骨架 + 只读投影 + fail-closed）← 07 §S02-P06 固定步骤 1-8 ← 05 §3/§4/§6/§7 ← machine_contract_batch1_freeze（MC1 OtcOrder DDL + Canonical State）← machine_contract_batch2_freeze（MC2 OTC O1-O12 状态转移 + Event Catalog）← machine_contract_batch2b1_state_contract（2B-1 OtcTrade append-only enum，Owner 2B1-ENUM-04）← stage02_p05_prediction_p0（fail-closed 只读投影 + CAS 状态转移先例）"
   role_workflow_rules:
     value: "EXECUTION_RULES_ADDED 2026-08-16 — 将创世DOG tools/git-review-worktree 通用多角色协作框架整合为 Gainode 项目执行规则：新增 .project-ai/rules/roles.md（5 角色 Owner/Scheduler/Developer/Quality/Reviewer 分工 + 权限矩阵 + 推理强度 + Gainode 参数表）、.project-ai/rules/workflow.md（双流水线 + 状态词 + 提交 trailer Code-Origin + 问题分级 + Verdict + 11 项门禁清单 + Stage 交接格式 + worktree 拓扑）、.project-ai/rules/git-review-worktree.md（独立审核 worktree 手工命令 + 必查清单 + 回滚）。定位为执行层细化，不推翻 MASTER_PROJECT_GOVERNANCE / 07 V3.3；DEV_GATE_MODEL=NO_PROGRESS_GATES_QUALITY_ENFORCES 与双流水线一致。"
     decision_date: "2026-08-16"

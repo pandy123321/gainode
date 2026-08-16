@@ -250,6 +250,14 @@ components:
       $ref: './components/schemas/prediction.yaml#/CorrectionCase'
     ConsentReceipt:
       $ref: './components/schemas/prediction.yaml#/ConsentReceipt'
+    OtcOrder:
+      $ref: './components/schemas/otc.yaml#/OtcOrder'
+    OtcTrade:
+      $ref: './components/schemas/otc.yaml#/OtcTrade'
+    OtcEligibility:
+      $ref: './components/schemas/otc.yaml#/OtcEligibility'
+    OtcCapacity:
+      $ref: './components/schemas/otc.yaml#/OtcCapacity'
   headers:
     Authorization:
       $ref: './components/headers/request.yaml#/Authorization'

@@ -1,0 +1,82 @@
+# APT / OTC 对象 schema（05 §3 OtcOrder/OtcTrade/OtcEligibility/OtcCapacity；S02-P06 落地）
+# decimal 字段一律 string（quantity_apt decimal(36,18) / price decimal(18,8) / Power decimal(18,4)），禁 number/float。
+# OtcEligibility / OtcCapacity 为非持久投影（每请求评估，不写表）。
+
+OtcOrder:
+  description: OTC 订单（05 §3 OtcOrder + §4 OTC 状态机，9 态，MC1 冻结）
+  type: object
+  required: [otc_order_id, user_id, side, status]
+  properties:
+    otc_order_id: { type: string, description: Snowflake 主键 }
+    user_id: { type: string }
+    side: { type: string, enum: [BUY, SELL], description: 方向 BUY=买入 SELL=卖出 }
+    price: { type: string, description: 价格(每 APT 单位，decimal string) }
+    quantity_apt: { type: string, description: 挂单数量 APT(decimal string) }
+    filled_quantity_apt: { type: string, description: 已成交数量 APT(decimal string) }
+    remaining_quantity_apt: { type: string, description: 剩余数量 APT(decimal string) }
+    fee_apt: { type: string, description: 手续费 APT(decimal string) }
+    power_required: { type: string, description: 所需 Power(decimal string，Preview 下发) }
+    power_consumed: { type: string, description: 已消耗 Power(decimal string) }
+    power_frozen: { type: string, description: 冻结 Power(decimal string) }
+    status: { type: string, enum: [draft, review, matching, partial, completed, cancelled, expired, rejected, disputed] }
+    review_required: { type: integer, description: 是否需审核(0=否 1=是) }
+    quote_id: { type: string, description: 报价ID(关联报价快照) }
+    snapshot_id: { type: string }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
+    policy_version: { type: string }
+    audit_event_id: { type: string }
+    object_version: { type: integer }
+
+OtcTrade:
+  description: OTC 成交事实（05 §3 OtcTrade，单态 completed，append-only，Owner 2B1-ENUM-04）
+  type: object
+  required: [trade_id, otc_order_id, buyer_user_id, seller_user_id, status]
+  properties:
+    trade_id: { type: string, description: Snowflake 主键 }
+    otc_order_id: { type: string }
+    buyer_user_id: { type: string }
+    seller_user_id: { type: string }
+    quantity_apt: { type: string, description: 成交数量 APT(decimal string) }
+    price_apt: { type: string, description: 成交价格 APT(decimal string) }
+    fee_apt: { type: string, description: 手续费 APT(decimal string) }
+    power_consumed: { type: string, description: 消耗 Power(decimal string) }
+    status: { type: string, enum: [completed], description: 成交状态(单态 completed) }
+    ledger_entry_ids: { type: array, items: { type: string }, description: 账本分录ID列表(JSON 数组) }
+    ledger_batch_id: { type: string }
+    audit_event_id: { type: string }
+    created_time: { type: integer }
+
+OtcEligibility:
+  description: OTC 资格投影（05 §3 OtcEligibility，非持久投影，每请求评估，非状态机）
+  type: object
+  required: [allowed]
+  properties:
+    allowed: { type: boolean, description: 是否允许 OTC（默认 deny） }
+    buy_allowed: { type: boolean }
+    sell_allowed: { type: boolean }
+    reason_code:
+      type: string
+      enum: [KYC_REQUIRED, SECURITY_VERIFICATION_REQUIRED, OTC_CAPACITY_INSUFFICIENT, INSUFFICIENT_POWER, UNDER_REVIEW, REGION_UNAVAILABLE, MAINTENANCE]
+      description: 05 §3 七选一冻结，不得覆盖 OtcOrder.status
+    reason_text_key: { type: string, description: 原因文案 I18N key }
+    next_action: { type: string }
+    policy_version: { type: string }
+    rule_version: { type: string }
+    capacity: { type: object, additionalProperties: true, description: 容量(结构未冻结 → null) }
+    power_impact: { type: object, additionalProperties: true, description: Power 影响(依赖 06 TBC → null) }
+    expires_at: { type: integer }
+    as_of: { type: integer, description: 评估时间戳(Unix 秒) }
+
+OtcCapacity:
+  description: OTC 容量投影（05 §3 OtcCapacity，非持久投影，容量/储备参数 TBC → 字段 null）
+  type: object
+  properties:
+    direction: { type: string, enum: [BUY, SELL] }
+    user_remaining_capacity: { type: string, description: 用户剩余容量(decimal string，inventory_limit TBC → null) }
+    global_remaining_capacity: { type: string, description: 全局剩余容量(decimal string，TBC → null) }
+    reserve_ratio: { type: string, description: 储备比例(decimal string，otc.*_reserve_ratio TBC → null) }
+    as_of: { type: integer }
+    next_refresh_at: { type: integer }
+    rule_version: { type: string }
+    parameter_release_id: { type: string }
