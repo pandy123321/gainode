@@ -29,9 +29,9 @@ QUALITY_MODE = INDEPENDENT_READ_ONLY_SNAPSHOT_REVIEW
 | STAGE-02 | S02-P03-LEDGER-APTACCOUNT-POWER | 0084fae | 978ca8a | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P04-ROBOT-REWARD-UPGRADE | 4999cf2 | 916e815 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-02 | S02-P05-PREDICTION-P0 | 916e815 | 4ffef8b | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
-| STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 1 | PENDING_RE_REVIEW | 0 / 3 / 1 | 0 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
-| STAGE-02 | S02-P07-GOVERNANCE | 678b61a | bc7daf4 | YES | 1 | PENDING_RE_REVIEW | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
-| STAGE-02 | S02-P08-AI-ENGINE | 273513a | 4e68838 | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P06-OTC-POWER | c6d7357 | 273513a | YES | 2 | APPROVED | 0 / 3 / 1 | 0 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P07-GOVERNANCE | 678b61a | bc7daf4 | YES | 2 | APPROVED | 0 / 3 / 0 | 3 | APPROVED | NO | NOT_APPLICABLE |
+| STAGE-02 | S02-P08-AI-ENGINE | 273513a | 4e68838 | YES | 1 | APPROVED | 0 / 0 / 0 | 0 | APPROVED | NO | NOT_APPLICABLE |
 | STAGE-03 | S03-P00-FRONTEND-FREEZE | 4e68838 | c30315a | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
 | STAGE-03 | S03-P01-H5-BASE | c30315a | 23e2a63 | YES | 1 | PENDING_EXTERNAL | 0 / 0 / 0 | 0 | PENDING | NO | NOT_APPLICABLE |
 | STAGE-03 | S03-P02-H5-AUTH | 23e2a63 | 87136de | YES | 1 | CHANGES_REQUIRED | 0 / 3 / 0 | 3 | CHANGES_REQUIRED | NO | NOT_APPLICABLE |
@@ -63,9 +63,9 @@ LAST_CHECKED_AT = 2026-08-16T03:42+08:00
 ## 待办（下一质量动作）
 
 ```text
-NEXT_QUALITY_ACTION = 后端收口复审：S02-P06 修复 f088d7f、S02-P07 修复 35ead50（复审）+ S02-P08 4e68838（首审）；前端 S03-P00~P03 已交同事，不在本地审核
-NEXT_DEVELOPER_ACTION = 后端 STAGE-02 代码层面已写完（S02-P06/S02-P07 修复 + S02-P08，测试全绿）；无新开发动作，待 Quality 复审后 push 交接
-OWNER_DECISION_REQUIRED = YES（push 交接需 Owner 授权；前端 S03 修复边界已随范围变更移交同事）
+NEXT_QUALITY_ACTION = 后端 STAGE-02 本地复审已全部 APPROVED（S02-P06/S02-P07 复审 + S02-P08 首审）；待 Owner 授权 push 交接
+NEXT_DEVELOPER_ACTION = 无（后端代码层面已写完并本地复审通过）；待 push 交接给同事
+OWNER_DECISION_REQUIRED = YES（push 交接需 Owner 授权；外部 ChatGPT 独立复审是否仍为硬门禁，取决于 Owner 裁决——当前 chatgpt_web 绑定 stale/failed）
 PRODUCTION_APPROVAL = NO
 ```
 
@@ -404,7 +404,10 @@ S02-P02 Auth/KYC/User/Eligibility = DONE（APPROVED，35 文件六子流程，2 
 S02-P03 Ledger/AptAccount/Power = DONE（APPROVED，14 文件经济写路径，11 步模板 + L1/L2/L3 + CAS + 负余额保护，1 P3 负余额口径，48 断言）
 S02-P04 Robot/Reward/Upgrade = DONE（APPROVED，16 文件 56 级规则读取器 + 三状态轴骨架 + 只读投影，写路径 fail-closed，82 断言，0 Finding）
 S02-P05 Prediction P0 = DONE（APPROVED，18 文件 8 对象状态机骨架 + 只读投影 + ConsentReceipt grant，写路径 fail-closed，113 断言，0 Finding）
-S02-P06 OTC/Power = CHANGES_REQUIRED（外审 record_id=727 否决：12 文件 OTC O1-O12 状态机 Guard/Role/经济 fail-closed 缺失，3 P1 + 1 P2；待 Developer 修复后复审）
+S02-P06 OTC/Power = APPROVED（复审 f088d7f 覆盖外审 727 全部 P1/P2，本地复审 QUALITY_PASS）
+S02-P07 Governance = APPROVED（复审 35ead50 覆盖外审 742 全部 P1/P2，本地复审 QUALITY_PASS）
+S02-P08 AI Engine = APPROVED（首审 4e68838，内部 AI 经济引擎 Scheme B，D10 C 端边界 LOCKED，本地内审 QUALITY_PASS）
+STAGE-02 全部包 = S02-P01~P08 本地全 APPROVED
 FAIL_CLOSED = YES（未冻结合同的流转保持拒绝）
 PRODUCTION = NO-GO
 ```
