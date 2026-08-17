@@ -1,0 +1,52 @@
+import { defineStore } from 'pinia'
+import {logout} from "@/api/module/user";
+import {getLangList} from "@/api/module/common";
+import router from "@/router";
+
+export const useAppStore = defineStore({
+  id: 'app',
+  state: () => {
+    return {
+      tab: true,
+      logo: true,
+      level: true,
+      inverted: false,
+      routerAlive: true,
+      collapse: false,
+      subfield: false,
+      langList: [] as any[],
+      locale: "zh_CN",
+      subfieldPosition: "side",
+      theme: 'light',
+      breadcrumb: true,
+      sideWidth: "220px",
+      sideTheme: 'dark',
+      greyMode: false,
+      accordion: true,
+      tagsTheme: 'concise',
+      keepAliveList: [],
+      themeVariable: {
+        "--global-checked-color": "#5fb878",
+        "--global-primary-color": "#009688",
+        "--global-normal-color": "#1e9fff",
+        "--global-danger-color": "#ff5722",
+        "--global-warm-color": "#ffb800",
+        "--global-border-radius": "4px"
+      },
+    }
+  },
+  actions: {
+    async getLangList() {
+      if(this.langList.length==0){
+        const { data, code } = await getLangList();
+        if(code == 0) {
+          this.langList = data;
+        }
+      }
+    },
+  },
+  persist: {
+    storage: localStorage,
+    paths: ['tab', 'locale', 'theme', 'logo', 'level', 'inverted', 'breadcrumb', 'sideTheme', 'greyMode', 'accordion', 'keepAliveList', 'themeVariable', 'subfield', 'tagsTheme','langList'],
+  }
+})
