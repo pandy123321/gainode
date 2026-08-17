@@ -6,3 +6,12 @@
 
 # Long paths / old archives
 历史文档/旧版本文档包/
+
+# V1.x production code baseline (read-only clone, not for version control)
+_existing_prod/
+
+# Historical docs (non-authoritative, traceability only)
+历史文档/
+
+# Package artifacts (rebuildable)
+*.zip
