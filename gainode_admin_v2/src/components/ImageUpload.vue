@@ -24,15 +24,15 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const fileInput = ref<HTMLInputElement>()
 const uploading = ref(false)
 
+const REGION = import.meta.env.VITE_S3_REGION || 'us-east-2'
+const BUCKET = import.meta.env.VITE_S3_BUCKET || 'gainode'
 const s3Client = new S3Client({
-  region: 'us-east-2',
+  region: REGION,
   credentials: {
-    accessKeyId: 'AKIAWNHTHADXNYVAT74S',
-    secretAccessKey: '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',
+    accessKeyId: import.meta.env.VITE_S3_ACCESS_KEY_ID || '',
+    secretAccessKey: import.meta.env.VITE_S3_SECRET_ACCESS_KEY || '',
   },
 })
-const BUCKET = 'gainode'
-const REGION = 'us-east-2'
 
 const openUpload = () => {
   fileInput.value?.click()
@@ -42,6 +42,10 @@ const handleChange = async (e: Event) => {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
+  if (!import.meta.env.VITE_S3_ACCESS_KEY_ID || !import.meta.env.VITE_S3_SECRET_ACCESS_KEY) {
+    layer.msg('未配置 S3 上传凭证（VITE_S3_ACCESS_KEY_ID / VITE_S3_SECRET_ACCESS_KEY）', { icon: 2 })
+    return
+  }
   uploading.value = true
   try {
     const key = `images/${Date.now()}_${file.name}`
