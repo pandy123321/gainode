@@ -9,6 +9,8 @@ import LayuiVue from '@layui/layui-vue'
 import LayJsonSchemaForm from "@layui/json-schema-form";
 import "@layui/json-schema-form/lib/index.css";
 import '@layui/layui-vue/lib/index.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 const app = createApp(App)
 
@@ -16,6 +18,7 @@ app.use(Store);
 app.use(Router);
 app.use(LayuiVue);
 app.use(LayJsonSchemaForm);
+app.use(ElementPlus);
 app.use(t)
 
 app.directive("permission",permission);

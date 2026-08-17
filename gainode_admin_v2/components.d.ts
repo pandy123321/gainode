@@ -7,9 +7,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AdminState: typeof import('./src/components/ep/AdminState.vue')['default']
+    ApprovalBar: typeof import('./src/components/ep/ApprovalBar.vue')['default']
+    AuditLink: typeof import('./src/components/ep/AuditLink.vue')['default']
+    EpDrawer: typeof import('./src/components/ep/EpDrawer.vue')['default']
     FormOpenSchema: typeof import('./src/components/FormOpenSchema.vue')['default']
     FormSchema: typeof import('./src/components/FormSchema.vue')['default']
     ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
+    ImpactPreview: typeof import('./src/components/ep/ImpactPreview.vue')['default']
     ImportSchema: typeof import('./src/components/ImportSchema.vue')['default']
     LayAvatar: typeof import('@layui/layui-vue')['LayAvatar']
     LayAvatarList: typeof import('@layui/layui-vue')['LayAvatarList']
@@ -76,6 +81,9 @@ declare module 'vue' {
     LayUpload: typeof import('@layui/layui-vue')['LayUpload']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SchemaForm: typeof import('./src/components/ep/SchemaForm.vue')['default']
+    SchemaSearch: typeof import('./src/components/ep/SchemaSearch.vue')['default']
+    SchemaTable: typeof import('./src/components/ep/SchemaTable.vue')['default']
     TableActionSchema: typeof import('./src/components/TableActionSchema.vue')['default']
     TableSearchSchema: typeof import('./src/components/TableSearchSchema.vue')['default']
     TableToolsSchema: typeof import('./src/components/TableToolsSchema.vue')['default']
