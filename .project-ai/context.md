@@ -62,9 +62,9 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
   - S02-P03 Ledger/AptAccount/Power（48 断言）。【APPROVED；1 P3 负余额口径】
   - S02-P04 Robot/Reward/Upgrade（82 断言）。【APPROVED】
   - S02-P05 Prediction P0 八对象（113 断言）。【APPROVED】
-  - S02-P06 OTC/Power（61 断言）。【APPROVED；外审 CHANGES_REQUIRED 已修复 `f088d7f`】
-  - S02-P07 治理六域 Approval/Parameter/Risk/Support/Notice/Audit（95 断言）。【APPROVED】
-  - S02-P08 内部 AI 经济引擎（80 断言）。【APPROVED】
+  - S02-P06 OTC/Power（35+39 断言）。【APPROVED；外审 record_id=727 的 P1-1/P1-2/P1-3/P2-1 已修复 `f088d7f`（Guard/Role + 经济转移 fail-closed），复审 QUALITY_PASS】
+  - S02-P07 治理六域 Approval/Parameter/Risk/Support/Notice/Audit（34+60 断言）。【APPROVED；外审 record_id=742 的 P1-1/P1-2/P1-3/P2-1/P2-2/P2-3 已修复 `35ead50`（6 Service guardRole 角色授权 + SoD + 业务完成态 fail-closed + request_id + attempt_count + OpenAPI parity），复审 QUALITY_PASS】
+  - S02-P08 内部 AI 经济引擎（56+24 断言）。【APPROVED；首审 QUALITY_PASS，Scheme B 内部引擎，D10 C 端边界 LOCKED】
   - S03-P00 前端目录冻结（`e2ea3c2`/`c30315a`，方案 A：gainode_h5_v2/gainode_admin_v2，_existing_prod/** 只读）。
   - S03-P01 H5 基础设施（`23e2a63`，19 断言 + type-check 0 + build 122 modules）。
   - S03-P02 H5-01 Auth 批次（M-AUTH-001..005 五页：登录/注册/OTP/找回/MFA，绑定 OpenAPI auth.yaml + tokens + 7 语言 + 五态；36 断言 + type-check 0 + build 140 modules）。
@@ -79,6 +79,11 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
   - S03-P02 H5-10 P1 / H5-11 Future 批次（M-AI-001 / M-GROWTH-001 / M-PREDICT-FREE-001 / M-MIGRATION-001 四页全部 Closed/Restricted 占位；四端点 /ai/signals（内部引擎）、/me/referrals、/free-predictions/*、/apt/migration-eligibility 均无 OpenAPI 路径，不提供读写方法不越权开放不挂导航入口；4 断言 + type-check 0 + build 278 modules）。**S03-P02 H5 页面实现顺序全部批次 H5-01..H5-11 落地（P0 九批完整 + P1/Future 四页占位），下一阶段 S03-P03 Admin。**
   - S03-P03-P00 Admin 基线收口（`feat(admin)`：首次导入 `gainode_admin_v2` V1.x Layui 基线 + build:check 类型错误清零）。处置：`tsconfig` 开 `skipLibCheck` + 移除 `types:["@layui/layui-vue/types/components"]` 全局注册（~55 `TableColumn`/`fixed` 级联消除）+ 补 `@types/crypto-js@4.2.2`；14 业务页 `ref([])→ref<any[]>`、`reactive({})→reactive<any>`、store `langList/permissions/menus` 加 `[] as any[]`、layer 调用/回调签名/递归返回类型（`mapUrl`/`clean`）等 ~40 处修正。验证 `vue-tsc --noEmit` 0 error + `vite build` 2245 modules（33.30s）。未升级 TS/Vue（TS 4.7.4；vue-router 4.6.4 peer 需 vue≥3.5 留待 Element Plus 迁移一并收口）。
   - S03-P03-P01 Admin Element Plus 基础设施（`675ebeb`）。交付：`element-plus@2.4.4` + `@element-plus/icons-vue@2.3.2`（2.14.x peer 需 vue≥3.3.7/3.5，故降级兼容 Vue 3.3.4）；`src/types/schema.ts` 强类型 Schema 契约（SchemaField/SchemaMap/SchemaColumn/ApiEnvelope/AdminStateName）；`ep/` 组件集 SchemaForm/SchemaSearch/SchemaTable adapter + AdminState（五态）/EpDrawer（480/640 基线）/ImpactPreview/ApprovalBar/AuditLink（高危操作）；main.ts 全量注册 Element Plus（过渡期 layui 共存）；复用矩阵 + 实施记录。验证 `vue-tsc --noEmit` 0 error + `build:check` 通过（3601 modules）。待优化（非阻塞）：按需引入 + manualChunks 拆包。下一包 S03-P03-P02 Admin API client + request context + object_version 冲突提示。
+  - S03-P03-P02 Admin API client + request context + object_version 冲突提示（`426fbaf`）。交付：`src/api/http-v2.ts` V2 API client（Envelope 解包 + token 注入 + 401 跳登录）、RequestContext（request_id 透传 + Idempotency-Key）、object_version 冲突提示。下一包 S03-P03-P04 Admin 逐页 Layui→Element Plus 替换。
+  - **后端 STAGE-02 全包收口（2026-08-17）**：S02-P01~P08 本地全 APPROVED（含 S02-P06/S02-P07 外审发现修复 + 复审、S02-P08 首审）。测试全绿：S02-P06 35+39 / S02-P07 34+60 / S02-P08 56+24。
+  - **前端交接（2026-08-17，范围变更）**：全部前端（STAGE-03 H5/Admin + STAGE-04 Flutter App）移交同事开发；本 Agent 前端工作已收尾。
+  - **push 交接（2026-08-17，Owner 授权）**：`origin/feature/gainode-v3-serial-development` 已推送 29 提交（前端 H5+Admin + 后端 STAGE-01/02 全部 + 密钥修复），本地与远程同步。
+  - **S3 密钥移除（`45d2f61`）**：`gainode_admin_v2/src/components/ImageUpload.vue` 硬编码 AWS 密钥（已轮换失效的旧 key，V1.x baseline 带入）改为环境变量 `VITE_S3_ACCESS_KEY_ID / VITE_S3_SECRET_ACCESS_KEY / VITE_S3_REGION / VITE_S3_BUCKET`，缺失时明确提示。GitHub Push Protection 拦截已由 Owner 放行（密钥失效，无泄露风险）。
   - 各包详细交付清单/审核证据：.project-ai/tasks/<task-id>/ + .project-ai/reviews/。
 - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
 - 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.4；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816`。40 个工作包均具备目标、固定步骤、验证、停止条件和验收；Development、Quality 和复审 Agent 必须按该文件执行，V3.3 及更早路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。V3.4 整合五角色执行纪律（Owner/Scheduler/Developer/Quality/Reviewer）与提交来源 trailer（`Code-Origin: Developer`/`Quality`），详见 07 §3 与 `.project-ai/rules/roles.md`、`.project-ai/rules/workflow.md`、`.project-ai/rules/git-review-worktree.md`。
