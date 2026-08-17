@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -37,6 +38,9 @@ use support\utils\Random;
 class NoticeService extends Service
 {
     public const EVENT_READ = 'NOTICE_READ';
+
+    // ---- 05 §8 最小角色（本包仅引用这 1 个，canonical 冻结）----
+    public const ROLE_END_USER = 'END_USER';
 
     public function __construct()
     {
@@ -90,13 +94,19 @@ class NoticeService extends Service
         ];
     }
 
-    /** read_state：unread → read（幂等：已读再标记不报错，直接返回） */
+    /** read_state：unread → read（幂等：已读再标记不报错，直接返回；END_USER 本人） */
     public function markRead(string $noticeId, string $actorId, string $actorRole): NoticeModel
     {
         return (new TransactionBoundary())->run(function () use ($noticeId, $actorId, $actorRole) {
             $notice = $this->get($noticeId);
             if (empty($notice)) {
                 throw new DomainException(ErrorDict::VALIDATION_ERROR, 'notice not found');
+            }
+            if ($actorRole !== self::ROLE_END_USER) {
+                throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'notice markRead actor role forbidden');
+            }
+            if ((string) $notice->user_id !== $actorId) {
+                throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'notice owner mismatch');
             }
             if ((string) $notice->read_state === NoticeModel::READ_READ) {
                 return $notice;
@@ -147,7 +157,7 @@ class NoticeService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => '0',
             'case_id'              => '0',
             'created_time'         => time(),

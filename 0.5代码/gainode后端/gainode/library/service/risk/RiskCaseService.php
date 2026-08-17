@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -54,6 +55,10 @@ class RiskCaseService extends Service
     public const EVENT_RESOLVED      = 'RISK_CASE_RESOLVED';
     public const EVENT_CLOSED        = 'RISK_CASE_CLOSED';
     public const EVENT_REOPENED      = 'RISK_CASE_REOPENED';
+
+    // ---- 05 §8 最小角色（本包仅引用这 2 个，canonical 冻结；两者互斥 SoD）----
+    public const ROLE_RISK_ANALYST  = 'RISK_ANALYST';
+    public const ROLE_RISK_APPROVER = 'RISK_APPROVER';
 
     public function __construct()
     {
@@ -115,7 +120,9 @@ class RiskCaseService extends Service
     {
         return $this->transition(
             $caseId, [RiskCaseModel::STATUS_OPEN], RiskCaseModel::STATUS_INVESTIGATING,
-            self::EVENT_INVESTIGATING, $actorId, $actorRole
+            self::EVENT_INVESTIGATING, $actorId, $actorRole,
+            [],
+            fn (RiskCaseModel $c) => $this->guardRole([self::ROLE_RISK_ANALYST], $actorRole)
         );
     }
 
@@ -124,11 +131,13 @@ class RiskCaseService extends Service
     {
         return $this->transition(
             $caseId, [RiskCaseModel::STATUS_INVESTIGATING], RiskCaseModel::STATUS_UNDER_REVIEW,
-            self::EVENT_UNDER_REVIEW, $actorId, $actorRole
+            self::EVENT_UNDER_REVIEW, $actorId, $actorRole,
+            [],
+            fn (RiskCaseModel $c) => $this->guardRole([self::ROLE_RISK_ANALYST], $actorRole)
         );
     }
 
-    /** under_review → resolved（RISK_APPROVER 批准处置；审批人 ≠ 检测人） */
+    /** under_review → resolved（RISK_APPROVER 批准处置；处置措施执行依赖风险策略 TBC → FAIL_CLOSED） */
     public function resolve(
         string $caseId,
         string $actorId,
@@ -136,44 +145,44 @@ class RiskCaseService extends Service
         string $disposition = '',
         string $dispositionReasonKey = ''
     ): RiskCaseModel {
-        return $this->transition(
-            $caseId, [RiskCaseModel::STATUS_UNDER_REVIEW], RiskCaseModel::STATUS_RESOLVED,
-            self::EVENT_RESOLVED, $actorId, $actorRole,
-            [
-                'reviewed_by'             => $actorId,
-                'disposition'             => $disposition,
-                'disposition_reason_key'  => $dispositionReasonKey,
-            ],
-            fn (RiskCaseModel $c) => $this->guardNotDetector($c, $actorId)
+        return $this->guardedFailClosed(
+            $caseId,
+            fn (RiskCaseModel $c) => $this->guardApprover($c, $actorId, $actorRole),
+            'RiskCase resolve (executing restriction disposition) depends on risk restriction policy (TBC) — not frozen'
         );
     }
 
-    /** resolved → closed（归档终态） */
+    /** resolved → closed（归档终态；RISK_APPROVER） */
     public function closeResolved(string $caseId, string $actorId, string $actorRole): RiskCaseModel
     {
         return $this->transition(
             $caseId, [RiskCaseModel::STATUS_RESOLVED], RiskCaseModel::STATUS_CLOSED,
-            self::EVENT_CLOSED, $actorId, $actorRole
+            self::EVENT_CLOSED, $actorId, $actorRole,
+            [],
+            fn (RiskCaseModel $c) => $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole)
         );
     }
 
-    /** open → closed（误报关闭） */
+    /** open → closed（误报关闭；RISK_APPROVER） */
     public function closeFalsePositive(string $caseId, string $actorId, string $actorRole): RiskCaseModel
     {
         return $this->transition(
             $caseId, [RiskCaseModel::STATUS_OPEN], RiskCaseModel::STATUS_CLOSED,
-            self::EVENT_CLOSED, $actorId, $actorRole
+            self::EVENT_CLOSED, $actorId, $actorRole,
+            [],
+            fn (RiskCaseModel $c) => $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole)
         );
     }
 
-    /** resolved → investigating（申诉重开，appeal_eligible=1） */
+    /** resolved → investigating（申诉重开，appeal_eligible=1；RISK_APPROVER） */
     public function reopenAppeal(string $caseId, string $actorId, string $actorRole): RiskCaseModel
     {
         return $this->transition(
             $caseId, [RiskCaseModel::STATUS_RESOLVED], RiskCaseModel::STATUS_INVESTIGATING,
             self::EVENT_REOPENED, $actorId, $actorRole,
             [],
-            function (RiskCaseModel $c) {
+            function (RiskCaseModel $c) use ($actorRole) {
+                $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole);
                 if ((int) $c->appeal_eligible !== 1) {
                     throw new DomainException(ErrorDict::POLICY_DENIED, 'risk case is not appeal eligible');
                 }
@@ -243,13 +252,33 @@ class RiskCaseService extends Service
         });
     }
 
-    /** SoD：处置审批人 ≠ 检测人（RISK_APPROVER != RISK_ANALYST 的可校验近似） */
-    private function guardNotDetector(RiskCaseModel $case, string $actorId): void
+    /** SoD + 角色：处置审批人 ≠ 检测人（RISK_APPROVER != RISK_ANALYST） */
+    private function guardApprover(RiskCaseModel $case, string $actorId, string $actorRole): void
     {
+        $this->guardRole([self::ROLE_RISK_APPROVER], $actorRole);
         $detectedBy = (string) $case->detected_by;
         if ($detectedBy !== '' && $detectedBy !== '0' && $detectedBy === $actorId) {
             throw new DomainException(ErrorDict::POLICY_DENIED, 'risk approver must differ from detector (SoD)');
         }
+    }
+
+    /** 角色白名单：不在冻结角色集合内 → AUTH_FORBIDDEN（fail-closed） */
+    private function guardRole(array $allowedRoles, string $actorRole): void
+    {
+        if (!in_array($actorRole, $allowedRoles, true)) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'risk case actor role forbidden');
+        }
+    }
+
+    /** 先过守卫（approver 角色 + SoD）再依赖 fail-closed；守卫失败优先于依赖不可用。 */
+    private function guardedFailClosed(string $caseId, callable $guard, string $dependency): RiskCaseModel
+    {
+        $case = $this->get($caseId);
+        if (empty($case)) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'risk case not found');
+        }
+        $guard($case);
+        throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, $dependency);
     }
 
     private function appendAudit(
@@ -272,7 +301,7 @@ class RiskCaseService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => '0',
             'case_id'              => $targetObjectId,
             'created_time'         => time(),

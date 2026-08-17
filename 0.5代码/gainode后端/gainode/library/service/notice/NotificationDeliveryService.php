@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -109,17 +110,18 @@ class NotificationDeliveryService extends Service
         );
     }
 
-    /** pending → delivered（投递成功） */
+    /** pending → delivered（投递成功；attempt_count 递增） */
     public function markDelivered(string $deliveryId, string $actorId, string $actorRole): NotificationDeliveryModel
     {
         return $this->transition(
             $deliveryId, [NotificationDeliveryModel::STATUS_PENDING], NotificationDeliveryModel::STATUS_DELIVERED,
             self::EVENT_DELIVERED, $actorId, $actorRole,
-            ['delivered_at' => time(), 'attempt_count' => 1, 'last_attempt_at' => time()]
+            ['delivered_at' => time(), 'last_attempt_at' => time()],
+            true
         );
     }
 
-    /** pending → failed（投递失败，attempt_count+1 并排期重试） */
+    /** pending → failed（投递失败，attempt_count 递增并排期重试） */
     public function markFailed(
         string $deliveryId,
         string $actorId,
@@ -129,7 +131,6 @@ class NotificationDeliveryService extends Service
     ): NotificationDeliveryModel {
         $extra = [
             'failure_reason_code' => $failureReasonCode,
-            'attempt_count'       => 1,
             'last_attempt_at'     => time(),
         ];
         if ($nextRetryAt > 0) {
@@ -137,7 +138,7 @@ class NotificationDeliveryService extends Service
         }
         return $this->transition(
             $deliveryId, [NotificationDeliveryModel::STATUS_PENDING], NotificationDeliveryModel::STATUS_FAILED,
-            self::EVENT_FAILED, $actorId, $actorRole, $extra
+            self::EVENT_FAILED, $actorId, $actorRole, $extra, true
         );
     }
 
@@ -166,10 +167,11 @@ class NotificationDeliveryService extends Service
         string $eventCode,
         string $actorId,
         string $actorRole,
-        array $extraFields = []
+        array $extraFields = [],
+        bool $incrementAttempt = false
     ): NotificationDeliveryModel {
         return (new TransactionBoundary())->run(function () use (
-            $deliveryId, $fromStatuses, $toStatus, $eventCode, $actorId, $actorRole, $extraFields
+            $deliveryId, $fromStatuses, $toStatus, $eventCode, $actorId, $actorRole, $extraFields, $incrementAttempt
         ) {
             $delivery = $this->get($deliveryId);
             if (empty($delivery)) {
@@ -188,6 +190,10 @@ class NotificationDeliveryService extends Service
                 'object_version'  => (int) $delivery->object_version + 1,
                 'updated_time'    => time(),
             ], $extraFields);
+
+            if ($incrementAttempt) {
+                $fields['attempt_count'] = (int) $delivery->attempt_count + 1;
+            }
 
             $affected = Db::connection('mysql')
                 ->table('notification_deliveries')
@@ -224,7 +230,7 @@ class NotificationDeliveryService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => '0',
             'case_id'              => '0',
             'created_time'         => time(),

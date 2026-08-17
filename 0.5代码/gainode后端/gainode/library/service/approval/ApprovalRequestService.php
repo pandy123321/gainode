@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -57,6 +58,15 @@ class ApprovalRequestService extends Service
     public const EVENT_EXECUTION_COMPLETED  = 'APPROVAL_EXECUTION_COMPLETED';
     public const EVENT_EXECUTION_FAILED     = 'APPROVAL_EXECUTION_FAILED';
 
+    // ---- 05 §8 最小角色（本包仅引用这些，canonical 冻结）----
+    public const ROLE_END_USER      = 'END_USER';
+    public const ROLE_OPS_OPERATOR  = 'OPS_OPERATOR';
+    public const ROLE_ADMIN_SECURITY = 'ADMIN_SECURITY';
+    public const ROLE_PARAM_APPROVER = 'PARAM_APPROVER';
+    public const ROLE_RISK_APPROVER  = 'RISK_APPROVER';
+    public const ROLE_PARAM_EDITOR   = 'PARAM_EDITOR';
+    public const ROLE_RISK_ANALYST   = 'RISK_ANALYST';
+
     public function __construct()
     {
         $this->dao = ApprovalRequestDao::class;
@@ -98,54 +108,58 @@ class ApprovalRequestService extends Service
         ];
     }
 
-    /** AR1：draft → pending（提交审批） */
+    /** AR1：draft → pending（提交审批；申请人角色，依 request_type 而异） */
     public function submit(string $approvalId, string $actorId, string $actorRole): ApprovalRequestModel
     {
         return $this->transition(
             $approvalId, [ApprovalRequestModel::STATUS_DRAFT], ApprovalRequestModel::STATUS_PENDING,
-            self::EVENT_SUBMITTED, $actorId, $actorRole
+            self::EVENT_SUBMITTED, $actorId, $actorRole,
+            [],
+            fn (ApprovalRequestModel $a) => $this->guardSubmitter($actorRole)
         );
     }
 
-    /** AR2：pending → changes_requested（要求修改，审批人 ≠ 申请人） */
+    /** AR2：pending → changes_requested（要求修改，审批人 ≠ 申请人；审批人角色） */
     public function requestChanges(string $approvalId, string $actorId, string $actorRole, string $reason = ''): ApprovalRequestModel
     {
         return $this->transition(
             $approvalId, [ApprovalRequestModel::STATUS_PENDING], ApprovalRequestModel::STATUS_CHANGES_REQUESTED,
             self::EVENT_CHANGES_REQUESTED, $actorId, $actorRole,
             ['decided_by' => $actorId, 'decided_at' => time(), 'changes_requested_reason' => $reason],
-            fn (ApprovalRequestModel $a) => $this->guardNotSelf($a, $actorId)
+            fn (ApprovalRequestModel $a) => $this->guardApprover($a, $actorId, $actorRole)
         );
     }
 
-    /** AR3：changes_requested → pending（修改后重提，不篡改原审批记录） */
+    /** AR3：changes_requested → pending（修改后重提，不篡改原审批记录；申请人角色） */
     public function resubmit(string $approvalId, string $actorId, string $actorRole): ApprovalRequestModel
     {
         return $this->transition(
             $approvalId, [ApprovalRequestModel::STATUS_CHANGES_REQUESTED], ApprovalRequestModel::STATUS_PENDING,
-            self::EVENT_RESUBMITTED, $actorId, $actorRole
+            self::EVENT_RESUBMITTED, $actorId, $actorRole,
+            [],
+            fn (ApprovalRequestModel $a) => $this->guardSubmitter($actorRole)
         );
     }
 
-    /** AR4：pending → approved（审批通过，审批人 ≠ 申请人） */
+    /** AR4：pending → approved（审批通过，审批人 ≠ 申请人；审批人角色） */
     public function approve(string $approvalId, string $actorId, string $actorRole, string $reasonKey = ''): ApprovalRequestModel
     {
         return $this->transition(
             $approvalId, [ApprovalRequestModel::STATUS_PENDING], ApprovalRequestModel::STATUS_APPROVED,
             self::EVENT_APPROVED, $actorId, $actorRole,
             ['decided_by' => $actorId, 'decided_at' => time(), 'reason_key' => $reasonKey],
-            fn (ApprovalRequestModel $a) => $this->guardNotSelf($a, $actorId)
+            fn (ApprovalRequestModel $a) => $this->guardApprover($a, $actorId, $actorRole)
         );
     }
 
-    /** AR5：pending → rejected（审批驳回，审批人 ≠ 申请人） */
+    /** AR5：pending → rejected（审批驳回，审批人 ≠ 申请人；审批人角色） */
     public function reject(string $approvalId, string $actorId, string $actorRole, string $reasonKey = ''): ApprovalRequestModel
     {
         return $this->transition(
             $approvalId, [ApprovalRequestModel::STATUS_PENDING], ApprovalRequestModel::STATUS_REJECTED,
             self::EVENT_REJECTED, $actorId, $actorRole,
             ['decided_by' => $actorId, 'decided_at' => time(), 'reason_key' => $reasonKey],
-            fn (ApprovalRequestModel $a) => $this->guardNotSelf($a, $actorId)
+            fn (ApprovalRequestModel $a) => $this->guardApprover($a, $actorId, $actorRole)
         );
     }
 
@@ -162,12 +176,12 @@ class ApprovalRequestService extends Service
         );
     }
 
-    /** AR7：executing → executed（执行完成；具体业务副作用由对应 Writer 承担） */
+    /** AR7：executing → executed（执行完成）；真实业务副作用由对应 Writer 承担（TBC）→ FAIL_CLOSED */
     public function completeExecution(string $approvalId, string $actorId, string $actorRole): ApprovalRequestModel
     {
-        return $this->transition(
-            $approvalId, [ApprovalRequestModel::STATUS_EXECUTING], ApprovalRequestModel::STATUS_EXECUTED,
-            self::EVENT_EXECUTION_COMPLETED, $actorId, $actorRole
+        throw new DomainException(
+            ErrorDict::DEPENDENCY_UNAVAILABLE,
+            'ApprovalRequest completeExecution depends on the concrete business side-effect Writer (ledger/funds, TBC) — not frozen'
         );
     }
 
@@ -229,12 +243,37 @@ class ApprovalRequestService extends Service
         });
     }
 
-    /** SoD：审批人 ≠ 申请人（approval actor != execution authority） */
-    private function guardNotSelf(ApprovalRequestModel $approval, string $actorId): void
+    /** SoD：审批人 ≠ 申请人 + 审批角色校验（防 role switching bypass 的 actor 维度） */
+    private function guardApprover(ApprovalRequestModel $approval, string $actorId, string $actorRole): void
     {
+        $this->guardRole([self::ROLE_PARAM_APPROVER, self::ROLE_RISK_APPROVER], $actorRole);
         if ((string) $approval->submitted_by === $actorId) {
             throw new DomainException(ErrorDict::POLICY_DENIED, 'approval actor must differ from submitter (SoD)');
         }
+        // 角色维度分离：审批人以申请人角色审批（role switching）同样拒绝。
+        if ((string) $approval->submitter_role !== '' && (string) $approval->submitter_role === $actorRole) {
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'approval actor role must differ from submitter role (SoD)');
+        }
+    }
+
+    /** 角色白名单：不在冻结角色集合内 → AUTH_FORBIDDEN（fail-closed） */
+    private function guardRole(array $allowedRoles, string $actorRole): void
+    {
+        if (!in_array($actorRole, $allowedRoles, true)) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'approval actor role forbidden');
+        }
+    }
+
+    /** 申请人角色（依 request_type 而异；审批人角色不可提交，防自审自批） */
+    private function guardSubmitter(string $actorRole): void
+    {
+        $this->guardRole([
+            self::ROLE_END_USER,
+            self::ROLE_OPS_OPERATOR,
+            self::ROLE_ADMIN_SECURITY,
+            self::ROLE_PARAM_EDITOR,
+            self::ROLE_RISK_ANALYST,
+        ], $actorRole);
     }
 
     private function appendAudit(
@@ -258,7 +297,7 @@ class ApprovalRequestService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => $targetObjectId,
             'case_id'              => ($caseId !== null && $caseId !== '') ? $caseId : '0',
             'created_time'         => time(),

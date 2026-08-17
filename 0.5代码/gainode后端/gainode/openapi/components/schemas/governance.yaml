@@ -25,6 +25,8 @@ ApprovalRequest:
     case_id: { type: string }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
+    updated_at: { type: integer, description: 更新时间戳(Unix秒;API 名对齐 05 §3,DDL 列 updated_time) }
 
 ParameterRelease:
   description: 参数发布（05 §3 ParameterRelease + §4 Parameter Release 状态机，8 态，冻结）
@@ -43,10 +45,14 @@ ParameterRelease:
     paused_at: { type: integer }
     rolled_back_at: { type: integer }
     archived_at: { type: integer }
+    monitoring_job_id: { type: string, description: 监控任务ID }
     snapshot_id: { type: string }
     case_id: { type: string }
+    audit_event_ids: { type: string, description: 审计事件ID列表(JSON 数组) }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
+    updated_at: { type: integer, description: 更新时间戳(Unix秒;API 名对齐 05 §3,DDL 列 updated_time) }
 
 ParameterSnapshot:
   description: 参数快照（05 §3 ParameterSnapshot，append-only 只读聚合，无状态机）
@@ -60,7 +66,7 @@ ParameterSnapshot:
     version: { type: string }
     created_by: { type: string }
     audit_event_id: { type: string }
-    created_time: { type: integer }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
 
 RiskCase:
   description: 风控案件（05 §3 RiskCase + §4 V2.4 状态机，5 态，Owner 2B2-ENUM-03 冻结）
@@ -83,6 +89,8 @@ RiskCase:
     appeal_eligible: { type: integer, description: 是否可申诉(0=否 1=是) }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
+    updated_at: { type: integer, description: 更新时间戳(Unix秒;API 名对齐 05 §3,DDL 列 updated_time) }
 
 Ticket:
   description: 工单（05 §3 Ticket + §4 Ticket 状态机，6 态，冻结）
@@ -100,9 +108,12 @@ Ticket:
     resolution_type: { type: string }
     resolution_summary_key: { type: string }
     appeal_eligible: { type: integer, description: 是否可申诉(0=否 1=是) }
+    ticket_message_ids: { type: string, description: 工单消息ID列表(JSON 数组) }
     case_id: { type: string }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
+    updated_at: { type: integer, description: 更新时间戳(Unix秒;API 名对齐 05 §3,DDL 列 updated_time) }
 
 TicketMessage:
   description: 工单消息（05 §3 TicketMessage，append-only 值对象，无状态机）
@@ -115,7 +126,7 @@ TicketMessage:
     body_key: { type: string, description: 正文 I18N key }
     attachments: { type: string, description: 附件列表(JSON 数组) }
     audit_event_id: { type: string }
-    created_time: { type: integer }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
 
 TicketAttachment:
   description: 工单附件（05 §3 TicketAttachment，append-only 值对象，无状态机）
@@ -130,7 +141,7 @@ TicketAttachment:
     file_hash: { type: string }
     uploaded_by: { type: string }
     audit_event_id: { type: string }
-    created_time: { type: integer }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
 
 Notice:
   description: 通知（05 §3 Notice，只读聚合，read_state 为可变字段，无状态机）
@@ -151,6 +162,7 @@ Notice:
     expires_at: { type: integer }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
 
 NotificationDelivery:
   description: 通知投递（05 §3 NotificationDelivery + §4 V2.4 状态机，4 态，Owner 2B2-ENUM-01 冻结）
@@ -169,6 +181,8 @@ NotificationDelivery:
     failure_reason_code: { type: string }
     object_version: { type: integer }
     audit_event_id: { type: string }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3,DDL 列 created_time) }
+    updated_at: { type: integer, description: 更新时间戳(Unix秒;API 名对齐 05 §3,DDL 列 updated_time) }
 
 AuditEvent:
   description: 审计事件（05 §3 AuditLog，append-only，复用 MC2 DDL，无 UPDATE/DELETE）
@@ -190,4 +204,4 @@ AuditEvent:
     request_id: { type: string }
     approval_id: { type: string }
     case_id: { type: string }
-    created_time: { type: integer }
+    created_at: { type: integer, description: 创建时间戳(Unix秒;API 名对齐 05 §3 AuditLog,DDL 列 created_time) }

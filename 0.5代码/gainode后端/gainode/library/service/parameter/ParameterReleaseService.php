@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -63,6 +64,11 @@ class ParameterReleaseService extends Service
     public const EVENT_ROLLED_BACK = 'PARAMETER_RELEASE_ROLLED_BACK';
     public const EVENT_ARCHIVED    = 'PARAMETER_RELEASE_ARCHIVED';
 
+    // ---- 05 §8 最小角色（本包仅引用这 3 个，canonical 冻结；三者互斥 SoD）----
+    public const ROLE_PARAM_EDITOR      = 'PARAM_EDITOR';
+    public const ROLE_PARAM_APPROVER    = 'PARAM_APPROVER';
+    public const ROLE_RELEASE_OPERATOR  = 'RELEASE_OPERATOR';
+
     public function __construct()
     {
         $this->dao = ParameterReleaseDao::class;
@@ -101,22 +107,25 @@ class ParameterReleaseService extends Service
         ];
     }
 
-    /** PR1：draft → pending_approval（提交审批） */
+    /** PR1：draft → pending_approval（提交审批；PARAM_EDITOR） */
     public function submit(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
         return $this->transition(
             $releaseId, [ParameterReleaseModel::STATUS_DRAFT], ParameterReleaseModel::STATUS_PENDING_APPROVAL,
-            self::EVENT_SUBMITTED, $actorId, $actorRole
+            self::EVENT_SUBMITTED, $actorId, $actorRole,
+            [],
+            fn (ParameterReleaseModel $r) => $this->guardRole([self::ROLE_PARAM_EDITOR], $actorRole)
         );
     }
 
-    /** PR2：pending_approval → approved（审批通过，记录 approved_by） */
+    /** PR2：pending_approval → approved（审批通过；PARAM_APPROVER，记录 approved_by） */
     public function approve(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
         return $this->transition(
             $releaseId, [ParameterReleaseModel::STATUS_PENDING_APPROVAL], ParameterReleaseModel::STATUS_APPROVED,
             self::EVENT_APPROVED, $actorId, $actorRole,
-            ['approved_by' => $actorId]
+            ['approved_by' => $actorId],
+            fn (ParameterReleaseModel $r) => $this->guardRole([self::ROLE_PARAM_APPROVER], $actorRole)
         );
     }
 
@@ -127,68 +136,62 @@ class ParameterReleaseService extends Service
             $releaseId, [ParameterReleaseModel::STATUS_APPROVED], ParameterReleaseModel::STATUS_SCHEDULED,
             self::EVENT_SCHEDULED, $actorId, $actorRole,
             ['scheduled_at' => $scheduledAt],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole)
         );
     }
 
-    /** PR6：approved → active（立即生效；RELEASE_OPERATOR ≠ PARAM_APPROVER） */
+    /** PR6：approved → active（立即生效；生成 active ParameterSnapshot 依赖参数内容 TBC → FAIL_CLOSED） */
     public function activateFromApproved(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
-        return $this->transition(
-            $releaseId, [ParameterReleaseModel::STATUS_APPROVED], ParameterReleaseModel::STATUS_ACTIVE,
-            self::EVENT_ACTIVATED, $actorId, $actorRole,
-            ['activated_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+        return $this->guardedFailClosed(
+            $releaseId,
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole),
+            'ParameterRelease activate depends on active ParameterSnapshot (parameter content, TBC) — not frozen'
         );
     }
 
-    /** PR7：scheduled → active（排期到期/提前激活；RELEASE_OPERATOR ≠ PARAM_APPROVER） */
+    /** PR7：scheduled → active（排期到期/提前激活；生成 ParameterSnapshot TBC → FAIL_CLOSED） */
     public function activateFromScheduled(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
-        return $this->transition(
-            $releaseId, [ParameterReleaseModel::STATUS_SCHEDULED], ParameterReleaseModel::STATUS_ACTIVE,
-            self::EVENT_ACTIVATED, $actorId, $actorRole,
-            ['activated_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+        return $this->guardedFailClosed(
+            $releaseId,
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole),
+            'ParameterRelease activate depends on active ParameterSnapshot (parameter content, TBC) — not frozen'
         );
     }
 
-    /** PR8：active → paused（临时停用，不删历史） */
+    /** PR8：active → paused（临时停用，不删历史；RELEASE_OPERATOR ≠ PARAM_APPROVER） */
     public function pause(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
         return $this->transition(
             $releaseId, [ParameterReleaseModel::STATUS_ACTIVE], ParameterReleaseModel::STATUS_PAUSED,
             self::EVENT_PAUSED, $actorId, $actorRole,
             ['paused_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole)
         );
     }
 
-    /** PR9：paused → active（恢复） */
+    /** PR9：paused → active（恢复；重新生成 active ParameterSnapshot TBC → FAIL_CLOSED） */
     public function resume(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
-        return $this->transition(
-            $releaseId, [ParameterReleaseModel::STATUS_PAUSED], ParameterReleaseModel::STATUS_ACTIVE,
-            self::EVENT_RESUMED, $actorId, $actorRole,
-            ['activated_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+        return $this->guardedFailClosed(
+            $releaseId,
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole),
+            'ParameterRelease resume depends on active ParameterSnapshot (parameter content, TBC) — not frozen'
         );
     }
 
-    /** PR10：active/paused → rolled_back（回滚到上一版本，保留审计链） */
+    /** PR10：active/paused → rolled_back（回滚到上一版本；生成回滚 ParameterSnapshot TBC → FAIL_CLOSED） */
     public function rollback(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
-        return $this->transition(
+        return $this->guardedFailClosed(
             $releaseId,
-            [ParameterReleaseModel::STATUS_ACTIVE, ParameterReleaseModel::STATUS_PAUSED],
-            ParameterReleaseModel::STATUS_ROLLED_BACK,
-            self::EVENT_ROLLED_BACK, $actorId, $actorRole,
-            ['rolled_back_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole),
+            'ParameterRelease rollback depends on rollback ParameterSnapshot (parameter content, TBC) — not frozen'
         );
     }
 
-    /** PR11：rolled_back/scheduled → archived（不可再激活） */
+    /** PR11：rolled_back/scheduled → archived（不可再激活；RELEASE_OPERATOR ≠ PARAM_APPROVER） */
     public function archive(string $releaseId, string $actorId, string $actorRole): ParameterReleaseModel
     {
         return $this->transition(
@@ -197,7 +200,7 @@ class ParameterReleaseService extends Service
             ParameterReleaseModel::STATUS_ARCHIVED,
             self::EVENT_ARCHIVED, $actorId, $actorRole,
             ['archived_at' => time()],
-            fn (ParameterReleaseModel $r) => $this->guardNotApprover($r, $actorId)
+            fn (ParameterReleaseModel $r) => $this->guardOperator($r, $actorId, $actorRole)
         );
     }
 
@@ -250,12 +253,32 @@ class ParameterReleaseService extends Service
         });
     }
 
-    /** SoD：RELEASE_OPERATOR ≠ PARAM_APPROVER（审批人不得自行操作发布） */
-    private function guardNotApprover(ParameterReleaseModel $release, string $actorId): void
+    /** SoD + 角色：RELEASE_OPERATOR ≠ PARAM_APPROVER（审批人不得自行操作发布） */
+    private function guardOperator(ParameterReleaseModel $release, string $actorId, string $actorRole): void
     {
+        $this->guardRole([self::ROLE_RELEASE_OPERATOR], $actorRole);
         if ((string) $release->approved_by !== '' && (string) $release->approved_by === $actorId) {
             throw new DomainException(ErrorDict::POLICY_DENIED, 'release operator must differ from approver (SoD)');
         }
+    }
+
+    /** 角色白名单：不在冻结角色集合内 → AUTH_FORBIDDEN（fail-closed） */
+    private function guardRole(array $allowedRoles, string $actorRole): void
+    {
+        if (!in_array($actorRole, $allowedRoles, true)) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'parameter release actor role forbidden');
+        }
+    }
+
+    /** 先过守卫（operator 角色 + SoD）再依赖 fail-closed；守卫失败优先于依赖不可用。 */
+    private function guardedFailClosed(string $releaseId, callable $guard, string $dependency): ParameterReleaseModel
+    {
+        $release = $this->get($releaseId);
+        if (empty($release)) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'parameter release not found');
+        }
+        $guard($release);
+        throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, $dependency);
     }
 
     private function appendAudit(
@@ -279,7 +302,7 @@ class ParameterReleaseService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => '0',
             'case_id'              => ($caseId !== null && $caseId !== '') ? $caseId : '0',
             'created_time'         => time(),

@@ -5,20 +5,20 @@
 | 项 | 命令 / 证据 | 期望 | 实际 |
 |---|---|---|---|
 | Contract 测试 | `php tests/Contract/S02P07PolicyContractTest.php` | 34 断言全过 | ✅ 34/34 |
-| Integration 测试 | `php tests/Integration/S02P07PolicyStateMachineTest.php` | 61 断言全过 | ✅ 61/61 |
+| Integration 测试 | `php tests/Integration/S02P07PolicyStateMachineTest.php` | 60 断言全过 | ✅ 60/60 |
 | PHP lint | `php -l`（12 文件） | 无语法错误 | ✅ |
 | OpenAPI YAML 解析 | pyyaml safe_load（governance.yaml/policy_parameter.yaml/admin.yaml/gainode-v2.yaml） | 全部可解析 | ✅ |
 | OpenAPI schema 注册 | gainode-v2.yaml components.schemas | ApprovalRequest/ParameterRelease/ParameterSnapshot/RiskCase/Ticket/TicketMessage/TicketAttachment/Notice/NotificationDelivery/AuditEvent 10 项 | ✅ |
 
 ## 业务验收（人工/复核）
 
-1. **ApprovalRequest AR1-AR8**：八态状态机按 2B-2 §3.2 转移矩阵，非法转移（executed→*、rejected→*、approved→changes_requested、draft→approved）抛 `OBJECT_VERSION_CONFLICT`（409）。
-2. **ParameterRelease PR1/PR2/PR5-PR11**：八态状态机；PR3/PR4 因 `changes_requested` 不在 canonical 8 态内（合同缺口）不实现，fail-closed。
-3. **RiskCase 五态**：open→investigating→under_review→resolved→closed + 误报 open→closed + 申诉 resolved→investigating（appeal_eligible 守卫）。
+1. **ApprovalRequest AR1-AR8**：八态状态机按 2B-2 §3.2 转移矩阵；`completeExecution` 因业务副作用（账本/资金）TBC 而 fail-closed（`DEPENDENCY_UNAVAILABLE`），`executed` 态保留为冻结常量但暂不可达；非法转移（rejected→*、approved→changes_requested、draft→approved）抛 `OBJECT_VERSION_CONFLICT`（409）。
+2. **ParameterRelease PR1/PR2/PR5-PR11**：八态状态机；`activateFromApproved`/`activateFromScheduled`/`resume`/`rollback` 因 snapshot 生成 TBC 而 fail-closed（`DEPENDENCY_UNAVAILABLE`）；PR3/PR4 因 `changes_requested` 不在 canonical 8 态内（合同缺口）不实现。
+3. **RiskCase 五态**：open→investigating→under_review→(resolved) + 误报 open→closed + 申诉 resolved→investigating（appeal_eligible 守卫）；`resolve` 因处置执行 TBC 而 fail-closed（`DEPENDENCY_UNAVAILABLE`），`resolved`/`closed` 态保留为冻结常量。
 4. **Ticket TK1-TK8**：六态状态机 + `resolved→in_progress` 重开（appeal_eligible 守卫）+ `resolved→closed` 终态保护。
 5. **NotificationDelivery 四态**：pending→delivered/failed/cancelled + failed→pending 重试（attempt_count 递增）。
 6. **SoD（Actor-level）**：ApprovalRequest 自批 / ParameterRelease 操作者=审批人 / RiskCase 审批人=检测人 → `POLICY_DENIED`（403）。
-7. **fail-closed**：NotificationDelivery.deliver / TicketAttachment.create / RiskCase.execute 全部抛 `DEPENDENCY_UNAVAILABLE`（503），未用 TBC 依赖补洞。
+7. **fail-closed**：NotificationDelivery.deliver / TicketAttachment.create / RiskCase.execute / ApprovalRequest.completeExecution / ParameterRelease.activateFromApproved·activateFromScheduled·resume·rollback / RiskCase.resolve 全部抛 `DEPENDENCY_UNAVAILABLE`（503），未用 TBC 依赖补洞。
 8. **append-only**：ParameterSnapshot/TicketMessage/TicketAttachment/AuditEvent 无覆盖/删除路径；仅追加与只读投影。
 9. **审计脱敏**：AuditEvent listAdmin/detail 对 AUDITOR 脱敏，不暴露内部快照结构。
 10. **审计与 CAS**：每个转移写 `audit_events` + actor 回写 + `object_version` 递增，并发冲突 CAS 决胜。
@@ -37,6 +37,6 @@
 
 - 10 个 Service 重写/实现（ApprovalRequest / ParameterRelease / ParameterSnapshot / RiskCase / Ticket / TicketMessage / TicketAttachment / Notice / NotificationDelivery / AuditEvent）
 - 1 个 OpenAPI schema 新增（governance.yaml）+ 3 个 OpenAPI 更新（policy_parameter.yaml / admin.yaml / gainode-v2.yaml）
-- 2 个测试新增（Contract/Integration，共 95 断言）
+- 2 个测试新增（Contract/Integration，共 94 断言）
 - 1 个 TASK 三件套（本目录）
 - context.md + manifest.yaml 指针更新

@@ -283,12 +283,10 @@ check((string) $approvalSvc->get('AP1')->status === ApprovalRequestModel::STATUS
 $approvalSvc->startExecution('AP1', 'SYS', 'SYSTEM', 'EX1');
 check((string) $approvalSvc->get('AP1')->status === ApprovalRequestModel::STATUS_EXECUTING, 'AR6 startExecution → executing');
 
-$approvalSvc->completeExecution('AP1', 'SYS', 'SYSTEM');
-check((string) $approvalSvc->get('AP1')->status === ApprovalRequestModel::STATUS_EXECUTED, 'AR7 completeExecution → executed');
-
+// AR7 completeExecution：真实业务副作用（账本/资金）由对应 Writer 承担（TBC）→ FAIL_CLOSED
 expectDomainException(function () use ($approvalSvc) {
     $approvalSvc->completeExecution('AP1', 'SYS', 'SYSTEM');
-}, ErrorDict::OBJECT_VERSION_CONFLICT, 'executed 态再 completeExecution → OBJECT_VERSION_CONFLICT（终态）');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'AR7 completeExecution → DEPENDENCY_UNAVAILABLE（业务副作用 TBC）');
 
 // SoD：审批人 == 申请人 → POLICY_DENIED
 $approvalSvc->create([
@@ -315,20 +313,37 @@ $paramSvc->approve('R1', 'A1', 'PARAM_APPROVER');
 check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_APPROVED, 'PR2 approve → approved');
 check((string) $paramSvc->get('R1')->approved_by === 'A1', 'PR2 approved_by 回写');
 
-$paramSvc->activateFromApproved('R1', 'O1', 'RELEASE_OPERATOR');
-check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_ACTIVE, 'PR6 activateFromApproved → active');
+// PR6 activateFromApproved：生成 active ParameterSnapshot 依赖参数内容（TBC）→ FAIL_CLOSED
+expectDomainException(function () use ($paramSvc) {
+    $paramSvc->activateFromApproved('R1', 'O1', 'RELEASE_OPERATOR');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'PR6 activateFromApproved → DEPENDENCY_UNAVAILABLE（snapshot TBC）');
 
-$paramSvc->pause('R1', 'O1', 'RELEASE_OPERATOR');
-check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_PAUSED, 'PR8 pause → paused');
+// PR5 schedule：approved → scheduled（纯状态转移）
+$paramSvc->schedule('R1', 'O1', 'RELEASE_OPERATOR', time() + 3600);
+check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_SCHEDULED, 'PR5 schedule → scheduled');
 
-$paramSvc->resume('R1', 'O1', 'RELEASE_OPERATOR');
-check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_ACTIVE, 'PR9 resume → active');
-
-$paramSvc->rollback('R1', 'O1', 'RELEASE_OPERATOR');
-check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_ROLLED_BACK, 'PR10 rollback → rolled_back');
-
+// PR11 archive：scheduled → archived（纯状态转移，不可再激活）
 $paramSvc->archive('R1', 'O1', 'RELEASE_OPERATOR');
 check((string) $paramSvc->get('R1')->status === ParameterReleaseModel::STATUS_ARCHIVED, 'PR11 archive → archived');
+
+// PR8 pause：active → paused（纯状态转移，直接构造 active 态对象）
+$paramSvc->create([
+    'release_id'  => 'R4',
+    'status'      => ParameterReleaseModel::STATUS_ACTIVE,
+    'approved_by' => 'A1',
+]);
+$paramSvc->pause('R4', 'O1', 'RELEASE_OPERATOR');
+check((string) $paramSvc->get('R4')->status === ParameterReleaseModel::STATUS_PAUSED, 'PR8 pause → paused');
+
+// PR9 resume：paused → active（重新生成 active ParameterSnapshot TBC → FAIL_CLOSED）
+expectDomainException(function () use ($paramSvc) {
+    $paramSvc->resume('R4', 'O1', 'RELEASE_OPERATOR');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'PR9 resume → DEPENDENCY_UNAVAILABLE（snapshot TBC）');
+
+// PR10 rollback：active/paused → rolled_back（生成回滚 ParameterSnapshot TBC → FAIL_CLOSED）
+expectDomainException(function () use ($paramSvc) {
+    $paramSvc->rollback('R4', 'O1', 'RELEASE_OPERATOR');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'PR10 rollback → DEPENDENCY_UNAVAILABLE（回滚 snapshot TBC）');
 
 // SoD：operator == approver → POLICY_DENIED
 $paramSvc->create([
@@ -340,14 +355,15 @@ expectDomainException(function () use ($paramSvc) {
     $paramSvc->activateFromApproved('R2', 'A9', 'RELEASE_OPERATOR');
 }, ErrorDict::POLICY_DENIED, 'activate operator=approver → POLICY_DENIED（SoD）');
 
-// PR7: scheduled → active
+// PR7: scheduled → active（生成 active ParameterSnapshot TBC → FAIL_CLOSED）
 $paramSvc->create([
     'release_id'  => 'R3',
     'status'      => ParameterReleaseModel::STATUS_SCHEDULED,
     'approved_by' => 'A1',
 ]);
-$paramSvc->activateFromScheduled('R3', 'O1', 'RELEASE_OPERATOR');
-check((string) $paramSvc->get('R3')->status === ParameterReleaseModel::STATUS_ACTIVE, 'PR7 activateFromScheduled → active');
+expectDomainException(function () use ($paramSvc) {
+    $paramSvc->activateFromScheduled('R3', 'O1', 'RELEASE_OPERATOR');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'PR7 activateFromScheduled → DEPENDENCY_UNAVAILABLE（snapshot TBC）');
 
 // Snapshot append-only 只读投影
 $snapshotSvc->create([
@@ -380,12 +396,20 @@ check((string) $riskSvc->get('C1')->status === RiskCaseModel::STATUS_INVESTIGATI
 $riskSvc->submitDecision('C1', 'RA1', 'RISK_ANALYST');
 check((string) $riskSvc->get('C1')->status === RiskCaseModel::STATUS_UNDER_REVIEW, 'investigating → under_review');
 
-$riskSvc->resolve('C1', 'RA2', 'RISK_APPROVER', 'FREEZE', 'reason');
-check((string) $riskSvc->get('C1')->status === RiskCaseModel::STATUS_RESOLVED, 'under_review → resolved');
-check((string) $riskSvc->get('C1')->reviewed_by === 'RA2', 'resolve reviewed_by 回写');
+// resolve：处置措施执行依赖风险策略（TBC）→ FAIL_CLOSED
+expectDomainException(function () use ($riskSvc) {
+    $riskSvc->resolve('C1', 'RA2', 'RISK_APPROVER', 'FREEZE', 'reason');
+}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'under_review → resolved → DEPENDENCY_UNAVAILABLE（处置执行 TBC）');
 
-$riskSvc->closeResolved('C1', 'RA2', 'RISK_APPROVER');
-check((string) $riskSvc->get('C1')->status === RiskCaseModel::STATUS_CLOSED, 'resolved → closed');
+// closeResolved：resolved → closed（纯状态转移，直接构造 resolved 态对象）
+$riskSvc->create([
+    'case_id'     => 'C6',
+    'user_id'     => 'U6',
+    'status'      => RiskCaseModel::STATUS_RESOLVED,
+    'detected_by' => 'SYS',
+]);
+$riskSvc->closeResolved('C6', 'RA2', 'RISK_APPROVER');
+check((string) $riskSvc->get('C6')->status === RiskCaseModel::STATUS_CLOSED, 'resolved → closed');
 
 // 误报关闭：open → closed
 $riskSvc->create([
@@ -416,7 +440,7 @@ $riskSvc->create([
     'detected_by'    => 'SYS',
     'appeal_eligible' => 1,
 ]);
-$riskSvc->reopenAppeal('C4', 'RA1', 'RISK_ANALYST');
+$riskSvc->reopenAppeal('C4', 'RA2', 'RISK_APPROVER');
 check((string) $riskSvc->get('C4')->status === RiskCaseModel::STATUS_INVESTIGATING, 'resolved → investigating（申诉重开）');
 
 // appeal_eligible=0 → reopen 拒绝
@@ -428,7 +452,7 @@ $riskSvc->create([
     'appeal_eligible' => 0,
 ]);
 expectDomainException(function () use ($riskSvc) {
-    $riskSvc->reopenAppeal('C5', 'RA1', 'RISK_ANALYST');
+    $riskSvc->reopenAppeal('C5', 'RA2', 'RISK_APPROVER');
 }, ErrorDict::POLICY_DENIED, 'reopen appeal_eligible=0 → POLICY_DENIED');
 
 expectDomainException(function () use ($riskSvc) {

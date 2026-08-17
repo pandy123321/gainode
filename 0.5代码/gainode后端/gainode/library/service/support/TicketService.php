@@ -13,6 +13,7 @@ use library\service\transaction\TransactionBoundary;
 use support\extend\Db;
 use support\extend\Service;
 use support\exception\DomainException;
+use support\middleware\RequestContext;
 use support\utils\Random;
 
 /**
@@ -51,6 +52,10 @@ class TicketService extends Service
     public const EVENT_RESOLVED      = 'TICKET_RESOLVED';
     public const EVENT_CLOSED        = 'TICKET_CLOSED';
     public const EVENT_REOPENED      = 'TICKET_REOPENED';
+
+    // ---- 05 §8 最小角色（本包仅引用这 2 个，canonical 冻结）----
+    public const ROLE_END_USER      = 'END_USER';
+    public const ROLE_SUPPORT_AGENT = 'SUPPORT_AGENT';
 
     public function __construct()
     {
@@ -112,38 +117,45 @@ class TicketService extends Service
         }
         return $this->transition(
             $ticketId, [TicketModel::STATUS_SUBMITTED], TicketModel::STATUS_IN_PROGRESS,
-            self::EVENT_ACCEPTED, $actorId, $actorRole, $extra
+            self::EVENT_ACCEPTED, $actorId, $actorRole, $extra,
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_SUPPORT_AGENT], $actorRole)
         );
     }
 
-    /** TK2：in_progress → waiting_user（等待用户回复） */
+    /** TK2：in_progress → waiting_user（等待用户回复；SUPPORT_AGENT） */
     public function waitUser(string $ticketId, string $actorId, string $actorRole): TicketModel
     {
         return $this->transition(
             $ticketId, [TicketModel::STATUS_IN_PROGRESS], TicketModel::STATUS_WAITING_USER,
-            self::EVENT_WAITING_USER, $actorId, $actorRole
+            self::EVENT_WAITING_USER, $actorId, $actorRole,
+            [],
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_SUPPORT_AGENT], $actorRole)
         );
     }
 
-    /** TK3：waiting_user → in_progress（用户回复） */
+    /** TK3：waiting_user → in_progress（用户回复；END_USER） */
     public function userReplied(string $ticketId, string $actorId, string $actorRole): TicketModel
     {
         return $this->transition(
             $ticketId, [TicketModel::STATUS_WAITING_USER], TicketModel::STATUS_IN_PROGRESS,
-            self::EVENT_USER_REPLIED, $actorId, $actorRole
+            self::EVENT_USER_REPLIED, $actorId, $actorRole,
+            [],
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_END_USER], $actorRole)
         );
     }
 
-    /** TK4：in_progress → under_review（升级复核） */
+    /** TK4：in_progress → under_review（升级复核；SUPPORT_AGENT） */
     public function escalate(string $ticketId, string $actorId, string $actorRole): TicketModel
     {
         return $this->transition(
             $ticketId, [TicketModel::STATUS_IN_PROGRESS], TicketModel::STATUS_UNDER_REVIEW,
-            self::EVENT_UNDER_REVIEW, $actorId, $actorRole
+            self::EVENT_UNDER_REVIEW, $actorId, $actorRole,
+            [],
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_SUPPORT_AGENT], $actorRole)
         );
     }
 
-    /** TK5/TK6：in_progress / under_review → resolved（问题解决） */
+    /** TK5/TK6：in_progress / under_review → resolved（问题解决；SUPPORT_AGENT） */
     public function resolve(string $ticketId, string $actorId, string $actorRole, string $resolutionType = ''): TicketModel
     {
         $extra = [];
@@ -154,27 +166,31 @@ class TicketService extends Service
             $ticketId,
             [TicketModel::STATUS_IN_PROGRESS, TicketModel::STATUS_UNDER_REVIEW],
             TicketModel::STATUS_RESOLVED,
-            self::EVENT_RESOLVED, $actorId, $actorRole, $extra
+            self::EVENT_RESOLVED, $actorId, $actorRole, $extra,
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_SUPPORT_AGENT], $actorRole)
         );
     }
 
-    /** TK7：resolved → closed（确认关闭） */
+    /** TK7：resolved → closed（确认关闭；SUPPORT_AGENT） */
     public function close(string $ticketId, string $actorId, string $actorRole): TicketModel
     {
         return $this->transition(
             $ticketId, [TicketModel::STATUS_RESOLVED], TicketModel::STATUS_CLOSED,
-            self::EVENT_CLOSED, $actorId, $actorRole
+            self::EVENT_CLOSED, $actorId, $actorRole,
+            [],
+            fn (TicketModel $t) => $this->guardRole([self::ROLE_SUPPORT_AGENT], $actorRole)
         );
     }
 
-    /** TK8：resolved → in_progress（重开，appeal_eligible=1） */
+    /** TK8：resolved → in_progress（重开，appeal_eligible=1；END_USER / SUPPORT_AGENT） */
     public function reopen(string $ticketId, string $actorId, string $actorRole): TicketModel
     {
         return $this->transition(
             $ticketId, [TicketModel::STATUS_RESOLVED], TicketModel::STATUS_IN_PROGRESS,
             self::EVENT_REOPENED, $actorId, $actorRole,
             [],
-            function (TicketModel $t) {
+            function (TicketModel $t) use ($actorRole) {
+                $this->guardRole([self::ROLE_END_USER, self::ROLE_SUPPORT_AGENT], $actorRole);
                 if ((int) $t->appeal_eligible !== 1) {
                     throw new DomainException(ErrorDict::POLICY_DENIED, 'ticket is not appeal eligible');
                 }
@@ -232,6 +248,14 @@ class TicketService extends Service
         });
     }
 
+    /** 角色白名单：不在冻结角色集合内 → AUTH_FORBIDDEN（fail-closed） */
+    private function guardRole(array $allowedRoles, string $actorRole): void
+    {
+        if (!in_array($actorRole, $allowedRoles, true)) {
+            throw new DomainException(ErrorDict::AUTH_FORBIDDEN, 'ticket actor role forbidden');
+        }
+    }
+
     private function appendAudit(
         string $eventCode,
         string $actorId,
@@ -253,7 +277,7 @@ class TicketService extends Service
             'after_snapshot_id'    => '0',
             'outcome'              => AuditEventModel::OUTCOME_SUCCESS,
             'reason_code'          => '',
-            'request_id'           => '',
+            'request_id'           => RequestContext::getRequestId(),
             'approval_id'          => '0',
             'case_id'              => ($caseId !== null && $caseId !== '') ? $caseId : '0',
             'created_time'         => time(),
