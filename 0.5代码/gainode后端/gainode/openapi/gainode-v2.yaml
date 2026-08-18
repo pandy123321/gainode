@@ -230,10 +230,6 @@ components:
       $ref: './components/schemas/robot.yaml#/AIReward'
     RobotUpgradeOrder:
       $ref: './components/schemas/robot.yaml#/RobotUpgradeOrder'
-    Robot:
-      $ref: './components/schemas/robot.yaml#/Robot'
-    RobotReward:
-      $ref: './components/schemas/robot.yaml#/RobotReward'
     PredictionMarket:
       $ref: './components/schemas/prediction.yaml#/PredictionMarket'
     PredictionOrder:
