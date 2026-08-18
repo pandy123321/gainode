@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="css/style.css">
 <style>
   .login-ver{text-align:center;margin-top:24px;color:rgba(255,255,255,0.5);font-size:12px;position:relative;z-index:1;}
+  .proto-banner{background:rgba(255,180,0,0.15);border:1px solid rgba(255,180,0,0.5);color:#ffb400;font-size:12px;font-weight:600;letter-spacing:.5px;padding:8px 12px;border-radius:6px;margin-bottom:16px;text-align:center;}
 </style>
 </head>
 <body>
@@ -18,14 +19,16 @@
       <p class="sub">Management Console · V6.1 Wireframe</p>
     </div>
 
+    <div class="proto-banner">NON_PRODUCTION · MOCK_ONLY · DO_NOT_DEPLOY — 静态原型演示，无真实认证与数据</div>
+
     <div id="pwdForm">
       <div class="form-group">
-        <label>Account</label>
-        <input type="text" id="account" placeholder="admin" value="admin">
+        <label>Account <span style="color:#ffb400;font-size:11px;">(DEMO: admin)</span></label>
+        <input type="text" id="account" placeholder="Enter account">
       </div>
       <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="Enter password" value="admin123">
+        <label>Password <span style="color:#ffb400;font-size:11px;">(DEMO: admin123)</span></label>
+        <input type="password" id="password" placeholder="Enter password">
       </div>
       <div class="form-group">
         <label>Verification</label>
