@@ -278,22 +278,23 @@ var MOCK = {
      resolution:'account_restricted',created:'2024-06-05 08:00',resolved:'2024-06-05 12:00'}
   ],
 
+  /* Approval canonical states（05 §Approval）：draft / pending / changes_requested / approved / rejected / executing / executed / failed */
   approvalTasks: [
     {task_id:'APR-089',type:'parameter_release',title:'Release V3.2.1 — daily_reward_coefficient',
-     requester:'param_editor_01',risk:'low',impact:'All active robots',
+     requester:'param_editor_01',requester_actor_id:'param_editor_01',risk:'low',impact:'All active robots',
      old_value:'multiple coefficients (V3.2.0)',new_value:'simplified 56-level table',
-     status:'pending',created:'2024-06-10 08:00',sla:'48h'},
+     status:'pending',allowed_actions:['approve','reject','request_changes'],created:'2024-06-10 08:00',sla:'48h'},
     {task_id:'APR-088',type:'ledger_correction',title:'Correct LE-004 posting error',
-     requester:'ledger_operator_01',risk:'medium',impact:'±500 APT on Prediction Settlement pool',
+     requester:'ledger_operator_01',requester_actor_id:'ledger_operator_01',risk:'medium',impact:'±500 APT on Prediction Settlement pool',
      old_value:'Posting to wrong batch',new_value:'Reversal + repost to B-892',
-     status:'changes_requested',created:'2024-06-09 16:00',sla:'24h'},
+     status:'changes_requested',allowed_actions:[],created:'2024-06-09 16:00',sla:'24h'},
     {task_id:'APR-087',type:'risk_disposition',title:'RC-2024-054 Escalation — market_manipulation',
-     requester:'risk_approver_01',risk:'high',impact:'MKT-002 LFC vs MNU',
+     requester:'risk_approver_01',requester_actor_id:'risk_approver_01',risk:'high',impact:'MKT-002 LFC vs MNU',
      old_value:'Continue market open',new_value:'Pause and investigate cluster',
-     status:'pending',created:'2024-06-10 07:00',sla:'2h',needs_mfa:true},
+     status:'pending',allowed_actions:['approve','reject','request_changes'],created:'2024-06-10 07:00',sla:'2h',needs_mfa:true},
     {task_id:'APR-086',type:'parameter_activation',title:'Activate Release V3.2.0 -> PROD',
-     requester:'release_operator_01',risk:'low',impact:'Power cap formula update',
-     status:'executed',created:'2024-06-08 10:00',decided:'2024-06-08 14:00',executed:'2024-06-08 15:00'}
+     requester:'release_operator_01',requester_actor_id:'release_operator_01',risk:'low',impact:'Power cap formula update',
+     status:'executed',allowed_actions:[],created:'2024-06-08 10:00',decided:'2024-06-08 14:00',executed:'2024-06-08 15:00'}
   ],
 
   parameters: [
@@ -375,30 +376,39 @@ var MOCK = {
     {case_id:'RST-003',user:'U-002/Maria Lopez',type:'restrict_robot',reason:'冷却期',effective:'2024-06-01',expiry:'2024-06-15',status:'expired'}
   ],
 
-  /* ───── RBAC Roles ───── */
-  adminRoles: [
-    {id:1,name:'Super Admin',desc:'Full system access',members:2,is_super:true},
-    {id:2,name:'KYC Reviewer',desc:'Review KYC cases only',members:4},
-    {id:3,name:'Finance Reviewer',desc:'Read all ledger, no write',members:2},
-    {id:4,name:'Ledger Operator',desc:'Execute approved corrections',members:2},
-    {id:5,name:'Risk Analyst',desc:'Create/analyze risk cases',members:3},
-    {id:6,name:'Risk Approver',desc:'Approve risk dispositions',members:2},
-    {id:7,name:'Parameter Editor',desc:'Edit drafts, cannot activate',members:2},
-    {id:8,name:'Parameter Approver',desc:'Approve parameters, cannot edit',members:2},
-    {id:9,name:'Release Operator',desc:'Activate releases, cannot edit',members:1},
-    {id:10,name:'Auditor',desc:'Read all audits, no execute',members:1},
-    {id:11,name:'Support Agent',desc:'Handle tickets, read user data',members:5},
-    {id:12,name:'Security Admin',desc:'Manage RBAC, cannot access business',members:1}
+  /* ───── RBAC Roles（canonical 13-role ID，display_name 仅 UI 展示） ───── */
+  CANONICAL_ROLES: [
+    'END_USER','SUPPORT_AGENT','OPS_OPERATOR','KYC_REVIEWER','RISK_ANALYST','RISK_APPROVER',
+    'LEDGER_OPERATOR','FINANCE_REVIEWER','PARAM_EDITOR','PARAM_APPROVER','RELEASE_OPERATOR','AUDITOR','ADMIN_SECURITY'
   ],
 
+  /* Admin 侧 Persona：12 = 13 - END_USER（END_USER 无权访问 Admin）。授权 ID 必须 canonical。 */
+  adminRoles: [
+    {id:1, canonical_role_id:'SUPPORT_AGENT', display_name:'Support Agent', desc:'可读用户摘要，不可写资产', members:5},
+    {id:2, canonical_role_id:'OPS_OPERATOR', display_name:'Ops Operator', desc:'可执行已批准操作，不可修改参数', members:1},
+    {id:3, canonical_role_id:'KYC_REVIEWER', display_name:'KYC Reviewer', desc:'可审批 KYC case，不可接触资产/Trade', members:4},
+    {id:4, canonical_role_id:'RISK_ANALYST', display_name:'Risk Analyst', desc:'可发起/分析 RiskCase，不可批准高危处置', members:3},
+    {id:5, canonical_role_id:'RISK_APPROVER', display_name:'Risk Approver', desc:'可批准处置，不可直接执行资产变更', members:2},
+    {id:6, canonical_role_id:'LEDGER_OPERATOR', display_name:'Ledger Operator', desc:'可执行已批准账本操作，不可单独创建新规则', members:2},
+    {id:7, canonical_role_id:'FINANCE_REVIEWER', display_name:'Finance Reviewer', desc:'可读全部 Ledger/对账、不可写', members:2},
+    {id:8, canonical_role_id:'PARAM_EDITOR', display_name:'Parameter Editor', desc:'可编辑参数草稿，不可批准或激活', members:2},
+    {id:9, canonical_role_id:'PARAM_APPROVER', display_name:'Parameter Approver', desc:'可批准参数，不可编辑或激活', members:2},
+    {id:10, canonical_role_id:'RELEASE_OPERATOR', display_name:'Release Operator', desc:'可排期和激活参数，不可编辑或批准', members:1},
+    {id:11, canonical_role_id:'AUDITOR', display_name:'Auditor', desc:'可读全部审计、不可执行任何变更', members:1},
+    {id:12, canonical_role_id:'ADMIN_SECURITY', display_name:'Security Admin', desc:'可管理角色/权限/安全配置，不可接触资产或业务数据', members:1}
+  ],
+
+  /* 当前登录操作者（Prototype 固定 Persona，用于 Actor-level SoD 演示） */
+  currentActor: { actor_id:'param_editor_01', canonical_role_id:'PARAM_EDITOR', display_name:'Dave Param (DEMO)' },
+
   adminUsers: [
-    {id:1,account:'admin',name:'System Admin',role:'Super Admin',status:'active',login_cnt:428,last_login:'2024-06-10 09:00'},
-    {id:2,account:'kyc_reviewer',name:'Alice KYC',role:'KYC Reviewer',status:'active',login_cnt:156,last_login:'2024-06-10 08:00'},
-    {id:3,account:'risk_analyst',name:'Bob Risk',role:'Risk Analyst',status:'active',login_cnt:89,last_login:'2024-06-10 07:30'},
-    {id:4,account:'cs_agent_01',name:'Carol Support',role:'Support Agent',status:'active',login_cnt:234,last_login:'2024-06-10 09:30'},
-    {id:5,account:'param_editor',name:'Dave Param',role:'Parameter Editor',status:'active',login_cnt:45,last_login:'2024-06-09 18:00'},
-    {id:6,account:'auditor_01',name:'Eve Audit',role:'Auditor',status:'active',login_cnt:67,last_login:'2024-06-10 06:00'},
-    {id:7,account:'finance_reviewer',name:'Frank Finance',role:'Finance Reviewer',status:'active',login_cnt:120,last_login:'2024-06-10 08:00'}
+    {id:1, account:'admin', name:'Demo Operator', role:'OPS_OPERATOR', status:'active', login_cnt:428, last_login:'2024-06-10 09:00', demo:true},
+    {id:2, account:'kyc_reviewer', name:'Alice KYC', role:'KYC_REVIEWER', status:'active', login_cnt:156, last_login:'2024-06-10 08:00'},
+    {id:3, account:'risk_analyst', name:'Bob Risk', role:'RISK_ANALYST', status:'active', login_cnt:89, last_login:'2024-06-10 07:30'},
+    {id:4, account:'cs_agent_01', name:'Carol Support', role:'SUPPORT_AGENT', status:'active', login_cnt:234, last_login:'2024-06-10 09:30'},
+    {id:5, account:'param_editor', name:'Dave Param', role:'PARAM_EDITOR', status:'active', login_cnt:45, last_login:'2024-06-09 18:00'},
+    {id:6, account:'auditor_01', name:'Eve Audit', role:'AUDITOR', status:'active', login_cnt:67, last_login:'2024-06-10 06:00'},
+    {id:7, account:'finance_reviewer', name:'Frank Finance', role:'FINANCE_REVIEWER', status:'active', login_cnt:120, last_login:'2024-06-10 08:00'}
   ],
 
   /* ───── System Config ───── */
@@ -446,19 +456,22 @@ var MOCK = {
      impact_apt:'±45,000',created:'2024-06-09 06:00'}
   ],
 
-  /* ───── Emergency Actions ───── */
+  /* ───── Emergency Actions（ADMIN_SECURITY + MFA + case_id/reason/evidence + 48h Independent Audit） ───── */
   emergencyActions: [
     {action_id:'EMG-001',type:'market_suspend',target:'MKT-002 LFC vs MNU',
-     reason:'Suspected match fixing',status:'executed',
-     executor:'admin',approver:'risk_approver_01',
-     executed:'2024-06-10 07:30',post_review_status:'pending',post_deadline:'2024-06-17'},
+     reason:'Suspected match fixing',evidence:'BetBurger anomaly feed + risk cluster report',
+     case_id:'RC-2024-054',role:'ADMIN_SECURITY',mfa:true,status:'executed',
+     executor:'security_admin',executed:'2024-06-10 07:30',
+     audit_deadline:'2024-06-12 07:30',audit_status:'pending'},
     {action_id:'EMG-002',type:'user_suspend',target:'U-003',
-     reason:'Account takeover — freeze all',status:'executed',
-     executor:'admin',approver:'security_admin',
-     executed:'2024-06-05 12:00',post_review_status:'completed',post_deadline:'2024-06-12'},
+     reason:'Account takeover — freeze all',evidence:'ATO detection case RC-2024-053',
+     case_id:'RC-2024-053',role:'ADMIN_SECURITY',mfa:true,status:'executed',
+     executor:'security_admin',executed:'2024-06-05 12:00',
+     audit_deadline:'2024-06-07 12:00',audit_status:'completed'},
     {action_id:'EMG-003',type:'parameter_rollback',target:'REL-3.2.1',
-     reason:'Reward spike detected',status:'pending_confirmation',
-     executor:'release_operator_01',created:'2024-06-10 10:00'}
+     reason:'Reward spike detected',evidence:'Daily reward anomaly alert',
+     case_id:'RC-2024-056',role:'ADMIN_SECURITY',mfa:true,status:'pending_confirmation',
+     executor:'security_admin',created:'2024-06-10 10:00'}
   ],
 
   /* ───── Async Jobs ───── */

@@ -117,17 +117,19 @@ var App = {
       '<button class="btn" onclick="App.closeModal()">关闭</button><button class="btn btn-primary" onclick="App.closeModal();App.toast(\'Candidate 已保存\')">保存 Candidate</button>',true);
   },
 
-  /* Emergency Action Form */
+  /* Emergency Action Form（ADMIN_SECURITY + MFA + case_id/reason/evidence + 48h Independent Audit） */
   openEmergencyForm:function(){
     var s=this;
-    s.openModal('🚨 发起紧急操作',
-      '<div class="bar-danger" style="margin-bottom:16px;">⚠ 紧急操作需双人授权。所有操作记录在审计日志且不可删除。事后补审超时必须升级。</div>'+
+    s.openModal('🚨 发起紧急操作（ADMIN_SECURITY + MFA）',
+      '<div class="bar-danger" style="margin-bottom:16px;">⚠ 紧急操作仅限 ADMIN_SECURITY 角色 + MFA。必须填写 case_id / reason / evidence。执行后 48h 内生成 Independent Audit。</div>'+
       s._form('操作类型','<select><option>–选择–</option><option>market_suspend</option><option>user_suspend</option><option>parameter_rollback</option><option>otc_freeze</option><option>settlement_pause</option></select>')+
+      s._form('Case ID','<input placeholder="关联 RiskCase / case_id（必填）">')+
       s._form('目标对象','<input placeholder="Market ID / User ID / Release ID ...">')+
       s._form('紧急理由','<textarea rows="3" placeholder="必须详细描述紧急情况、影响范围和证据"></textarea>')+
-      s._form('恢复方案','<textarea rows="2" placeholder="描述事后恢复计划和责任人"></textarea>')+
-      s._form('第二授权人','<select><option>–选择授权人–</option><option>risk_approver_01</option><option>security_admin</option><option>admin</option></select>'),
-      '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-danger" onclick="App.closeModal();App.toast(\'紧急操作已发起 — 等待第二人授权\',\'warning\')">确认发起</button>',true);
+      s._form('证据引用','<textarea rows="2" placeholder="证据源 / 检测报告 / 数据快照（必填）"></textarea>')+
+      s._form('MFA 验证','<input placeholder="输入 6 位 MFA 验证码（必填）">')+
+      '<div class="bar-info" style="margin-top:12px;">ℹ 执行后自动创建 48h Independent Audit obligation，不可省略。</div>',
+      '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-danger" onclick="App.closeModal();App.toast(\'紧急操作已执行 — 48h 独立审计已登记\')">确认执行</button>',true);
   },
 
   /* Refund / Correction Form */
@@ -225,8 +227,9 @@ var App = {
   openRoleEditor:function(rid){
     var r=MOCK.adminRoles.find(function(x){return x.id===rid;}),s=this;
     if(!r)return;
-    s.openModal('编辑角色 — '+r.name,
-      s._form('角色名称','<input value="'+r.name+'">')+
+    s.openModal('编辑角色 — '+r.display_name,
+      s._form('Canonical Role ID (只读)','<input readonly value="'+r.canonical_role_id+'">')+
+      s._form('UI Display Name','<input value="'+r.display_name+'">')+
       s._form('描述','<input value="'+r.desc+'">')+
       s._form('权限范围','<div style="max-height:200px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:var(--radius);padding:8px;">'+['user:read / user:write','kyc:review / kyc:approve','ledger:read / ledger:correction','robot:read / robot:case','otc:review / otc:approve','market:manage / market:publish','risk:analyze / risk:approve','param:edit / param:activate','support:handle / support:escalate'].map(function(p){return'<div style="padding:4px 0;"><label><input type="checkbox" checked> '+p+'</label></div>';}).join('')+'</div>'),
       '<button class="btn" onclick="App.closeModal()">取消</button><button class="btn btn-primary" onclick="App.closeModal();App.toast(\'角色已更新\')">保存</button>');
@@ -696,10 +699,10 @@ var App = {
          '🇬🇧 United Kingdom|L2|Yes|Yes (P0)|Yes|Available|24h'].map(function(r){var p=r.split('|');
           return'<tr><td>'+p[0]+'</td><td class="'+(p[1]==='N/A'?'deny':'allow')+'">'+p[1]+'</td><td class="'+(p[2]==='Restricted'?'deny':'allow')+'">'+p[2]+'</td><td class="'+(p[3].match(/\d+\+/)||p[3].indexOf('Age')>=0?'conditional':p[3]==='Restricted'?'deny':'allow')+'">'+p[3]+'</td><td class="'+(p[4].indexOf('Limit')>=0?'conditional':p[4]==='Restricted'?'deny':'allow')+'">'+p[4]+'</td><td class="'+(p[5]==='Not available'||p[5]==='N/A'?'deny':'allow')+'">'+p[5]+'</td><td class="'+(p[6]==='N/A'?'deny':'conditional')+'">'+p[6]+'</td></tr>';}).join('')+'</tbody></table></div></div>';
     }else if(tab==='emergency'){
-      body=s.banner('danger','紧急操作只允许预授权角色执行。需 case_id、理由、双人授权。事后补审超时必须升级。')+
-        '<div class="card">'+s.tbl(['Action ID','类型','目标','理由','状态','执行人','审批人','执行时间','事后复审'],
-          MOCK.emergencyActions.map(function(e){return'<tr><td class="cell-mono">'+e.action_id+'</td><td><span class="tag tag-red">'+e.type.replace(/_/g,' ')+'</span></td><td>'+e.target+'</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+e.reason+'">'+e.reason+'</td><td>'+s.tag(e.status)+'</td><td>'+e.executor+'</td><td>'+e.approver+'</td><td>'+(e.executed||e.created||'—')+'</td><td>'+(e.post_review_status?s.tag(e.post_review_status)+' (by '+e.post_deadline+')':'—')+'</td></tr>';}))+
-          '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openEmergencyForm()">发起紧急操作</button><span class="muted" style="margin-left:12px;">影响资产/账本/资格的操作默认仍需双人授权</span></div>'+
+      body=s.banner('danger','紧急操作仅限 ADMIN_SECURITY 角色 + MFA。每笔必须 case_id、理由、证据，执行后 48h 内生成 Independent Audit。非紧急操作仍保持 Requester ≠ Approver（SoD）。')+
+        '<div class="card">'+s.tbl(['Action ID','类型','目标','理由','证据','Case','状态','执行人','角色','MFA','48h 审计'],
+          MOCK.emergencyActions.map(function(e){return'<tr><td class="cell-mono">'+e.action_id+'</td><td><span class="tag tag-red">'+e.type.replace(/_/g,' ')+'</span></td><td>'+e.target+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+e.reason+'">'+e.reason+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+e.evidence+'">'+e.evidence+'</td><td class="cell-mono">'+e.case_id+'</td><td>'+s.tag(e.status)+'</td><td>'+e.executor+'</td><td><span class="tag tag-blue">'+(e.role||'ADMIN_SECURITY')+'</span></td><td>'+(e.mfa?'<span class="tag tag-green">Required</span>':'—')+'</td><td>'+(e.audit_deadline?s.tag(e.audit_status||'pending')+' (by '+e.audit_deadline+')':'—')+'</td></tr>';}))+
+          '<div class="btn-group mt-16"><button class="btn btn-danger" onclick="App.openEmergencyForm()">发起紧急操作</button><span class="muted" style="margin-left:12px;">ADMIN_SECURITY + MFA · case_id/reason/evidence · 48h Independent Audit</span></div>'+
         '</div>';
     }else if(tab==='aiCockpit'){
       body=s.banner('info','依赖能力尚未就绪 — AI 运营驾驶舱依赖 AIAnalysis / AIPipeline 对象，未冻结于 05。当前仅支持占位查看。')+
@@ -734,11 +737,22 @@ var App = {
   openApprovalDetail:function(tid){
     var a=MOCK.approvalTasks.find(function(x){return x.task_id===tid;}),s=this;
     if(!a)return;
+    var cur=MOCK.currentActor||{actor_id:''};
+    var selfRequest=(a.requester_actor_id||a.requester)===cur.actor_id;
+    var can=function(act){return (a.allowed_actions||[]).indexOf(act)>=0;};
+    var btns='';
+    if(can('reject'))btns+='<button class="btn btn-danger" onclick="App.closeModal();App.toast(\'已驳回\',\'error\')">驳回</button>';
+    if(can('request_changes'))btns+='<button class="btn btn-warn" onclick="App.closeModal();App.toast(\'请求修改\')">请求修改</button>';
+    if(can('approve')){
+      if(selfRequest){btns+='<button class="btn btn-success" disabled title="Requester ≠ Approver (SoD)">批准（本人申请不可批准）</button>';}
+      else{btns+='<button class="btn btn-success" onclick="App.closeModal();App.toast(\'已批准 — 等待异步执行\')">批准</button>';}
+    }
     s.openModal('审批详情 — '+a.task_id,
       '<div class="detail-grid mb-16">'+['请求人|'+a.requester,'风险|'+s.tag(a.risk),'影响|'+a.impact].map(function(x){var p=x.split('|');return'<div class="detail-item"><div class="dl">'+p[0]+'</div><div class="dv">'+p[1]+'</div></div>';}).join('')+'</div>'+
       '<div class="diff-table"><table><tr><td class="diff-key">旧值</td><td class="diff-old">'+a.old_value+'</td></tr><tr><td class="diff-arrow">→</td></tr><tr><td class="diff-key">新值</td><td class="diff-new">'+a.new_value+'</td></tr></table></div>'+
-      '<div class="divider"></div><div class="approval-flow"><div class="approval-step done"><div class="step-dot">✓</div><div class="step-label">草稿</div></div><div class="approval-line done"></div><div class="approval-step active"><div class="step-dot">●</div><div class="step-label">审批中</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">执行</div></div></div>',
-      '<button class="btn btn-danger" onclick="App.closeModal();App.toast(\'已驳回\',\'error\')">驳回</button><button class="btn btn-warn" onclick="App.closeModal();App.toast(\'请求修改\')">请求修改</button><button class="btn btn-success" onclick="App.closeModal();App.toast(\'已批准 — 等待异步执行\')">批准</button>',true);
+      '<div class="divider"></div><div class="approval-flow"><div class="approval-step done"><div class="step-dot">✓</div><div class="step-label">草稿</div></div><div class="approval-line done"></div><div class="approval-step active"><div class="step-dot">●</div><div class="step-label">审批中</div></div><div class="approval-line"></div><div class="approval-step"><div class="step-dot">○</div><div class="step-label">执行</div></div></div>'+
+      (selfRequest?'<div class="bar-warn" style="margin-top:12px;">⚠ 申请人不能审批自己的申请（Actor-level SoD）：批准按钮已禁用。后端仍必须重复校验，不能依赖前端。</div>':''),
+      btns,true);
   },
 
   /* ===== 08 客服 / 审计 / 运维 ===== */
@@ -756,7 +770,7 @@ var App = {
     ];
     var body='';
     if(tab==='sensitiveAudit'){
-      body=s.banner('info','敏感操作审计 — 聚焦余额调整、冻结、参数发布、结算更正、权限变化。仅超级管理员。')+
+      body=s.banner('info','敏感操作审计 — 聚焦余额调整、冻结、参数发布、结算更正、权限变化。仅 ADMIN_SECURITY / AUDITOR 可读。')+
         s.tbl(['事件','操作者','对象','Before','After','原因','证据','审批人','执行结果','时间'],[
           '<tr><td>资产调整</td><td>admin</td><td>U-004</td><td>46,700</td><td>48,200</td><td>工单补偿</td><td>TKT-033</td><td>risk_approver_01</td><td><span class="tag tag-green">已执行</span></td><td>2024-06-05</td></tr>',
           '<tr><td>参数发布</td><td>param_editor_01</td><td>REL-3.2.1</td><td>V3.2.0</td><td>V3.2.1</td><td>简化56级表</td><td>—</td><td>admin</td><td><span class="tag tag-green">已激活</span></td><td>2024-06-10</td></tr>',
@@ -794,9 +808,9 @@ var App = {
           Object.keys(MOCK.systemStatus).map(function(k){var v=MOCK.systemStatus[k];return'<div class="flex-row" style="padding:8px 0;border-bottom:1px solid var(--gray-100);"><span style="color:var(--gray-500);width:140px;">'+k+'</span><span class="tag tag-'+(v==='Normal'||v==='Running'?'green':'amber')+'">'+v+'</span></div>';}).join('')+
         '</div>';
     }else if(tab==='rbac'){
-      body=s.banner('info','SoD：Param Edit ≠ Approval ≠ Activation；Risk Analysis ≠ High-Risk Disposition。超管不能绕过审计。')+
-        '<div class="card">'+s.tbl(['ID','角色','描述','成员','操作'],MOCK.adminRoles.map(function(r){return'<tr><td>'+r.id+'</td><td><strong>'+r.name+'</strong>'+(r.is_super?'<span class="tag tag-red">Super</span>':'')+'</td><td>'+r.desc+'</td><td>'+r.members+'</td><td><button class="btn btn-xs btn-primary" onclick="App.openRoleEditor('+r.id+')">编辑</button></td></tr>';}))+'</div>'+
-        '<div class="card mt-16"><div class="card-header">管理员用户</div>'+s.tbl(['ID','账号','角色','登录次数','最后登录'],MOCK.adminUsers.map(function(a){return'<tr><td>'+a.id+'</td><td class="cell-mono">'+a.account+'</td><td>'+a.role+'</td><td>'+a.login_cnt+'</td><td>'+a.last_login+'</td></tr>';}))+'</div>';
+      body=s.banner('info','SoD：Param Edit ≠ Approval ≠ Activation；Risk Analysis ≠ High-Risk Disposition。ADMIN_SECURITY 不能绕过审计/账本/审批。授权 ID 必须 canonical（13 roles），display_name 仅 UI 展示。')+
+        '<div class="card">'+s.tbl(['ID','Canonical Role ID','Display Name','描述','成员','操作'],MOCK.adminRoles.map(function(r){return'<tr><td>'+r.id+'</td><td class="cell-mono">'+r.canonical_role_id+'</td><td><strong>'+r.display_name+'</strong></td><td>'+r.desc+'</td><td>'+r.members+'</td><td><button class="btn btn-xs btn-primary" onclick="App.openRoleEditor('+r.id+')">编辑</button></td></tr>';}))+'</div>'+
+        '<div class="card mt-16"><div class="card-header">管理员用户</div>'+s.tbl(['ID','账号','Canonical Role','登录次数','最后登录'],MOCK.adminUsers.map(function(a){return'<tr><td>'+a.id+'</td><td class="cell-mono">'+a.account+(a.demo?' <span class="tag tag-amber">DEMO</span>':'')+'</td><td class="cell-mono">'+a.role+'</td><td>'+a.login_cnt+'</td><td>'+a.last_login+'</td></tr>';}))+'</div>';
     }else if(tab==='lang'){
       body='<div class="card">'+s.tbl(['Code','语言','覆盖率','翻译条数','状态'],
         MOCK.languages.map(function(l){return'<tr><td class="cell-mono">'+l.code+'</td><td>'+l.flag+' '+l.name+'</td><td><div class="progress-bar" style="width:120px;display:inline-block;"><div class="fill fill-blue" style="width:'+l.coverage+'"></div></div> <span style="font-size:12px;margin-left:8px;">'+l.coverage+'</span></td><td>'+l.translations+'</td><td>'+s.tag(l.status)+'</td></tr>';}))+'</div>';
