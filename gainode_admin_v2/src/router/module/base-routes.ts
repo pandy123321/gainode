@@ -2,14 +2,16 @@ import BasicLayout from '../../layouts/BasicLayout.vue';
 import Login from '../../views/login/index.vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { ADMIN_PAGE_REGISTRY, DEFERRED_PAGE_REGISTRY } from './admin-registry';
+import { ADMIN_PAGE_COMPONENTS } from './admin-page-components';
 
 /**
  * 8 导航 2.0 页面路由（骨架阶段统一挂 ListPage，逐页实现时替换 component）。
  * 权威来源 admin-registry.ts（8 Root IA，04 §2；33 权威 + 7 DEFERRED）。
+ * 已逐页实现的页面由 admin-page-components.ts 登记，未实现的回退 ListPage 骨架。
  */
 const adminPageRoutes: RouteRecordRaw[] = ADMIN_PAGE_REGISTRY.map((page) => ({
   path: page.route,
-  component: () => import('../../views/common/ListPage.vue'),
+  component: ADMIN_PAGE_COMPONENTS[page.pageId] ?? (() => import('../../views/common/ListPage.vue')),
   meta: {
     title: page.title,
     pageId: page.pageId,
