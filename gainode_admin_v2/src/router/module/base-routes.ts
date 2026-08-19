@@ -1,8 +1,38 @@
 import BasicLayout from '../../layouts/BasicLayout.vue';
 import Login from '../../views/login/index.vue';
+import type { RouteRecordRaw } from 'vue-router';
+import { ADMIN_PAGE_REGISTRY, DEFERRED_PAGE_REGISTRY } from './admin-registry';
 
+/**
+ * 8 导航 2.0 页面路由（骨架阶段统一挂 ListPage，逐页实现时替换 component）。
+ * 权威来源 admin-registry.ts（8 Root IA，04 §2；33 权威 + 7 DEFERRED）。
+ */
+const adminPageRoutes: RouteRecordRaw[] = ADMIN_PAGE_REGISTRY.map((page) => ({
+  path: page.route,
+  component: () => import('../../views/common/ListPage.vue'),
+  meta: {
+    title: page.title,
+    pageId: page.pageId,
+    navId: page.navId,
+    priority: page.priority,
+    contractStatus: page.contractStatus,
+    requireServerAuth: page.requireServerAuth,
+    requireAuth: true,
+  },
+}))
 
-export default [
+const deferredPageRoutes: RouteRecordRaw[] = DEFERRED_PAGE_REGISTRY.map((page) => ({
+  path: page.route,
+  component: () => import('../../views/common/ListPage.vue'),
+  meta: {
+    title: page.title,
+    pageId: page.pageId,
+    priority: page.priority,
+    requireAuth: true,
+  },
+}))
+
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     redirect: '/login'
@@ -193,7 +223,7 @@ export default [
   {
     path: '/system',
     component: BasicLayout,
-    meta: { title: '系统管理123' },
+    meta: { title: '系统管理' },
     children: [
       {
         path: '/system/admin',
@@ -289,7 +319,7 @@ export default [
   {
     path: '/user',
     component: BasicLayout,
-    meta: { title: '用户' },
+    meta: { title: '用户管理' },
     children: [
       {
         path: '/user/index',
@@ -415,4 +445,14 @@ export default [
       },
     ]
   },
+
+  // ===========================================================================
+  // Gainode 2.0 8 导航菜单路由（权威 33 + DEFERRED 7，S03-P03）
+  // 由 admin-registry.ts（8 Root IA，04 §2）生成；骨架阶段统一挂 ListPage，
+  // 逐页实现时在 src/views/<nav>/<page-id-lower>/index.vue 落地后替换 component。
+  // ===========================================================================
+  ...adminPageRoutes,
+  ...deferredPageRoutes,
 ]
+
+export default routes

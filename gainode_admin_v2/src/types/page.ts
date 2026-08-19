@@ -76,6 +76,18 @@ export type PagePriority = 'P0' | 'P1' | 'P1_CONDITIONAL' | 'FUTURE' | 'DEFERRED
 /** 页面合同状态（决定页面是完整实现 / 仅预览 / 关闭占位） */
 export type PageContractStatus = 'OPEN' | 'CONTRACT_GAP' | 'CLOSED' | 'TBC'
 
+/** 页面级操作动作键（工具栏 + 行内按钮共用；前端仅按 allowed_actions 显隐，不得本地推导可操作性） */
+export type AdminAction = 'add' | 'edit' | 'view' | 'export' | 'approve' | 'execute' | 'audit'
+
+/** 页面级操作策略：forbidden 优先于 allowed */
+export interface PageActionPolicy {
+  allowed: AdminAction[]
+  forbidden: AdminAction[]
+}
+
+/** 页面形态：dashboard=看板；list=列表（均支持顶部统计卡片） */
+export type AdminPageType = 'dashboard' | 'list'
+
 /** 页面注册元数据（route meta 扩展 + registry 共用） */
 export interface AdminPageMeta {
   /** 页面唯一标识 */
@@ -90,6 +102,26 @@ export interface AdminPageMeta {
   contractStatus: PageContractStatus
   /** 是否需服务端授权（直接 URL 也由服务端强制，前端 RBAC 过滤仅用于菜单展示） */
   requireServerAuth: boolean
+  /** 前端路由 path（8 导航，与 sys_menus.route_url 一致） */
+  route: string
+  /** 页面形态 */
+  type: AdminPageType
+  /** 页面级操作策略 */
+  actions: PageActionPolicy
+  /** detail 子页：挂靠父列表页（不进侧边栏），从列表页行点击/抽屉进入 */
+  isDetail?: boolean
+  /** detail 子页挂靠的父 Page ID */
+  parentPageId?: PageId
+}
+
+/** DEFERRED 页（占位不 404，不计入验收，不挂任何 8 导航） */
+export interface DeferredPageMeta {
+  pageId: DeferredPageId
+  title: string
+  priority: 'DEFERRED'
+  route: string
+  type: AdminPageType
+  actions: PageActionPolicy
 }
 
 /** 写页七态（04 §2 / 07 §9 S03-P03 步骤 4）：在 AdminFiveState 基础上追加 */
