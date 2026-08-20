@@ -66,6 +66,7 @@ check(serviceMethodExists(\library\service\otc\OtcEligibilityProjectionService::
 check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'listAdmin'), 'AuditEventService::listAdmin');
 check(serviceMethodExists(\library\service\admin\AdminUserDtoService::class, 'list'), 'AdminUserDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminOtcDtoService::class, 'list'), 'AdminOtcDtoService::list');
+check(serviceMethodExists(\library\service\admin\AdminOtcTradeDtoService::class, 'list'), 'AdminOtcTradeDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminRobotDtoService::class, 'list'), 'AdminRobotDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminTicketDtoService::class, 'list'), 'AdminTicketDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminLedgerDtoService::class, 'list'), 'AdminLedgerDtoService::list');
@@ -102,7 +103,7 @@ foreach ([
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
     \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts', 'orderCreate', 'orderAddition', 'appealCreate'],
     \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility', 'quote', 'orderCreate', 'orderCancel'],
-    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'userDetail', 'kycQueue', 'otcOrders', 'otcUserOrders', 'robots', 'tickets', 'ledgerAccounts', 'riskCases', 'riskDetail', 'approvalTasks', 'approvalDetail', 'parameterDefinitions', 'parameterReleaseDetail', 'predictionMarkets', 'predictionMarketDetail', 'predictionResults', 'refunds', 'refundDetail', 'corrections', 'correctionDetail', 'powerAccounts', 'rewardOps', 'otcOrderDetail', 'robotDetail', 'ticketDetail', 'workbenchOverview', 'auditLogDetail', 'ledgerOverview', 'ledgerEntries'],
+    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'userDetail', 'kycQueue', 'otcOrders', 'otcUserOrders', 'otcTrades', 'robots', 'tickets', 'ledgerAccounts', 'riskCases', 'riskDetail', 'approvalTasks', 'approvalDetail', 'parameterDefinitions', 'parameterReleaseDetail', 'predictionMarkets', 'predictionMarketDetail', 'predictionResults', 'refunds', 'refundDetail', 'corrections', 'correctionDetail', 'powerAccounts', 'rewardOps', 'otcOrderDetail', 'robotDetail', 'ticketDetail', 'workbenchOverview', 'auditLogDetail', 'ledgerOverview', 'ledgerEntries'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {
         check(method_exists($ctrl, $m), "controller method: {$ctrl}::{$m}");

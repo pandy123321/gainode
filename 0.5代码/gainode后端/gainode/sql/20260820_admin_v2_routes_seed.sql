@@ -13,6 +13,7 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('5884eeecfa31bde2e534795bfd77ec9d','admin_v2','v2\adminv2','kycQueue','GET',NULL,'/admission/kyc','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'kycQueue',1),
     ('33ec532927c38ee6e08489c1a093743d','admin_v2','v2\adminv2','otcOrders','GET',NULL,'/otc/orders','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrders',1),
     ('0ea5f1932a576c001aae5c8a60ddfce2','admin_v2','v2\adminv2','otcUserOrders','GET',NULL,'/otc/users/{id}/orders','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcUserOrders',1),
+    ('82c20a553798c0ae2dbf444128b32087','admin_v2','v2\adminv2','otcTrades','GET',NULL,'/otc/trades','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcTrades',1),
     ('4e016e293594e2154e53628a049e1b23','admin_v2','v2\adminv2','robots','GET',NULL,'/robot/list','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'robots',1),
     ('dbf81db272574a8ffd8c69ed2079bfd2','admin_v2','v2\adminv2','tickets','GET',NULL,'/support/tickets','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'tickets',1),
     ('3c4e93abbffd5ef126a668121edc9f7f','admin_v2','v2\adminv2','ledgerAccounts','GET',NULL,'/ledger/accounts','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerAccounts',1),

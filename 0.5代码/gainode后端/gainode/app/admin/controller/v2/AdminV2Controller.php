@@ -13,6 +13,7 @@ use library\service\admin\AdminLedgerEntriesDtoService;
 use library\service\admin\AdminLedgerOverviewDtoService;
 use library\service\admin\AdminKycDtoService;
 use library\service\admin\AdminOtcDtoService;
+use library\service\admin\AdminOtcTradeDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
 use library\service\admin\AdminPredictionResultDtoService;
@@ -110,6 +111,21 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new OtcOrderService())->listByUser($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/otc/trades — OTC 成交记录 DTO（A-OTC-001 补充） */
+    public function otcTrades(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $otcOrderId = (string) $this->request->get('otc_order_id', '');
+            $result = (new AdminOtcTradeDtoService())->list($page, $size, $otcOrderId);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
