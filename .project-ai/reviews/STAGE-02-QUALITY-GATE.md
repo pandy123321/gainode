@@ -21,7 +21,7 @@
 
 - wiring 契约测试：`tests/Contract/S02P09ControllerWiringContractTest.php` 155 断言全绿
 - 既有 Contract/Integration 套件全绿（S02-P02~P08）
-- 前端 `vite build` exit 0（Admin 16 权威页真实数据）
+- 前端 `vite build` exit 0（Admin 19 权威页真实数据）
 - H5 type-check/build/unit（147 断言）PASS
 
 ## 未运行项（如实声明）
@@ -29,7 +29,7 @@
 - OpenAPI lint（parse/ref/operationId 唯一性）：NOT_RUN
 - 真实 HTTP 请求 / E2E：NOT_RUN（无 runnable 服务实例）
 - Admin V2 写路径测试：NOT_RUN（admin 角色映射 sys_admin.role_id→05 13 角色未冻结，写路径 fail-closed）
-- 前端 33 权威页 DTO 对接：PARTIAL（16 页已接，其余待后端接口/前端同事）
+- 前端 33 权威页 DTO 对接：PARTIAL（19 页已接，其余待后端接口/前端同事）
 - 生产参数批准：NO-GO（未批准，依赖预算/claim/consume 仍 FAIL_CLOSED）
 
 ## 验收矩阵对照

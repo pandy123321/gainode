@@ -31,7 +31,7 @@
 | A-USER-001 用户列表 | /admission/users | GET /api/v1/admin/admission/users（分页：UID/手机/邮箱/Robot状态/KYC/APT/Power） | **READY**（AdminUserDtoService::list） |
 | A-USER-002 用户360 | /admission/user-360 | GET /api/v1/admin/admission/users/{id}（9 Tab 聚合） | **READY**（AdminUserDetailDtoService::detail） |
 | A-USER-004 资产调整 | /admission/asset-adjust | POST /api/v1/admin/ledger/corrections（审批） | CONTRACT_GAP（GAP-015） |
-| A-KYC-001 KYC队列 | /admission/kyc | GET /api/v1/admin/admission/kyc + POST /…/kyc/{id}/decision | PARTIAL（AdminKycDtoService::list 已建；decision 写路径 fail-closed） |
+| A-KYC-001 KYC队列 | /admission/kyc | GET /api/v1/admin/admission/kyc + POST /…/kyc/{id}/decision | PARTIAL（AdminKycDtoService::list 已建 + 前端已接；decision 写路径 fail-closed） |
 
 ### 03 资产与账本（ADM-03）
 
@@ -64,8 +64,8 @@
 |---|---|---|---|
 | A-PREDICT-001 Market列表 | /prediction/markets | GET /api/v1/admin/prediction/markets | **READY**（AdminPredictionDtoService::list） |
 | A-PREDICT-002 Market详情 | /prediction/market-detail | GET /api/v1/admin/prediction/markets/{id} | **READY**（AdminV2Controller::predictionMarketDetail→PredictionMarketService::detail） |
-| A-PREDICT-003 Result/Settlement | /prediction/results | GET /api/v1/admin/prediction/results + 赛果录入 | **READY**（AdminPredictionResultDtoService::list + AdminSettlementDtoService::list + batches） |
-| A-PREDICT-004 Refund/Correction | /prediction/refunds | POST refund/correction（审批） | PARTIAL（AdminRefundDtoService::list + AdminCorrectionDtoService::list 已建；写路径 fail-closed） |
+| A-PREDICT-003 Result/Settlement | /prediction/results | GET /api/v1/admin/prediction/results + 赛果录入 | **READY**（AdminPredictionResultDtoService::list + AdminSettlementDtoService::list + batches；前端已接 results） |
+| A-PREDICT-004 Refund/Correction | /prediction/refunds | POST refund/correction（审批） | PARTIAL（AdminRefundDtoService::list + AdminCorrectionDtoService::list 已建 + 前端已接；写路径 fail-closed） |
 
 ### 07 风控 / 审批 / 参数 / 策略（ADM-07）
 
@@ -106,7 +106,7 @@
   用户/用户360/KYC队列/OTC列表+详情/OTC用户订单/Robot列表+详情/Reward/工单列表+详情/工单消息/
   Ledger账户+流水+总览/更正冲正/Risk/Approval+详情/Config+Release详情/Prediction Market+详情+订单+结果/
   Settlement+批次/Refund+详情/Correction+详情/Power/升级订单+详情/审计+详情/异步/导出/工作台总览+待办
-前端已对接（admin-v2.ts 20 接口 + pageData.ts）：16 个权威页路由真实数据加载，vite build 通过
+前端已对接（admin-v2.ts 24 接口 + pageData.ts）：19 个权威页路由真实数据加载，vite build 通过
 READY（后端接口存在并已注册）= 上述 48 只读方法 + 数据页 fixture/signal/datasource + C端只读
 PARTIAL = 剩余页面（池子对账/策略/报表/Referral 等，service 待建；写路径 admin 角色映射待冻结）
 CONTRACT_GAP = 资产调整(A-USER-004) / 紧急操作(A-EMERGENCY-001)

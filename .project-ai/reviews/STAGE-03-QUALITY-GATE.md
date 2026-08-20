@@ -24,7 +24,7 @@
 |---|---|---|
 | 1. Page ID 与 route/view 机械比对 | PARTIAL | H5 69 views / Admin 98 views；33 权威 Admin Page ID 在 registry；P0 逐页 view 覆盖未全量核 |
 | 2. frozen-lock install/typecheck/build/unit/E2E | PARTIAL | H5 type+build+unit PASS；Admin type+build PASS；E2E NOT_RUN；Admin 无 unit |
-| 3. OpenAPI ↔ 前端 client/DTO 比对 + 本地推导/float 扫描 | PARTIAL | Admin admin-v2.ts 对接 19 后端接口；金额 string decimal 透传；本地推导/float 全量扫描 NOT_RUN |
+| 3. OpenAPI ↔ 前端 client/DTO 比对 + 本地推导/float 扫描 | PARTIAL | Admin admin-v2.ts 对接 24 后端接口；金额 string decimal 透传；本地推导/float 全量扫描 NOT_RUN |
 | 4. 7 语言 key 集/terminology/one-locale/sensitive 文案 | PARTIAL | H5 7 语言文件齐；key parity 全量比对 NOT_RUN |
 | 5. 三尺寸视觉回归 + a11y | NOT_RUN | 需浏览器环境 |
 | 6. 五态/Unknown Result/State Changed/token refresh/断网重连 E2E | NOT_RUN | 需浏览器 + 后端服务实例 |
