@@ -12,6 +12,21 @@
 // 不改写金额/赔率原始精度（利润率/赔率保留字符串小数语义，展示层才格式化）。
 // =============================================================================
 import { fixtureList, signalList, dataSourceList } from '@/api/module/arbitrage'
+import {
+  listUsers,
+  listOtcOrders,
+  listRobots,
+  listRewards,
+  listTickets,
+  listLedgerAccounts,
+  listRiskCases,
+  listApprovalTasks,
+  listParameterReleases,
+  listPredictionMarkets,
+  listPowerAccounts,
+  listAuditLog,
+  getWorkbenchOverview,
+} from '@/api/module/admin-v2'
 
 /** 列表查询入参（keyword 由搜索框、其余由 filters 注入） */
 export interface ListQuery {
@@ -162,6 +177,114 @@ const LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/data/signal': loadSignal,
   '/data/source': loadSource,
 }
+
+// ---------------------------------------------------------------------------
+// 权威页真实数据 loader（对接 admin-v2 后端 DTO；只读）
+// 统一：rows 取响应的领域数组，total 取分页 total；未登录/无权限由 http-v2 抛错。
+// ---------------------------------------------------------------------------
+function paged(fetcher: (p: number, s: number, extra?: any) => Promise<any>, pickRows: (d: any) => any[]): (q: ListQuery) => Promise<ListResult> {
+  return async (q: ListQuery) => {
+    const { data } = await fetcher(q.page, q.size, q)
+    const rows = pickRows(data) || []
+    return { rows, total: data?.total || 0, stats: [data?.total || 0, undefined, undefined, undefined] }
+  }
+}
+
+// 用户列表（A-USER-001）
+const loadUsers = paged(
+  (p, s, q) => listUsers({ page: p, size: s, keyword: q?.keyword }),
+  (d) => d?.users,
+)
+// OTC 订单（A-OTC-001）
+const loadOtcOrders = paged(
+  (p, s, q) => listOtcOrders({ page: p, size: s, status: q?.status }),
+  (d) => d?.orders,
+)
+// Robot 列表（A-ROBOT-001）
+const loadRobots = paged(
+  (p, s, q) => listRobots({ page: p, size: s, status: q?.status }),
+  (d) => d?.robots,
+)
+// Reward 运营（A-ROBOT-003）
+const loadRewards = paged(
+  (p, s, q) => listRewards({ page: p, size: s, state: q?.state }),
+  (d) => d?.rewards,
+)
+// 工单队列（A-SUPPORT-001）
+const loadTickets = paged(
+  (p, s, q) => listTickets({ page: p, size: s, status: q?.status }),
+  (d) => d?.tickets,
+)
+// APT 账户（A-LEDGER-002）
+const loadLedgerAccounts = paged(
+  (p, s, q) => listLedgerAccounts({ page: p, size: s, keyword: q?.keyword }),
+  (d) => d?.accounts,
+)
+// Risk Case（A-RISK-001）
+const loadRiskCases = paged(
+  (p, s, q) => listRiskCases({ page: p, size: s, status: q?.status, severity: q?.severity }),
+  (d) => d?.cases,
+)
+// 审批中心（A-APPROVAL-001）
+const loadApprovalTasks = paged(
+  (p, s, q) => listApprovalTasks({ page: p, size: s, status: q?.status }),
+  (d) => d?.tasks,
+)
+// Parameter Center（A-CONFIG-001）
+const loadParameterReleases = paged(
+  (p, s, q) => listParameterReleases({ page: p, size: s, status: q?.status }),
+  (d) => d?.releases,
+)
+// Market（A-PREDICT-001）
+const loadPredictionMarkets = paged(
+  (p, s, q) => listPredictionMarkets({ page: p, size: s, status: q?.status }),
+  (d) => d?.markets,
+)
+// Power 账户（A-POWER-001）
+const loadPowerAccounts = paged(
+  (p, s) => listPowerAccounts({ page: p, size: s }),
+  (d) => d?.accounts,
+)
+
+// 工作台运营总览（A-WORK-001，dashboard）
+const loadWorkbenchOverview: (q: ListQuery) => Promise<ListResult> = async () => {
+  const { data } = await getWorkbenchOverview()
+  return {
+    rows: [],
+    total: 0,
+    stats: [
+      String(data?.user_count ?? 0),
+      String(data?.robot_count ?? 0),
+      String(data?.otc_open_orders ?? 0),
+      String(data?.pending_approvals ?? 0),
+    ],
+  }
+}
+
+// 审计日志（A-AUDIT-001，只读）
+const loadAuditLog: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
+  const { data } = await listAuditLog({ page: q.page, size: q.size })
+  return { rows: data?.audit_events || [], total: (data?.audit_events || []).length }
+}
+
+// 权威页路由 → loader 映射（与 admin-registry.ts 的 33 权威 pageId route 对齐）
+const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
+  '/workbench/overview': loadWorkbenchOverview,
+  '/admission/users': loadUsers,
+  '/otc/orders': loadOtcOrders,
+  '/robot/list': loadRobots,
+  '/robot/rewards': loadRewards,
+  '/support/tickets': loadTickets,
+  '/ledger/accounts': loadLedgerAccounts,
+  '/risk/cases': loadRiskCases,
+  '/approval/center': loadApprovalTasks,
+  '/config/definitions': loadParameterReleases,
+  '/prediction/markets': loadPredictionMarkets,
+  '/power/accounts': loadPowerAccounts,
+  '/audit/logs': loadAuditLog,
+}
+
+Object.assign(LOADERS, ADMIN_LOADERS)
 
 /** 已接入真实数据的路由集合 */
 export const dataPageRoutes = Object.keys(LOADERS)
