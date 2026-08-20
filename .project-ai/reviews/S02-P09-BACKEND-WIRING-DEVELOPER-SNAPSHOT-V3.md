@@ -44,9 +44,9 @@ Open issues / Risk / Not implemented:
   - 写路径（robot start/stop/upgrade/reward-claim、prediction order/consent、otc quote/create/cancel、parameter activate）均未在控制器开放（fail-closed；服务层已对 TBC 抛 DEPENDENCY_UNAVAILABLE）。
   - 路由未注册前，Auth/Kyc/User 控制器仍 HTTP 不可达（路由缺失即关闭，安全）。
   - Robot/Prediction/Otc 只读投影依赖 DB 中真实数据行；空表时返回空列表（非 mock）。
-  - 本包不包含 sys_route seed（等待路由方案裁决）。
   - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
-Next technically ready Package: S02-P09 后端 Gate（路由方案裁决 + sys_route 注册后即可进入 Gate 步骤；若裁决前继续，可先做只读接线余下的 validator 补齐）
+  - 【更新】路由路径方案已裁决（Owner 2026-08-20 = OPTION_A），V2 路由已注册：config/route/v2.php + sql/20260820_v2_api_routes_seed.sql（41 条 Auth/Kyc/User/Ledger/Robot/Parameter/Prediction/Otc 只读路由），V1 /v1 组保留不动。
+Next technically ready Package: S02-P09 后端 Gate（路由已注册；下一步执行 Gate 步骤 1-7：P0 API 映射、状态转移映射、OpenAPI/测试/权限/守恒审查、输出 STAGE-02-BACKEND-COVERAGE.md + STAGE-02-QUALITY-GATE.md）
 SNAPSHOT_LOCKED: YES
 ```
 
@@ -66,11 +66,11 @@ SNAPSHOT_LOCKED: YES
 
 ```text
 CONSUMED_UNFROZEN_CONTRACT = 无（只读投影均绑定已 FROZEN 契约/服务）
-OPEN_OWNER_DECISION = V2-ROUTE-PATH-01（路由路径方案，见 docs/DECISION_REQUEST_V2_ROUTE_PATH_SCHEME.md）
+OPEN_OWNER_DECISION = V2-ROUTE-PATH-01 → RESOLVED（Owner 2026-08-20 裁决 OPTION_A；路由已注册）
 OVERLAPS_LOCKED_SNAPSHOT = 无（仅新增文件，不触碰既有已锁定实现）
 ```
 
 ## 待 Owner 动作
 
-1. 裁决 `DECISION_REQUEST_V2_ROUTE_PATH_SCHEME.md`（建议 OPTION_A）。
-2. 在本机凭据可用环境执行 `git push origin feature/gainode-v3-serial-development`（或提供可用凭据）。
+1. ✅ 已裁决 `DECISION_REQUEST_V2_ROUTE_PATH_SCHEME.md`（OPTION_A）。
+2. 无待办（路由已注册；后续进入 S02-P09 后端 Gate 步骤）。
