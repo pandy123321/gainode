@@ -24,7 +24,8 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('744f22c35a22f8f316d30105295dced8','admin_v2','v2\adminv2','ticketDetail','GET',NULL,'/support/tickets/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ticketDetail',1),
     ('8004447bc24094ef33657761da9433ab','admin_v2','v2\adminv2','workbenchOverview','GET',NULL,'/workbench/overview','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'workbenchOverview',1),
     ('4b67804fd230e54ac0b7f65a2e208f80','admin_v2','v2\adminv2','auditLogDetail','GET',NULL,'/audit-log/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'auditLogDetail',1),
-    ('7e7b5283a344298c8e5908f4d5749069','admin_v2','v2\adminv2','ledgerOverview','GET',NULL,'/ledger/overview','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerOverview',1);
+    ('7e7b5283a344298c8e5908f4d5749069','admin_v2','v2\adminv2','ledgerOverview','GET',NULL,'/ledger/overview','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerOverview',1),
+    ('f8ae4759885405527be5d4bd78e17253','admin_v2','v2\adminv2','ledgerEntries','GET',NULL,'/ledger/entries','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerEntries',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

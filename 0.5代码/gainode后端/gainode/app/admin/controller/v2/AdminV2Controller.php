@@ -8,6 +8,7 @@ use library\dict\ErrorDict;
 use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminLedgerDtoService;
+use library\service\admin\AdminLedgerEntriesDtoService;
 use library\service\admin\AdminLedgerOverviewDtoService;
 use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminPowerDtoService;
@@ -294,6 +295,21 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new AdminLedgerOverviewDtoService())->overview();
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/ledger/entries — APT 流水明细 DTO（A-LEDGER-002 明细） */
+    public function ledgerEntries(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $accountId = (string) $this->request->get('account_id', '');
+            $result = (new AdminLedgerEntriesDtoService())->list($page, $size, $accountId);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
