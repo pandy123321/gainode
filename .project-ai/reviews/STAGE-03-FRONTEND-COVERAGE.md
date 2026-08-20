@@ -22,7 +22,7 @@ E2E        = playwright 脚本存在，NOT_RUN（需浏览器）
 Admin views = 98
 权威 Page ID = 33（admin-registry.ts AUTHORITATIVE_PAGE_IDS）
 DEFERRED     = 7（A-AI-* / A-DATA-*）
-API 对接      = admin-v2.ts 对接后端 /api/v1/admin/* 18 只读接口 + pageData.ts 15 权威页真实数据 loader
+API 对接      = admin-v2.ts 对接后端 /api/v1/admin/* 19 只读接口 + pageData.ts 16 权威页真实数据 loader
 type-check = vue-tsc --noEmit PASS
 build      = vite build PASS
 unit       = 无测试脚本（NOT_RUN，不得写 PASS）
@@ -33,7 +33,7 @@ unit       = 无测试脚本（NOT_RUN，不得写 PASS）
 | 前端 | 已对接后端接口 | 未对接 |
 |---|---|---|
 | H5 | auth/kyc/eligibility/asset/robot/prediction/otc 只读（S03-P02 已接） | 写路径（后端 fail-closed） |
-| Admin | /api/v1/admin/* 18 只读接口（用户/OTC/Robot/Reward/工单/Ledger/Risk/Approval/Config/Prediction/Power/审计/工作台） | 池子对账/策略（无冻结 service）；写路径（admin 角色映射未冻结） |
+| Admin | /api/v1/admin/* 19 只读接口（用户/OTC/Robot/Reward/工单/Ledger/Risk/Approval/Config/Prediction/Power/审计/工作台总览+待办） | 池子对账/策略（无冻结 service）；写路径（admin 角色映射未冻结） |
 
 ## 未运行/待补
 
