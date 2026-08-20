@@ -43,6 +43,7 @@ Open issues / Risk / Not implemented:
   - 【OPEN_OWNER_DECISION】V2 路由路径方案：契约/前端/OpenAPI 用 /api/v1/...，运行时 config/route/api.php 组 /v1 + sys_route.url /api/... = /v1/api/...。Agent 不得猜测，已提交 DECISION_REQUEST_V2_ROUTE_PATH_SCHEME.md，建议 OPTION_A（新增 /api/v1 组，复用 sys_route 表）。裁决前不注册任何 V2 路由（fail-closed）。
   - 写路径（robot start/stop/upgrade/reward-claim、prediction order/consent、otc quote/create/cancel、parameter activate）均未在控制器开放（fail-closed；服务层已对 TBC 抛 DEPENDENCY_UNAVAILABLE）。
   - 路由未注册前，Auth/Kyc/User 控制器仍 HTTP 不可达（路由缺失即关闭，安全）。
+  - 【更新】Admin V2 已落地（OPTION_A，Owner 裁决 ADMIN-V2-AUTH-01）：AdminV2Controller（app/admin/controller/v2）+ /api/v1/admin 组 + sql/20260820_admin_v2_routes_seed.sql（audit_log 只读 + async/export fail-closed）；认证走 AdminAuth。Admin 写操作（市场/结算/退款/更正/审批）因 admin 角色映射未冻结而 fail-closed。
   - Robot/Prediction/Otc 只读投影依赖 DB 中真实数据行；空表时返回空列表（非 mock）。
   - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
   - 【更新】路由路径方案已裁决（Owner 2026-08-20 = OPTION_A），V2 路由已注册：config/route/v2.php + sql/20260820_v2_api_routes_seed.sql（41 条 Auth/Kyc/User/Ledger/Robot/Parameter/Prediction/Otc 只读路由），V1 /v1 组保留不动。
