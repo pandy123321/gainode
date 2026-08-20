@@ -126,4 +126,39 @@ class RobotController extends ApiV2
             return $this->envelopeError($e);
         }
     }
+
+    /**
+     * 写路径（显式 fail-closed，契约 503 DependencyUnavailable）。
+     * 升级/领取依赖 AI 经济规则与预算（TBC），服务层抛 DEPENDENCY_UNAVAILABLE → envelopeError 503。
+     */
+
+    /** POST /api/v1/ai/users/{id}/upgrade-orders */
+    public function upgradeOrderCreate(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            $toLevel = (int) ($data['to_level'] ?? 0);
+            $result = (new RobotUpgradeOrderService())->submit($id, $toLevel, $userId, 'END_USER');
+            return $this->envelope(['upgrade_order_id' => (string) $result]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** POST /api/v1/ai/users/{id}/reward-claims */
+    public function rewardClaim(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            $rewardId = (string) ($data['reward_id'] ?? '');
+            (new RobotRewardService())->completeClaim($rewardId, $userId, 'END_USER');
+            return $this->envelope([]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
 }

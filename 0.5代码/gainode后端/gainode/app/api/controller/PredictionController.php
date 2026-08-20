@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace app\api\controller;
 
+use library\dict\ErrorDict;
 use library\service\policy\ConsentReceiptService;
 use library\service\prediction\PredictionMarketService;
 use library\service\prediction\PredictionOrderService;
 use support\controller\ApiV2;
+use support\exception\DomainException;
 use support\Response;
 
 /**
@@ -90,6 +92,51 @@ class PredictionController extends ApiV2
                 ];
             }
             return $this->envelope(['receipts' => $items]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /**
+     * 写路径（显式 fail-closed，契约 503 DependencyUnavailable）。
+     * 下单/加注/申诉依赖锁盘参数/资格/Consent 版本（TBC），服务层抛 DEPENDENCY_UNAVAILABLE → 503。
+     */
+
+    /** POST /api/v1/orders */
+    public function orderCreate(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            (new PredictionOrderService())->submit($data, $userId, 'END_USER');
+            return $this->envelope([]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** POST /api/v1/orders/{id}/additions */
+    public function orderAddition(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            $data['order_id'] = $id;
+            (new PredictionOrderService())->submit($data, $userId, 'END_USER');
+            return $this->envelope([]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** POST /api/v1/appeals */
+    public function appealCreate(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'appeal create not available');
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }

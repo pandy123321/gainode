@@ -68,10 +68,10 @@ check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'list
 // ---- 3. 控制器方法存在 ----
 foreach ([
     \app\api\controller\LedgerController::class => ['asset', 'ledgerEntries', 'power'],
-    \app\api\controller\RobotController::class => ['userSummary', 'list', 'detail', 'actions', 'upgradeOrders', 'rewards'],
+    \app\api\controller\RobotController::class => ['userSummary', 'list', 'detail', 'actions', 'upgradeOrders', 'rewards', 'upgradeOrderCreate', 'rewardClaim'],
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
-    \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts'],
-    \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility'],
+    \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts', 'orderCreate', 'orderAddition', 'appealCreate'],
+    \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility', 'quote', 'orderCreate', 'orderCancel'],
     \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {

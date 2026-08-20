@@ -98,4 +98,53 @@ class OtcController extends ApiV2
             return $this->envelopeError($e);
         }
     }
+
+    /**
+     * 写路径（显式 fail-closed，契约 503 DependencyUnavailable）。
+     * 报价/挂单/撤单依赖 06 OTC 参数 + Power freeze 规则（TBC），服务层抛 DEPENDENCY_UNAVAILABLE → 503。
+     */
+
+    /** POST /api/v1/otc/quotes */
+    public function quote(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            (new OtcOrderService())->quote($data, $userId, 'END_USER');
+            return $this->envelope([]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** POST /api/v1/otc/orders */
+    public function orderCreate(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $data = $this->getPost();
+            (new OtcOrderService())->createOrder($data, $userId, 'END_USER');
+            return $this->envelope([]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** POST /api/v1/otc/orders/{id}/cancel */
+    public function orderCancel(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $userId = (string) $this->request->getUserID();
+            $result = (new OtcOrderService())->cancel($id, $userId, 'END_USER');
+            return $this->envelope([
+                'otc_order_id' => (string) $result->otc_order_id,
+                'status'       => (string) $result->status,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
 }
