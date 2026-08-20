@@ -102,12 +102,14 @@
 
 ```text
 33 权威页接口契约已逐页列明
-后端已落地（/api/v1/admin/*，AdminV2Controller 48 只读方法 + 48 条 sys_route）：
+后端已落地（/api/v1/admin/*，AdminV2Controller 53 方法 + 54 条 sys_route）：
   用户/用户360/KYC队列/OTC列表+详情/OTC用户订单/Robot列表+详情/Reward/工单列表+详情/工单消息/
   Ledger账户+流水+总览/更正冲正/Risk/Approval+详情/Config+Release详情/Prediction Market+详情+订单+结果/
   Settlement+批次/Refund+详情/Correction+详情/Power/升级订单+详情/审计+详情/异步/导出/工作台总览+待办
+写占位（fail-closed，5 个） = KYC decision / OTC review / Approval decision / Refund create / Correction create
+   + asyncJob/exportTask，共 7 条写路由全部 fail-closed（角色映射冻结后接线）
 前端已对接（admin-v2.ts 24 接口 + pageData.ts）：19 个权威页路由真实数据加载，vite build 通过
-READY（后端接口存在并已注册）= 上述 48 只读方法 + 数据页 fixture/signal/datasource + C端只读
+READY（后端接口存在并已注册）= 上述 53 方法 + 数据页 fixture/signal/datasource + C端只读
 PARTIAL = 剩余页面（池子对账/策略/报表/Referral 等，service 待建；写路径 admin 角色映射待冻结）
 CONTRACT_GAP = 资产调整(A-USER-004) / 紧急操作(A-EMERGENCY-001)
 CLOSED = APT 迁移(A-MIGRATION-001)
