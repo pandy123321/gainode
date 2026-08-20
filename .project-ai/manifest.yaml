@@ -1,6 +1,6 @@
 schemaVersion: 1
 projectName: Gainode
-contextVersion: 40
+contextVersion: 42
 status: PUBLISHED
 STAGE_00_COMPLETE: true
 STAGE_00_IR_VERDICT: CONDITIONAL_APPROVAL
@@ -12,8 +12,8 @@ DEVELOPMENT_EXECUTION_PLAN_STATUS: "FROZEN_FOR_EXECUTION"
 DEVELOPMENT_EXECUTION_PLAN_FREEZE_ID: "GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816"
 DEVELOPMENT_EXECUTION_PLAN_PATH: "Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md"
 DEVELOPMENT_EXECUTION_PLAN_CHANGE_CONTROL: "OWNER_APPROVAL_REQUIRED"
-DEV_GATE_MODEL: "NO_PROGRESS_GATES_QUALITY_ENFORCES"
-QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN: true
+DEV_GATE_MODEL: "MERGED_DEV_REVIEW_SINGLE_ACTOR"
+QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN: false
 enabledDocuments:
   - bootstrap.md
   - context.md
@@ -87,3 +87,13 @@ decisionSources:
     decision_date: "2026-08-16"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE ← TASK-20260816-006"
+  workflow_merge_dev_review_single_actor:
+    value: "APPROVED — 取消五角色自动化审核流程；审核线与开发线合并，单人逐模块开发+自测；DEV_GATE_MODEL=NO_PROGRESS_GATES_QUALITY_ENFORCES 改为 MERGED_DEV_REVIEW_SINGLE_ACTOR；QUALITY_AGENT_MUST_REVIEW_AGAINST_FROZEN_PLAN=false；不再自动触发 complete_project_context_update/ChatGPT 同步。"
+    decision_date: "2026-08-18"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE ← CR-20260818-001"
+  production_param_approval_20260818:
+    value: "APPROVED — Owner 批准 5 类生产参数进入落值：56级容量表、升级成本、reward系数、Power cap、预算分配。数值源 = E:\\gainode项目\\用户经济模型规则附录 V1.0.pdf（EM V4.1.1 / PARAM V1.0.0 / 生效2026-07-15）：含完整56级 standard_capacity(50~743,720) 与基准升级费用(0~5,200,000 APT) 与冷却时间。Power cap 完整56级映射、预算数值、reward系数来源规则 待 Owner 补充（附录仅有 Lv.18=8,600 散点 + 区间恢复率，无完整映射）。"
+    decision_date: "2026-08-18"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE ← CR-20260818-002"

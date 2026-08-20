@@ -85,10 +85,24 @@ Admin 原型（`0.5代码/admin-proto/`）已完成交互验证阶段（8 一级
   - **push 交接（2026-08-17，Owner 授权）**：`origin/feature/gainode-v3-serial-development` 已推送 29 提交（前端 H5+Admin + 后端 STAGE-01/02 全部 + 密钥修复），本地与远程同步。
   - **S3 密钥移除（`45d2f61`）**：`gainode_admin_v2/src/components/ImageUpload.vue` 硬编码 AWS 密钥（已轮换失效的旧 key，V1.x baseline 带入）改为环境变量 `VITE_S3_ACCESS_KEY_ID / VITE_S3_SECRET_ACCESS_KEY / VITE_S3_REGION / VITE_S3_BUCKET`，缺失时明确提示。GitHub Push Protection 拦截已由 Owner 放行（密钥失效，无泄露风险）。
   - 各包详细交付清单/审核证据：.project-ai/tasks/<task-id>/ + .project-ai/reviews/。
+  - **2.0 菜单重构与 Admin 逐页骨架（2026-08-17/18，S03-P03 基础设施步骤 3/4 + ADM 批次前置）**：后台从 8 根 51 页收敛为 11 根 33 页（人话命名 + 合并不影响管理的页）。后端 `sql/20260817_admin_20_menu_seed.sql`（幂等 seed）+ `MenusService` 平台过滤；前端 `pageRegistry.ts`（33 权威 Page ID + 7 DEFERRED）→ `pageSchema.ts`（逐页 columns/filters/stats，DTO 口径）→ `ListPage.vue`（通用列表页 + AdminFiveState + 工具栏/行按钮按 allowed/forbidden 策略）→ `base-routes.ts`（33 路由 + pageId 元数据）。33 页 UI 骨架齐，逐页真实数据接入中。
+  - **数据源接入 BetBurger / API-Football（2026-08-18，进行中，属 DEFERRED 数据页 A-DATA-002/003/005，不计入 33 权威验收）**：后端 `DataSourceController`（list/save/test：凭证配置 + 健康测试 + 同步统计）+ `DataSourceService` + `FixtureController`（list/detail）+ `FixtureModel` 搜索字段（keyword/status/time）+ `SignalModel` 状态筛选 + `20260818_admin_datasource_routes_seed.sql`（5 条路由已入库 sys_route）。前端 `arbitrage.ts` 已加 fixture/datasource 接口。**前端数据页真实绑定（pageData 加载器 + ListPage 数据源编辑/测试弹窗）未完成**；`arbitrage_*` 表当前 0 数据（凭证 api_key/access_token 为空，待填后跑采集才有数据）。
+  - **git 同步状态（2026-08-19）**：本地 `feature/gainode-v3-serial-development` 领先 origin 6 提交；`master` 领先 origin 25 提交；另有未提交工作区改动（生产参数、Power 记账、2.0 菜单、数据源接入、前端骨架等），全部未 push。
 - 正式后续阶段：STAGE-02 OpenAPI/Environment/Backend Core；STAGE-03 H5+Admin；STAGE-04 Flutter；STAGE-05 Sandbox E2E；STAGE-06 Release Readiness。
 - 详细且唯一的执行路线见 `Gainode_Development_Ready_V6.1_Latest/07_DEVELOPMENT_AND_ACCEPTANCE.md` V3.4；状态为 `FROZEN_FOR_EXECUTION`，Freeze ID=`GAINODE-DEVELOPMENT-EXECUTION-PLAN-V3.4-20260816`。40 个工作包均具备目标、固定步骤、验证、停止条件和验收；Development、Quality 和复审 Agent 必须按该文件执行，V3.3 及更早路线均为 `SUPERSEDED_DO_NOT_EXECUTE`。改变路线必须先获得 Owner 明确批准并升级版本、Freeze ID 和冻结凭证。V3.4 整合五角色执行纪律（Owner/Scheduler/Developer/Quality/Reviewer）与提交来源 trailer（`Code-Origin: Developer`/`Quality`），详见 07 §3 与 `.project-ai/rules/roles.md`、`.project-ai/rules/workflow.md`、`.project-ai/rules/git-review-worktree.md`。
 - 开发采用一个 Development Agent 串行工作包，一开到底：完成一个包后立即生成快照并继续下一个已定义包，不等待审核结论、合同冻结、Owner 决策或 Stage Gate 关闭。唯一硬停止 = §0.1 永久禁止项 + 「包未在本文件定义」。所有 Package 的「前置」「停止条件」「Stage Gate」降级为 Quality Agent 审核时的验证项；未冻结合同/未决 Owner 决策按 best-effort 继续并在交接声明，Quality 审核时逐项验证并记为 Finding（CR-20260816-003）。
 - Production Real-Value：NO-GO，需生产参数批准后开放。
+- **生产参数落值（2026-08-18，Owner 合并双线 + CR-20260818-002 批准）**：开发/审核线合并为单人逐模块开发+自测（`DEV_GATE_MODEL=MERGED_DEV_REVIEW_SINGLE_ACTOR`，不再自动触发 `complete_project_context_update`/ChatGPT 同步）。5 类参数批准进入落值，数值源 = `E:\gainode项目\用户经济模型规则附录 V1.0.pdf`（EM V4.1.1 / PARAM V1.0.0 / 生效 2026-07-15）。已落地：
+  - `sql/20260818_production_param_em_v4_1_1_seed.sql`：active `parameter_releases` + `parameter_snapshots`，含完整 56 级 `standard_capacity`(50~743,720)、基准升级费用(0~5,200,000 APT)、冷却区间(0/1/3/5/6 天)、算力消耗 50%、恢复率区间(10%~20%)、P 优惠(P1~P6 2%~12%)、领取有效期(24h+(level-1)h)、收益系数来源(DYNAMIC_BUDGET_DIV_CAPACITY)。
+  - `RobotRuleReader` 扩展 getter：`getStandardCapacity` / `getUpgradeCost` / `getUpgradeCooldownDays` / `getPowerSellConsumptionRatio` / `getPowerDailyRestoreRate` / `getUpgradePDiscount` / `getClaimWindowHours`；`getPowerCap` 支持「显式映射优先，否则派生 standard_capacity × factor（bcmath）」。
+  - **Power cap 派生规则（Owner 决策 2026-08-18，CR-20260818-002 追加）**：`AI.power_cap_factor = '0.5'`，`power_cap = standard_capacity × 0.5`。**注意：该决策覆盖文档 §07 案例 Lv.18=8,600（文档标准产能 468 × 0.5 = 234，非 8,600）；显式 56 级映射 `AI.power_cap_by_robot_level` 若未来提供将优先于派生因子。**
+  - `RobotUpgradeOrderService::quote` 已打开（只读报价，返回 current/target level、apt_cost、capacity_diff、power_limit_diff（派生）、cooldown、rule_version、release_id）；`submit` 仍 fail-closed（资金去向 `AI.upgrade_allocation_profile` 未批准）。
+  - 测试 `S02P04RobotStateMachineTest` 扩展至 93 断言全绿（含 start/stop 纯状态转移）。
+  - **仍 TBC（文档无数值，待 Owner 补）**：① 预算具体数值（`AI.ai_reward_budget_cap`/`period_cap`，文档只写「当天可分配预算」，运行时由运营录入）② reward 系数动态计算依赖的「当日预算」数值源。→ 依赖预算的 `hold`/`completeClaim`/`expire`/`reverse` 仍 FAIL_CLOSED。
+- **Power 记账补齐（2026-08-18，Owner 决策 CR-20260818-003）**：核对 Power 记账后发现两处缺口并已落地：
+  - ① **新增 `sql/20260818_power_ledger_entries.sql`**：独立 append-only Power 流水表，对标 `apt_ledger_entries`（仅 `state`/`audit_event_id`/`object_version` 可变，冲正走 `reversal_of` 追加不删原文；`quantity` decimal(18,4) 对齐 `power_positions`；无 `asset` 列）。配套 `PowerLedgerEntryModel` + `PowerLedgerEntryAppendOnlyBuilder` + `PowerLedgerEntryDao`（机械封堵 UPDATE/DELETE/upsert/increment 等 destructive mutation）。
+  - ② **裁决 Robot 启动/停止与 Power 消耗冲突**：MC2 Event Catalog 早期 `ROBOT_STARTED → consume` / `ROBOT_STOPPED → release` 与经济模型 §07「算力只控制 APT 卖出速度，不影响持有、正常升级、上链迁移」矛盾，且原 consume/release 从未定义数量（不可执行）。裁决：**以 §07 为准，Robot 启动/停止不消耗/释放 Power**。`RobotService::start/stop` 改为纯状态转移（审计 + object_version CAS，去掉 FAIL_CLOSED）；MC2 §5 Event Catalog 两行 `Power 影响` 改为 `—` 并登记 CR-20260818-003。
+  - **注意**：`PowerPositionService::consume/recover` 仍 FAIL_CLOSED（OTC 卖出消耗算力的冻结/消耗/恢复规则未冻结，本次不开放）；`allowedActions` 投影的「动作授权模型」整体仍为占位（恒空），start/stop 已解冻但未计入 allowed_actions，待单独收口。
 
 ### 技术栈（已确认）
 
@@ -151,7 +165,7 @@ sql/YYYYMMDD_*.sql  # V2.0 增量 DDL（MC1 8 核心实体：20260813_machine_co
 - **Robot**：56 级 AI 代理，`standard_capacity × daily_reward_coefficient = pending APT`（动态 Reward，系数可为 0）。
 - **Prediction**：P0 仅 Football Pre-match 1X2（Home/Draw/Away），90 分钟+伤停补时，不含加时/点球。中文用户端统一显示「竞猜」。
 - **APT**：系统内部数量代币，总量上限 1000 亿。V2.0 纯中心化账本（不涉及链上发行），四账分离模型（数量×估值×收入×预算）
-- **Power**：可消耗、可恢复操作资源，用于 OTC Sell、Withdrawal、Robot Start。容量由 Robot 等级决定。
+- **Power**：可消耗、可恢复操作资源，用于 OTC Sell、Withdrawal（不用于 Robot 启停，见 CR-20260818-003）。容量由 Robot 等级决定。
 - **OTC**：用户间受控撮合，非平台固定回购。
 - **Notice**：通知体系，与业务事务解耦，通过 Outbox/异步投递。
 
