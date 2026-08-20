@@ -47,6 +47,7 @@ Open issues / Risk / Not implemented:
   - Robot/Prediction/Otc 只读投影依赖 DB 中真实数据行；空表时返回空列表（非 mock）。
   - 【更新】写路径显式 fail-closed 补齐：RobotController(upgradeOrderCreate/rewardClaim)、PredictionController(orderCreate/orderAddition/appealCreate)、OtcController(quote/orderCreate/orderCancel) —— 服务层抛 DEPENDENCY_UNAVAILABLE → 503，非 404。sql/20260820_v2_api_routes_seed.sql 扩至 49 条。wiring 契约测试扩至 68 断言全绿。
   - 【审核状态】ACR bridge 当前 HEAD 被其他会话(Flutter S3-P02 cb4d098)占用，未审到本 feature 分支 commit；已如实记录，不阻塞后续推进。
+  - 【更新】Admin V2 用户列表 DTO 接口（A-USER-001）落地：AdminUserDtoService（member_user 分页 + Robot + APT 余额聚合）+ AdminV2Controller::users（/api/v1/admin/admission/users）+ admin_v2 seed 加 users 路由（纯 ASCII 重写避免 git binary）。wiring 契约测试扩至 70 断言全绿。另产出 gainode_admin_v2/ADMIN_V2_DTO_INTERFACE_CONTRACT.md（33 权威页逐页接口契约清单，作为前端对接依据）。
   - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
   - 【更新】路由路径方案已裁决（Owner 2026-08-20 = OPTION_A），V2 路由已注册：config/route/v2.php + sql/20260820_v2_api_routes_seed.sql（41 条 Auth/Kyc/User/Ledger/Robot/Parameter/Prediction/Otc 只读路由），V1 /v1 组保留不动。
 Next technically ready Package: S02-P09 后端 Gate（路由已注册；下一步执行 Gate 步骤 1-7：P0 API 映射、状态转移映射、OpenAPI/测试/权限/守恒审查、输出 STAGE-02-BACKEND-COVERAGE.md + STAGE-02-QUALITY-GATE.md）
