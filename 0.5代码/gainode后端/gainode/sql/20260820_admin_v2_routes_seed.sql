@@ -19,7 +19,9 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('3d7fe0289161ba22fcf0ead0d660e464','admin_v2','v2\adminv2','predictionMarkets','GET',NULL,'/prediction/markets','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'predictionMarkets',1),
     ('4823b18a988070da59a987dfd784484f','admin_v2','v2\adminv2','powerAccounts','GET',NULL,'/power/accounts','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'powerAccounts',1),
     ('50a809b4180a6bb4d2068d353208371c','admin_v2','v2\adminv2','rewardOps','GET',NULL,'/robot/rewards','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'rewardOps',1),
-    ('69849b74b7ba324dea7b074030fa36d4','admin_v2','v2\adminv2','otcOrderDetail','GET',NULL,'/otc/orders/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrderDetail',1);
+    ('69849b74b7ba324dea7b074030fa36d4','admin_v2','v2\adminv2','otcOrderDetail','GET',NULL,'/otc/orders/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrderDetail',1),
+    ('c60bf1ee1b9a2fd668215b022f18d6ed','admin_v2','v2\adminv2','robotDetail','GET',NULL,'/robot/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'robotDetail',1),
+    ('744f22c35a22f8f316d30105295dced8','admin_v2','v2\adminv2','ticketDetail','GET',NULL,'/support/tickets/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ticketDetail',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

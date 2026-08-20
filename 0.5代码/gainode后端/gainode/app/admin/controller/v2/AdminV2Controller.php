@@ -18,6 +18,8 @@ use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
+use library\service\robot\RobotService;
+use library\service\support\TicketService;
 use library\service\sys\AdminService;
 use support\controller\ApiV2;
 use support\exception\DomainException;
@@ -230,6 +232,30 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new OtcOrderService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/{id} — Robot 详情（A-ROBOT-002） */
+    public function robotDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new RobotService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/support/tickets/{id} — 工单详情（A-SUPPORT-002） */
+    public function ticketDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new TicketService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
