@@ -9,7 +9,8 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('6989bb9c6e12b23265f92a8012e5c640','admin_v2','v2\adminv2','asyncJob','GET',NULL,'/async-jobs/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'asyncJob',1),
     ('0e50cacf6ea1fccb5e6d12785354bcdf','admin_v2','v2\adminv2','exportTask','POST',NULL,'/export-tasks','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'exportTask',1),
     ('5f369bceea81219b029d44423e5b93ad','admin_v2','v2\adminv2','users','GET',NULL,'/admission/users','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'users',1),
-    ('33ec532927c38ee6e08489c1a093743d','admin_v2','v2\adminv2','otcOrders','GET',NULL,'/otc/orders','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrders',1);
+    ('33ec532927c38ee6e08489c1a093743d','admin_v2','v2\adminv2','otcOrders','GET',NULL,'/otc/orders','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrders',1),
+    ('4e016e293594e2154e53628a049e1b23','admin_v2','v2\adminv2','robots','GET',NULL,'/robot/list','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'robots',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

@@ -66,6 +66,7 @@ check(serviceMethodExists(\library\service\otc\OtcEligibilityProjectionService::
 check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'listAdmin'), 'AuditEventService::listAdmin');
 check(serviceMethodExists(\library\service\admin\AdminUserDtoService::class, 'list'), 'AdminUserDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminOtcDtoService::class, 'list'), 'AdminOtcDtoService::list');
+check(serviceMethodExists(\library\service\admin\AdminRobotDtoService::class, 'list'), 'AdminRobotDtoService::list');
 
 // ---- 3. 控制器方法存在 ----
 foreach ([
@@ -74,7 +75,7 @@ foreach ([
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
     \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts', 'orderCreate', 'orderAddition', 'appealCreate'],
     \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility', 'quote', 'orderCreate', 'orderCancel'],
-    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'otcOrders'],
+    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'otcOrders', 'robots'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {
         check(method_exists($ctrl, $m), "controller method: {$ctrl}::{$m}");

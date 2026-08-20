@@ -6,6 +6,7 @@ namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
 use library\service\admin\AdminOtcDtoService;
+use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\audit\AuditEventService;
 use library\service\sys\AdminService;
@@ -73,6 +74,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminOtcDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/list — Robot 列表 DTO（A-ROBOT-001） */
+    public function robots(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminRobotDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
