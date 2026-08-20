@@ -33,6 +33,7 @@ use library\service\admin\AdminUpgradeOrderDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\admin\AdminUserDetailDtoService;
 use library\service\admin\AdminWorkbenchDtoService;
+use library\service\admin\AdminTodoDtoService;
 use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
@@ -684,6 +685,18 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new AdminWorkbenchDtoService())->overview();
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/workbench/todo — 今日待办 DTO（A-WORK-002） */
+    public function workbenchTodo(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new AdminTodoDtoService())->todo();
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
