@@ -18,6 +18,7 @@ use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminOtcTradeDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
+use library\service\admin\AdminPredictionOrderDtoService;
 use library\service\admin\AdminPredictionResultDtoService;
 use library\service\admin\AdminRefundDtoService;
 use library\service\admin\AdminRewardDtoService;
@@ -350,6 +351,21 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new PredictionMarketService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/orders — Prediction Order 列表 DTO（A-PREDICT-001 补充） */
+    public function predictionOrders(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminPredictionOrderDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);

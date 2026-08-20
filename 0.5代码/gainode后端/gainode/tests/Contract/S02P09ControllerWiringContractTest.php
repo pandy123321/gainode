@@ -78,6 +78,7 @@ check(serviceMethodExists(\library\service\approval\ApprovalRequestService::clas
 check(serviceMethodExists(\library\service\parameter\ParameterReleaseService::class, 'detail'), 'ParameterReleaseService::detail');
 check(serviceMethodExists(\library\service\admin\AdminConfigDtoService::class, 'list'), 'AdminConfigDtoService::list');
 check(serviceMethodExists(\library\service\admin\AdminPredictionDtoService::class, 'list'), 'AdminPredictionDtoService::list');
+check(serviceMethodExists(\library\service\admin\AdminPredictionOrderDtoService::class, 'list'), 'AdminPredictionOrderDtoService::list');
 check(serviceMethodExists(\library\service\prediction\PredictionMarketService::class, 'detail'), 'PredictionMarketService::detail');
 check(serviceMethodExists(\library\service\admin\AdminPredictionResultDtoService::class, 'list'), 'AdminPredictionResultDtoService::list');
 check(serviceMethodExists(\library\service\prediction\ResultService::class, 'detail'), 'ResultService::detail');
@@ -111,7 +112,7 @@ foreach ([
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
     \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts', 'orderCreate', 'orderAddition', 'appealCreate'],
     \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility', 'quote', 'orderCreate', 'orderCancel'],
-    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'userDetail', 'kycQueue', 'otcOrders', 'otcUserOrders', 'otcTrades', 'otcTradeDetail', 'robots', 'upgradeOrders', 'robotUpgradeOrderDetail', 'tickets', 'ledgerAccounts', 'riskCases', 'riskDetail', 'approvalTasks', 'approvalDetail', 'parameterDefinitions', 'parameterReleaseDetail', 'predictionMarkets', 'predictionMarketDetail', 'predictionResults', 'resultDetail', 'settlements', 'settlementDetail', 'settlementBatches', 'settlementBatchDetail', 'refunds', 'refundDetail', 'corrections', 'correctionDetail', 'powerAccounts', 'powerDetail', 'rewardOps', 'robotRewardDetail', 'otcOrderDetail', 'robotDetail', 'ticketDetail', 'workbenchOverview', 'auditLogDetail', 'ledgerOverview', 'ledgerEntries'],
+    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users', 'userDetail', 'kycQueue', 'otcOrders', 'otcUserOrders', 'otcTrades', 'otcTradeDetail', 'robots', 'upgradeOrders', 'robotUpgradeOrderDetail', 'tickets', 'ledgerAccounts', 'riskCases', 'riskDetail', 'approvalTasks', 'approvalDetail', 'parameterDefinitions', 'parameterReleaseDetail', 'predictionMarkets', 'predictionMarketDetail', 'predictionOrders', 'predictionResults', 'resultDetail', 'settlements', 'settlementDetail', 'settlementBatches', 'settlementBatchDetail', 'refunds', 'refundDetail', 'corrections', 'correctionDetail', 'powerAccounts', 'powerDetail', 'rewardOps', 'robotRewardDetail', 'otcOrderDetail', 'robotDetail', 'ticketDetail', 'workbenchOverview', 'auditLogDetail', 'ledgerOverview', 'ledgerEntries'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {
         check(method_exists($ctrl, $m), "controller method: {$ctrl}::{$m}");
