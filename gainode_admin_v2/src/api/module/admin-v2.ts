@@ -156,6 +156,32 @@ export function listLedgerAccounts(params: {
   return get('/api/v1/admin/ledger/accounts', { params })
 }
 
+// ---- APT 流水明细（A-LEDGER-002 明细） ----
+export interface AdminLedgerEntryDto {
+  ledger_entry_id: string
+  account_id: string
+  asset: string
+  quantity: string
+  entry_direction: number
+  entry_type: string
+  state: string
+  source_object_type: string
+  source_object_id: string
+  journal_batch_id: string
+  reversal_of: string
+  rule_version: string
+  snapshot_id: string
+  audit_event_id: string
+  created_time: number
+}
+export function listLedgerEntries(params: {
+  page: number
+  size: number
+  account_id?: string
+}): Promise<Envelope<PageData<AdminLedgerEntryDto> & { entries: AdminLedgerEntryDto[] }>> {
+  return get('/api/v1/admin/ledger/entries', { params })
+}
+
 // ---- Risk Case（A-RISK-001） ----
 export interface AdminRiskCaseDto {
   case_id: string

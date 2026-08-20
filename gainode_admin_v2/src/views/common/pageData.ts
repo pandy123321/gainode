@@ -19,6 +19,7 @@ import {
   listRewards,
   listTickets,
   listLedgerAccounts,
+  listLedgerEntries,
   listRiskCases,
   listApprovalTasks,
   listParameterReleases,
@@ -221,6 +222,11 @@ const loadLedgerAccounts = paged(
   (p, s, q) => listLedgerAccounts({ page: p, size: s, keyword: q?.keyword }),
   (d) => d?.accounts,
 )
+// APT 流水明细（A-LEDGER-002 明细）
+const loadLedgerEntries = paged(
+  (p, s, q) => listLedgerEntries({ page: p, size: s, account_id: q?.account_id }),
+  (d) => d?.entries,
+)
 // Risk Case（A-RISK-001）
 const loadRiskCases = paged(
   (p, s, q) => listRiskCases({ page: p, size: s, status: q?.status, severity: q?.severity }),
@@ -292,6 +298,7 @@ const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/robot/rewards': loadRewards,
   '/support/tickets': loadTickets,
   '/ledger/accounts': loadLedgerAccounts,
+  '/ledger/entries': loadLedgerEntries,
   '/ledger/overview': loadLedgerOverview,
   '/risk/cases': loadRiskCases,
   '/approval/center': loadApprovalTasks,
