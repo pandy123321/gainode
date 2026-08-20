@@ -34,6 +34,7 @@ use library\service\power\PowerPositionService;
 use library\service\prediction\CorrectionCaseService;
 use library\service\prediction\PredictionMarketService;
 use library\service\prediction\RefundCaseService;
+use library\service\prediction\ResultService;
 use library\service\prediction\SettlementService;
 use library\service\risk\RiskCaseService;
 use library\service\robot\RobotService;
@@ -298,6 +299,18 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionResultDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/results/{id} — Result 详情（A-PREDICT-003） */
+    public function resultDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new ResultService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
