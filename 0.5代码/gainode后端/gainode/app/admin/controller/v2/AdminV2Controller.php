@@ -8,6 +8,7 @@ use library\dict\ErrorDict;
 use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminLedgerDtoService;
+use library\service\admin\AdminLedgerOverviewDtoService;
 use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
@@ -269,6 +270,30 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new AdminWorkbenchDtoService())->overview();
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/audit-log/{id} — 审计日志详情（A-AUDIT-001） */
+    public function auditLogDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new AuditEventService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/ledger/overview — 资产总览 DTO（A-LEDGER-001） */
+    public function ledgerOverview(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new AdminLedgerOverviewDtoService())->overview();
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
