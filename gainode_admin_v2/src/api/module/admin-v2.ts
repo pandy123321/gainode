@@ -314,6 +314,103 @@ export function getAuditLogDetail(id: string): Promise<Envelope<Record<string, u
   return get(`/api/v1/admin/audit-log/${id}`)
 }
 
+// ---- KYC 审核队列（A-KYC-001） ----
+export interface AdminKycCaseDto {
+  case_id: string
+  user_id: string
+  kyc_level: string
+  status: string
+  submitted_at: number
+  reviewed_at: number
+  reviewed_by: string | null
+  reason_code: string | null
+  next_action: string | null
+  policy_version: string
+  rule_version: string
+  object_version: number
+  created_time: number
+}
+export function listKycCases(params: {
+  page: number
+  size: number
+  status?: string
+}): Promise<Envelope<PageData<AdminKycCaseDto> & { cases: AdminKycCaseDto[] }>> {
+  return get('/api/v1/admin/admission/kyc', { params })
+}
+
+// ---- Result/Settlement（A-PREDICT-003） ----
+export interface AdminPredictionResultDto {
+  result_id: string
+  market_id: string
+  event_id: string
+  scores: string | null
+  outcome: string
+  status: string
+  confirmed_by: string | null
+  confirmed_at: number
+  dispute_reason_code: string | null
+  correction_version: number
+  rule_version: string
+  snapshot_id: string
+  object_version: number
+  created_time: number
+}
+export function listPredictionResults(params: {
+  page: number
+  size: number
+  status?: string
+}): Promise<Envelope<PageData<AdminPredictionResultDto> & { results: AdminPredictionResultDto[] }>> {
+  return get('/api/v1/admin/prediction/results', { params })
+}
+
+// ---- Refund（A-PREDICT-004） ----
+export interface AdminRefundDto {
+  refund_id: string
+  market_id: string
+  batch_size: number
+  principal_total_apt: string
+  service_fee_total_apt: string
+  status: string
+  approved_by: string | null
+  executed_at: number
+  reason_code: string
+  approval_id: string
+  rule_version: string
+  snapshot_id: string
+  object_version: number
+  created_time: number
+}
+export function listRefunds(params: {
+  page: number
+  size: number
+  status?: string
+}): Promise<Envelope<PageData<AdminRefundDto> & { refunds: AdminRefundDto[] }>> {
+  return get('/api/v1/admin/prediction/refunds', { params })
+}
+
+// ---- Correction（A-PREDICT-004） ----
+export interface AdminCorrectionDto {
+  correction_id: string
+  market_id: string
+  result_id_old: string
+  result_id_new: string
+  status: string
+  approved_by: string | null
+  executed_at: number
+  approval_id: string
+  rule_version: string
+  snapshot_id: string
+  object_version: number
+  created_time: number
+}
+export function listCorrections(params: {
+  page: number
+  size: number
+  status?: string
+}): Promise<Envelope<PageData<AdminCorrectionDto> & { corrections: AdminCorrectionDto[] }>> {
+  return get('/api/v1/admin/prediction/corrections', { params })
+}
+
 // ---- 资产总览（A-LEDGER-001） ----
 export interface AdminLedgerOverview {
   account_count: number

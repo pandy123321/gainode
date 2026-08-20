@@ -29,6 +29,10 @@ import {
   getWorkbenchOverview,
   getWorkbenchTodo,
   getLedgerOverview,
+  listKycCases,
+  listPredictionResults,
+  listRefunds,
+  listCorrections,
 } from '@/api/module/admin-v2'
 
 /** 列表查询入参（keyword 由搜索框、其余由 filters 注入） */
@@ -290,6 +294,30 @@ const loadAuditLog: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery)
   return { rows: data?.audit_events || [], total: (data?.audit_events || []).length }
 }
 
+// KYC 审核队列（A-KYC-001，只读）
+const loadKycCases: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
+  const { data } = await listKycCases({ page: q.page, size: q.size, status: q.status })
+  return { rows: data?.cases || [], total: data?.total ?? 0 }
+}
+
+// Result/Settlement（A-PREDICT-003，只读）
+const loadPredictionResults: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
+  const { data } = await listPredictionResults({ page: q.page, size: q.size, status: q.status })
+  return { rows: data?.results || [], total: data?.total ?? 0 }
+}
+
+// Refund（A-PREDICT-004，只读）
+const loadRefunds: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
+  const { data } = await listRefunds({ page: q.page, size: q.size, status: q.status })
+  return { rows: data?.refunds || [], total: data?.total ?? 0 }
+}
+
+// Correction（A-PREDICT-004，只读）
+const loadCorrections: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
+  const { data } = await listCorrections({ page: q.page, size: q.size, status: q.status })
+  return { rows: data?.corrections || [], total: data?.total ?? 0 }
+}
+
 // 资产总览（A-LEDGER-001，dashboard）
 const loadLedgerOverview: (q: ListQuery) => Promise<ListResult> = async () => {
   const { data } = await getLedgerOverview()
@@ -323,6 +351,9 @@ const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/prediction/markets': loadPredictionMarkets,
   '/power/accounts': loadPowerAccounts,
   '/audit/logs': loadAuditLog,
+  '/admission/kyc': loadKycCases,
+  '/prediction/results': loadPredictionResults,
+  '/prediction/refunds': loadRefunds,
 }
 
 Object.assign(LOADERS, ADMIN_LOADERS)
