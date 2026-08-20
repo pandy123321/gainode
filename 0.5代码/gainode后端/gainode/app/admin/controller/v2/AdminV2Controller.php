@@ -9,6 +9,7 @@ use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminOtcDtoService;
+use library\service\admin\AdminPredictionDtoService;
 use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
@@ -170,6 +171,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminConfigDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/markets — Market 列表 DTO（A-PREDICT-001） */
+    public function predictionMarkets(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminPredictionDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
