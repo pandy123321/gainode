@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
+use library\dao\prediction\PredictionOrderDao;
 use library\dao\robot\RobotRewardDao;
 use library\dao\robot\RobotUpgradeOrderDao;
 use library\service\admin\AdminApprovalDtoService;
@@ -367,6 +368,36 @@ class AdminV2Controller extends ApiV2
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionOrderDtoService())->list($page, $size, $status);
             return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/orders/{id} — Prediction Order 详情（A-PREDICT-001） */
+    public function predictionOrderDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $o = (new PredictionOrderDao())->get($id);
+            if (empty($o)) {
+                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'order not found');
+            }
+            return $this->envelope([
+                'order_id'            => (string) $o->order_id,
+                'user_id'             => (string) $o->user_id,
+                'market_id'           => (string) $o->market_id,
+                'selection'           => (string) $o->selection,
+                'amount_apt'          => (string) $o->amount_apt,
+                'order_status'        => (string) $o->order_status,
+                'asset_status'        => $o->asset_status !== null ? (string) $o->asset_status : null,
+                'risk_status'         => $o->risk_status !== null ? (string) $o->risk_status : null,
+                'consent_receipt_id'  => (string) $o->consent_receipt_id,
+                'submit_snapshot_id'  => (string) $o->submit_snapshot_id,
+                'parameter_release_id'=> (string) $o->parameter_release_id,
+                'policy_version'      => (string) $o->policy_version,
+                'object_version'      => (int) $o->object_version,
+                'created_time'        => (int) $o->getRawOriginal('created_time'),
+            ]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
