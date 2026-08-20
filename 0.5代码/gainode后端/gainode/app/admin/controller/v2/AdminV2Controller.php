@@ -21,6 +21,7 @@ use library\service\admin\AdminRefundDtoService;
 use library\service\admin\AdminRewardDtoService;
 use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
+use library\service\admin\AdminSettlementDtoService;
 use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\admin\AdminUserDetailDtoService;
@@ -295,6 +296,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionResultDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/settlements — Settlement 列表 DTO（A-PREDICT-003 结算） */
+    public function settlements(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminSettlementDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
