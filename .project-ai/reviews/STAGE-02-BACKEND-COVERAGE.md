@@ -102,19 +102,21 @@
 | GET /api/v1/admin/risk/cases/{id} | A-RISK-001 | riskDetail | ✅ | RiskCaseService::detail | WIRED |
 | GET /api/v1/admin/otc/users/{id}/orders | A-OTC-001 | otcUserOrders | ✅ | OtcOrderService::listByUser | WIRED |
 
-## Admin V2 写路径（fail-closed 占位，A5403BD 起）
+## Admin V2 写路径（A5403BD 起；6D39C92 开放 OTC/审批）
 
 | 接口 | Page | Controller 方法 | 路由 | 状态 |
 |---|---|---|---|---|
-| POST /api/v1/admin/admission/kyc/{id}/decision | A-KYC-001 | kycDecision | ✅ | FAIL_CLOSED(POLICY_DENIED) |
-| POST /api/v1/admin/otc/orders/{id}/review | A-OTC-002 | otcOrderReview | ✅ | FAIL_CLOSED(POLICY_DENIED) |
-| POST /api/v1/admin/approval/tasks/{id}/decision | A-APPROVAL-001 | approvalDecision | ✅ | FAIL_CLOSED(POLICY_DENIED) |
-| POST /api/v1/admin/prediction/refunds | A-PREDICT-004 | refundCreate | ✅ | FAIL_CLOSED(POLICY_DENIED) |
-| POST /api/v1/admin/ledger/corrections | A-LEDGER-004 | correctionCreate | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/admission/kyc/{id}/decision | A-KYC-001 | kycDecision | ✅ | FAIL_CLOSED（KYC 领域 approve/reject 方法缺失） |
+| POST /api/v1/admin/otc/orders/{id}/review | A-OTC-002 | otcOrderReview | ✅ | **WIRED**（OtcOrderService::approveReview/reject，guardRole） |
+| POST /api/v1/admin/approval/tasks/{id}/decision | A-APPROVAL-001 | approvalDecision | ✅ | **WIRED**（ApprovalRequestService::approve/reject，guardRole+SoD） |
+| POST /api/v1/admin/prediction/refunds | A-PREDICT-004 | refundCreate | ✅ | FAIL_CLOSED（RefundCaseService::createCase 依赖退款契约未冻结） |
+| POST /api/v1/admin/ledger/corrections | A-LEDGER-004 | correctionCreate | ✅ | FAIL_CLOSED（CorrectionCase 依赖冲正契约/账本未冻结） |
 | POST /api/v1/admin/async-jobs/{id} | A-OPS-001 | asyncJob | ✅ | FAIL_CLOSED(DEPENDENCY_UNAVAILABLE) |
 | POST /api/v1/admin/export-tasks | A-OPS-001 | exportTask | ✅ | FAIL_CLOSED(DEPENDENCY_UNAVAILABLE) |
 
-> 写路径占位统一 fail-closed：admin 角色映射（sys_admin.role_id→05 13 角色）未冻结，不开放有经济/审批副作用的写路径。待映射冻结后再绑定真实 Service。
+> 治理角色：AdminGovernanceRoleService 解析当前 admin → 05 §8 治理角色集合（超管 is_admin=1 持全部角色；
+> 非超管按 role_id 映射，未配置 fail-closed）。OTC 审核/审批决策已接入真实 service（guardRole 二次校验）；
+> KYC 因领域方法缺失、退款/冲正因依赖契约未冻结，保持 fail-closed（对齐 service 逻辑，不绕过）。
 
 ## 汇总
 

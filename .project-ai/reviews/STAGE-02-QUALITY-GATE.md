@@ -19,7 +19,7 @@
 
 ## 运行证据（Developer 侧，本轮）
 
-- wiring 契约测试：`tests/Contract/S02P09ControllerWiringContractTest.php` 160 断言全绿
+- wiring 契约测试：`tests/Contract/S02P09ControllerWiringContractTest.php` 163 断言全绿 + `AdminGovernanceRoleServiceContractTest` 8 断言全绿
 - 既有 Contract/Integration 套件全绿（S02-P02~P08）
 - 前端 `vite build` exit 0（Admin 19 权威页真实数据）
 - H5 type-check/build/unit（147 断言）PASS
@@ -28,7 +28,7 @@
 
 - OpenAPI lint（parse/ref/operationId 唯一性）：NOT_RUN
 - 真实 HTTP 请求 / E2E：NOT_RUN（无 runnable 服务实例）
-- Admin V2 写路径测试：PARTIAL（5 写操作 + async/export 占位控制器已建并注册路由，统一 fail-closed；真实写需 admin 角色映射冻结）
+- Admin V2 写路径测试：PARTIAL（OTC 审核/审批决策已接入真实 service；KYC/退款/冲正因领域方法缺失或依赖契约未冻结保持 fail-closed）
 - 前端 33 权威页 DTO 对接：PARTIAL（19 页已接，其余待后端接口/前端同事）
 - 生产参数批准：NO-GO（未批准，依赖预算/claim/consume 仍 FAIL_CLOSED）
 
@@ -40,5 +40,5 @@
 | 非法状态出边=0 | 域层 PASS；HTTP 层 N/A（写路径未暴露） |
 | 直接账本经济列更新=0 | PASS（域层 Authoritative Writer 已审；append-only 保护经测试验证） |
 | SoD bypass=0 | PARTIAL（admin 认证已裁决 OPTION_A；角色映射待冻结） |
-| 核心测试通过 | PASS（Contract 160 + Integration 全绿） |
+| 核心测试通过 | PASS（Contract 163+8 + Integration 全绿） |
 | Production | NO-GO |
