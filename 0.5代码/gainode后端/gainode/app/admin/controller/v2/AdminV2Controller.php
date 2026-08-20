@@ -24,8 +24,10 @@ use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\admin\AdminUserDetailDtoService;
 use library\service\admin\AdminWorkbenchDtoService;
+use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
+use library\service\parameter\ParameterReleaseService;
 use library\service\robot\RobotService;
 use library\service\support\TicketService;
 use support\controller\ApiV2;
@@ -168,6 +170,30 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminApprovalDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/approval/tasks/{id} — 审批详情（A-APPROVAL-001 详情） */
+    public function approvalDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new ApprovalRequestService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/parameter/releases/{id} — Parameter Release 详情（A-CONFIG-002） */
+    public function parameterReleaseDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new ParameterReleaseService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
