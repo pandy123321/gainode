@@ -37,6 +37,7 @@ use library\service\prediction\CorrectionCaseService;
 use library\service\prediction\PredictionMarketService;
 use library\service\prediction\RefundCaseService;
 use library\service\prediction\ResultService;
+use library\service\prediction\SettlementBatchService;
 use library\service\prediction\SettlementService;
 use library\service\risk\RiskCaseService;
 use library\service\robot\RobotService;
@@ -355,6 +356,18 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminSettlementBatchDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/settlement-batches/{id} — Settlement Batch 详情（A-PREDICT-003） */
+    public function settlementBatchDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new SettlementBatchService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
