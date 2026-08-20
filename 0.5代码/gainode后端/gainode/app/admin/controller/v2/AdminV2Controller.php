@@ -30,6 +30,7 @@ use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
 use library\service\parameter\ParameterReleaseService;
+use library\service\power\PowerPositionService;
 use library\service\prediction\CorrectionCaseService;
 use library\service\prediction\PredictionMarketService;
 use library\service\prediction\RefundCaseService;
@@ -380,6 +381,34 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $result = (new AdminPowerDtoService())->list($page, $size);
             return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/power/users/{id} — Power 账户详情（A-POWER-001 详情） */
+    public function powerDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $pos = (new PowerPositionService())->getByUser($id);
+            if (empty($pos)) {
+                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'power position not found');
+            }
+            return $this->envelope([
+                'user_id'                  => (string) $pos->user_id,
+                'available'                => (string) $pos->available,
+                'frozen'                   => (string) $pos->frozen,
+                'consumed_period'          => (string) $pos->consumed_period,
+                'released_period'          => (string) $pos->released_period,
+                'recovering'               => (string) $pos->recovering,
+                'limit'                    => (string) $pos->limit,
+                'power_cap_source_robot_level' => (int) $pos->power_cap_source_robot_level,
+                'last_restore_at'          => (int) $pos->last_restore_at,
+                'next_restore_at'          => (int) $pos->next_restore_at,
+                'rule_version'             => (string) $pos->rule_version,
+                'object_version'           => (int) $pos->object_version,
+            ]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
