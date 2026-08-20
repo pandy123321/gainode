@@ -37,7 +37,7 @@ Automated verification:
   - 既有 Integration 套件(S02P02~P08/Kernel)               | exit 0 | PASS
   - tests/ledger/LedgerAppendOnlyMutationMatrixTest        | exit 0 | PASS (67 断言)
   - git diff --check                        | exit 0 | PASS
-  - git push origin feature/gainode-v3-serial-development | exit 128 | BLOCKED（Schannel SEC_E_NO_CREDENTIALS，本机凭据不可用）
+  - git push origin feature/gainode-v3-serial-development | exit 0 | PASS（danger-full-access 下 GCM 可取得凭据；bec04b4..0fc5289 已同步）
 Manual verification: 路由注册 + 真实 HTTP 请求 | 未执行（路由方案 OPEN，未注册路由；无 runnable 服务实例） | NOT_RUN
 Open issues / Risk / Not implemented:
   - 【OPEN_OWNER_DECISION】V2 路由路径方案：契约/前端/OpenAPI 用 /api/v1/...，运行时 config/route/api.php 组 /v1 + sys_route.url /api/... = /v1/api/...。Agent 不得猜测，已提交 DECISION_REQUEST_V2_ROUTE_PATH_SCHEME.md，建议 OPTION_A（新增 /api/v1 组，复用 sys_route 表）。裁决前不注册任何 V2 路由（fail-closed）。
@@ -45,7 +45,7 @@ Open issues / Risk / Not implemented:
   - 路由未注册前，Auth/Kyc/User 控制器仍 HTTP 不可达（路由缺失即关闭，安全）。
   - Robot/Prediction/Otc 只读投影依赖 DB 中真实数据行；空表时返回空列表（非 mock）。
   - 本包不包含 sys_route seed（等待路由方案裁决）。
-  - push BLOCKED：本机 Windows Schannel 无法取得 GitHub 凭据；本地 commit f97b84c 已就绪待 Owner 环境推送。
+  - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
 Next technically ready Package: S02-P09 后端 Gate（路由方案裁决 + sys_route 注册后即可进入 Gate 步骤；若裁决前继续，可先做只读接线余下的 validator 补齐）
 SNAPSHOT_LOCKED: YES
 ```
