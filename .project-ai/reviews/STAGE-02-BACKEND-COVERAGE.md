@@ -102,19 +102,33 @@
 | GET /api/v1/admin/risk/cases/{id} | A-RISK-001 | riskDetail | ✅ | RiskCaseService::detail | WIRED |
 | GET /api/v1/admin/otc/users/{id}/orders | A-OTC-001 | otcUserOrders | ✅ | OtcOrderService::listByUser | WIRED |
 
+## Admin V2 写路径（fail-closed 占位，A5403BD 起）
+
+| 接口 | Page | Controller 方法 | 路由 | 状态 |
+|---|---|---|---|---|
+| POST /api/v1/admin/admission/kyc/{id}/decision | A-KYC-001 | kycDecision | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/otc/orders/{id}/review | A-OTC-002 | otcOrderReview | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/approval/tasks/{id}/decision | A-APPROVAL-001 | approvalDecision | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/prediction/refunds | A-PREDICT-004 | refundCreate | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/ledger/corrections | A-LEDGER-004 | correctionCreate | ✅ | FAIL_CLOSED(POLICY_DENIED) |
+| POST /api/v1/admin/async-jobs/{id} | A-OPS-001 | asyncJob | ✅ | FAIL_CLOSED(DEPENDENCY_UNAVAILABLE) |
+| POST /api/v1/admin/export-tasks | A-OPS-001 | exportTask | ✅ | FAIL_CLOSED(DEPENDENCY_UNAVAILABLE) |
+
+> 写路径占位统一 fail-closed：admin 角色映射（sys_admin.role_id→05 13 角色）未冻结，不开放有经济/审批副作用的写路径。待映射冻结后再绑定真实 Service。
+
 ## 汇总
 
 ```text
-operationId 总数 = 74
-已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 30（Admin V2 只读）≈ 71 路由已注册
-写路径 FAIL_CLOSED = 未在 C 端暴露（服务层抛 DEPENDENCY_UNAVAILABLE）；Admin 写操作待 admin 角色映射冻结
-前端对接         = admin-v2.ts + pageData.ts 15 权威页真实数据（vite build 通过）
+operationId 总数 = 81
+已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 30（Admin V2 只读）+ 5（Admin 写占位 fail-closed）+ 2（async/export fail-closed）≈ 78 路由已注册
+写路径 FAIL_CLOSED = Admin V2 5 写操作 + async/export 占位已注册路由；服务层未绑定（角色映射冻结后接线）
+前端对接         = admin-v2.ts + pageData.ts 19 权威页真实数据（vite build 通过）
 池子对账/策略     = 无冻结 service，保持 fail-closed（不猜测建表）
 ```
 
 ## 未运行项（如实声明）
 
 - 真实 HTTP 请求/E2E：NOT_RUN（无 runnable 服务实例；sys_route seed 需 DB 应用）
-- Admin V2 写路径集成测试：NOT_RUN（控制器未建，认证架构虽已裁决 OPTION_A 但角色映射未冻结）
+- Admin V2 写路径集成测试：NOT_RUN（控制器 fail-closed 占位已建；真实写需 admin 角色映射冻结）
 - OpenAPI lint 工具（parse/ref/operationId 唯一性）：NOT_RUN（本环境无独立 lint 脚本）
-- 前端 33 权威 Admin 页 DTO 对接：PARTIAL（15 页已接，其余待后端接口/前端同事）
+- 前端 33 权威 Admin 页 DTO 对接：PARTIAL（19 页已接，其余待后端接口/前端同事）
