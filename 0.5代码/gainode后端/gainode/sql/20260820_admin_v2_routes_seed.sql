@@ -13,7 +13,8 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('4e016e293594e2154e53628a049e1b23','admin_v2','v2\adminv2','robots','GET',NULL,'/robot/list','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'robots',1),
     ('dbf81db272574a8ffd8c69ed2079bfd2','admin_v2','v2\adminv2','tickets','GET',NULL,'/support/tickets','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'tickets',1),
     ('3c4e93abbffd5ef126a668121edc9f7f','admin_v2','v2\adminv2','ledgerAccounts','GET',NULL,'/ledger/accounts','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerAccounts',1),
-    ('f98494865f13a671e5c70c5f9d1b92d6','admin_v2','v2\adminv2','riskCases','GET',NULL,'/risk/cases','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'riskCases',1);
+    ('f98494865f13a671e5c70c5f9d1b92d6','admin_v2','v2\adminv2','riskCases','GET',NULL,'/risk/cases','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'riskCases',1),
+    ('6ec92182d0e6b516af1596b99ecea9d4','admin_v2','v2\adminv2','approvalTasks','GET',NULL,'/approval/tasks','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'approvalTasks',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

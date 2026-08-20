@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
+use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminRiskDtoService;
@@ -138,6 +139,21 @@ class AdminV2Controller extends ApiV2
             $status = (string) $this->request->get('status', '');
             $severity = (string) $this->request->get('severity', '');
             $result = (new AdminRiskDtoService())->list($page, $size, $status, $severity);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/approval/tasks — 审批中心 DTO（A-APPROVAL-001） */
+    public function approvalTasks(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminApprovalDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
