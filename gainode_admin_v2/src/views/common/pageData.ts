@@ -26,6 +26,7 @@ import {
   listPowerAccounts,
   listAuditLog,
   getWorkbenchOverview,
+  getLedgerOverview,
 } from '@/api/module/admin-v2'
 
 /** 列表查询入参（keyword 由搜索框、其余由 filters 注入） */
@@ -267,6 +268,21 @@ const loadAuditLog: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery)
   return { rows: data?.audit_events || [], total: (data?.audit_events || []).length }
 }
 
+// 资产总览（A-LEDGER-001，dashboard）
+const loadLedgerOverview: (q: ListQuery) => Promise<ListResult> = async () => {
+  const { data } = await getLedgerOverview()
+  return {
+    rows: [],
+    total: 0,
+    stats: [
+      String(data?.account_count ?? 0),
+      data?.total_balance_apt_i ?? '0',
+      data?.total_frozen_apt_i ?? '0',
+      data?.total_earned_apt ?? '0',
+    ],
+  }
+}
+
 // 权威页路由 → loader 映射（与 admin-registry.ts 的 33 权威 pageId route 对齐）
 const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/workbench/overview': loadWorkbenchOverview,
@@ -276,6 +292,7 @@ const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/robot/rewards': loadRewards,
   '/support/tickets': loadTickets,
   '/ledger/accounts': loadLedgerAccounts,
+  '/ledger/overview': loadLedgerOverview,
   '/risk/cases': loadRiskCases,
   '/approval/center': loadApprovalTasks,
   '/config/definitions': loadParameterReleases,

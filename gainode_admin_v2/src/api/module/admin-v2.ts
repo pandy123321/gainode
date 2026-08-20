@@ -284,6 +284,21 @@ export function listAuditLog(params?: Record<string, string | number>): Promise<
 > {
   return get('/api/v1/admin/audit-log', { params })
 }
+export function getAuditLogDetail(id: string): Promise<Envelope<Record<string, unknown>>> {
+  return get(`/api/v1/admin/audit-log/${id}`)
+}
+
+// ---- 资产总览（A-LEDGER-001） ----
+export interface AdminLedgerOverview {
+  account_count: number
+  total_balance_apt_i: string
+  total_frozen_apt_i: string
+  total_earned_apt: string
+  total_spent_apt: string
+}
+export function getLedgerOverview(): Promise<Envelope<AdminLedgerOverview>> {
+  return get('/api/v1/admin/ledger/overview')
+}
 
 // ---- 工作台运营总览（A-WORK-001） ----
 export interface AdminWorkbenchOverview {
