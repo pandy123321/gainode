@@ -45,6 +45,8 @@ Open issues / Risk / Not implemented:
   - 路由未注册前，Auth/Kyc/User 控制器仍 HTTP 不可达（路由缺失即关闭，安全）。
   - 【更新】Admin V2 已落地（OPTION_A，Owner 裁决 ADMIN-V2-AUTH-01）：AdminV2Controller（app/admin/controller/v2）+ /api/v1/admin 组 + sql/20260820_admin_v2_routes_seed.sql（audit_log 只读 + async/export fail-closed）；认证走 AdminAuth。Admin 写操作（市场/结算/退款/更正/审批）因 admin 角色映射未冻结而 fail-closed。
   - Robot/Prediction/Otc 只读投影依赖 DB 中真实数据行；空表时返回空列表（非 mock）。
+  - 【更新】写路径显式 fail-closed 补齐：RobotController(upgradeOrderCreate/rewardClaim)、PredictionController(orderCreate/orderAddition/appealCreate)、OtcController(quote/orderCreate/orderCancel) —— 服务层抛 DEPENDENCY_UNAVAILABLE → 503，非 404。sql/20260820_v2_api_routes_seed.sql 扩至 49 条。wiring 契约测试扩至 68 断言全绿。
+  - 【审核状态】ACR bridge 当前 HEAD 被其他会话(Flutter S3-P02 cb4d098)占用，未审到本 feature 分支 commit；已如实记录，不阻塞后续推进。
   - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
   - 【更新】路由路径方案已裁决（Owner 2026-08-20 = OPTION_A），V2 路由已注册：config/route/v2.php + sql/20260820_v2_api_routes_seed.sql（41 条 Auth/Kyc/User/Ledger/Robot/Parameter/Prediction/Otc 只读路由），V1 /v1 组保留不动。
 Next technically ready Package: S02-P09 后端 Gate（路由已注册；下一步执行 Gate 步骤 1-7：P0 API 映射、状态转移映射、OpenAPI/测试/权限/守恒审查、输出 STAGE-02-BACKEND-COVERAGE.md + STAGE-02-QUALITY-GATE.md）
