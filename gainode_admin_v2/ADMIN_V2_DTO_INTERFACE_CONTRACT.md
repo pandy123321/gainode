@@ -102,9 +102,10 @@
 
 ```text
 33 权威页接口契约已逐页列明
-READY（后端接口存在并已注册）= audit-log / 数据页 fixture/signal/datasource / C端只读
-PARTIAL（service 有、Controller/DTO 列表待建）= 多数 P0 页（User/Robot/OTC/Ledger/Prediction/Risk/Approval/Config/Support）
-NOT_BUILT = 工作台聚合 / 资产总览 / 池子对账 / 策略 / 报表 / Referral（需新 DTO service）
+后端已落地（/api/v1/admin/*）：用户/OTC列表/OTC详情/Robot列表/Robot详情/Reward/工单列表/工单详情/Ledger/Risk/Approval/Config/Prediction/Power/工作台(共15接口)
+前端已对接（admin-v2.ts + pageData.ts）：13 个权威页路由真实数据加载，vite build 通过
+READY（后端接口存在并已注册）= 上述 15 接口 + 数据页 fixture/signal/datasource + C端只读
+PARTIAL = 剩余页面（资产总览/池子对账/策略/报表/Referral 等，service 待建）
 CONTRACT_GAP = 资产调整(A-USER-004) / 紧急操作(A-EMERGENCY-001)
 CLOSED = APT 迁移(A-MIGRATION-001)
 ```
