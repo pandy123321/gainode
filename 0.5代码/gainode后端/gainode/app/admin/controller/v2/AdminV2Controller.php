@@ -15,6 +15,7 @@ use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
 use library\service\admin\AdminPredictionResultDtoService;
+use library\service\admin\AdminRefundDtoService;
 use library\service\admin\AdminRewardDtoService;
 use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
@@ -211,6 +212,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionResultDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/refunds — Refund/Correction 列表 DTO（A-PREDICT-004） */
+    public function refunds(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminRefundDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
