@@ -21,8 +21,8 @@
 
 | Page ID | 前端 route | 所需接口 | 后端 readiness |
 |---|---|---|---|
-| A-WORK-001 运营总览 | /workbench/overview | GET /api/v1/admin/workbench/overview（聚合指标：用户/资产/Robot/市场/待办） | NOT_BUILT（需 DTO 聚合 service） |
-| A-WORK-002 今日待办 | /workbench/todo | GET /api/v1/admin/workbench/todo（待审批/待复核列表） | NOT_BUILT |
+| A-WORK-001 运营总览 | /workbench/overview | GET /api/v1/admin/workbench/overview（聚合指标：用户/Robot/OTC挂单/市场/待审批） | **READY**（AdminWorkbenchDtoService::overview） |
+| A-WORK-002 今日待办 | /workbench/todo | GET /api/v1/admin/workbench/todo（待审批/待复核 KYC/待处理工单/待审核 OTC 计数） | **READY**（AdminTodoDtoService::todo） |
 
 ### 02 用户与准入（ADM-02）
 
