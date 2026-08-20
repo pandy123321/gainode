@@ -16,6 +16,7 @@ use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
+use library\service\admin\AdminWorkbenchDtoService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
 use library\service\robot\RobotService;
@@ -256,6 +257,18 @@ class AdminV2Controller extends ApiV2
         try {
             $this->request->getTokenUser();
             $result = (new TicketService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/workbench/overview — 运营总览 DTO（A-WORK-001） */
+    public function workbenchOverview(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new AdminWorkbenchDtoService())->overview();
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
