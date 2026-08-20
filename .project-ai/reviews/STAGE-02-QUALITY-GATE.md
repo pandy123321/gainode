@@ -9,13 +9,13 @@
 
 | 步骤 | 状态 | 说明 |
 |---|---|---|
-| 1. P0 API → OpenAPI/route/controller/validator/service/test 映射 | PARTIAL | 41 路由已注册（C 端只读+Auth/KYC/User）；admin 12 项未接线；写路径 fail-closed |
+| 1. P0 API → OpenAPI/route/controller/validator/service/test 映射 | PARTIAL | 60 路由已注册（C 端只读+Auth/KYC/User+Admin V2 19 只读）；admin 写路径未接线；写路径 fail-closed |
 | 2. 状态转移 → writer/guard/idempotency/audit/outbox/test | PARTIAL | 域层已完成（S02-P02~P08 已审）；HTTP 层写路径未暴露 |
 | 3. OpenAPI parse/ref/operationId/required/auth/idempotency lint | NOT_RUN | 本环境无独立 lint 脚本 |
-| 4. RBAC/ABAC/SoD/field-masking/secret/dependency/SQL/append-only | PARTIAL | 域层已审；HTTP 层 admin 认证未决 |
+| 4. RBAC/ABAC/SoD/field-masking/secret/dependency/SQL/append-only | PARTIAL | 域层已审；HTTP 层 admin 角色映射未冻结 |
 | 5. Ledger/APT/Power/Reward/OTC/Prediction 守恒/reversal/outbox/restart | PASS(域层) | 既有 Integration 测试全绿 |
 | 6. S02-P01..P08 Snapshot/Quality/Finding closure 核对 | PARTIAL | 已审包 APPROVED；本接线包待审 |
-| 7. 独立 Gate | BLOCKED | admin 认证架构待 Owner；运行时证据缺失 |
+| 7. 独立 Gate | PARTIAL | admin 认证架构已裁决 OPTION_A；admin 角色映射 + 运行时证据待补 |
 
 ## 未运行项（如实声明）
 

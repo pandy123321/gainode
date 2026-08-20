@@ -64,20 +64,45 @@
 | otc_quote/order_create/order_cancel | quote/createOrder/cancel 抛 DEPENDENCY_UNAVAILABLE | 未暴露 | 未注册 | FAIL_CLOSED |
 | policy_evaluation_create | 无对应服务 | 未暴露 | 未注册 | N/A |
 | parameter_candidate_create/release_create/release_activate | 需 admin 角色守卫 | 未暴露 | 未注册 | FAIL_CLOSED(admin) |
-| admin_*（12 项 market/publish/result/settlement/refund/correction/case/approval/async/export） | 部分服务存在(Result/Refund/Correction/Approval/Audit)，AsyncJob/Export 无服务 | 未暴露 | 未注册 | FAIL_CLOSED/N/A；admin 认证架构待决 |
+| admin_*（12 项 market/publish/result/settlement/refund/correction/case/approval/async/export） | 部分服务存在(Result/Refund/Correction/Approval/Audit)，AsyncJob/Export 无服务 | 未暴露 | 未注册 | FAIL_CLOSED/N/A；admin 认证架构已裁决 OPTION_A |
+
+## Admin V2 只读接口（本轮批量落地，OPTION_A admin 应用组 /api/v1/admin）
+
+| 接口 | 前端 Page | Controller 方法 | 路由 | Service | 状态 |
+|---|---|---|---|---|---|
+| GET /api/v1/admin/admission/users | A-USER-001 | users | ✅ | AdminUserDtoService | WIRED |
+| GET /api/v1/admin/otc/orders | A-OTC-001 | otcOrders | ✅ | AdminOtcDtoService | WIRED |
+| GET /api/v1/admin/otc/orders/{id} | A-OTC-002 | otcOrderDetail | ✅ | OtcOrderService::detail | WIRED |
+| GET /api/v1/admin/robot/list | A-ROBOT-001 | robots | ✅ | AdminRobotDtoService | WIRED |
+| GET /api/v1/admin/robot/{id} | A-ROBOT-002 | robotDetail | ✅ | RobotService::detail | WIRED |
+| GET /api/v1/admin/robot/rewards | A-ROBOT-003 | rewardOps | ✅ | AdminRewardDtoService | WIRED |
+| GET /api/v1/admin/support/tickets | A-SUPPORT-001 | tickets | ✅ | AdminTicketDtoService | WIRED |
+| GET /api/v1/admin/support/tickets/{id} | A-SUPPORT-002 | ticketDetail | ✅ | TicketService::detail | WIRED |
+| GET /api/v1/admin/ledger/overview | A-LEDGER-001 | ledgerOverview | ✅ | AdminLedgerOverviewDtoService | WIRED |
+| GET /api/v1/admin/ledger/accounts | A-LEDGER-002 | ledgerAccounts | ✅ | AdminLedgerDtoService | WIRED |
+| GET /api/v1/admin/ledger/entries | A-LEDGER-002明细 | ledgerEntries | ✅ | AdminLedgerEntriesDtoService | WIRED |
+| GET /api/v1/admin/risk/cases | A-RISK-001 | riskCases | ✅ | AdminRiskDtoService | WIRED |
+| GET /api/v1/admin/approval/tasks | A-APPROVAL-001 | approvalTasks | ✅ | AdminApprovalDtoService | WIRED |
+| GET /api/v1/admin/parameter/definitions | A-CONFIG-001 | parameterDefinitions | ✅ | AdminConfigDtoService | WIRED |
+| GET /api/v1/admin/prediction/markets | A-PREDICT-001 | predictionMarkets | ✅ | AdminPredictionDtoService | WIRED |
+| GET /api/v1/admin/power/accounts | A-POWER-001 | powerAccounts | ✅ | AdminPowerDtoService | WIRED |
+| GET /api/v1/admin/audit-log | A-AUDIT-001 | auditLog | ✅ | AuditEventService::listAdmin | WIRED |
+| GET /api/v1/admin/audit-log/{id} | A-AUDIT-001 | auditLogDetail | ✅ | AuditEventService::detail | WIRED |
+| GET /api/v1/admin/workbench/overview | A-WORK-001 | workbenchOverview | ✅ | AdminWorkbenchDtoService | WIRED |
 
 ## 汇总
 
 ```text
 operationId 总数 = 74
-已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User，含 8 auth 写）≈ 41 路由已注册
-写路径 FAIL_CLOSED = 未在 C 端暴露（服务层抛 DEPENDENCY_UNAVAILABLE）
-admin 域          = 12 项未接线；认证架构(admin guard vs api guard)待 Owner 裁决
+已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 19（Admin V2 只读）≈ 60 路由已注册
+写路径 FAIL_CLOSED = 未在 C 端暴露（服务层抛 DEPENDENCY_UNAVAILABLE）；Admin 写操作待 admin 角色映射冻结
+前端对接         = admin-v2.ts + pageData.ts 15 权威页真实数据（vite build 通过）
+池子对账/策略     = 无冻结 service，保持 fail-closed（不猜测建表）
 ```
 
 ## 未运行项（如实声明）
 
 - 真实 HTTP 请求/E2E：NOT_RUN（无 runnable 服务实例；sys_route seed 需 DB 应用）
-- Admin V2 写路径集成测试：NOT_RUN（控制器未建，认证架构未决）
+- Admin V2 写路径集成测试：NOT_RUN（控制器未建，认证架构虽已裁决 OPTION_A 但角色映射未冻结）
 - OpenAPI lint 工具（parse/ref/operationId 唯一性）：NOT_RUN（本环境无独立 lint 脚本）
-- 前端 33 权威 Admin 页 DTO 对接：NOT_RUN（前端同事按 §DTO 口径进行中）
+- 前端 33 权威 Admin 页 DTO 对接：PARTIAL（15 页已接，其余待后端接口/前端同事）
