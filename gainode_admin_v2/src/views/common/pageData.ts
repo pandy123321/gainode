@@ -32,7 +32,6 @@ import {
   listKycCases,
   listPredictionResults,
   listRefunds,
-  listCorrections,
 } from '@/api/module/admin-v2'
 
 /** 列表查询入参（keyword 由搜索框、其余由 filters 注入） */
@@ -306,16 +305,12 @@ const loadPredictionResults: (q: ListQuery) => Promise<ListResult> = async (q: L
   return { rows: data?.results || [], total: data?.total ?? 0 }
 }
 
-// Refund（A-PREDICT-004，只读）
+// Correction（A-PREDICT-004，只读）
+// 说明：A-PREDICT-004 页面路由为 /prediction/refunds（读 refunds）；corrections 列表
+// 无独立权威路由（/ledger/corrections 为 fail-closed 写），故此处不注册 corrections loader。
 const loadRefunds: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
   const { data } = await listRefunds({ page: q.page, size: q.size, status: q.status })
   return { rows: data?.refunds || [], total: data?.total ?? 0 }
-}
-
-// Correction（A-PREDICT-004，只读）
-const loadCorrections: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
-  const { data } = await listCorrections({ page: q.page, size: q.size, status: q.status })
-  return { rows: data?.corrections || [], total: data?.total ?? 0 }
 }
 
 // 资产总览（A-LEDGER-001，dashboard）
