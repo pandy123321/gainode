@@ -24,7 +24,6 @@ use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
 use library\service\robot\RobotService;
 use library\service\support\TicketService;
-use library\service\sys\AdminService;
 use support\controller\ApiV2;
 use support\exception\DomainException;
 use support\Response;
@@ -352,18 +351,5 @@ class AdminV2Controller extends ApiV2
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
-    }
-
-    /** 内部：解析 admin actor 基本信息（id + role_id，role 映射待决） */
-    private function resolveActor(): array
-    {
-        $this->request->getTokenUser();
-        $adminId = (string) $this->request->getUserID();
-        $admin = (new AdminService())->getUserById($adminId);
-        return [
-            'actor_id' => $adminId,
-            'role_id'  => $admin ? (int) $admin->role_id : 0,
-            'is_admin' => $admin ? (int) $admin->is_admin : 0,
-        ];
     }
 }
