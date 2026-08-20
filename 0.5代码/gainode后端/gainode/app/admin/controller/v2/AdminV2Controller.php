@@ -17,6 +17,7 @@ use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\audit\AuditEventService;
+use library\service\otc\OtcOrderService;
 use library\service\sys\AdminService;
 use support\controller\ApiV2;
 use support\exception\DomainException;
@@ -217,6 +218,18 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $state = (string) $this->request->get('state', '');
             $result = (new AdminRewardDtoService())->list($page, $size, $state);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/otc/orders/{id} — OTC 订单详情（A-OTC-002） */
+    public function otcOrderDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new OtcOrderService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
