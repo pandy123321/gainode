@@ -29,6 +29,7 @@ use library\service\admin\AdminWorkbenchDtoService;
 use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
+use library\service\otc\OtcTradeService;
 use library\service\parameter\ParameterReleaseService;
 use library\service\power\PowerPositionService;
 use library\service\prediction\CorrectionCaseService;
@@ -130,6 +131,18 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $otcOrderId = (string) $this->request->get('otc_order_id', '');
             $result = (new AdminOtcTradeDtoService())->list($page, $size, $otcOrderId);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/otc/trades/{id} — OTC 成交详情（A-OTC-001） */
+    public function otcTradeDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new OtcTradeService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
