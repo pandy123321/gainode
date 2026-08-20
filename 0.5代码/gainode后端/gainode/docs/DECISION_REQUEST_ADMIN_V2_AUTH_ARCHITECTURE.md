@@ -2,7 +2,7 @@
 
 > 起草日期：2026-08-20
 > 起草者：DEVELOPMENT-01
-> 状态：**OPEN（待 Owner 裁决）**
+> 状态：**RESOLVED — OPTION_A（Owner 2026-08-20 裁决，见「裁决结果」）**
 > 影响：admin.yaml 12 项操作 + Admin 前端 33 权威页的后端 DTO 接口层能否落地
 
 ---
@@ -71,6 +71,19 @@ Admin V2 控制器仍放 `app/api/controller`，控制器内自行做 admin 角�
    Approval/Audit/Market service；audit_log 只读先落地；写操作 fail-closed。
 2. 注册 admin 应用路由（复用 getRouteList('admin') 或新增组）。
 3. 更新本 Decision + manifest/context。
+
+## 裁决结果（Owner 2026-08-20）
+
+```text
+DECISION = OPTION_A（独立 admin 应用组）
+IMPLEMENTED =
+  - app/admin/controller/v2/AdminV2Controller.php（extends ApiV2，位于 admin 应用）
+  - config/route/admin.php 新增 Route::group('/api/v1/admin', ...) 加载 sys_route module='admin_v2'
+  - sql/20260820_admin_v2_routes_seed.sql：audit-log(只读) / async-jobs(FAIL_CLOSED) / export-tasks(FAIL_CLOSED)
+  - 认证：控制器位于 app/admin/controller/v2 → $request->app='admin' → getTokenUser() 走 AdminAuth
+  - wiring 契约测试 60 断言全绿
+Admin 写操作（市场/结算/退款/更正/审批）= FAIL_CLOSED（admin 角色映射 sys_admin.role_id → 05 13 角色未冻结）
+```
 
 ## 裁决前安全姿态
 

@@ -32,6 +32,7 @@ $controllers = [
     \app\api\controller\ParameterController::class,
     \app\api\controller\PredictionController::class,
     \app\api\controller\OtcController::class,
+    \app\admin\controller\v2\AdminV2Controller::class,
 ];
 foreach ($controllers as $c) {
     check(controllerExists($c), "controller exists: {$c}");
@@ -62,6 +63,7 @@ check(serviceMethodExists(\library\service\otc\OtcOrderService::class, 'detail')
 check(serviceMethodExists(\library\service\otc\OtcTradeService::class, 'getByBuyer'), 'OtcTradeService::getByBuyer');
 check(serviceMethodExists(\library\service\otc\OtcTradeService::class, 'getBySeller'), 'OtcTradeService::getBySeller');
 check(serviceMethodExists(\library\service\otc\OtcEligibilityProjectionService::class, 'getEligibility'), 'OtcEligibilityProjectionService::getEligibility');
+check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'listAdmin'), 'AuditEventService::listAdmin');
 
 // ---- 3. 控制器方法存在 ----
 foreach ([
@@ -70,6 +72,7 @@ foreach ([
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
     \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts'],
     \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility'],
+    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {
         check(method_exists($ctrl, $m), "controller method: {$ctrl}::{$m}");

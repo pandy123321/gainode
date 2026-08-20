@@ -102,3 +102,8 @@ decisionSources:
     decision_date: "2026-08-20"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE ← ask_user_question v2_route_path (OPTION_A)"
+  admin_v2_auth_architecture:
+    value: "APPROVED — OPTION_A（Owner 2026-08-20 裁决 ADMIN-V2-AUTH-01）：Admin V2 操作走独立 admin 应用组。控制器位于 app/admin/controller/v2 → $request->app='admin' → getTokenUser() 走 AdminAuth + Casbin RBAC。新增 config/route/admin.php 组 /api/v1/admin 加载 sys_route module='admin_v2'。已落地 audit_log 只读 + async/export fail-closed（sql/20260820_admin_v2_routes_seed.sql）。Admin 写操作（市场/结算/退款/更正/审批）因 admin 角色映射(sys_admin.role_id → 05 13 角色)未冻结而 fail-closed。"
+    decision_date: "2026-08-20"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE ← ask_user_question admin_v2_auth (OPTION_A)"
