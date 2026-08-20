@@ -19,6 +19,7 @@ use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
+use library\service\admin\AdminUserDetailDtoService;
 use library\service\admin\AdminWorkbenchDtoService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
@@ -325,6 +326,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminKycDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/admission/users/{id} — 用户 360 详情 DTO（A-USER-002） */
+    public function userDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new AdminUserDetailDtoService())->detail($id);
+            if ($result === null) {
+                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'user not found');
+            }
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
