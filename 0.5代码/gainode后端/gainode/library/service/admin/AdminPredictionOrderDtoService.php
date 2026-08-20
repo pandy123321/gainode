@@ -36,6 +36,8 @@ class AdminPredictionOrderDtoService extends Service
         if ($status !== '') {
             $params['order_status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new PredictionOrderDao())->paginate(
             $params,
             ['created_time' => 'desc'],

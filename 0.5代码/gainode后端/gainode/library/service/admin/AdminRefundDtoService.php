@@ -36,6 +36,8 @@ class AdminRefundDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new RefundCaseDao())->paginate(
             $params,
             ['created_time' => 'desc'],

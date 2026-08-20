@@ -36,6 +36,8 @@ class AdminUpgradeOrderDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new RobotUpgradeOrderDao())->paginate(
             $params,
             ['created_time' => 'desc'],

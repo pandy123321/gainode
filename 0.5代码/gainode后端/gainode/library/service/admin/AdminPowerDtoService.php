@@ -31,6 +31,8 @@ class AdminPowerDtoService extends Service
      */
     public function list(int $page, int $size): array
     {
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new PowerPositionDao())->paginate(
             [],
             ['created_time' => 'desc'],

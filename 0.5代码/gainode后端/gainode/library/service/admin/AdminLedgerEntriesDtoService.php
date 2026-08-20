@@ -36,6 +36,8 @@ class AdminLedgerEntriesDtoService extends Service
         if ($accountId !== '') {
             $params['account_id'] = $accountId;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new AptLedgerEntryDao())->paginate(
             $params,
             ['created_time' => 'desc'],

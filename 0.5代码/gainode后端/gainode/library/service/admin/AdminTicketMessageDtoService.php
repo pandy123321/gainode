@@ -36,6 +36,8 @@ class AdminTicketMessageDtoService extends Service
         if ($ticketId !== '') {
             $params['ticket_id'] = $ticketId;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new TicketMessageDao())->paginate(
             $params,
             ['created_time' => 'desc'],

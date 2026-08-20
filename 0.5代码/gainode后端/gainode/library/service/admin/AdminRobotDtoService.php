@@ -36,6 +36,8 @@ class AdminRobotDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new RobotDao())->paginate(
             $params,
             ['created_time' => 'desc'],

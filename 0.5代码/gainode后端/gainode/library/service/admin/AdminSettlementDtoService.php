@@ -36,6 +36,8 @@ class AdminSettlementDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new SettlementDao())->paginate(
             $params,
             ['created_time' => 'desc'],

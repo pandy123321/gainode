@@ -36,6 +36,8 @@ class AdminApprovalDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new ApprovalRequestDao())->paginate(
             $params,
             ['created_time' => 'desc'],

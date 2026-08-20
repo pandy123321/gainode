@@ -36,6 +36,8 @@ class AdminRewardDtoService extends Service
         if ($state !== '') {
             $params['state'] = $state;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new RobotRewardDao())->paginate(
             $params,
             ['created_time' => 'desc'],

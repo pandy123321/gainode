@@ -36,6 +36,8 @@ class AdminCorrectionDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new CorrectionCaseDao())->paginate(
             $params,
             ['created_time' => 'desc'],

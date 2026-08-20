@@ -36,6 +36,8 @@ class AdminConfigDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new ParameterReleaseDao())->paginate(
             $params,
             ['created_time' => 'desc'],

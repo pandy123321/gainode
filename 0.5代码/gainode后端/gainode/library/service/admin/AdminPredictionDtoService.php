@@ -36,6 +36,8 @@ class AdminPredictionDtoService extends Service
         if ($status !== '') {
             $params['market_status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new PredictionMarketDao())->paginate(
             $params,
             ['created_time' => 'desc'],

@@ -40,6 +40,8 @@ class AdminRiskDtoService extends Service
         if ($severity !== '') {
             $params['severity'] = $severity;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new RiskCaseDao())->paginate(
             $params,
             ['created_time' => 'desc'],

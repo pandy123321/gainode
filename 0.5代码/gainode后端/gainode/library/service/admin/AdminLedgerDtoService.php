@@ -37,6 +37,8 @@ class AdminLedgerDtoService extends Service
         if ($keyword !== '') {
             $params['user_id'] = $keyword;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new AptAccountDao())->paginate(
             $params,
             ['created_time' => 'desc'],

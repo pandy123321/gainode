@@ -36,6 +36,8 @@ class AdminOtcTradeDtoService extends Service
         if ($otcOrderId !== '') {
             $params['otc_order_id'] = $otcOrderId;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new OtcTradeDao())->paginate(
             $params,
             ['created_time' => 'desc'],

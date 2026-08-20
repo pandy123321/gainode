@@ -36,6 +36,8 @@ class AdminKycDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new KycCaseDao())->paginate(
             $params,
             ['created_time' => 'desc'],

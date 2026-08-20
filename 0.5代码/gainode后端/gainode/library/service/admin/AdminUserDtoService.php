@@ -38,6 +38,8 @@ class AdminUserDtoService extends Service
         if ($keyword !== '') {
             $params['account'] = ['like', "%{$keyword}%"];
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new UserDao())->paginate(
             $params,
             ['created_time' => 'desc'],

@@ -36,6 +36,8 @@ class AdminSettlementBatchDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new SettlementBatchDao())->paginate(
             $params,
             ['created_time' => 'desc'],

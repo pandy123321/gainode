@@ -36,6 +36,8 @@ class AdminTicketDtoService extends Service
         if ($status !== '') {
             $params['status'] = $status;
         }
+        $params['page'] = $page;
+        $params['size'] = $size;
         $paginator = (new TicketDao())->paginate(
             $params,
             ['created_time' => 'desc'],
