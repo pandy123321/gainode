@@ -10,6 +10,7 @@ use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminLedgerEntriesDtoService;
 use library\service\admin\AdminLedgerOverviewDtoService;
+use library\service\admin\AdminKycDtoService;
 use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
@@ -310,6 +311,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $accountId = (string) $this->request->get('account_id', '');
             $result = (new AdminLedgerEntriesDtoService())->list($page, $size, $accountId);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/admission/kyc — KYC 审核队列 DTO（A-KYC-001） */
+    public function kycQueue(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminKycDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
