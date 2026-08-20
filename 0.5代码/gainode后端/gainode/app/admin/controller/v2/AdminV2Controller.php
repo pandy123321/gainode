@@ -28,6 +28,9 @@ use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
 use library\service\parameter\ParameterReleaseService;
+use library\service\prediction\CorrectionCaseService;
+use library\service\prediction\RefundCaseService;
+use library\service\risk\RiskCaseService;
 use library\service\robot\RobotService;
 use library\service\support\TicketService;
 use support\controller\ApiV2;
@@ -100,6 +103,18 @@ class AdminV2Controller extends ApiV2
         }
     }
 
+    /** GET /api/v1/admin/otc/users/{id}/orders — 用户 OTC 订单（A-OTC-001 补充） */
+    public function otcUserOrders(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new OtcOrderService())->listByUser($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
     /** GET /api/v1/admin/robot/list — Robot 列表 DTO（A-ROBOT-001） */
     public function robots(): Response
     {
@@ -155,6 +170,18 @@ class AdminV2Controller extends ApiV2
             $status = (string) $this->request->get('status', '');
             $severity = (string) $this->request->get('severity', '');
             $result = (new AdminRiskDtoService())->list($page, $size, $status, $severity);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/risk/cases/{id} — Risk Case 详情（A-RISK-001 详情） */
+    public function riskDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new RiskCaseService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
@@ -254,6 +281,30 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminRefundDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/refunds/{id} — Refund 详情（A-PREDICT-004） */
+    public function refundDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new RefundCaseService())->detail($id);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/corrections/{id} — Correction 详情（A-PREDICT-004） */
+    public function correctionDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new CorrectionCaseService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
