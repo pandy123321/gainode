@@ -107,3 +107,8 @@ decisionSources:
     decision_date: "2026-08-20"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE ← ask_user_question admin_v2_auth (OPTION_A)"
+  flutter_s04p00_engineering:
+    value: "APPROVED — Owner 2026-08-21 批准 FLUTTER_ENGINEERING_DECISION 全部推荐值：FLUTTER_TARGET_ROOT=E:\\github\\sports\\gainode_app；APPLICATION_ID_IOS/ANDROID=com.gainode.app；MIN_IOS=13.0/MIN_ANDROID_SDK=24；Flutter 3.47.0/Dart 3.13.0；STATE_MANAGEMENT=Riverpod；ROUTING=GoRouter；SECURE_STORAGE=flutter_secure_storage；HTTP_CLIENT=DIO；DECIMAL_LIBRARY=decimal；FLAVOR_SET=dev,test,sandbox；PRODUCTION_FLAVOR=SCAFFOLD_ONLY_NO_REAL_VALUES。批准后可运行 flutter create。"
+    decision_date: "2026-08-21"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE ← ask_user_question flutter_s04p00 (批准全部推荐值)"
