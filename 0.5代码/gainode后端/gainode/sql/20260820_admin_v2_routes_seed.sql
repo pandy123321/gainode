@@ -17,7 +17,8 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('6ec92182d0e6b516af1596b99ecea9d4','admin_v2','v2\adminv2','approvalTasks','GET',NULL,'/approval/tasks','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'approvalTasks',1),
     ('f9c459a61eaa0cf45d7350a8a1112c26','admin_v2','v2\adminv2','parameterDefinitions','GET',NULL,'/parameter/definitions','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'parameterDefinitions',1),
     ('3d7fe0289161ba22fcf0ead0d660e464','admin_v2','v2\adminv2','predictionMarkets','GET',NULL,'/prediction/markets','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'predictionMarkets',1),
-    ('4823b18a988070da59a987dfd784484f','admin_v2','v2\adminv2','powerAccounts','GET',NULL,'/power/accounts','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'powerAccounts',1);
+    ('4823b18a988070da59a987dfd784484f','admin_v2','v2\adminv2','powerAccounts','GET',NULL,'/power/accounts','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'powerAccounts',1),
+    ('50a809b4180a6bb4d2068d353208371c','admin_v2','v2\adminv2','rewardOps','GET',NULL,'/robot/rewards','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'rewardOps',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

@@ -11,6 +11,7 @@ use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminOtcDtoService;
 use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
+use library\service\admin\AdminRewardDtoService;
 use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
@@ -201,6 +202,21 @@ class AdminV2Controller extends ApiV2
             $page = (int) $this->request->get('page', 1);
             $size = (int) $this->request->get('size', 20);
             $result = (new AdminPowerDtoService())->list($page, $size);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/rewards — Reward 运营 DTO（A-ROBOT-003） */
+    public function rewardOps(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $state = (string) $this->request->get('state', '');
+            $result = (new AdminRewardDtoService())->list($page, $size, $state);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
