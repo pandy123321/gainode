@@ -36,7 +36,8 @@ class AdminUserDtoService extends Service
     {
         $params = [];
         if ($keyword !== '') {
-            $params['account'] = ['like', "%{$keyword}%"];
+            // selector() 的 'like' 分支已自带 %..% 包裹，勿重复加 %（避免 %%keyword%%）
+            $params['account'] = ['like', $keyword];
         }
         $params['page'] = $page;
         $params['size'] = $size;
