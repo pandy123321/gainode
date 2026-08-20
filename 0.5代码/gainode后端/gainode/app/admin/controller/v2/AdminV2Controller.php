@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
+use library\dao\robot\RobotRewardDao;
 use library\dao\robot\RobotUpgradeOrderDao;
 use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
@@ -542,6 +543,38 @@ class AdminV2Controller extends ApiV2
             $state = (string) $this->request->get('state', '');
             $result = (new AdminRewardDtoService())->list($page, $size, $state);
             return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/rewards/{id} — Robot Reward 详情（A-ROBOT-003） */
+    public function robotRewardDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $r = (new RobotRewardDao())->get($id);
+            if (empty($r)) {
+                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'reward not found');
+            }
+            return $this->envelope([
+                'reward_id'               => (string) $r->reward_id,
+                'user_id'                 => (string) $r->user_id,
+                'robot_id'                => (string) $r->robot_id,
+                'period'                  => (string) $r->period,
+                'standard_capacity'       => (string) $r->standard_capacity,
+                'daily_reward_coefficient'=> (string) $r->daily_reward_coefficient,
+                'quantity_apt'            => (string) $r->quantity_apt,
+                'state'                   => (string) $r->state,
+                'eligibility_snapshot_id' => (string) $r->eligibility_snapshot_id,
+                'budget_snapshot_id'      => (string) $r->budget_snapshot_id,
+                'claim_id'                => (string) $r->claim_id,
+                'ledger_entry_id'         => (string) $r->ledger_entry_id,
+                'expires_at'              => (int) $r->expires_at,
+                'rule_version'            => (string) $r->rule_version,
+                'object_version'          => (int) $r->object_version,
+                'created_time'            => (int) $r->getRawOriginal('created_time'),
+            ]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
