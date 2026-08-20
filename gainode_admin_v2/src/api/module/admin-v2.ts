@@ -337,3 +337,14 @@ export interface AdminWorkbenchOverview {
 export function getWorkbenchOverview(): Promise<Envelope<AdminWorkbenchOverview>> {
   return get('/api/v1/admin/workbench/overview')
 }
+
+// ---- 工作台今日待办（A-WORK-002） ----
+export interface AdminWorkbenchTodo {
+  pending_approvals: number
+  pending_kyc: number
+  open_tickets: number
+  review_otc: number
+}
+export function getWorkbenchTodo(): Promise<Envelope<AdminWorkbenchTodo>> {
+  return get('/api/v1/admin/workbench/todo')
+}

@@ -27,6 +27,7 @@ import {
   listPowerAccounts,
   listAuditLog,
   getWorkbenchOverview,
+  getWorkbenchTodo,
   getLedgerOverview,
 } from '@/api/module/admin-v2'
 
@@ -268,6 +269,21 @@ const loadWorkbenchOverview: (q: ListQuery) => Promise<ListResult> = async () =>
   }
 }
 
+// 工作台今日待办（A-WORK-002，dashboard）
+const loadWorkbenchTodo: (q: ListQuery) => Promise<ListResult> = async () => {
+  const { data } = await getWorkbenchTodo()
+  return {
+    rows: [],
+    total: 0,
+    stats: [
+      String(data?.pending_approvals ?? 0),
+      String(data?.pending_kyc ?? 0),
+      String(data?.open_tickets ?? 0),
+      String(data?.review_otc ?? 0),
+    ],
+  }
+}
+
 // 审计日志（A-AUDIT-001，只读）
 const loadAuditLog: (q: ListQuery) => Promise<ListResult> = async (q: ListQuery) => {
   const { data } = await listAuditLog({ page: q.page, size: q.size })
@@ -292,6 +308,7 @@ const loadLedgerOverview: (q: ListQuery) => Promise<ListResult> = async () => {
 // 权威页路由 → loader 映射（与 admin-registry.ts 的 33 权威 pageId route 对齐）
 const ADMIN_LOADERS: Record<string, (q: ListQuery) => Promise<ListResult>> = {
   '/workbench/overview': loadWorkbenchOverview,
+  '/workbench/todo': loadWorkbenchTodo,
   '/admission/users': loadUsers,
   '/otc/orders': loadOtcOrders,
   '/robot/list': loadRobots,
