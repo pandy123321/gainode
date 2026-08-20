@@ -9,6 +9,7 @@ use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminOtcDtoService;
+use library\service\admin\AdminPowerDtoService;
 use library\service\admin\AdminPredictionDtoService;
 use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
@@ -186,6 +187,20 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/power/accounts — Power 账户列表 DTO（A-POWER-001） */
+    public function powerAccounts(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $result = (new AdminPowerDtoService())->list($page, $size);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
