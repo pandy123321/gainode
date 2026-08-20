@@ -8,7 +8,8 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('53312708d4ae75b162e40bc9e4a0456e','admin_v2','v2\adminv2','auditLog','GET',NULL,'/audit-log','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'auditLog',1),
     ('6989bb9c6e12b23265f92a8012e5c640','admin_v2','v2\adminv2','asyncJob','GET',NULL,'/async-jobs/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'asyncJob',1),
     ('0e50cacf6ea1fccb5e6d12785354bcdf','admin_v2','v2\adminv2','exportTask','POST',NULL,'/export-tasks','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'exportTask',1),
-    ('5f369bceea81219b029d44423e5b93ad','admin_v2','v2\adminv2','users','GET',NULL,'/admission/users','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'users',1);
+    ('5f369bceea81219b029d44423e5b93ad','admin_v2','v2\adminv2','users','GET',NULL,'/admission/users','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'users',1),
+    ('33ec532927c38ee6e08489c1a093743d','admin_v2','v2\adminv2','otcOrders','GET',NULL,'/otc/orders','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrders',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);
