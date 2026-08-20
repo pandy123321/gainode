@@ -101,6 +101,9 @@ check(serviceMethodExists(\library\service\robot\RobotService::class, 'detail'),
 check(serviceMethodExists(\library\service\support\TicketService::class, 'detail'), 'TicketService::detail');
 check(serviceMethodExists(\library\service\admin\AdminWorkbenchDtoService::class, 'overview'), 'AdminWorkbenchDtoService::overview');
 check(serviceMethodExists(\library\service\admin\AdminTodoDtoService::class, 'todo'), 'AdminTodoDtoService::todo');
+check(serviceMethodExists(\library\service\admin\AdminGovernanceRoleService::class, 'rolesFor'), 'AdminGovernanceRoleService::rolesFor');
+check(serviceMethodExists(\library\service\admin\AdminGovernanceRoleService::class, 'rolesForAdminId'), 'AdminGovernanceRoleService::rolesForAdminId');
+check(serviceMethodExists(\library\service\admin\AdminGovernanceRoleService::class, 'hasAnyRole'), 'AdminGovernanceRoleService::hasAnyRole');
 check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'detail'), 'AuditEventService::detail');
 check(serviceMethodExists(\library\service\admin\AdminLedgerOverviewDtoService::class, 'overview'), 'AdminLedgerOverviewDtoService::overview');
 check(serviceMethodExists(\library\service\admin\AdminLedgerEntriesDtoService::class, 'list'), 'AdminLedgerEntriesDtoService::list');

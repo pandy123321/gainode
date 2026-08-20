@@ -34,6 +34,7 @@ use library\service\admin\AdminUserDtoService;
 use library\service\admin\AdminUserDetailDtoService;
 use library\service\admin\AdminWorkbenchDtoService;
 use library\service\admin\AdminTodoDtoService;
+use library\service\admin\AdminGovernanceRoleService;
 use library\service\approval\ApprovalRequestService;
 use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
@@ -796,13 +797,17 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/admission/kyc/{id}/decision — KYC 审核决策（A-KYC-001 写）
-     * fail-closed：admin 角色映射未冻结，不开放有审批副作用的写路径。
+     * fail-closed：KycApplicationService/KycCaseService 未实现 admin approve/reject 领域方法
+     * （仅有 C 端 submit）。领域写方法缺失，保持 fail-closed，不猜测状态转移。
      */
     public function kycDecision(string $id): Response
     {
         try {
             $this->request->getTokenUser();
-            throw new DomainException(ErrorDict::POLICY_DENIED, 'kyc decision write path closed until admin role mapping frozen');
+            throw new DomainException(
+                ErrorDict::DEPENDENCY_UNAVAILABLE,
+                'kyc decision domain method (approve/reject) not implemented in KycCaseService'
+            );
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
@@ -810,13 +815,24 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/otc/orders/{id}/review — OTC 订单审核（A-OTC-002 写）
-     * fail-closed：admin 角色映射未冻结。
+     * 接入 OtcOrderService::approveReview/reject（真实写路径，guardRole KYC_REVIEWER/OPS_OPERATOR）。
+     * action=approve|reject（默认 approve）。
      */
     public function otcOrderReview(string $id): Response
     {
         try {
-            $this->request->getTokenUser();
-            throw new DomainException(ErrorDict::POLICY_DENIED, 'otc order review write path closed until admin role mapping frozen');
+            $admin = $this->request->getTokenUser();
+            $action = (string) $this->request->post('action', 'approve');
+            [$actorId, $actorRoles] = $this->resolveActor($admin);
+            $role = $this->pickRole($actorRoles, [OtcOrderService::ROLE_KYC_REVIEWER, OtcOrderService::ROLE_OPS_OPERATOR]);
+            if ($role === null) {
+                throw new DomainException(ErrorDict::POLICY_DENIED, 'admin has no governance role for otc order review');
+            }
+            $service = new OtcOrderService();
+            $result = $action === 'reject'
+                ? $service->reject($id, $actorId, $role)
+                : $service->approveReview($id, $actorId, $role);
+            return $this->envelope(['otc_order_id' => (string) $result->otc_order_id, 'status' => (string) $result->status]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
@@ -824,13 +840,25 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/approval/tasks/{id}/decision — 审批决策（A-APPROVAL-001 写）
-     * fail-closed：admin 角色映射未冻结。
+     * 接入 ApprovalRequestService::approve/reject（真实写路径，guardRole PARAM/RISK_APPROVER + SoD）。
+     * action=approve|reject（默认 approve）。
      */
     public function approvalDecision(string $id): Response
     {
         try {
-            $this->request->getTokenUser();
-            throw new DomainException(ErrorDict::POLICY_DENIED, 'approval decision write path closed until admin role mapping frozen');
+            $admin = $this->request->getTokenUser();
+            $action = (string) $this->request->post('action', 'approve');
+            $reason = (string) $this->request->post('reason_key', '');
+            [$actorId, $actorRoles] = $this->resolveActor($admin);
+            $role = $this->pickRole($actorRoles, [ApprovalRequestService::ROLE_PARAM_APPROVER, ApprovalRequestService::ROLE_RISK_APPROVER]);
+            if ($role === null) {
+                throw new DomainException(ErrorDict::POLICY_DENIED, 'admin has no governance role for approval decision');
+            }
+            $service = new ApprovalRequestService();
+            $result = $action === 'reject'
+                ? $service->reject($id, $actorId, $role, $reason)
+                : $service->approve($id, $actorId, $role, $reason);
+            return $this->envelope(['approval_id' => (string) $result->approval_id, 'status' => (string) $result->status]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
@@ -838,13 +866,18 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/prediction/refunds — 退款发起（A-PREDICT-004 写）
-     * fail-closed：admin 角色映射未冻结。
+     * fail-closed：RefundCaseService::createCase 依赖退款契约/账本写（2B-1 未冻结）→ 服务层抛
+     * DEPENDENCY_UNAVAILABLE。控制器保持 fail-closed 转发语义，不绕过。
      */
     public function refundCreate(): Response
     {
         try {
-            $this->request->getTokenUser();
-            throw new DomainException(ErrorDict::POLICY_DENIED, 'refund create write path closed until admin role mapping frozen');
+            $admin = $this->request->getTokenUser();
+            [$actorId, $actorRoles] = $this->resolveActor($admin);
+            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']) ?? 'OPS_OPERATOR';
+            $data = $this->request->post();
+            (new RefundCaseService())->createCase($data, $actorId, $role);
+            return $this->envelope(['result' => 'ok']);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
@@ -852,15 +885,50 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/ledger/corrections — 更正冲正发起（A-LEDGER-004 写）
-     * fail-closed：admin 角色映射未冻结。
+     * fail-closed：CorrectionCase 领域写依赖契约/账本（未冻结），服务层抛 DEPENDENCY_UNAVAILABLE。
+     * 控制器保持 fail-closed 转发语义。
      */
     public function correctionCreate(): Response
     {
         try {
-            $this->request->getTokenUser();
-            throw new DomainException(ErrorDict::POLICY_DENIED, 'correction create write path closed until admin role mapping frozen');
+            $admin = $this->request->getTokenUser();
+            [$actorId, $actorRoles] = $this->resolveActor($admin);
+            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']) ?? 'OPS_OPERATOR';
+            $data = $this->request->post();
+            (new CorrectionCaseService())->createCase($data, $actorId, $role);
+            return $this->envelope(['result' => 'ok']);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
+    }
+
+    /**
+     * 解析当前 admin 的 actorId + 治理角色集合。
+     *
+     * @param object $admin getTokenUser() 返回的 AdminModel
+     * @return array{0:string,1:string[]}
+     */
+    private function resolveActor($admin): array
+    {
+        $actorId = (string) ($admin->id ?? 0);
+        $roles = (new AdminGovernanceRoleService())->rolesFor($admin);
+        return [$actorId, $roles];
+    }
+
+    /**
+     * 从治理角色集合中挑选一个满足 required 的可用角色（按集合优先级）。
+     *
+     * @param string[] $actorRoles
+     * @param string[] $required
+     * @return string|null
+     */
+    private function pickRole(array $actorRoles, array $required): ?string
+    {
+        foreach ($required as $r) {
+            if (in_array($r, $actorRoles, true)) {
+                return $r;
+            }
+        }
+        return null;
     }
 }
