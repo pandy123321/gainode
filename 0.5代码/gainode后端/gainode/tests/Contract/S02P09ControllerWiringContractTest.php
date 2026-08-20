@@ -64,6 +64,7 @@ check(serviceMethodExists(\library\service\otc\OtcTradeService::class, 'getByBuy
 check(serviceMethodExists(\library\service\otc\OtcTradeService::class, 'getBySeller'), 'OtcTradeService::getBySeller');
 check(serviceMethodExists(\library\service\otc\OtcEligibilityProjectionService::class, 'getEligibility'), 'OtcEligibilityProjectionService::getEligibility');
 check(serviceMethodExists(\library\service\audit\AuditEventService::class, 'listAdmin'), 'AuditEventService::listAdmin');
+check(serviceMethodExists(\library\service\admin\AdminUserDtoService::class, 'list'), 'AdminUserDtoService::list');
 
 // ---- 3. 控制器方法存在 ----
 foreach ([
@@ -72,7 +73,7 @@ foreach ([
     \app\api\controller\ParameterController::class => ['activeRelease', 'snapshot'],
     \app\api\controller\PredictionController::class => ['markets', 'marketDetail', 'myOrders', 'orderReceipt', 'myConsentReceipts', 'orderCreate', 'orderAddition', 'appealCreate'],
     \app\api\controller\OtcController::class => ['orderBook', 'orderDetail', 'userOrders', 'trades', 'eligibility', 'quote', 'orderCreate', 'orderCancel'],
-    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask'],
+    \app\admin\controller\v2\AdminV2Controller::class => ['auditLog', 'asyncJob', 'exportTask', 'users'],
 ] as $ctrl => $methods) {
     foreach ($methods as $m) {
         check(method_exists($ctrl, $m), "controller method: {$ctrl}::{$m}");

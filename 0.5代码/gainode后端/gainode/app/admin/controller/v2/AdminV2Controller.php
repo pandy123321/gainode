@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
+use library\service\admin\AdminUserDtoService;
 use library\service\audit\AuditEventService;
 use library\service\sys\AdminService;
 use support\controller\ApiV2;
@@ -41,6 +42,21 @@ class AdminV2Controller extends ApiV2
                 }
             }
             $result = (new AuditEventService())->listAdmin($filters);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/admission/users — 用户列表 DTO（A-USER-001） */
+    public function users(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $keyword = (string) $this->request->get('keyword', '');
+            $result = (new AdminUserDtoService())->list($page, $size, $keyword);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
