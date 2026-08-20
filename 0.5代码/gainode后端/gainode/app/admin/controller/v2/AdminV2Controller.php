@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app\admin\controller\v2;
 
 use library\dict\ErrorDict;
+use library\dao\robot\RobotUpgradeOrderDao;
 use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
 use library\service\admin\AdminCorrectionDtoService;
@@ -177,6 +178,39 @@ class AdminV2Controller extends ApiV2
             $status = (string) $this->request->get('status', '');
             $result = (new AdminUpgradeOrderDtoService())->list($page, $size, $status);
             return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/upgrade-orders/{id} — Robot 升级订单详情（A-ROBOT-001） */
+    public function robotUpgradeOrderDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $o = (new RobotUpgradeOrderDao())->get($id);
+            if (empty($o)) {
+                throw new DomainException(ErrorDict::VALIDATION_ERROR, 'upgrade order not found');
+            }
+            return $this->envelope([
+                'upgrade_order_id'   => (string) $o->upgrade_order_id,
+                'robot_id'           => (string) $o->robot_id,
+                'user_id'            => (string) $o->user_id,
+                'from_level'         => (int) $o->from_level,
+                'to_level'           => (int) $o->to_level,
+                'apt_cost'           => (string) $o->apt_cost,
+                'status'             => (string) $o->status,
+                'power_cap_after'    => (string) $o->power_cap_after,
+                'capacities_after'   => $o->capacities_after !== null ? (string) $o->capacities_after : null,
+                'cooling_end_at'     => (int) $o->cooling_end_at,
+                'review_case_id'     => (string) $o->review_case_id,
+                'approval_id'        => (string) $o->approval_id,
+                'ledger_entry_id'    => (string) $o->ledger_entry_id,
+                'rule_version'       => (string) $o->rule_version,
+                'parameter_release_id' => (string) $o->parameter_release_id,
+                'object_version'     => (int) $o->object_version,
+                'created_time'       => (int) $o->getRawOriginal('created_time'),
+            ]);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
         }
