@@ -22,5 +22,6 @@ return [
     'routes'=> [
         config_path('route/admin.php'),
         config_path('route/api.php'),
+        config_path('route/v2.php'),
     ],
 ];

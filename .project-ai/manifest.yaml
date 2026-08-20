@@ -97,3 +97,8 @@ decisionSources:
     decision_date: "2026-08-18"
     owner: OWNER
     provenance: "OWNER_DIRECTIVE ← CR-20260818-002"
+  v2_route_path_scheme:
+    value: "APPROVED — OPTION_A（Owner 2026-08-20 裁决 V2-ROUTE-PATH-01）：V2 路由生效路径 = /api/v1/...（对齐契约 05/OpenAPI/前端）。新增 config/route/v2.php 组 /api/v1 加载 sys_route module='api_v2'；V1 /v1 组保留不动。已注册 Auth/Kyc/User + Ledger/Robot/Parameter/Prediction/Otc 只读控制器（sql/20260820_v2_api_routes_seed.sql）。中间件 Cors+RequestContext+ActionHook 由 config/middleware.php 'api' 全局注入。"
+    decision_date: "2026-08-20"
+    owner: OWNER
+    provenance: "OWNER_DIRECTIVE ← ask_user_question v2_route_path (OPTION_A)"

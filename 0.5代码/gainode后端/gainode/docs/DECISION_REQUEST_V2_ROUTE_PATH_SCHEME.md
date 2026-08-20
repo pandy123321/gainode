@@ -4,7 +4,7 @@
 > 起草者：DEVELOPMENT-01（Gainode 唯一 Development Agent）
 > 关联：07 §7（STAGE-02 路由复用 sys_route）、05 §1/§2（API 路径契约 `/api/v1/...`）、
 >       `openapi/gainode-v2.yaml`（servers: /api/v1）、`config/route/api.php` + `admin.php`
-> 状态：**OPEN（待 Owner 裁决）**
+> 状态：**RESOLVED — OPTION_A（Owner 2026-08-20 裁决，见下「裁决结果」）**
 > 影响：STAGE-02 已接线但 HTTP 不可达的 Auth/Kyc/User 控制器 + 本包新增的只读控制器能否注册路由
 
 ---
@@ -77,10 +77,20 @@ sys_route url 列存 `/api/v1/...` 全路径；V1 的 `/v1` 组 + `/api/...` 保
 **OPTION_A**。理由：契约与前端均已按 `/api/v1/...` 冻结，唯一矛盾在运行时组前缀；
 建立 `/api/v1` 组并复用 sys_route 表最贴近「复用现有路由框架」要求，且不触碰 V1。
 
-裁决后动作：
-1. 若选 A：新增 `config/route/v2.php` 并在 `config/autoload.php` `routes` 追加；sys_route url 列存 `/api/v1/...`。
-2. 注册已接线的 Auth/Kyc/User + 本包只读控制器的全部操作。
-3. 更新本 Decision 状态 + manifest/context。
+## 裁决结果（Owner 2026-08-20）
+
+```text
+DECISION = OPTION_A（新增 /api/v1 组，复用 sys_route 表，V1 /v1 组保留不动）
+IMPLEMENTED =
+  - 新增 config/route/v2.php：Route::group('/api/v1', ...) 加载 sys_route module='api_v2'
+  - config/autoload.php routes 追加 config_path('route/v2.php')
+  - sql/20260820_v2_api_routes_seed.sql：module='api_v2'，url 为相对路径（组前缀 + url = /api/v1/<url>）
+  - 已接线 Auth/Kyc/User + 新增 Ledger/Robot/Parameter/Prediction/Otc 只读控制器全部注册
+  - 中间件 Cors+RequestContext+ActionHook 由 config/middleware.php 'api' 全局注入；鉴权由控制器 getTokenUser() 强制
+V1 /v1 组 = 未改动
+```
+
+裁决后动作 1（注册已接线控制器）已落实；后续 V2 写路径控制器按同一 sys_route(api_v2) 模式追加。
 
 ## 裁决前安全姿态
 
