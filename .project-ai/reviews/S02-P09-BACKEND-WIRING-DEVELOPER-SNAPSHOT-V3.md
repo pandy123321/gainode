@@ -51,6 +51,7 @@ Open issues / Risk / Not implemented:
   - 【更新】Admin V2 DTO 列表接口批量落地（本轮）：AdminOtcDtoService（/api/v1/admin/otc/orders）、AdminRobotDtoService（/api/v1/admin/robot/list）、AdminTicketDtoService（/api/v1/admin/support/tickets）。wiring 契约测试扩至 76 断言全绿。
   - 【更新】Admin V2 DTO 列表接口持续落地：AdminLedgerDtoService（/api/v1/admin/ledger/accounts）、AdminRiskDtoService（/api/v1/admin/risk/cases）、AdminApprovalDtoService（/api/v1/admin/approval/tasks）、AdminConfigDtoService（/api/v1/admin/parameter/definitions）、AdminPredictionDtoService（/api/v1/admin/prediction/markets）。**累计 9 个 Admin DTO 列表接口**（用户/OTC/Robot/工单/Ledger/Risk/Approval/Config/Prediction），wiring 契约测试扩至 86 断言全绿。
   - 【更新】Admin V2 DTO 持续落地：AdminPowerDtoService（/api/v1/admin/power/accounts）、AdminRewardDtoService（/api/v1/admin/robot/rewards）、OTC 订单详情（/api/v1/admin/otc/orders/{id}）。**累计 12 个 Admin V2 接口**（11 列表 + 1 详情），wiring 契约测试扩至 92 断言全绿。
+  - 【更新】Admin V2 DTO 详情与聚合持续落地：Robot 详情（/api/v1/admin/robot/{id}）、工单详情（/api/v1/admin/support/tickets/{id}）、工作台运营总览（/api/v1/admin/workbench/overview）。**累计 15 个 Admin V2 接口**（11 列表 + 3 详情 + 1 聚合），wiring 契约测试扩至 98 断言全绿。
   - push 已解除（danger-full-access 下 GCM 正常取得凭据，bec04b4..0fc5289 已同步到 origin）。
   - 【更新】路由路径方案已裁决（Owner 2026-08-20 = OPTION_A），V2 路由已注册：config/route/v2.php + sql/20260820_v2_api_routes_seed.sql（41 条 Auth/Kyc/User/Ledger/Robot/Parameter/Prediction/Otc 只读路由），V1 /v1 组保留不动。
 Next technically ready Package: S02-P09 后端 Gate（路由已注册；下一步执行 Gate 步骤 1-7：P0 API 映射、状态转移映射、OpenAPI/测试/权限/守恒审查、输出 STAGE-02-BACKEND-COVERAGE.md + STAGE-02-QUALITY-GATE.md）
