@@ -119,8 +119,8 @@
 ## 汇总
 
 ```text
-operationId 总数 = 81
-已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 30（Admin V2 只读）+ 5（Admin 写占位 fail-closed）+ 2（async/export fail-closed）≈ 78 路由已注册
+operationId 总数 = 81（Admin 域）+ api_v2 50 条（C 端 read + Auth/KYC/User）
+已接线(WIRED)     = api_v2 50 + admin_v2 54（48 只读 + 5 写占位 + async/export 占位）≈ 104 路由已注册
 写路径 FAIL_CLOSED = Admin V2 5 写操作 + async/export 占位已注册路由；服务层未绑定（角色映射冻结后接线）
 前端对接         = admin-v2.ts + pageData.ts 19 权威页真实数据（vite build 通过）
 池子对账/策略     = 无冻结 service，保持 fail-closed（不猜测建表）

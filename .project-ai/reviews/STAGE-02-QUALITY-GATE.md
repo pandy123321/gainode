@@ -9,7 +9,7 @@
 
 | 步骤 | 状态 | 说明 |
 |---|---|---|
-| 1. P0 API → OpenAPI/route/controller/validator/service/test 映射 | PARTIAL | 78 路由已注册（C 端只读+Auth/KYC/User+Admin V2 48 只读+7 写占位 fail-closed）；admin 写路径未绑定真实 service |
+| 1. P0 API → OpenAPI/route/controller/validator/service/test 映射 | PARTIAL | 104 路由已注册（api_v2 50 + admin_v2 54；Admin V2 48 只读 + 7 写占位 fail-closed）；admin 写路径未绑定真实 service |
 | 2. 状态转移 → writer/guard/idempotency/audit/outbox/test | PARTIAL | 域层已完成（S02-P02~P08 已审）；HTTP 层写路径未暴露 |
 | 3. OpenAPI parse/ref/operationId/required/auth/idempotency lint | NOT_RUN | 本环境无独立 lint 脚本 |
 | 4. RBAC/ABAC/SoD/field-masking/secret/dependency/SQL/append-only | PARTIAL | 域层已审；HTTP 层 admin 角色映射未冻结 |
