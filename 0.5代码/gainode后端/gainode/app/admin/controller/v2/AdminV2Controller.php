@@ -7,6 +7,7 @@ namespace app\admin\controller\v2;
 use library\dict\ErrorDict;
 use library\service\admin\AdminApprovalDtoService;
 use library\service\admin\AdminConfigDtoService;
+use library\service\admin\AdminCorrectionDtoService;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminLedgerEntriesDtoService;
 use library\service\admin\AdminLedgerOverviewDtoService;
@@ -227,6 +228,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminRefundDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/corrections — Correction 列表 DTO（A-PREDICT-004 更正） */
+    public function corrections(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminCorrectionDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
