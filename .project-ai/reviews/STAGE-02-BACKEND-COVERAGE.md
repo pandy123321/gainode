@@ -89,12 +89,23 @@
 | GET /api/v1/admin/audit-log | A-AUDIT-001 | auditLog | ✅ | AuditEventService::listAdmin | WIRED |
 | GET /api/v1/admin/audit-log/{id} | A-AUDIT-001 | auditLogDetail | ✅ | AuditEventService::detail | WIRED |
 | GET /api/v1/admin/workbench/overview | A-WORK-001 | workbenchOverview | ✅ | AdminWorkbenchDtoService | WIRED |
+| GET /api/v1/admin/admission/users/{id} | A-USER-002 | userDetail | ✅ | AdminUserDetailDtoService | WIRED |
+| GET /api/v1/admin/admission/kyc | A-KYC-001 | kycQueue | ✅ | AdminKycDtoService | WIRED |
+| GET /api/v1/admin/prediction/results | A-PREDICT-003 | predictionResults | ✅ | AdminPredictionResultDtoService | WIRED |
+| GET /api/v1/admin/prediction/refunds | A-PREDICT-004 | refunds | ✅ | AdminRefundDtoService | WIRED |
+| GET /api/v1/admin/prediction/corrections | A-PREDICT-004 | corrections | ✅ | AdminCorrectionDtoService | WIRED |
+| GET /api/v1/admin/prediction/refunds/{id} | A-PREDICT-004 | refundDetail | ✅ | RefundCaseService::detail | WIRED |
+| GET /api/v1/admin/prediction/corrections/{id} | A-PREDICT-004 | correctionDetail | ✅ | CorrectionCaseService::detail | WIRED |
+| GET /api/v1/admin/approval/tasks/{id} | A-APPROVAL-001 | approvalDetail | ✅ | ApprovalRequestService::detail | WIRED |
+| GET /api/v1/admin/parameter/releases/{id} | A-CONFIG-002 | parameterReleaseDetail | ✅ | ParameterReleaseService::detail | WIRED |
+| GET /api/v1/admin/risk/cases/{id} | A-RISK-001 | riskDetail | ✅ | RiskCaseService::detail | WIRED |
+| GET /api/v1/admin/otc/users/{id}/orders | A-OTC-001 | otcUserOrders | ✅ | OtcOrderService::listByUser | WIRED |
 
 ## 汇总
 
 ```text
 operationId 总数 = 74
-已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 19（Admin V2 只读）≈ 60 路由已注册
+已接线(WIRED)     = 21（C 端只读）+ 20（Auth/KYC/User）+ 29（Admin V2 只读）≈ 70 路由已注册
 写路径 FAIL_CLOSED = 未在 C 端暴露（服务层抛 DEPENDENCY_UNAVAILABLE）；Admin 写操作待 admin 角色映射冻结
 前端对接         = admin-v2.ts + pageData.ts 15 权威页真实数据（vite build 通过）
 池子对账/策略     = 无冻结 service，保持 fail-closed（不猜测建表）
