@@ -52,7 +52,12 @@ INSERT INTO `sys_route` (`key`,`module`,`controller`,`action`,`method`,`plugins`
     ('4b67804fd230e54ac0b7f65a2e208f80','admin_v2','v2\adminv2','auditLogDetail','GET',NULL,'/audit-log/{id}','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'auditLogDetail',1),
     ('7e7b5283a344298c8e5908f4d5749069','admin_v2','v2\adminv2','ledgerOverview','GET',NULL,'/ledger/overview','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerOverview',1),
     ('f8ae4759885405527be5d4bd78e17253','admin_v2','v2\adminv2','ledgerEntries','GET',NULL,'/ledger/entries','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'ledgerEntries',1),
-    ('68a95024cf61340fdc2b0751a6bf54a7','admin_v2','v2\adminv2','workbenchTodo','GET',NULL,'/workbench/todo','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'workbenchTodo',1);
+    ('68a95024cf61340fdc2b0751a6bf54a7','admin_v2','v2\adminv2','workbenchTodo','GET',NULL,'/workbench/todo','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'workbenchTodo',1),
+    ('887d19a3cdf49a3d1aaa2676eb599ef3','admin_v2','v2\adminv2','kycDecision','POST',NULL,'/admission/kyc/{id}/decision','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'kycDecision',1),
+    ('4c3adf897445e77a07b847bd8d208107','admin_v2','v2\adminv2','otcOrderReview','POST',NULL,'/otc/orders/{id}/review','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'otcOrderReview',1),
+    ('d7161bd08f21e0ce1f7b2f167c467b35','admin_v2','v2\adminv2','approvalDecision','POST',NULL,'/approval/tasks/{id}/decision','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'approvalDecision',1),
+    ('adca1bbdc25c561bafffb21b57aeb623','admin_v2','v2\adminv2','refundCreate','POST',NULL,'/prediction/refunds','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'refundCreate',1),
+    ('08c4e356cc775836797d2bd92f4f85ff','admin_v2','v2\adminv2','correctionCreate','POST',NULL,'/ledger/corrections','app\admin\controller\v2\AdminV2Controller','[]',2,UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'correctionCreate',1);
 ON DUPLICATE KEY UPDATE
     `url`=VALUES(`url`),`path`=VALUES(`path`),`method`=VALUES(`method`),
     `middleware`=VALUES(`middleware`),`verify`=VALUES(`verify`),`updated_time`=VALUES(`updated_time`),`descr`=VALUES(`descr`),`status`=VALUES(`status`);

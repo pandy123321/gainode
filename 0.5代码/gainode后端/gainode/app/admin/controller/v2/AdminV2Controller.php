@@ -793,4 +793,74 @@ class AdminV2Controller extends ApiV2
             return $this->envelopeError($e);
         }
     }
+
+    /**
+     * POST /api/v1/admin/admission/kyc/{id}/decision — KYC 审核决策（A-KYC-001 写）
+     * fail-closed：admin 角色映射未冻结，不开放有审批副作用的写路径。
+     */
+    public function kycDecision(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'kyc decision write path closed until admin role mapping frozen');
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /**
+     * POST /api/v1/admin/otc/orders/{id}/review — OTC 订单审核（A-OTC-002 写）
+     * fail-closed：admin 角色映射未冻结。
+     */
+    public function otcOrderReview(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'otc order review write path closed until admin role mapping frozen');
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /**
+     * POST /api/v1/admin/approval/tasks/{id}/decision — 审批决策（A-APPROVAL-001 写）
+     * fail-closed：admin 角色映射未冻结。
+     */
+    public function approvalDecision(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'approval decision write path closed until admin role mapping frozen');
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /**
+     * POST /api/v1/admin/prediction/refunds — 退款发起（A-PREDICT-004 写）
+     * fail-closed：admin 角色映射未冻结。
+     */
+    public function refundCreate(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'refund create write path closed until admin role mapping frozen');
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /**
+     * POST /api/v1/admin/ledger/corrections — 更正冲正发起（A-LEDGER-004 写）
+     * fail-closed：admin 角色映射未冻结。
+     */
+    public function correctionCreate(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            throw new DomainException(ErrorDict::POLICY_DENIED, 'correction create write path closed until admin role mapping frozen');
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
 }
