@@ -61,12 +61,6 @@ echo "\n";
 // ======================= 3. fail-closed 写路径 =======================
 echo "[3] fail-closed 写路径（DEPENDENCY_UNAVAILABLE，不触 DB）\n";
 $robotSvc = new RobotService();
-expectDomainException(function () use ($robotSvc) {
-    $robotSvc->start('R1', 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Robot start（R1）→ DEPENDENCY_UNAVAILABLE');
-expectDomainException(function () use ($robotSvc) {
-    $robotSvc->stop('R1', 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Robot stop（R3）→ DEPENDENCY_UNAVAILABLE');
 
 $rewardSvc = new RobotRewardService();
 expectDomainException(function () use ($rewardSvc) {
@@ -83,9 +77,6 @@ expectDomainException(function () use ($rewardSvc) {
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Reward reverse（W9/W10）→ DEPENDENCY_UNAVAILABLE');
 
 $upgradeSvc = new RobotUpgradeOrderService();
-expectDomainException(function () use ($upgradeSvc) {
-    $upgradeSvc->quote('R1', 2, 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Upgrade quote → DEPENDENCY_UNAVAILABLE');
 expectDomainException(function () use ($upgradeSvc) {
     $upgradeSvc->submit('R1', 2, 'U1', 'END_USER');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'Upgrade submit → DEPENDENCY_UNAVAILABLE');

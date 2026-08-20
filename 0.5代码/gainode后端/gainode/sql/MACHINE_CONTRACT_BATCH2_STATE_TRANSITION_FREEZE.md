@@ -216,11 +216,12 @@
 
 > `entry_direction`：`1 = CREDIT(入账)`，`-1 = DEBIT(出账)`（Owner 裁决 #16）。事件码命名 `ENTITY_ACTION`（Owner 裁决 #15），覆盖 8 核心实体 A.1–A.6 全部 transition ID（IR 629 P1-1）。
 > 一致性 gate（冻结前）：`MISSING_EVENT_FOR_TRANSITION = 0`；`UNKNOWN_TRANSITION_REFERENCE = 0`；`DUPLICATE_AMBIGUOUS_MAPPING = 0`。
+> **CR-20260818-003（Owner 决策，2026-08-18）**：`ROBOT_STARTED`（R1）与 `ROBOT_STOPPED`（R3）的「Power 影响」由 `consume`/`release` 改为 `—`。依据经济模型 §07「算力只控制 APT 卖出速度，不影响持有、正常升级、上链迁移」；原 `consume`/`release` 标注从未定义消耗/释放数量，属不可执行的占位。R1/R3 改为纯状态转移，不产生 Power 账本分录。
 
 | event_code | 来源实体 | 触发转移 | ledger entry_type | entry_direction | Power 影响 | 审计 |
 |---|---|---|---|---|---|---|
-| ROBOT_STARTED | robots | R1 | — | — | consume | 是 |
-| ROBOT_STOPPED | robots | R3 | — | — | release | 是 |
+| ROBOT_STARTED | robots | R1 | — | — | — | 是 |
+| ROBOT_STOPPED | robots | R3 | — | — | — | 是 |
 | ROBOT_COOLING_ENTERED | robots | R2 | — | — | — | 是 |
 | ROBOT_COOLING_EXITED | robots | R6 | — | — | — | 是 |
 | ROBOT_REVIEW_LOCKED | robots | R4 | — | — | — | 是 |

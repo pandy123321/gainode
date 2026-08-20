@@ -84,7 +84,7 @@ class MenusService extends Service
     public function getUserTreeMenus($user_id){
         $userService = new AdminService();
         $adminObj = $userService->get($user_id);
-        $params = ['status'=>1,'is_show'=>1];
+        $params = ['status'=>1,'is_show'=>1,'platform'=>'system'];
         if($adminObj->is_admin!=1){
             $user_menu_ids = [];
             if(!empty($adminObj->menu_ids)){

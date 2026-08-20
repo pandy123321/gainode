@@ -83,6 +83,24 @@ class SignalModel extends Model
         return $selector->where('event_name','like','%'.$value.'%');
     }
 
+    /**
+     * 信号状态筛选：valid/expired/used/closed/invalid。
+     */
+    public function searchStatusAttr(Builder $selector, $value){
+        $value = strtolower((string) $value);
+        $map = [
+            'valid'   => self::STATUS_VALID,
+            'expired' => self::STATUS_EXPIRED,
+            'used'    => self::STATUS_USED,
+            'closed'  => self::STATUS_CLOSED,
+            'invalid' => self::STATUS_INVALID,
+        ];
+        if (isset($map[$value])) {
+            return $selector->where('status', $map[$value]);
+        }
+        return $selector;
+    }
+
     public function toM(){
         return [
             'id'                => (int) $this->id,

@@ -64,15 +64,85 @@ class RobotUpgradeOrderService extends Service
     // =========================================================================
 
     /**
-     * 升级报价 quote：依赖 AI.upgrade_apt_requirement + AI.upgrade_allocation_profile
-     * （06 TBC）→ FAIL_CLOSED，不返回报价。
+     * 升级报价 quote：读取 Active Release 的 56 级升级成本/产能/冷却规则，返回报价投影。
+     *
+     * 依赖已批准参数（CR-20260818-002）：
+     *   - AI.upgrade_apt_requirement（基准升级费用，56 级）
+     *   - AI.standard_capacity_by_level（标准产能，56 级）
+     *   - AI.upgrade_cooldown_by_range（升级冷却）
+     *   - AI.upgrade_p_discount_by_level（P 等级升级优惠）
+     * 未批准仍 fail-closed：
+     *   - AI.power_cap_by_robot_level 完整 56 级映射（附录仅 Lv.18=8,600 散点）→ power_limit_diff=null
+     *   - AI.upgrade_allocation_profile（升级 APT 去向结构）→ 不影响报价，仅影响 submit 资金分录
+     *
+     * @return array<string,mixed> 报价投影（对齐 02 §6 字段）
      */
-    public function quote(string $robotId, int $toLevel, string $actorId, string $actorRole): void
+    public function quote(string $robotId, int $toLevel, string $actorId, string $actorRole): array
     {
-        throw new DomainException(
-            ErrorDict::DEPENDENCY_UNAVAILABLE,
-            'Upgrade quote depends on AI.upgrade_apt_requirement/allocation_profile (TBC) — not frozen'
-        );
+        $robot = (new RobotService())->get($robotId);
+        if (empty($robot)) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'robot not found');
+        }
+
+        $fromLevel = (int) $robot->level;
+        if ($toLevel <= $fromLevel) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'to_level must be greater than current level');
+        }
+        if ($toLevel < 1 || $toLevel > 56) {
+            throw new DomainException(ErrorDict::VALIDATION_ERROR, 'to_level out of range 1-56');
+        }
+
+        $reader = new RobotRuleReader();
+        $snap = $reader->getRuleSnapshot();
+        if ($snap['source_status'] !== RobotRuleReader::SOURCE_AVAILABLE) {
+            throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, 'upgrade rule not active');
+        }
+
+        $aptCost = $reader->getUpgradeCost($toLevel);
+        if ($aptCost === null) {
+            throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, 'upgrade cost not defined for level');
+        }
+
+        $fromCapacity = $reader->getStandardCapacity($fromLevel);
+        $toCapacity = $reader->getStandardCapacity($toLevel);
+        if ($fromCapacity === null || $toCapacity === null) {
+            throw new DomainException(ErrorDict::DEPENDENCY_UNAVAILABLE, 'standard capacity not defined');
+        }
+
+        // P 等级优惠：actor 的 P 等级由调用方提供（这里按 actorRole 无法推导），默认无优惠。
+        // 实际优惠应在 Controller 层解析用户 P 等级后传入；quote 仅返回基准价 + 优惠比例表。
+        $discount = null; // 由 Controller 解析后叠加，报价返回基准 apt_cost
+
+        // Power cap 派生（standard_capacity × factor，bcmath）。无 factor → null（fail-closed）。
+        $fromPowerCap = $reader->getPowerCap($fromLevel);
+        $toPowerCap = $reader->getPowerCap($toLevel);
+        $powerLimitDiff = null;
+        if ($fromPowerCap !== null && $toPowerCap !== null) {
+            $diff = bcsub($toPowerCap, $fromPowerCap, 18);
+            $powerLimitDiff = [
+                'from' => $fromPowerCap,
+                'to'   => $toPowerCap,
+                'diff' => $diff,
+            ];
+        }
+
+        return [
+            'current_level'           => $fromLevel,
+            'target_level'            => $toLevel,
+            'apt_cost'                => $aptCost,
+            'capability_diff'         => [
+                'standard_capacity'   => [
+                    'from' => $fromCapacity,
+                    'to'   => $toCapacity,
+                ],
+            ],
+            'power_limit_diff'        => $powerLimitDiff,
+            'cooldown'                => $reader->getUpgradeCooldownDays($toLevel),
+            'eligibility'             => [], // 关键升级节点（直推/KYC）校验在 submit 阶段执行
+            'quote_expires_at'        => time() + 600,
+            'rule_version'            => $snap['rule_version'],
+            'parameter_release_id'    => $snap['parameter_release_id'],
+        ];
     }
 
     /**

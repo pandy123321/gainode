@@ -2,6 +2,7 @@
 
 namespace library\model\arbitrage;
 
+use Illuminate\Database\Eloquent\Builder;
 use support\extend\Model;
 
 /**
@@ -64,4 +65,56 @@ class FixtureModel extends Model
 		"updated_time",
 		"status",
     ];
+
+    /**
+     * 关键词模糊搜索：联赛/主队/客队任一命中。
+     */
+    public function searchKeywordAttr(Builder $selector, $value)
+    {
+        $value = (string) $value;
+        if ($value === '') {
+            return $selector;
+        }
+        return $selector->where(function (Builder $q) use ($value) {
+            $q->where('league', 'like', '%' . $value . '%')
+              ->orWhere('home', 'like', '%' . $value . '%')
+              ->orWhere('away', 'like', '%' . $value . '%');
+        });
+    }
+
+    /**
+     * 比赛状态友好映射：scheduled=待开赛 live=进行中 finished=已完赛。
+     */
+    public function searchStatusAttr(Builder $selector, $value)
+    {
+        $value = strtolower((string) $value);
+        $selector = match ($value) {
+            'scheduled' => $selector->whereIn('status_short', ['NS', 'TBD']),
+            'live'      => $selector->whereIn('status_short', [
+                'LIVE', '1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT',
+                'Q1', 'Q2', 'Q3', 'Q4', 'OT',
+            ]),
+            'finished'  => $selector->where('is_finished', self::FINISHED),
+            default     => $selector,
+        };
+        // 一旦 status 参数参与查询，selector 会跳过软删过滤，这里显式排除已删除记录
+        return $selector->where('status', self::STATUS_NORMAL);
+    }
+
+    /**
+     * 数据时间范围：'YYYY-MM-DD~YYYY-MM-DD'（~ 分隔），映射到 kickoff_at 区间。
+     */
+    public function searchTimeAttr(Builder $selector, $value)
+    {
+        $value = (string) $value;
+        $parts = preg_split('/\s*~\s*/', trim($value));
+        if (count($parts) === 2 && $parts[0] !== '' && $parts[1] !== '') {
+            $start = strtotime($parts[0] . ' 00:00:00');
+            $end   = strtotime($parts[1] . ' 23:59:59');
+            if ($start !== false && $end !== false && $start <= $end) {
+                return $selector->whereBetween('kickoff_at', [$start, $end]);
+            }
+        }
+        return $selector;
+    }
 }

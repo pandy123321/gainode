@@ -23,9 +23,10 @@ use support\utils\Random;
  * 状态机（MC2 §3.2，R1–R12）：
  *   inactive / active / cooling / review / restricted / paused
  *
- * 实现策略（fail-closed）：
- *   - 纯状态转移（R2/R4/R5/R6/R7/R8/R9/R10/R11/R12）已完整实现（审计 + object_version CAS）。
- *   - R1 start / R3 stop 依赖 Power 消耗/释放规则（06 TBC）→ FAIL_CLOSED。
+ * 实现策略：
+ *   - 全部 12 个状态转移（R1–R12）已完整实现（审计 + object_version CAS）。
+ *   - R1 start / R3 stop 为纯状态转移，不消耗/释放 Power（Owner 决策 CR-20260818-003，
+ *     依据经济模型 §07「算力只控制 APT 卖出速度」）。
  *   - robots 表无 audit_event_id 列（MC1 DDL），审计经 audit_events.target_object_type 单向关联。
  *
  * @method RobotModel create($data)
@@ -119,8 +120,12 @@ class RobotService extends Service
     }
 
     /**
-     * Robot 允许动作投影。S02-P04：start/stop/upgrade/reward-claim 依赖 TBC 规则
-     * → allowed_actions 恒为空（fail-closed），候选动作进 blocked_actions。
+     * Robot 允许动作投影。S02-P04：upgrade submit / reward-claim 依赖 TBC 经济规则，
+     * 故 allowed_actions 恒为空（fail-closed），候选动作进 blocked_actions。
+     *
+     * 注：start/stop（R1/R3）已解冻为纯状态转移（Owner 决策 CR-20260818-003），但本投影
+     * 的「动作授权模型」整体仍为占位实现（恒空），是否将已解冻动作计入 allowed_actions
+     * 需单独收口，不在本 CR 范围。
      *
      * @return array<string,mixed>
      */
@@ -163,30 +168,37 @@ class RobotService extends Service
     }
 
     // =========================================================================
-    // 经济/依赖动作（FAIL_CLOSED）
+    // 经济/依赖动作
     // =========================================================================
 
     /**
-     * R1：inactive → active（启动，Power 消耗）。
-     * Power 消耗规则（AI.power_*，06 TBC）未冻结 → FAIL_CLOSED。
+     * R1：inactive → active（启动）。
+     *
+     * Owner 决策（CR-20260818-003，2026-08-18）：Robot 启动/停止不消耗/释放 Power。
+     * 依据经济模型 §07「算力只控制 APT 卖出速度，不影响持有、正常升级、上链迁移」，
+     * 覆盖 MC2 Event Catalog 早期「ROBOT_STARTED → consume」的占位标注（该标注从未
+     * 定义消耗数量，不可执行）。故 R1/R3 为纯状态转移（审计 + object_version CAS），
+     * 不产生 Power 账本分录。
      */
-    public function start(string $robotId, string $actorId, string $actorRole): void
+    public function start(string $robotId, string $actorId, string $actorRole): RobotModel
     {
-        throw new DomainException(
-            ErrorDict::DEPENDENCY_UNAVAILABLE,
-            'R1 start depends on Power consume rules (AI.power_*, 06 TBC) — not frozen'
+        return $this->transition(
+            $robotId, [RobotModel::STATUS_INACTIVE], RobotModel::STATUS_ACTIVE,
+            self::EVENT_STARTED, $actorId, $actorRole
         );
     }
 
     /**
-     * R3：active → inactive（停止，Power 释放）。
-     * Power 释放规则（06 TBC）未冻结 → FAIL_CLOSED。
+     * R3：active → inactive（停止）。
+     *
+     * Owner 决策（CR-20260818-003）：Robot 停止不释放 Power（见 start 说明）。
+     * 纯状态转移（审计 + object_version CAS）。
      */
-    public function stop(string $robotId, string $actorId, string $actorRole): void
+    public function stop(string $robotId, string $actorId, string $actorRole): RobotModel
     {
-        throw new DomainException(
-            ErrorDict::DEPENDENCY_UNAVAILABLE,
-            'R3 stop depends on Power release rules (06 TBC) — not frozen'
+        return $this->transition(
+            $robotId, [RobotModel::STATUS_ACTIVE], RobotModel::STATUS_INACTIVE,
+            self::EVENT_STOPPED, $actorId, $actorRole
         );
     }
 

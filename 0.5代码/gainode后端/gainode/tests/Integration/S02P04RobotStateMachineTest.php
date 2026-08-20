@@ -205,15 +205,36 @@ Capsule::connection('mysql')->table('parameter_snapshots')->insert([
     'snapshot_id'      => 'S1',
     'release_id'       => 'REL1',
     'parameter_values' => json_encode([
-        'AI.standard_capacity_rule_version'    => 'v1.0',
-        'AI.power_cap_by_robot_level'          => ['1' => '100', '2' => '200', '56' => '5600'],
-        'AI.upgrade_apt_requirement'           => ['1_2' => '500'],
-        'AI.ai_reward_budget_cap'              => '100000',
-        'AI.ai_reward_claim_enabled'           => false,
-        'AI.daily_yield_coefficient_source'    => 'server',
-        'AI.daily_yield_coefficient_precision' => '0',
+        'AI.standard_capacity_rule_version'       => 'EM_V4.1.1',
+        'AI.standard_capacity_by_level'           => ['1' => '50', '2' => '52', '3' => '55', '19' => '547', '20' => '675', '56' => '743720'],
+        'AI.upgrade_apt_requirement'              => ['1' => '0', '2' => '200', '20' => '9200', '56' => '5200000'],
+        'AI.upgrade_cooldown_by_range'            => [
+            ['from' => 1, 'to' => 20, 'days' => 0],
+            ['from' => 21, 'to' => 30, 'days' => 1],
+            ['from' => 31, 'to' => 40, 'days' => 3],
+            ['from' => 41, 'to' => 50, 'days' => 5],
+            ['from' => 51, 'to' => 56, 'days' => 6],
+        ],
+        'AI.power_sell_consumption_ratio'         => '0.5',
+        'AI.power_daily_restore_rate_by_range'    => [
+            ['from' => 1, 'to' => 10, 'rate' => '0.10'],
+            ['from' => 11, 'to' => 20, 'rate' => '0.12'],
+            ['from' => 21, 'to' => 30, 'rate' => '0.14'],
+            ['from' => 31, 'to' => 40, 'rate' => '0.16'],
+            ['from' => 41, 'to' => 50, 'rate' => '0.18'],
+            ['from' => 51, 'to' => 56, 'rate' => '0.20'],
+        ],
+        'AI.upgrade_p_discount_by_level'          => ['1' => '0.02', '2' => '0.04', '6' => '0.12'],
+        'AI.ai_reward_claim_window_base_hours'    => '24',
+        'AI.ai_reward_claim_window_per_level_hours' => '1',
+        'AI.power_cap_by_robot_level'             => ['1' => '100', '2' => '200', '56' => '5600'],
+        'AI.power_cap_factor'                     => '0.5',
+        'AI.ai_reward_budget_cap'                 => '100000',
+        'AI.ai_reward_claim_enabled'              => false,
+        'AI.daily_yield_coefficient_source'       => 'server',
+        'AI.daily_yield_coefficient_precision'    => '0',
     ]),
-    'version'     => 'v1.0',
+    'version'     => 'EM_V4.1.1',
     'created_time' => time(),
 ]);
 Capsule::connection('mysql')->table('parameter_releases')->insert([
@@ -227,7 +248,7 @@ Capsule::connection('mysql')->table('parameter_releases')->insert([
 
 $snap = $reader->getRuleSnapshot();
 check($snap['source_status'] === RobotRuleReader::SOURCE_AVAILABLE, 'source_status=AVAILABLE');
-check($snap['rule_version'] === 'v1.0', 'rule_version=v1.0');
+check($snap['rule_version'] === 'EM_V4.1.1', 'rule_version=EM_V4.1.1');
 check($snap['parameter_release_id'] === 'REL1', 'parameter_release_id=REL1');
 check($snap['snapshot_id'] === 'S1', 'snapshot_id=S1');
 check($snap['power_cap_by_level'][1] === '100', 'power_cap_by_level[1]=100');
@@ -235,9 +256,34 @@ check($snap['power_cap_by_level'][56] === '5600', 'power_cap_by_level[56]=5600�
 check($snap['ai_reward_budget_cap'] === '100000', 'ai_reward_budget_cap=100000');
 check($snap['ai_reward_claim_enabled'] === false, 'ai_reward_claim_enabled=false（JSON false）');
 check($snap['daily_yield_coefficient_precision'] === '0', 'daily_yield_coefficient_precision=0（0 合法）');
-check($reader->getPowerCap(1) === '100', 'getPowerCap(1)=100');
-check($reader->getPowerCap(3) === null, 'getPowerCap(3)=null（该级无值）');
+check($reader->getPowerCap(1) === '100', 'getPowerCap(1)=100（显式映射优先）');
+check($reader->getPowerCap(3) === '27.5', 'getPowerCap(3)=27.5（派生：55×0.5，无显式映射）');
+check($reader->getPowerCap(19) === '273.5', 'getPowerCap(19)=273.5（派生：547×0.5）');
+check($reader->getPowerCap(56) === '5600', 'getPowerCap(56)=5600（显式映射优先）');
 check($reader->getClaimEnabled() === false, 'getClaimEnabled()=false');
+
+// 新增 56 级容量/升级成本/冷却/算力/优惠/领取有效期 getter
+check($reader->getStandardCapacity(1) === '50', 'getStandardCapacity(1)=50');
+check($reader->getStandardCapacity(20) === '675', 'getStandardCapacity(20)=675');
+check($reader->getStandardCapacity(56) === '743720', 'getStandardCapacity(56)=743720');
+check($reader->getUpgradeCost(1) === '0', 'getUpgradeCost(1)=0');
+check($reader->getUpgradeCost(2) === '200', 'getUpgradeCost(2)=200');
+check($reader->getUpgradeCost(20) === '9200', 'getUpgradeCost(20)=9200');
+check($reader->getUpgradeCost(56) === '5200000', 'getUpgradeCost(56)=5200000');
+check($reader->getUpgradeCooldownDays(10) === 0, 'getUpgradeCooldownDays(10)=0');
+check($reader->getUpgradeCooldownDays(25) === 1, 'getUpgradeCooldownDays(25)=1');
+check($reader->getUpgradeCooldownDays(35) === 3, 'getUpgradeCooldownDays(35)=3');
+check($reader->getUpgradeCooldownDays(45) === 5, 'getUpgradeCooldownDays(45)=5');
+check($reader->getUpgradeCooldownDays(56) === 6, 'getUpgradeCooldownDays(56)=6');
+check($reader->getPowerSellConsumptionRatio() === '0.5', 'getPowerSellConsumptionRatio()=0.5');
+check($reader->getPowerDailyRestoreRate(5) === '0.10', 'getPowerDailyRestoreRate(5)=0.10');
+check($reader->getPowerDailyRestoreRate(18) === '0.12', 'getPowerDailyRestoreRate(18)=0.12');
+check($reader->getPowerDailyRestoreRate(56) === '0.20', 'getPowerDailyRestoreRate(56)=0.20');
+check($reader->getUpgradePDiscount(2) === '0.04', 'getUpgradePDiscount(2)=0.04');
+check($reader->getUpgradePDiscount(6) === '0.12', 'getUpgradePDiscount(6)=0.12');
+check($reader->getClaimWindowHours(1) === 24, 'getClaimWindowHours(1)=24');
+check($reader->getClaimWindowHours(20) === 43, 'getClaimWindowHours(20)=43');
+check($reader->getClaimWindowHours(56) === 79, 'getClaimWindowHours(56)=79');
 echo "\n";
 
 // ======================= 3. Robot 状态机 =======================
@@ -264,6 +310,24 @@ check((string) $robotSvc->get('R1')->status === RobotModel::STATUS_ACTIVE, 'exit
 expectDomainException(function () use ($robotSvc) {
     $robotSvc->exitCooling('R1', 'SYS', 'SYSTEM');
 }, ErrorDict::OBJECT_VERSION_CONFLICT, 'active 态 exitCooling → OBJECT_VERSION_CONFLICT');
+
+// R1 start / R3 stop：纯状态转移（Owner 决策 CR-20260818-003，不消耗/释放 Power）
+$robotSvc->stop('R1', 'U1', 'END_USER');
+check((string) $robotSvc->get('R1')->status === RobotModel::STATUS_INACTIVE, 'stop（active→inactive）纯状态转移');
+$robotSvc->start('R1', 'U1', 'END_USER');
+check((string) $robotSvc->get('R1')->status === RobotModel::STATUS_ACTIVE, 'start（inactive→active）纯状态转移');
+
+// active 态 start 非法（start 仅 inactive→active）
+expectDomainException(function () use ($robotSvc) {
+    $robotSvc->start('R1', 'U1', 'END_USER');
+}, ErrorDict::OBJECT_VERSION_CONFLICT, 'active 态 start → OBJECT_VERSION_CONFLICT');
+
+// inactive 态 stop 非法（stop 仅 active→inactive）
+$robotSvc->stop('R1', 'U1', 'END_USER');
+expectDomainException(function () use ($robotSvc) {
+    $robotSvc->stop('R1', 'U1', 'END_USER');
+}, ErrorDict::OBJECT_VERSION_CONFLICT, 'inactive 态 stop → OBJECT_VERSION_CONFLICT');
+$robotSvc->start('R1', 'U1', 'END_USER'); // 恢复 active，供后续测试
 echo "\n";
 
 // ======================= 4. Reward 状态机 =======================
@@ -369,12 +433,6 @@ echo "\n";
 
 // ======================= 6. fail-closed（经济写） =======================
 echo "[6] fail-closed（经济写路径）\n";
-expectDomainException(function () use ($robotSvc) {
-    $robotSvc->start('R1', 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'start → DEPENDENCY_UNAVAILABLE');
-expectDomainException(function () use ($robotSvc) {
-    $robotSvc->stop('R1', 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'stop → DEPENDENCY_UNAVAILABLE');
 expectDomainException(function () use ($rewardSvc) {
     $rewardSvc->hold('RW1', 'SYS', 'SYSTEM');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'hold → DEPENDENCY_UNAVAILABLE');
@@ -388,11 +446,30 @@ expectDomainException(function () use ($rewardSvc) {
     $rewardSvc->reverse('RW1', 'SYS', 'SYSTEM');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'reverse → DEPENDENCY_UNAVAILABLE');
 expectDomainException(function () use ($upgradeSvc) {
-    $upgradeSvc->quote('R1', 2, 'U1', 'END_USER');
-}, ErrorDict::DEPENDENCY_UNAVAILABLE, 'quote → DEPENDENCY_UNAVAILABLE');
-expectDomainException(function () use ($upgradeSvc) {
     $upgradeSvc->submit('R1', 2, 'U1', 'END_USER');
 }, ErrorDict::DEPENDENCY_UNAVAILABLE, 'submit → DEPENDENCY_UNAVAILABLE');
+
+// quote 已打开（依赖 56 级升级成本已批准）：R1 level=1 → 报价升级到 Lv.2
+$quote = $upgradeSvc->quote('R1', 2, 'U1', 'END_USER');
+check($quote['current_level'] === 1, 'quote.current_level=1');
+check($quote['target_level'] === 2, 'quote.target_level=2');
+check($quote['apt_cost'] === '200', 'quote.apt_cost=200（Lv.2 基准升级费用）');
+check($quote['capability_diff']['standard_capacity']['from'] === '50', 'quote 产能 from=50');
+check($quote['capability_diff']['standard_capacity']['to'] === '52', 'quote 产能 to=52');
+check($quote['cooldown'] === 0, 'quote.cooldown=0（Lv.1-20 无冷却）');
+check($quote['power_limit_diff']['from'] === '100', 'quote.power_limit_diff.from=100（显式映射）');
+check($quote['power_limit_diff']['to'] === '200', 'quote.power_limit_diff.to=200（显式映射）');
+check($quote['power_limit_diff']['diff'] === '100.000000000000000000', 'quote.power_limit_diff.diff=100');
+check($quote['rule_version'] === 'EM_V4.1.1', 'quote.rule_version=EM_V4.1.1');
+check($quote['parameter_release_id'] === 'REL1', 'quote.parameter_release_id=REL1');
+
+// 越界/非法报价
+expectDomainException(function () use ($upgradeSvc) {
+    $upgradeSvc->quote('R1', 1, 'U1', 'END_USER');
+}, ErrorDict::VALIDATION_ERROR, 'quote(to_level=1) → VALIDATION_ERROR（不高于当前级）');
+expectDomainException(function () use ($upgradeSvc) {
+    $upgradeSvc->quote('R1', 57, 'U1', 'END_USER');
+}, ErrorDict::VALIDATION_ERROR, 'quote(to_level=57) → VALIDATION_ERROR（越界）');
 echo "\n";
 
 // ======================= 7. Robot 只读投影 =======================
@@ -407,7 +484,7 @@ check((int) $detail['level'] === 1, 'detail.level=1');
 check($detail['source_status'] === RobotRuleReader::SOURCE_AVAILABLE, 'detail.source_status=AVAILABLE');
 
 $actions = $robotSvc->allowedActions('R1');
-check($actions['allowed_actions'] === [], 'active 态 allowed_actions=[]（start/stop/upgrade fail-closed）');
+check($actions['allowed_actions'] === [], 'active 态 allowed_actions=[]（授权模型占位，恒空）');
 check(in_array('stop', $actions['blocked_actions'], true), 'blocked_actions 含 stop');
 check(in_array('upgrade', $actions['blocked_actions'], true), 'blocked_actions 含 upgrade');
 
