@@ -7,6 +7,7 @@ namespace app\admin\controller\v2;
 use library\dict\ErrorDict;
 use library\service\admin\AdminLedgerDtoService;
 use library\service\admin\AdminOtcDtoService;
+use library\service\admin\AdminRiskDtoService;
 use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminTicketDtoService;
 use library\service\admin\AdminUserDtoService;
@@ -121,6 +122,22 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $keyword = (string) $this->request->get('keyword', '');
             $result = (new AdminLedgerDtoService())->list($page, $size, $keyword);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/risk/cases — Risk Case 列表 DTO（A-RISK-001） */
+    public function riskCases(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $severity = (string) $this->request->get('severity', '');
+            $result = (new AdminRiskDtoService())->list($page, $size, $status, $severity);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
