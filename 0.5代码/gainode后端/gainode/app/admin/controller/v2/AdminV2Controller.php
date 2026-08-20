@@ -24,6 +24,7 @@ use library\service\admin\AdminRobotDtoService;
 use library\service\admin\AdminSettlementDtoService;
 use library\service\admin\AdminSettlementBatchDtoService;
 use library\service\admin\AdminTicketDtoService;
+use library\service\admin\AdminUpgradeOrderDtoService;
 use library\service\admin\AdminUserDtoService;
 use library\service\admin\AdminUserDetailDtoService;
 use library\service\admin\AdminWorkbenchDtoService;
@@ -160,6 +161,21 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminRobotDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/robot/upgrade-orders — Robot 升级订单 DTO（A-ROBOT-001 补充） */
+    public function upgradeOrders(): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $page = (int) $this->request->get('page', 1);
+            $size = (int) $this->request->get('size', 20);
+            $status = (string) $this->request->get('status', '');
+            $result = (new AdminUpgradeOrderDtoService())->list($page, $size, $status);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
