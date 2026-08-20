@@ -29,6 +29,7 @@ use library\service\audit\AuditEventService;
 use library\service\otc\OtcOrderService;
 use library\service\parameter\ParameterReleaseService;
 use library\service\prediction\CorrectionCaseService;
+use library\service\prediction\PredictionMarketService;
 use library\service\prediction\RefundCaseService;
 use library\service\risk\RiskCaseService;
 use library\service\robot\RobotService;
@@ -251,6 +252,18 @@ class AdminV2Controller extends ApiV2
             $size = (int) $this->request->get('size', 20);
             $status = (string) $this->request->get('status', '');
             $result = (new AdminPredictionDtoService())->list($page, $size, $status);
+            return $this->envelope($result);
+        } catch (\Throwable $e) {
+            return $this->envelopeError($e);
+        }
+    }
+
+    /** GET /api/v1/admin/prediction/markets/{id} — Market 详情（A-PREDICT-002） */
+    public function predictionMarketDetail(string $id): Response
+    {
+        try {
+            $this->request->getTokenUser();
+            $result = (new PredictionMarketService())->detail($id);
             return $this->envelope($result);
         } catch (\Throwable $e) {
             return $this->envelopeError($e);
