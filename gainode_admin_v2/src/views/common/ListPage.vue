@@ -10,8 +10,8 @@
 
     <template v-else>
       <!-- 统计卡片（dashboard 或 list 均支持，展示该领域关键指标） -->
-      <el-row v-if="schema && schema.stats && schema.stats.length" :gutter="16" class="stats-row">
-        <el-col v-for="s in schema.stats" :key="s.label" :span="statSpan">
+      <el-row v-if="displayStats.length" :gutter="16" class="stats-row">
+        <el-col v-for="s in displayStats" :key="s.label" :span="statSpan">
           <el-card shadow="hover" class="stat-card">
             <div class="stat-label">{{ s.label }}</div>
             <div class="stat-value">{{ s.value }}</div>
@@ -101,24 +101,66 @@
           </el-table-column>
         </el-table>
 
-        <div class="pagination">
+        <div v-if="!unpaged" class="pagination">
           <el-pagination
             background
             layout="total, sizes, prev, pager, next, jumper"
             :total="total"
             :page-sizes="[10, 20, 50]"
             :page-size="pageSize"
+            :current-page="currentPage"
             @current-change="onPageChange"
             @size-change="onSizeChange"
           />
         </div>
       </el-card>
     </template>
+
+    <!-- 数据源编辑弹窗（凭证字段掩码回显，未改则跳过保存） -->
+    <el-dialog
+      v-model="sourceDialogVisible"
+      :title="`编辑数据源 · ${sourceName}`"
+      width="560px"
+      destroy-on-close
+    >
+      <el-form label-width="120px">
+        <el-form-item
+          v-for="f in sourceFieldMeta"
+          :key="f.field_code"
+          :label="f.field_name"
+          :required="f.field_required"
+        >
+          <el-input
+            v-if="f.is_credential"
+            v-model="sourceForm[f.field_code]"
+            type="password"
+            show-password
+            :placeholder="f.field_tips || `请输入 ${f.field_name}`"
+          />
+          <el-input
+            v-else
+            v-model="sourceForm[f.field_code]"
+            :placeholder="f.field_tips || `请输入 ${f.field_name}`"
+          />
+        </el-form-item>
+        <el-form-item v-if="sourceTestResult" label="测试结果">
+          <div :class="sourceTestResult.ok ? 'test-ok' : 'test-err'">
+            {{ sourceTestResult.ok ? '连接正常' : '连接失败' }}
+            （{{ sourceTestResult.latency_ms ?? '—' }}ms）{{ sourceTestResult.message }}
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button :loading="sourceTesting" @click="testSource(sourceCode, collectFields())">测试连接</el-button>
+        <el-button @click="sourceDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="sourceSaving" @click="saveSource">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { pageSchema, type ColumnDef, type FilterDef } from './pageSchema'
@@ -126,6 +168,8 @@ import { getEntryByRoute, isActionAllowed } from '@/router/module/admin-registry
 import type { AdminAction } from '@/types/page'
 import type { AdminStateName } from '@/types/schema'
 import EpAdminState from '@/components/ep/AdminState.vue'
+import { loadPage } from './pageData'
+import { dataSourceSave, dataSourceTest } from '@/api/module/arbitrage'
 
 const route = useRoute()
 
@@ -169,39 +213,171 @@ const ROW_MAP: ActionBtn[] = [
 const toolbarButtons = computed(() =>
   TOOLBAR_MAP.filter((b) => isActionAllowed(entry.value, b.key)),
 )
-const rowButtons = computed(() =>
-  ROW_MAP.filter((b) => isActionAllowed(entry.value, b.key)),
-)
+const rowButtons = computed(() => {
+  const list = ROW_MAP.filter((b) => isActionAllowed(entry.value, b.key))
+  if (route.path === '/data/source') {
+    return list.map((b) => (b.key === 'execute' ? { ...b, label: '测试连接' } : b))
+  }
+  return list
+})
 
+// ---------- 列表状态 ----------
 const keyword = ref('')
 const filterValues = reactive<Record<string, any>>({})
 const rows = ref<any[]>([])
 const total = ref(0)
 const pageSize = ref(10)
+const currentPage = ref(1)
+const statOverrides = ref<(string | number | undefined)[]>([])
+const unpaged = ref(false)
 
-const onSearch = () => {
-  // 骨架：后端接口未接入，查询仅保留筛选状态。接入后由前端同事填充 pageState/rows/total。
+const displayStats = computed(() => {
+  const base = schema.value?.stats || []
+  return base.map((s, i) => ({ label: s.label, value: statOverrides.value[i] ?? s.value }))
+})
+
+const onSearch = async () => {
+  const loader = loadPage(route.path, {
+    page: currentPage.value,
+    size: pageSize.value,
+    keyword: keyword.value || undefined,
+    ...filterValues,
+  })
+  if (!loader) return // 未接入真实接口的页保持骨架态
+  pageState.value = 'loading'
+  stateText.value = ''
+  try {
+    const result = await loader
+    rows.value = result.rows
+    total.value = result.total
+    unpaged.value = !!result.unpaged
+    statOverrides.value = result.stats ?? []
+    pageState.value = result.rows.length ? 'default' : 'empty'
+  } catch (e: any) {
+    pageState.value = 'error'
+    stateText.value = e?.message || '加载失败'
+  }
 }
 
 const onReset = () => {
   keyword.value = ''
   Object.keys(filterValues).forEach((k) => delete filterValues[k])
+  currentPage.value = 1
   rows.value = []
   total.value = 0
-}
-
-const onAction = (type: string, _row?: any) => {
-  ElMessage.info(`操作「${type}」暂未接入后端`)
+  statOverrides.value = []
+  unpaged.value = false
+  pageState.value = 'default'
+  onSearch()
 }
 
 const onRetry = () => {
-  pageState.value = 'loading'
   onSearch()
-  pageState.value = 'empty'
 }
 
-const onPageChange = () => {}
-const onSizeChange = () => {}
+const onPageChange = (p: number) => {
+  currentPage.value = p
+  onSearch()
+}
+const onSizeChange = (s: number) => {
+  pageSize.value = s
+  currentPage.value = 1
+  onSearch()
+}
+
+// ---------- 行/工具栏动作 ----------
+const onAction = (type: string, row?: any) => {
+  if (route.path === '/data/source') {
+    if (type === 'edit' && row) {
+      openSourceDialog(row)
+    } else if (type === 'execute' && row) {
+      testSource(row.code, {})
+    }
+    return
+  }
+  ElMessage.info(`操作「${type}」暂未接入后端`)
+}
+
+// ---------- 数据源编辑/测试 ----------
+const sourceDialogVisible = ref(false)
+const sourceCode = ref('')
+const sourceName = ref('')
+const sourceFieldMeta = ref<any[]>([])
+const sourceForm = reactive<Record<string, string>>({})
+const sourceSaving = ref(false)
+const sourceTesting = ref(false)
+const sourceTestResult = ref<{ ok: boolean; latency_ms?: number; message?: string } | null>(null)
+
+function openSourceDialog(row: any) {
+  sourceCode.value = row.code
+  sourceName.value = row.name
+  sourceFieldMeta.value = row.fields || []
+  Object.keys(sourceForm).forEach((k) => delete sourceForm[k])
+  for (const f of sourceFieldMeta.value) sourceForm[f.field_code] = f.field_value ?? ''
+  sourceTestResult.value = null
+  sourceDialogVisible.value = true
+}
+
+function collectFields(): Record<string, string> {
+  const fields: Record<string, string> = {}
+  for (const f of sourceFieldMeta.value) {
+    const v = sourceForm[f.field_code]
+    if (v !== undefined && v !== '') fields[f.field_code] = v
+  }
+  return fields
+}
+
+function saveSource() {
+  sourceSaving.value = true
+  dataSourceSave({ code: sourceCode.value, fields: collectFields() })
+    .then((res: any) => {
+      if (res?.code === 0) {
+        ElMessage.success(res?.msg || '保存成功')
+        sourceDialogVisible.value = false
+        onSearch()
+      } else {
+        ElMessage.error(res?.msg || '保存失败')
+      }
+    })
+    .catch((e: any) => ElMessage.error(e?.message || '保存失败'))
+    .finally(() => (sourceSaving.value = false))
+}
+
+function testSource(code: string, fields: Record<string, string>) {
+  sourceTesting.value = true
+  sourceTestResult.value = null
+  dataSourceTest({ code, fields })
+    .then((res: any) => {
+      if (res?.code === 0) {
+        const d = res.data || {}
+        sourceTestResult.value = d
+        if (d.ok) ElMessage.success(`连接正常（${d.latency_ms ?? '—'}ms）`)
+        else ElMessage.error(d.message || '连接失败')
+      } else {
+        ElMessage.error(res?.msg || '测试失败')
+      }
+    })
+    .catch((e: any) => ElMessage.error(e?.message || '测试失败'))
+    .finally(() => (sourceTesting.value = false))
+}
+
+// 路由切换（ListPage 复用）时重置并重新加载
+watch(
+  () => route.path,
+  () => {
+    currentPage.value = 1
+    keyword.value = ''
+    Object.keys(filterValues).forEach((k) => delete filterValues[k])
+    rows.value = []
+    total.value = 0
+    statOverrides.value = []
+    unpaged.value = false
+    pageState.value = 'default'
+    onSearch()
+  },
+)
+
+onMounted(onSearch)
 </script>
 
 <style scoped>
@@ -273,5 +449,13 @@ const onSizeChange = () => {}
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
+}
+
+.test-ok {
+  color: #2dc570;
+}
+
+.test-err {
+  color: #f56c6c;
 }
 </style>

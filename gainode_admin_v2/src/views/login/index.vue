@@ -226,7 +226,7 @@ const mobileLoginSubmit = async () => {
         userTreeMenus().then(({ data, code }: any) => {
           if (code == 0) {
             const mapUrl = (nodes: any[]): any[] => nodes.map((n: any) => ({
-              ...n, id: n.route_url || n.id,
+              ...n, id: n.route_url || n.id, title: n.name,
               children: n.children ? mapUrl(n.children) : undefined
             }))
             userStore.menus = mapUrl(data)
@@ -270,7 +270,7 @@ const loginSubmit = async () => {
         userTreeMenus().then(({ data, code }: any) => {
           if (code == 0) {
             const mapUrl = (nodes: any[]): any[] => nodes.map((n: any) => ({
-              ...n, id: n.route_url || n.id,
+              ...n, id: n.route_url || n.id, title: n.name,
               children: n.children ? mapUrl(n.children) : undefined
             }))
             userStore.menus = mapUrl(data)

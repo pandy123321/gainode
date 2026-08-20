@@ -131,7 +131,7 @@ export const DEFERRED_PAGE_REGISTRY: DeferredPageMeta[] = [
   { pageId: 'A-AI-001', title: 'AI 看板', priority: 'DEFERRED', route: '/ai/dashboard', type: 'dashboard', actions: readonlyView() },
   { pageId: 'A-AI-002', title: '运营建议', priority: 'DEFERRED', route: '/ai/suggestion', type: 'list', actions: readonlyView() },
   { pageId: 'A-AI-004', title: '策略模拟', priority: 'DEFERRED', route: '/ai/simulation', type: 'list', actions: readonlyView() },
-  { pageId: 'A-DATA-002', title: '数据源管理', priority: 'DEFERRED', route: '/data/source', type: 'list', actions: readonlyView() },
+  { pageId: 'A-DATA-002', title: '数据源管理', priority: 'DEFERRED', route: '/data/source', type: 'list', actions: { allowed: ['edit', 'execute'], forbidden: ['add', 'view', 'export', 'approve', 'audit'] } },
   { pageId: 'A-DATA-003', title: '足球数据', priority: 'DEFERRED', route: '/data/football', type: 'list', actions: readonlyView() },
   { pageId: 'A-DATA-004', title: '市场与赔率', priority: 'DEFERRED', route: '/data/market', type: 'list', actions: readonlyView() },
   { pageId: 'A-DATA-005', title: '信号质量', priority: 'DEFERRED', route: '/data/signal', type: 'list', actions: readonlyView() },

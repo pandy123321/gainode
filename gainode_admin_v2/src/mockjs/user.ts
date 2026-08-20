@@ -6,94 +6,116 @@ let user: User = {
   'username': 'admin',
 }
 
+// Gainode 2.0 后台菜单（与 sql/20260817_admin_20_menu_seed.sql V2 一致）
+// 来源：GAINODE_ADMIN_PAGE_MAP_V2.4.1.md（PageID 权威映射，11 Root / 33 二级）
 const menus = [
   {
-    id: "/content",
-    icon: "layui-icon-template",
-    title: "内容管理",
+    id: "/workbench",
+    icon: "layui-icon-form",
+    title: "工作台",
     children: [
-      { id: "/content/list", icon: "layui-icon-list", title: "内容" },
-      { id: "/content/classification", icon: "layui-icon-app", title: "分类" }
-    ]
-  },
-  {
-    id: "/system",
-    icon: "layui-icon-set",
-    title: "系统管理",
-    children: [
-      { id: "/language/index", icon: "layui-icon-cellphone", title: "语言管理" },
-      { id: "/system/dictionary", icon: "layui-icon-date", title: "字典管理" },
-      { id: "/system/role", icon: "layui-icon-rate-half", title: "角色管理" },
-      { id: "/system/admin", icon: "layui-icon-user", title: "后台管理员" },
-      { id: "/system/menu", icon: "layui-icon-app", title: "菜单管理" },
-      { id: "/system/dept", icon: "layui-icon-align-right", title: "部门管理" },
-      { id: "/system/login", icon: "layui-icon-list", title: "登录日志" },
-      { id: "/system/option", icon: "layui-icon-tabs", title: "操作日志" }
-    ]
-  },
-  {
-    id: "/team",
-    icon: "layui-icon-user",
-    title: "团队管理",
-    children: [
-      { id: "/team/relationship", icon: "layui-icon-user", title: "团队关系图" }
+      { id: "/workbench/overview", icon: "layui-icon-list", title: "运营总览" },
+      { id: "/workbench/todo", icon: "layui-icon-list", title: "今日待办" }
     ]
   },
   {
     id: "/user",
-    icon: "layui-icon-friends",
-    title: "用户",
+    icon: "layui-icon-user",
+    title: "用户管理",
     children: [
-      { id: "/user/index", icon: "layui-icon-friends", title: "用户列表" },
-      { id: "/user/grade", icon: "layui-icon-next", title: "等级列表" }
+      { id: "/user/list", icon: "layui-icon-list", title: "用户列表" },
+      { id: "/user/kyc", icon: "layui-icon-list", title: "实名认证" },
+      { id: "/user/status", icon: "layui-icon-list", title: "用户360" },
+      { id: "/user/support", icon: "layui-icon-list", title: "客服工单" }
     ]
   },
   {
-    id: "/assets",
+    id: "/affiliate",
+    icon: "layui-icon-group",
+    title: "代理管理",
+    children: [
+      { id: "/affiliate/list", icon: "layui-icon-list", title: "代理列表" }
+    ]
+  },
+  {
+    id: "/finance",
     icon: "layui-icon-rmb",
-    title: "资产管理",
+    title: "财务管理",
     children: [
-      { id: "/assets/recharge", icon: "layui-icon-prev", title: "充值" },
-      { id: "/assets/withdraw", icon: "layui-icon-tabs", title: "提现" }
+      { id: "/finance/overview", icon: "layui-icon-list", title: "资产总览" },
+      { id: "/finance/reconciliation", icon: "layui-icon-list", title: "对账与冲正" },
+      { id: "/finance/settlement", icon: "layui-icon-list", title: "结算管理" },
+      { id: "/finance/power", icon: "layui-icon-list", title: "Power 账户" }
     ]
   },
   {
-    id: "/configuration",
-    icon: "layui-icon-set",
-    title: "配置",
-    children: [
-      { id: "/configuration/arbitrage", icon: "layui-icon-transfer", title: "套利配置" },
-      { id: "/configuration/funds", icon: "layui-icon-auz", title: "资金配置" },
-      { id: "/configuration/other", icon: "layui-icon-template-one", title: "其他配置" },
-      { id: "/configuration/payment", icon: "layui-icon-template", title: "支付配置" },
-      { id: "/configuration/storage", icon: "layui-icon-radio", title: "储存配置" },
-      { id: "/configuration/system", icon: "layui-icon-layouts", title: "系统配置" }
-    ]
-  },
-  {
-    id: "/mining",
+    id: "/robot",
     icon: "layui-icon-senior",
     title: "机器人管理",
     children: [
-      { id: "/mining/order", icon: "layui-icon-form", title: "订单管理" },
-      { id: "/mining/project", icon: "layui-icon-unlink", title: "项目管理" }
+      { id: "/robot/list", icon: "layui-icon-list", title: "机器人列表" },
+      { id: "/robot/revenue", icon: "layui-icon-list", title: "收益记录" }
     ]
   },
   {
-    id: "/signal",
+    id: "/trade",
+    icon: "layui-icon-transfer",
+    title: "交易管理",
+    children: [
+      { id: "/trade/otc-order", icon: "layui-icon-list", title: "OTC 订单" },
+      { id: "/trade/dispute", icon: "layui-icon-list", title: "争议处理" }
+    ]
+  },
+  {
+    id: "/predict",
     icon: "layui-icon-website",
-    title: "信号",
+    title: "赛事竞猜",
     children: [
-      { id: "/signal/signal", icon: "layui-icon-loading", title: "信号" },
-      { id: "/signal/arbitrage", icon: "layui-icon-form", title: "套利记录" }
+      { id: "/predict/match", icon: "layui-icon-list", title: "赛事管理" },
+      { id: "/predict/order", icon: "layui-icon-list", title: "投注订单" },
+      { id: "/predict/settlement", icon: "layui-icon-list", title: "结算管理" }
     ]
   },
   {
-    id: "/redEnvelope",
-    icon: "layui-icon-rmb",
-    title: "红包",
+    id: "/data",
+    icon: "layui-icon-chart",
+    title: "数据中心",
     children: [
-      { id: "/redEnvelope/index", icon: "layui-icon-list", title: "红包列表" }
+      { id: "/data/dashboard", icon: "layui-icon-list", title: "数据看板" },
+      { id: "/data/football", icon: "layui-icon-list", title: "足球数据" },
+      { id: "/data/market", icon: "layui-icon-list", title: "市场与赔率" },
+      { id: "/data/signal", icon: "layui-icon-list", title: "信号质量" },
+      { id: "/data/source", icon: "layui-icon-list", title: "数据源管理" }
+    ]
+  },
+  {
+    id: "/risk",
+    icon: "layui-icon-set",
+    title: "风控与配置",
+    children: [
+      { id: "/risk/event", icon: "layui-icon-list", title: "风控事件" },
+      { id: "/risk/approval", icon: "layui-icon-list", title: "审批中心" },
+      { id: "/risk/param", icon: "layui-icon-list", title: "参数管理" },
+      { id: "/risk/policy", icon: "layui-icon-list", title: "策略配置" }
+    ]
+  },
+  {
+    id: "/ai",
+    icon: "layui-icon-service",
+    title: "AI 运营",
+    children: [
+      { id: "/ai/dashboard", icon: "layui-icon-list", title: "AI 看板" },
+      { id: "/ai/suggestion", icon: "layui-icon-list", title: "运营建议" },
+      { id: "/ai/simulation", icon: "layui-icon-list", title: "策略模拟" }
+    ]
+  },
+  {
+    id: "/system",
+    icon: "layui-icon-template",
+    title: "系统管理",
+    children: [
+      { id: "/system/log", icon: "layui-icon-list", title: "操作日志" },
+      { id: "/system/monitor", icon: "layui-icon-list", title: "系统监控" }
     ]
   }
 ]

@@ -87,5 +87,6 @@ declare module 'vue' {
     TableActionSchema: typeof import('./src/components/TableActionSchema.vue')['default']
     TableSearchSchema: typeof import('./src/components/TableSearchSchema.vue')['default']
     TableToolsSchema: typeof import('./src/components/TableToolsSchema.vue')['default']
+    WriteState: typeof import('./src/components/ep/WriteState.vue')['default']
   }
 }

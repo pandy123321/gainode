@@ -24,7 +24,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/v1': {
-        target: 'https://api.gainode.com', // Background interface
+        target: 'http://127.0.0.1:8789', // Local backend (was: https://api.gainode.com)
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/v1/, '/v1'),

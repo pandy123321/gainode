@@ -26,3 +26,19 @@ export const signalList = function (params: any) {
 export const positionList = function (params: any) {
   return Http.get('/admin/arbitrage/position', params)
 }
+
+export const fixtureList = function (params: any) {
+  return Http.get('/admin/arbitrage/fixture', params)
+}
+
+export const dataSourceList = function (params: any) {
+  return Http.get('/admin/arbitrage/datasource', params)
+}
+
+export const dataSourceSave = function (post: any) {
+  return Http.post('/admin/arbitrage/datasource/save', post)
+}
+
+export const dataSourceTest = function (post: any) {
+  return Http.post('/admin/arbitrage/datasource/test', post)
+}

@@ -801,6 +801,7 @@ export const pageSchema: Record<string, PageSchema> = {
       { prop: 'updatedAt', label: '更新时间', width: 170 },
     ],
   },
+  // A-DATA-003 足球数据（已接入 GET /admin/arbitrage/fixture，字段对齐 arbitrage_fixture）
   '/data/football': {
     type: 'list',
     stats: [
@@ -809,25 +810,26 @@ export const pageSchema: Record<string, PageSchema> = {
       { label: '已完赛', value: '--' },
       { label: '数据源覆盖', value: '--' },
     ],
-    searchPlaceholder: '搜索赛事 / 联赛',
+    searchPlaceholder: '搜索联赛 / 主队 / 客队',
     filters: [
       {
         type: 'select', prop: 'status', label: '状态',
         options: [
           { label: '待开赛', value: 'scheduled' },
-          { label: '直播中', value: 'live' },
+          { label: '进行中', value: 'live' },
           { label: '已完赛', value: 'finished' },
         ],
       },
-      range('数据时间'),
+      range('开赛时间'),
     ],
     columns: [
-      { prop: 'league', label: '联赛', width: 170 },
+      { prop: 'league', label: '联赛', minWidth: 160 },
       { prop: 'home', label: '主队', width: 140 },
       { prop: 'away', label: '客队', width: 140 },
-      { prop: 'score', label: '比分', width: 110 },
-      { prop: 'status', label: '状态', width: 100 },
-      { prop: 'dataAt', label: '数据时间', width: 170 },
+      { prop: 'score', label: '比分', width: 100 },
+      { prop: 'statusText', label: '状态', width: 100 },
+      { prop: 'sourceText', label: '数据源', width: 130 },
+      { prop: 'kickoffText', label: '开赛时间', width: 170 },
     ],
   },
   '/data/market': {
@@ -867,6 +869,7 @@ export const pageSchema: Record<string, PageSchema> = {
       { prop: 'updatedAt', label: '更新时间', width: 170 },
     ],
   },
+  // A-DATA-005 套利信号（已接入 GET /admin/arbitrage/signal，字段对齐 arbitrage_signal）
   '/data/signal': {
     type: 'list',
     stats: [
@@ -875,36 +878,33 @@ export const pageSchema: Record<string, PageSchema> = {
       { label: '低质量', value: '--' },
       { label: '今日新增', value: '--' },
     ],
-    searchPlaceholder: '搜索信号源 / 类型',
+    searchPlaceholder: '搜索赛事名称',
     filters: [
       {
-        type: 'select', prop: 'type', label: '类型',
+        type: 'select', prop: 'status', label: '状态',
         options: [
-          { label: 'AI 信号', value: 'ai_signal' },
-          { label: '套利信号', value: 'arbitrage' },
-          { label: '数据质量', value: 'quality' },
+          { label: '有效', value: 'valid' },
+          { label: '已过期', value: 'expired' },
+          { label: '已成交', value: 'used' },
+          { label: '已关闭', value: 'closed' },
+          { label: '无效', value: 'invalid' },
         ],
       },
-      {
-        type: 'select', prop: 'quality', label: '质量',
-        options: [
-          { label: '高', value: 'high' },
-          { label: '中', value: 'medium' },
-          { label: '低', value: 'low' },
-        ],
-      },
-      range('更新时间'),
     ],
     columns: [
-      { prop: 'signalId', label: '信号 ID', width: 120 },
-      { prop: 'type', label: '类型', width: 130 },
-      { prop: 'source', label: '信号源', width: 140 },
-      { prop: 'accuracy', label: '准确率', width: 110, ...money },
-      { prop: 'sampleSize', label: '样本量', width: 110, ...money },
-      { prop: 'quality', label: '质量评分', width: 110, ...money },
-      { prop: 'updatedAt', label: '更新时间', width: 170 },
+      { prop: 'event_name', label: '赛事名称', minWidth: 180 },
+      { prop: 'isLiveText', label: '滚球/赛前', width: 100 },
+      { prop: 'profitRateText', label: '利润率', width: 100, ...money },
+      { prop: 'leg1_bookmaker', label: 'Leg1 博彩公司', width: 130 },
+      { prop: 'leg1_odds', label: 'Leg1 赔率', width: 90, ...money },
+      { prop: 'leg2_bookmaker', label: 'Leg2 博彩公司', width: 130 },
+      { prop: 'leg2_odds', label: 'Leg2 赔率', width: 90, ...money },
+      { prop: 'current_score', label: '比分', width: 90 },
+      { prop: 'startedAtText', label: '开赛时间', width: 170 },
+      { prop: 'statusText', label: '状态', width: 90 },
     ],
   },
+  // A-DATA-002 数据源管理（已接入 GET /admin/arbitrage/datasource，凭证可编辑/可测试）
   '/data/source': {
     type: 'list',
     stats: [
@@ -918,29 +918,26 @@ export const pageSchema: Record<string, PageSchema> = {
       {
         type: 'select', prop: 'type', label: '类型',
         options: [
-          { label: '足球数据', value: 'football' },
-          { label: '赔率数据', value: 'odds' },
-          { label: '套利数据', value: 'arbitrage' },
+          { label: '足球数据', value: 'fixture' },
+          { label: '套利信号', value: 'signal' },
         ],
       },
       {
         type: 'select', prop: 'status', label: '健康状态',
         options: [
           { label: '健康', value: 'healthy' },
-          { label: '降级', value: 'degraded' },
-          { label: '异常', value: 'error' },
           { label: '停用', value: 'disabled' },
+          { label: '异常', value: 'error' },
         ],
       },
-      range('更新时间'),
     ],
     columns: [
-      { prop: 'provider', label: '数据源名称', width: 180 },
-      { prop: 'type', label: '类型', width: 130 },
-      { prop: 'status', label: '健康状态', width: 110 },
-      { prop: 'latency', label: '延迟', width: 110 },
-      { prop: 'lastSyncAt', label: '最后同步', width: 170 },
-      { prop: 'updatedAt', label: '更新时间', width: 170 },
+      { prop: 'name', label: '数据源名称', minWidth: 180 },
+      { prop: 'typeText', label: '类型', width: 130 },
+      { prop: 'configuredText', label: '配置状态', width: 110 },
+      { prop: 'statusText', label: '健康状态', width: 110 },
+      { prop: 'sync_count', label: '同步条数', width: 110, ...money },
+      { prop: 'lastSyncAtText', label: '最后同步', width: 170 },
     ],
   },
 

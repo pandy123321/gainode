@@ -4,6 +4,7 @@ import { useAppStore } from "../store/app";
 import { layer } from '@layui/layui-vue';
 import router from '../router'
 import md5 from 'md5'
+import { generateIdempotencyKey } from '../utils/request-id'
 
 type TAxiosOption = {
     timeout: number;
@@ -63,6 +64,10 @@ class Http {
                 }
             }
             headers.Sign = generateSign(headers)
+            // 写操作补 Idempotency-Key（后端 RequestContext 强制，且不参与签名）
+            if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method)) {
+                headers['Idempotency-Key'] = generateIdempotencyKey()
+            }
             Object.assign(config.headers as AxiosRequestHeaders, headers)
             return config
         }, error => {
