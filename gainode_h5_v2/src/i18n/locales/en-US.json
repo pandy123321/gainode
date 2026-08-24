@@ -426,6 +426,7 @@
       "not_found": "Entry not found"
     },
     "m_power_001": {
+      "available": "Available",
       "title": "Power",
       "description": "Consumable, recoverable operation resource",
       "primary_action": "Refresh",

@@ -415,6 +415,7 @@
       "not_found": "Écriture introuvable"
     },
     "m_power_001": {
+      "available": "Disponible",
       "title": "Power",
       "description": "Ressource d'opération consommable et récupérable",
       "primary_action": "Actualiser",

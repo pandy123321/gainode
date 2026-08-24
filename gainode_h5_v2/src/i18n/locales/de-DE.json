@@ -415,6 +415,7 @@
       "not_found": "Eintrag nicht gefunden"
     },
     "m_power_001": {
+      "available": "Verfügbar",
       "title": "Power",
       "description": "Verbrauchbare, wiederherstellbare Betriebsressource",
       "primary_action": "Aktualisieren",

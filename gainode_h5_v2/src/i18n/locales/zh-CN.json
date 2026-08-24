@@ -426,6 +426,7 @@
       "not_found": "未找到该笔流水"
     },
     "m_power_001": {
+      "available": "可用",
       "title": "Power",
       "description": "可消耗、可恢复的操作资源",
       "primary_action": "刷新",

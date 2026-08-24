@@ -1,5 +1,7 @@
 /**
- * 多语言入口（vue-i18n 7 语言）+ legacy 兼容导出（旧 view 直到 S03-P02）。
+ * 多语言入口（vue-i18n 7 语言 JSON）。
+ * H5-04 修复：移除 legacy TS 语言包双轨（zh-CN.ts/en-US.ts 已随 V1 死代码集群删除）。
+ * t() 现在直接走 vue-i18n（7 个 JSON locale，key parity 由 tests/unit/i18n.spec.ts 保证）。
  */
 import { createI18n } from 'vue-i18n'
 import zhCN from './locales/zh-CN.json'
@@ -9,9 +11,6 @@ import koKR from './locales/ko-KR.json'
 import thTH from './locales/th-TH.json'
 import deDE from './locales/de-DE.json'
 import frFR from './locales/fr-FR.json'
-// legacy 旧 key（TS 模块，保留给旧 view，S03-P02 迁移后删除）
-import legacyZhCN from './locales/zh-CN'
-import legacyEnUS from './locales/en-US'
 
 export const SUPPORTED_LOCALES = [
   'zh-CN',
@@ -41,24 +40,15 @@ export const i18n = createI18n({
 
 const STORAGE_KEY = 'app_lang'
 
-const legacyLocales: Record<string, Record<string, string>> = {
-  'zh-CN': legacyZhCN as Record<string, string>,
-  'en-US': legacyEnUS as Record<string, string>,
-}
-
 function resolveLocale(lang: string): SupportedLocale {
   return (SUPPORTED_LOCALES as readonly string[]).includes(lang)
     ? (lang as SupportedLocale)
     : 'zh-CN'
 }
 
-/** 兼容旧 view 的 t()：先查旧 key，再查 vue-i18n，最后回退 raw key */
+/** 统一翻译入口：vue-i18n + {param} 插值 */
 export function t(key: string, params?: Record<string, string>): string {
-  const current = i18n.global.locale
-  let text =
-    legacyLocales[current]?.[key] ??
-    legacyLocales['zh-CN']?.[key] ??
-    String(i18n.global.t(key))
+  let text = String(i18n.global.t(key))
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(`{${k}}`, v)
@@ -91,10 +81,6 @@ export function getSupportedLanguages(): { code: string; name: string; nativeNam
     { code: 'de-DE', name: 'German', nativeName: 'Deutsch' },
     { code: 'fr-FR', name: 'French', nativeName: 'Français' },
   ]
-}
-
-export function getCurrentLocale(): Readonly<Record<string, string>> {
-  return legacyLocales[getCurrentLanguage()] ?? legacyLocales['zh-CN'] ?? {}
 }
 
 // 应用启动时从 localStorage 恢复语言

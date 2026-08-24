@@ -95,9 +95,18 @@ let refreshPromise: Promise<string | null> | null = null
 async function doRefresh(): Promise<string | null> {
   if (!refreshToken) return null
   const raw = axios.create({ timeout: 10000 })
-  const resp = await raw.post<{ data: { access_token: string } }>(refreshUrl, {
-    refresh_token: refreshToken,
-  })
+  // H5-08：refresh 端点同样携带基础请求头（无 Authorization，令牌已失效）
+  const resp = await raw.post<{ data: { access_token: string } }>(
+    refreshUrl,
+    { refresh_token: refreshToken },
+    {
+      headers: {
+        'Accept-Language': languageGetter(),
+        'X-Request-Id': generateRequestId(),
+        'X-Timestamp': nowUnixSeconds(),
+      },
+    },
+  )
   const token = resp.data?.data?.access_token ?? null
   if (token) accessToken = token
   return token

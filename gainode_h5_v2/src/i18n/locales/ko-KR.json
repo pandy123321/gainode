@@ -415,6 +415,7 @@
       "not_found": "항목을 찾을 수 없습니다"
     },
     "m_power_001": {
+      "available": "사용 가능",
       "title": "Power",
       "description": "소비 가능하고 회복 가능한 작업 자원",
       "primary_action": "새로고침",

@@ -415,6 +415,7 @@
       "not_found": "このエントリが見つかりません"
     },
     "m_power_001": {
+      "available": "利用可能",
       "title": "Power",
       "description": "消費可能で回復可能な操作リソース",
       "primary_action": "更新",
