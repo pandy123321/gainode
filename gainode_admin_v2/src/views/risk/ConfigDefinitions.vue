@@ -29,7 +29,9 @@
           />
           <el-space class="mt">
             <el-button @click="editCandidate">编辑草案</el-button>
-            <el-button type="primary" @click="simulate">仿真</el-button>
+            <el-tooltip content="参数仿真契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="primary" disabled>仿真</el-button>
+            </el-tooltip>
             <el-button type="warning" @click="submitRelease">提交发布</el-button>
           </el-space>
         </el-card>
@@ -49,6 +51,7 @@ import { ElMessage } from 'element-plus'
 
 // A-CONFIG-001 Parameter Center · Definition/Candidate（P0）。后端 GET /parameter-definitions、
 // POST /parameter-candidates 未实现，MOCK_ONLY。保存不生效；TBC 生产值 null（07 §8）。
+// 仿真按钮已禁用（FAIL_CLOSED）：仿真契约未冻结，不做本地「仿真完成」假反馈。
 
 const router = useRouter()
 const namespaces = ['robot.capacity', 'robot.upgrade_cost', 'robot.reward', 'power.cap', 'budget.allocation']
@@ -61,9 +64,6 @@ const onSelect = (ns: string): void => {
 }
 const editCandidate = (): void => {
   ElMessage.info('编辑候选草案暂未接入后端')
-}
-const simulate = (): void => {
-  ElMessage.success('仿真完成（MOCK_ONLY）')
 }
 const submitRelease = (): void => {
   router.push('/config/releases')

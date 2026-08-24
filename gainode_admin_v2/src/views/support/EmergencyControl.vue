@@ -38,13 +38,9 @@
       </el-form>
       <template #footer>
         <el-button @click="confirmVisible = false">取消</el-button>
-        <el-button
-          type="danger"
-          :disabled="!form.caseId || !form.reason"
-          @click="execute"
-        >
-          执行（需双人授权）
-        </el-button>
+        <el-tooltip content="紧急执行契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="danger" disabled>执行（需双人授权）</el-button>
+        </el-tooltip>
       </template>
     </el-dialog>
   </div>
@@ -75,14 +71,12 @@ const actions = ref<EmergencyRow[]>([
   { name: '回滚参数', state: '已执行', scope: 'REL-12' },
 ])
 const confirmVisible = ref(false)
-const pendingRow = ref<EmergencyRow | null>(null)
 const form = reactive({ caseId: '', reason: '', scope: '', recovery: '' })
 
 const stateTag = (s: EmergencyState): 'success' | 'warning' | 'info' | 'danger' =>
   ({ 可执行: 'success', 需双人授权: 'warning', 执行中: 'info', 已执行: 'info', 补审待处理: 'warning', 补审超时: 'danger' } as const)[s]
 
 const initiate = (r: EmergencyRow): void => {
-  pendingRow.value = r
   form.caseId = ''
   form.reason = ''
   form.scope = r.scope
@@ -95,10 +89,7 @@ const audit = (r: EmergencyRow): void => {
 const postReview = (r: EmergencyRow): void => {
   ElMessage.info(`事后复核 ${r.name}（超时自动升级）`)
 }
-const execute = (): void => {
-  ElMessage.success(`已执行（需双人授权，case_id=${form.caseId}，MOCK_ONLY）`)
-  confirmVisible.value = false
-}
+// 执行按钮已禁用（FAIL_CLOSED）：紧急操作契约未冻结，禁止任何"已执行"模拟反馈。
 </script>
 
 <style scoped>

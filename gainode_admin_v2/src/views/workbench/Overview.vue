@@ -4,7 +4,9 @@
     <div class="env-bar">
       <el-tag :type="env.tag" size="small" effect="plain">{{ env.label }}</el-tag>
       <span class="env-meta">数据更新于 {{ updatedAt }}</span>
-      <el-button link class="env-save" @click="onSaveView">保存视图</el-button>
+      <el-tooltip content="视图布局持久化契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+        <el-button link class="env-save" disabled>保存视图</el-button>
+      </el-tooltip>
     </div>
 
     <EpAdminState
@@ -254,9 +256,7 @@ const severityTag = (s: Anomaly['severity']): 'danger' | 'warning' | 'info' =>
 const onOpen = (a: Anomaly): void => {
   ElMessage.info(`异常详情「${a.title}」暂未接入后端`)
 }
-const onSaveView = (): void => {
-  ElMessage.success('视图布局已保存（本地）')
-}
+// 保存视图按钮已禁用（FAIL_CLOSED）：布局无持久化写入，不做假「已保存」反馈。
 const goTodo = (): void => {
   router.push('/workbench/todo')
 }

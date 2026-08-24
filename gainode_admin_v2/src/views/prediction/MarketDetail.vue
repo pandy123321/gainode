@@ -6,7 +6,9 @@
           <div class="obj-title">{{ market.event }}</div>
           <div class="obj-sub">{{ market.id }} · 状态 {{ market.state }}</div>
         </div>
-        <el-button type="primary" @click="runLock">运行锁定评估</el-button>
+        <el-tooltip content="锁定评估契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="primary" disabled>运行锁定评估</el-button>
+        </el-tooltip>
       </div>
     </el-card>
 
@@ -45,7 +47,6 @@ export default { name: 'MarketDetail' }
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
 
 // A-PREDICT-002 Market 详情（P0）。后端 POST /markets/{id}/lock-evaluations 未实现，MOCK_ONLY。
 // 锁定失败要有明确 reason 和后续 refund 路径；不暴露反作弊阈值/完整图谱（07 §8）。
@@ -68,10 +69,7 @@ const orders = ref([
 const liquidity = ref('正常')
 const evaluation = ref('待评估')
 
-const runLock = (): void => {
-  evaluation.value = '通过（MOCK_ONLY）'
-  ElMessage.success('锁定评估通过（MOCK_ONLY）')
-}
+// 锁定评估按钮已禁用（FAIL_CLOSED）：POST /markets/{id}/lock-evaluations 契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>

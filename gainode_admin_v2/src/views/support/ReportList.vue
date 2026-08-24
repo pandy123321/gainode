@@ -6,7 +6,9 @@
       <div class="filter-bar">
         <el-date-picker v-model="range" type="daterange" range-separator="至" start-placeholder="开始" end-placeholder="结束" />
         <el-button type="primary" @click="load">查询</el-button>
-        <el-button @click="exportReport">导出</el-button>
+        <el-tooltip content="报表导出契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button disabled>导出</el-button>
+        </el-tooltip>
       </div>
     </el-card>
 
@@ -34,7 +36,6 @@ export default { name: 'ReportList' }
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import { useAdminPage } from '@/composables/useAdminPage'
 
 // A-REPORT-001 运营报表（P1）。后端 /admin/reports 未实现，MOCK_ONLY。
@@ -60,9 +61,7 @@ function load(): void {
     ]
   })
 }
-const exportReport = (): void => {
-  ElMessage.success('导出任务已创建（MOCK_ONLY）')
-}
+// 导出按钮已禁用（FAIL_CLOSED）：报表导出契约未冻结，不做本地假提交。
 
 load()
 </script>

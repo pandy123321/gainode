@@ -47,9 +47,15 @@
           <el-divider>决策（SoD：申请人不可审批自己）</el-divider>
           <el-alert v-if="isSelf" type="error" :closable="false" title="自我审批已阻止" />
           <el-space v-else class="mt">
-            <el-button type="success" @click="decide('approve')">通过</el-button>
-            <el-button type="danger" @click="decide('reject')">拒绝</el-button>
-            <el-button type="warning" @click="decide('request_changes')">退回修改</el-button>
+            <el-tooltip content="审批决策契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="success" disabled>通过</el-button>
+            </el-tooltip>
+            <el-tooltip content="审批决策契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="danger" disabled>拒绝</el-button>
+            </el-tooltip>
+            <el-tooltip content="审批决策契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="warning" disabled>退回修改</el-button>
+            </el-tooltip>
           </el-space>
         </template>
       </el-drawer>
@@ -63,7 +69,6 @@ export default { name: 'ApprovalCenter' }
 
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import EpAdminState from '@/components/ep/AdminState.vue'
 import EpImpactPreview from '@/components/ep/ImpactPreview.vue'
 import { useAdminPage } from '@/composables/useAdminPage'
@@ -115,12 +120,7 @@ const open = (r: ApprovalRow): void => {
   current.value = r
   drawerVisible.value = true
 }
-const decide = (result: string): void => {
-  if (!current.value) return
-  current.value.decision = result === 'approve' ? 'approved' : result === 'reject' ? 'rejected' : 'request_changes'
-  ElMessage.success(`已决定：${current.value.decision}（MOCK_ONLY）`)
-  drawerVisible.value = false
-}
+// 决策按钮已禁用（FAIL_CLOSED）：POST /approval-tasks/{id}/decisions 契约未冻结，不做本地假提交。
 
 load()
 </script>

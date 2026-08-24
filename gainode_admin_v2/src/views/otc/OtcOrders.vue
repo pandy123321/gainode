@@ -16,7 +16,9 @@
             <el-option label="已完成" value="completed" />
           </el-select>
           <el-button type="primary" @click="load">查询</el-button>
-          <el-button @click="onSave">保存视图</el-button>
+          <el-tooltip content="视图布局持久化契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button disabled>保存视图</el-button>
+          </el-tooltip>
         </div>
       </el-card>
 
@@ -60,12 +62,12 @@ export default { name: 'OtcOrders' }
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import EpAdminState from '@/components/ep/AdminState.vue'
 import { useAdminPage } from '@/composables/useAdminPage'
 
 // A-OTC-001 OTC 订单列表（P0）。后端 GET /admin/otc/orders 未实现，MOCK_ONLY。
 // SUBMITTED/MATCHING/PARTIAL 绝不能显示 Completed（07 §8）。
+// 保存视图按钮已禁用（FAIL_CLOSED）：视图布局无持久化写入，不做假「已保存」反馈。
 
 type OtcStatus = 'submitted' | 'matching' | 'partial' | 'completed'
 
@@ -109,9 +111,6 @@ function load(): void {
   })
 }
 
-const onSave = (): void => {
-  ElMessage.success('视图已保存（本地）')
-}
 const open = (r: OtcRow): void => {
   router.push({ path: '/otc/order-detail', query: { id: r.orderId } })
 }

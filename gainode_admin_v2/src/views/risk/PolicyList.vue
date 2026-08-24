@@ -39,7 +39,9 @@
     <div class="action-bar">
       <el-space>
         <el-button @click="preview">用户预览</el-button>
-        <el-button type="primary" @click="createCandidate">创建策略候选 / 案件</el-button>
+        <el-tooltip content="策略候选/案件创建契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="primary" disabled>创建策略候选 / 案件</el-button>
+        </el-tooltip>
       </el-space>
     </div>
   </div>
@@ -70,9 +72,7 @@ const allowTag = (v: string): 'success' | 'danger' | 'info' =>
 const preview = (): void => {
   ElMessage.info('用户预览暂未接入后端')
 }
-const createCandidate = (): void => {
-  ElMessage.success('策略候选/案件创建入口（MOCK_ONLY）')
-}
+// 创建按钮已禁用（FAIL_CLOSED）：策略候选/案件创建契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>

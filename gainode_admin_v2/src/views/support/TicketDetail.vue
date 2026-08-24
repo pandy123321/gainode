@@ -49,8 +49,12 @@
         <el-space>
           <el-button @click="supplement">补件</el-button>
           <el-button type="warning" @click="escalate">升级风控</el-button>
-          <el-button type="primary" :disabled="!note" @click="send">发送</el-button>
-          <el-button type="success" @click="close">关闭</el-button>
+          <el-tooltip content="工单回复契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button type="primary" disabled>发送</el-button>
+          </el-tooltip>
+          <el-tooltip content="工单关闭契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button type="success" disabled>关闭</el-button>
+          </el-tooltip>
         </el-space>
       </div>
     </el-card>
@@ -92,13 +96,7 @@ const supplement = (): void => {
 const escalate = (): void => {
   ElMessage.info('升级风控暂未接入后端')
 }
-const send = (): void => {
-  ElMessage.success(`已发送（${noteKind.value === 'internal' ? '内部备注' : '用户可见回复'}）`)
-  note.value = ''
-}
-const close = (): void => {
-  ElMessage.success('工单已关闭（需结论，MOCK_ONLY）')
-}
+// 发送/关闭按钮已禁用（FAIL_CLOSED）：POST /admin/tickets/{id}/* 契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>

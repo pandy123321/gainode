@@ -52,9 +52,15 @@
       <el-input v-model="decisionNote" type="textarea" :rows="2" placeholder="决定备注（必填）" />
       <div class="decision-bar">
         <el-space>
-          <el-button type="success" :disabled="!decisionNote" @click="decide('approved')">通过</el-button>
-          <el-button type="danger" :disabled="!decisionNote" @click="decide('rejected')">拒绝</el-button>
-          <el-button type="warning" :disabled="!decisionNote" @click="decide('needs_info')">需补充</el-button>
+          <el-tooltip content="OTC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button type="success" disabled>通过</el-button>
+          </el-tooltip>
+          <el-tooltip content="OTC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button type="danger" disabled>拒绝</el-button>
+          </el-tooltip>
+          <el-tooltip content="OTC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button type="warning" disabled>需补充</el-button>
+          </el-tooltip>
         </el-space>
       </div>
     </el-card>
@@ -68,11 +74,11 @@ export default { name: 'OtcOrderDetail' }
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
 import type { SchemaColumn } from '@/types/schema'
 
 // A-OTC-002 OTC 订单详情/审核（P0）。后端 GET /otc/orders/{id} 未实现，MOCK_ONLY。
 // 决定必须写 reason；资产影响预览；风险决定与高危处置分权（07 §8）。
+// 决定按钮已禁用（FAIL_CLOSED）：OTC 决定写契约未冻结，不做本地假成功反馈。
 
 const route = useRoute()
 const activeTab = ref('order')
@@ -94,9 +100,6 @@ const timeline = ref([
   { time: '2026-08-03 10:05', event: '部分成交' },
 ])
 
-const decide = (result: string): void => {
-  ElMessage.success(`已决定：${result}（reason: ${decisionNote.value}）`)
-}
 </script>
 
 <style scoped>

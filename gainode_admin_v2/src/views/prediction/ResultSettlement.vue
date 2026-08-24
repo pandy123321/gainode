@@ -28,8 +28,12 @@
 
     <div class="action-bar">
       <el-space>
-        <el-button @click="calcSandbox">沙箱试算</el-button>
-        <el-button type="primary" @click="submitApproval">提交结算审批</el-button>
+        <el-tooltip content="结算试算/审批契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button disabled>沙箱试算</el-button>
+        </el-tooltip>
+        <el-tooltip content="结算审批契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="primary" disabled>提交结算审批</el-button>
+        </el-tooltip>
       </el-space>
     </div>
   </div>
@@ -41,7 +45,6 @@ export default { name: 'ResultSettlement' }
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
 
 // A-PREDICT-003 Result/Settlement（P0）。后端 POST /markets/{id}/results 未实现，MOCK_ONLY。
 // 未 reconciliation=0 不得关闭 batch；「赛果确认」与「钱已结算」是两件事（07 §8）。
@@ -59,12 +62,7 @@ const settlement = ref([
 ])
 const reconcile = ref('0')
 
-const calcSandbox = (): void => {
-  ElMessage.success('沙箱试算完成（MOCK_ONLY）')
-}
-const submitApproval = (): void => {
-  ElMessage.success('结算审批已提交（MOCK_ONLY）')
-}
+// 试算/提交按钮已禁用（FAIL_CLOSED）：POST /markets/{id}/results 契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>

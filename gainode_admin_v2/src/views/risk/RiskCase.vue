@@ -44,9 +44,15 @@
           <el-divider>分析师决定</el-divider>
           <el-input v-model="internalReason" type="textarea" :rows="2" placeholder="内部 reason（不对外展示）" />
           <el-space class="mt">
-            <el-button type="success" @click="recommend('approve')">建议通过</el-button>
-            <el-button type="danger" @click="recommend('reject')">建议拒绝</el-button>
-            <el-button type="warning" @click="recommend('hold')">Hold</el-button>
+            <el-tooltip content="案件建议契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="success" disabled>建议通过</el-button>
+            </el-tooltip>
+            <el-tooltip content="案件建议契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="danger" disabled>建议拒绝</el-button>
+            </el-tooltip>
+            <el-tooltip content="案件建议契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="warning" disabled>Hold</el-button>
+            </el-tooltip>
           </el-space>
         </template>
       </el-drawer>
@@ -66,6 +72,7 @@ import { useAdminPage } from '@/composables/useAdminPage'
 
 // A-RISK-001 Risk Case（P0）。后端 POST /admin/cases 未实现，MOCK_ONLY。
 // 用户可见 reason 与内部 reason 分离；不暴露模型权重（07 §8）。
+// 建议按钮已禁用（FAIL_CLOSED）：案件建议写契约未冻结，不做本地假提交。
 
 type CaseStatus = 'open' | 'reviewing' | 'pending_approval' | 'closed'
 
@@ -108,14 +115,6 @@ const open = (r: RiskRow): void => {
 }
 const escalate = (r: RiskRow): void => {
   ElMessage.info(`升级 ${r.caseId} 暂未接入后端`)
-}
-const recommend = (result: string): void => {
-  if (!internalReason.value) {
-    ElMessage.warning('内部 reason 必填')
-    return
-  }
-  ElMessage.success(`已提交建议：${result}（内部 reason 已记录）`)
-  drawerVisible.value = false
 }
 
 load()

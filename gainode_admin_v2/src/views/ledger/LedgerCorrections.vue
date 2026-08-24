@@ -37,7 +37,9 @@
     <div class="sticky-bar">
       <el-space>
         <el-button @click="cancelDraft">取消草案</el-button>
-        <el-button type="primary" :disabled="!reason" @click="submitDraft">提交审批</el-button>
+        <el-tooltip content="账本更正契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="primary" disabled>提交审批</el-button>
+        </el-tooltip>
       </el-space>
     </div>
   </div>
@@ -77,9 +79,7 @@ const cancelDraft = (): void => {
   reason.value = ''
   ElMessage.info('草案已取消')
 }
-const submitDraft = (): void => {
-  ElMessage.success('更正草案已提交审批（MOCK_ONLY）')
-}
+// 提交按钮已禁用（FAIL_CLOSED）：POST /ledger/journal-batches/{id}/reversal 契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>

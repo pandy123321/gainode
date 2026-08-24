@@ -13,7 +13,9 @@
             <el-option label="LEDGER_REVERSAL" value="LEDGER_REVERSAL" />
           </el-select>
           <el-button type="primary" @click="load">查询</el-button>
-          <el-button @click="exportTask">发起导出</el-button>
+          <el-tooltip content="导出任务契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button disabled>发起导出</el-button>
+          </el-tooltip>
         </div>
       </el-card>
 
@@ -54,7 +56,6 @@ export default { name: 'AuditLogs' }
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import EpAdminState from '@/components/ep/AdminState.vue'
 import { useAdminPage } from '@/composables/useAdminPage'
 
@@ -99,9 +100,7 @@ const open = (r: AuditRow): void => {
   current.value = r
   drawerVisible.value = true
 }
-const exportTask = (): void => {
-  ElMessage.success('导出任务已创建（MOCK_ONLY）')
-}
+// 导出按钮已禁用（FAIL_CLOSED）：POST /export-tasks 契约未冻结，不做本地假提交。
 
 load()
 </script>

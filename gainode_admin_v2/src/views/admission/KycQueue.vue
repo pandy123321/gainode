@@ -57,9 +57,15 @@
             </el-form-item>
           </el-form>
           <el-space>
-            <el-button type="success" @click="decide('approved')">通过</el-button>
-            <el-button type="danger" @click="decide('rejected')">拒绝</el-button>
-            <el-button type="warning" @click="decide('needs_info')">补件</el-button>
+            <el-tooltip content="KYC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="success" disabled>通过</el-button>
+            </el-tooltip>
+            <el-tooltip content="KYC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="danger" disabled>拒绝</el-button>
+            </el-tooltip>
+            <el-tooltip content="KYC 决定契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+              <el-button type="warning" disabled>补件</el-button>
+            </el-tooltip>
           </el-space>
         </template>
       </el-drawer>
@@ -73,12 +79,12 @@ export default { name: 'KycQueue' }
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import EpAdminState from '@/components/ep/AdminState.vue'
 import { useAdminPage } from '@/composables/useAdminPage'
 
 // A-KYC-001 KYC 审核队列（P0）。后端 GET/POST /admin/kyc-cases 未实现，MOCK_ONLY。
 // 决定必须有 reason_code + decision_version，不可覆盖旧决定（07 §8）。
+// 决定按钮已禁用（FAIL_CLOSED）：POST /admin/kyc-cases 写契约未冻结，不做本地假状态变更。
 
 type KycStatus = 'submitted' | 'needs_info' | 'approved' | 'rejected'
 
@@ -121,18 +127,6 @@ const open = (c: KycCase): void => {
   decision.reasonCode = ''
   decision.note = ''
   drawerVisible.value = true
-}
-
-const decide = (result: 'approved' | 'rejected' | 'needs_info'): void => {
-  if (!decision.reasonCode) {
-    ElMessage.warning('决定必须选择 reason_code')
-    return
-  }
-  if (!current.value) return
-  current.value.status = result
-  current.value.decisionVersion += 1
-  ElMessage.success(`已决定（${statusText(result)}），decision_version=${current.value.decisionVersion}`)
-  drawerVisible.value = false
 }
 
 load()

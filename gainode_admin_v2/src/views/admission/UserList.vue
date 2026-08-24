@@ -24,7 +24,9 @@
           </el-select>
           <el-button type="primary" @click="load">查询</el-button>
           <el-button @click="onReset">重置</el-button>
-          <el-button class="save" @click="onSaveFilter">保存筛选</el-button>
+          <el-tooltip content="筛选持久化契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+            <el-button class="save" disabled>保存筛选</el-button>
+          </el-tooltip>
         </div>
       </el-card>
 
@@ -82,6 +84,7 @@ import { useAdminPage } from '@/composables/useAdminPage'
 
 // A-USER-001 用户列表（P0）。后端 GET /admin/users 未实现，MOCK_ONLY。
 // 字段按脱敏展示（手机号掩码），列表不提供直接改余额/资格（07 §8）。
+// 保存筛选按钮已禁用（FAIL_CLOSED）：筛选无任何持久化写入，不做假「已保存」反馈。
 
 interface UserRow {
   uid: string
@@ -138,9 +141,6 @@ const onReset = (): void => {
   filters.kyc = ''
   filters.robot = ''
   filters.risk = ''
-}
-const onSaveFilter = (): void => {
-  ElMessage.success('筛选条件已保存（本地）')
 }
 const go360 = (r: UserRow): void => {
   router.push({ path: '/admission/user-360', query: { uid: r.uid } })

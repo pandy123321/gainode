@@ -21,15 +21,12 @@
         </el-table-column>
         <el-table-column label="操作" width="150">
           <template #default="{ row }">
-            <el-button
-              link
-              type="primary"
-              size="small"
-              :disabled="row.fundEffect"
-              @click="retry(row)"
+            <el-tooltip
+              :content="row.fundEffect ? '资金效果任务禁止直接重试（FAIL_CLOSED）' : '任务重试契约未冻结，写路径未接入（FAIL_CLOSED）'"
+              placement="top"
             >
-              重试
-            </el-button>
+              <el-button link type="primary" size="small" disabled>重试</el-button>
+            </el-tooltip>
             <el-button link type="warning" size="small" @click="createCase(row)">建 Case</el-button>
           </template>
         </el-table-column>
@@ -107,13 +104,7 @@ function load(): void {
   })
 }
 
-const retry = (j: Job): void => {
-  if (j.fundEffect) {
-    ElMessage.warning('资金效果任务需额外确认，不能直接重试')
-    return
-  }
-  ElMessage.success(`重试 ${j.jobId}（MOCK_ONLY）`)
-}
+// 重试按钮已禁用（FAIL_CLOSED）：异步任务重试契约未冻结，不做本地假提交；资金任务额外禁止 replay。
 const createCase = (j: Job): void => {
   ElMessage.info(`为 ${j.jobId} 建 Case 暂未接入后端`)
 }

@@ -64,18 +64,17 @@
           <el-table-column prop="dueAt" label="到期时间" width="120" />
           <el-table-column label="操作" width="220" fixed="right">
             <template #default="{ row }">
-              <el-button
+              <el-tooltip
                 v-if="row.status === 'pending'"
-                link
-                type="primary"
-                size="small"
-                :loading="row.claiming"
-                @click="claim(row)"
+                content="工作队列契约未冻结，写路径未接入（FAIL_CLOSED）"
+                placement="top"
               >
-                领取
-              </el-button>
+                <el-button link type="primary" size="small" disabled>领取</el-button>
+              </el-tooltip>
               <el-button link type="primary" size="small" @click="open(row)">打开</el-button>
-              <el-button link type="warning" size="small" @click="transfer(row)">转派</el-button>
+              <el-tooltip content="工作队列契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+                <el-button link type="warning" size="small" disabled>转派</el-button>
+              </el-tooltip>
               <el-button link type="info" size="small" @click="supplement(row)">补件</el-button>
               <el-button link type="danger" size="small" @click="createCase(row)">建 Case</el-button>
             </template>
@@ -111,16 +110,15 @@ export default { name: 'WorkbenchTodo' }
 
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import EpAdminState from '@/components/ep/AdminState.vue'
-import { showObjectVersionConflict } from '@/utils/object-version'
 import type { AdminStateName } from '@/types/schema'
 
 // =============================================================================
 // A-WORK-002 今日待办（P0）
 // 契约：04 §3 A-WORK-002。后端 `GET/POST /admin/work-items` 尚未实现，此处为
-// MOCK_ONLY UI 骨架；接入时替换 load()/claim()/transfer() 为真实接口，
-// 并发领取仍须走 object_version / If-Match（05 §1）。
+// MOCK_ONLY 只读骨架；claim/transfer 已禁用（FAIL_CLOSED），接入时替换 load()
+// 为真实接口，并发领取仍须走 object_version / If-Match（05 §1）。
 // =============================================================================
 
 type Priority = 'P0' | 'P1' | 'P2'
@@ -139,7 +137,6 @@ interface WorkItem {
   status: ItemStatus
   dueAt: string
   objectVersion: number
-  claiming?: boolean
 }
 
 const state = ref<AdminStateName>('default')
@@ -153,9 +150,6 @@ const filters = reactive<{ priority: string; sla: string; objectType: string; as
 })
 
 const items = ref<WorkItem[]>([])
-
-// MOCK_ONLY：模拟「任务已被他人领取」的并发冲突对象（object_version 已过期）
-const MOCK_STALE_IDS = new Set(['WI-1002'])
 
 const filteredItems = computed<WorkItem[]>(() =>
   items.value.filter((it) => {
@@ -197,51 +191,12 @@ const statusText = (s: ItemStatus): string =>
 const statusTag = (s: ItemStatus): 'info' | 'warning' | 'success' =>
   ({ pending: 'info', claimed: 'warning', done: 'success' } as const)[s]
 
-const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
-
-// 领取：并发领取走 object_version 乐观锁，冲突时不得静默覆盖
-const claim = async (item: WorkItem): Promise<void> => {
-  if (item.claiming) return
-  item.claiming = true
-  await sleep(600)
-  item.claiming = false
-  if (MOCK_STALE_IDS.has(item.id)) {
-    await showObjectVersionConflict({ onRefresh: () => markClaimedByOther(item) })
-    return
-  }
-  item.status = 'claimed'
-  item.assignee = '当前操作员'
-  item.objectVersion += 1
-  ElMessage.success(`已领取「${item.title}」`)
-}
-
-const markClaimedByOther = (item: WorkItem): void => {
-  item.status = 'claimed'
-  item.assignee = '王五'
-  ElMessage.warning('该任务已被他人领取，已刷新为最新状态')
-}
-
 const open = (item: WorkItem): void => {
   drawerItem.value = item
   drawerVisible.value = true
 }
 
-const transfer = async (item: WorkItem): Promise<void> => {
-  try {
-    const { value } = await ElMessageBox.prompt('请输入接收人（只能转派到允许队列）', `转派「${item.title}」`, {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      inputPlaceholder: '接收人',
-    })
-    if (value) {
-      item.assignee = value.trim()
-      item.objectVersion += 1
-      ElMessage.success('已转派')
-    }
-  } catch {
-    // 用户取消
-  }
-}
+// 领取/转派按钮已禁用（FAIL_CLOSED）：工作队列写契约未冻结，不做本地假状态变更。
 
 const supplement = (item: WorkItem): void => {
   ElMessage.info(`补件「${item.title}」暂未接入后端`)

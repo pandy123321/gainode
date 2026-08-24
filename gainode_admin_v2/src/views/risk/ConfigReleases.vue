@@ -31,7 +31,9 @@
 
     <div class="action-bar">
       <el-space>
-        <el-button type="primary" @click="activate">激活（授权角色）</el-button>
+        <el-tooltip content="Release 激活契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+          <el-button type="primary" disabled>激活（授权角色）</el-button>
+        </el-tooltip>
         <el-button @click="pause">暂停</el-button>
         <el-button type="danger" @click="rollback">回滚</el-button>
       </el-space>
@@ -57,9 +59,7 @@ const scope = ref('全量')
 const approval = ref('待审批')
 const effectiveTime = ref('2026-08-21 00:00')
 
-const activate = (): void => {
-  ElMessage.success('已激活（MOCK_ONLY）')
-}
+// 激活按钮已禁用（FAIL_CLOSED）：POST /parameter-releases、/activate 契约未冻结，不做本地假提交。
 const pause = (): void => {
   ElMessage.info('暂停暂未接入后端')
 }

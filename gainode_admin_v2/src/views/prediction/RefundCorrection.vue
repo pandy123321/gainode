@@ -30,7 +30,9 @@
     </el-card>
 
     <div class="action-bar">
-      <el-button type="primary" :disabled="!reason" @click="submit">提交审批</el-button>
+      <el-tooltip content="退款/更正契约未冻结，写路径未接入（FAIL_CLOSED）" placement="top">
+        <el-button type="primary" disabled>提交审批</el-button>
+      </el-tooltip>
     </div>
   </div>
 </template>
@@ -41,7 +43,6 @@ export default { name: 'RefundCorrection' }
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
 import EpImpactPreview from '@/components/ep/ImpactPreview.vue'
 import type { SchemaColumn } from '@/types/schema'
 
@@ -63,9 +64,7 @@ const impactColumns: SchemaColumn[] = [
   { key: 'after', title: '调整后' },
 ]
 
-const submit = (): void => {
-  ElMessage.success('退款/更正审批已提交（MOCK_ONLY）')
-}
+// 提交按钮已禁用（FAIL_CLOSED）：POST /refunds、/corrections 契约未冻结，不做本地假提交。
 </script>
 
 <style scoped>
