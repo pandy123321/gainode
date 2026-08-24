@@ -94,6 +94,8 @@ paths:
     $ref: './paths/robot.yaml#/computing_power_ledger'
   /api/v1/ai/robots/{robot_id}/actions:
     $ref: './paths/robot.yaml#/robot_action'
+  /api/v1/ai/robots/{robot_id}/actions:
+    $ref: './paths/robot.yaml#/robot_action_list'
   /api/v1/ai/robots/{robot_id}/actions/{action_id}:
     $ref: './paths/robot.yaml#/robot_action_detail'
   # ---- Prediction C 端（05 §6）----
@@ -105,6 +107,8 @@ paths:
     $ref: './paths/prediction.yaml#/market_disclosure'
   /api/v1/consent-receipts:
     $ref: './paths/prediction.yaml#/consent_receipt_create'
+  /api/v1/consent-receipts:
+    $ref: './paths/prediction.yaml#/consent_receipt_list'
   /api/v1/orders:
     $ref: './paths/prediction.yaml#/order_create'
   /api/v1/orders/{id}/additions:
@@ -126,6 +130,8 @@ paths:
     $ref: './paths/apt_otc.yaml#/otc_order_book'
   /api/v1/otc/quotes:
     $ref: './paths/apt_otc.yaml#/otc_quote'
+  /api/v1/otc/eligibility:
+    $ref: './paths/apt_otc.yaml#/otc_eligibility'
   /api/v1/otc/orders:
     $ref: './paths/apt_otc.yaml#/otc_order_create'
   /api/v1/otc/orders/{id}:

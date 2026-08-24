@@ -110,3 +110,15 @@ otc_user_orders:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+otc_eligibility:
+  get:
+    operationId: otc_eligibility
+    summary: OTC 交易资格（lint 补齐：种子已注册只读端点 eligibility）
+    tags: [APT-OTC]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }

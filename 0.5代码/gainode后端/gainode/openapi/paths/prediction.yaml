@@ -54,6 +54,15 @@ consent_receipt_create:
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
 
 order_create:
+  get:
+    operationId: prediction_order_list
+    summary: 我的预测订单列表（lint 补齐：种子已注册只读端点 myOrders）
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
   post:
     operationId: prediction_order_create
     summary: 提交订单（锁盘参数/资格/stake TBC → fail-closed）
@@ -151,4 +160,15 @@ appeal_detail:
       '200': { $ref: '../components/responses/common.yaml#/Success' }
       '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '404': { $ref: '../components/responses/common.yaml#/NotFound' }
+      '500': { $ref: '../components/responses/common.yaml#/InternalError' }
+
+consent_receipt_list:
+  get:
+    operationId: prediction_consent_receipt_list
+    summary: 我的同意回执列表（lint 补齐：种子已注册只读端点 myConsentReceipts）
+    tags: [Prediction]
+    security: [{ bearerAuth: [] }]
+    responses:
+      '200': { $ref: '../components/responses/common.yaml#/Success' }
+      '401': { $ref: '../components/responses/common.yaml#/Unauthenticated' }
       '500': { $ref: '../components/responses/common.yaml#/InternalError' }
