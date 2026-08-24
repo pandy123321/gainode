@@ -63,7 +63,11 @@
     "pre-package-uninstall": [
       "support\\Plugin::uninstall"
     ],
-    "test": "php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php"
+    "test": "php tests/run_all.php",
+    "test:contract": "php tests/run_all.php Contract",
+    "test:integration": "php tests/run_all.php Integration",
+    "test:projection": "php tests/run_all.php projection",
+    "test:ledger": "php tests/ledger/LedgerAppendOnlyMutationMatrixTest.php"
   },
   "config": {
     "allow-plugins": {
