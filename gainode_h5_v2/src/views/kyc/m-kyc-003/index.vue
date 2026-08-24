@@ -5,6 +5,7 @@ import { useKycStore } from '../../../stores/kyc'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import { kycStatusLabel } from '../kycStatus'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const kyc = useKycStore()
@@ -47,6 +48,7 @@ onMounted(() => kyc.fetch())
   <main class="app-page">
     <header class="app-head">
       <h1>{{ t('page.m_kyc_003.title') }}</h1>
+      <DataStateBadge page-id="M-KYC-003" />
       <p>{{ t('page.m_kyc_003.description') }}</p>
     </header>
 

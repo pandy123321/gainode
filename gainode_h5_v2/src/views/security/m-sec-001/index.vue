@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useSecurityStore } from '../../../stores/security'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const security = useSecurityStore()
 
@@ -16,6 +17,7 @@ onMounted(() => {
   <main class="sec-root">
     <header class="page-header">
       <h1>{{ t('page.m_sec_001.title') }}</h1>
+      <DataStateBadge page-id="M-SEC-001" />
       <RouterLink to="/security/sessions" class="header-link" data-testid="manage-link">
         {{ t('page.m_sec_001.manage') }}
       </RouterLink>

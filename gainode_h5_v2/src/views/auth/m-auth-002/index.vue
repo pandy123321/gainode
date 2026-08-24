@@ -7,6 +7,7 @@ import { t } from '../../../i18n'
 import { maskAccount } from '../../../utils/mask'
 import AuthShell from '../AuthShell.vue'
 import { authErrorMessage } from '../authError'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 // 当前条款/隐私 consent 版本。来源端点未冻结（缺口 S03-P02-AUTH-CONSENT-VERSION），
 // 对齐后端当前生效版本后更新；不随客户端随意变更。
@@ -71,6 +72,7 @@ async function submit() {
 
 <template>
   <AuthShell :title="t('page.m_auth_002.title')" :description="t('page.m_auth_002.description')">
+  <DataStateBadge page-id="M-AUTH-002" />
     <div v-if="errorMessage" class="auth-error" data-testid="auth-error">
       {{ errorMessage }}
     </div>

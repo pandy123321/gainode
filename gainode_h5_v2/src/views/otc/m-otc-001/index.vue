@@ -5,6 +5,7 @@ import { usePowerStore } from '../../../stores/power'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import type { OtcOrder } from '../../../api/otc'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const otc = useOtcStore()
 const power = usePowerStore()
@@ -28,6 +29,7 @@ onMounted(() => {
   <main class="otc-root">
     <header class="page-header">
       <h1>{{ t('page.m_otc_001.title') }}</h1>
+      <DataStateBadge page-id="M-OTC-001" />
       <RouterLink to="/otc/my" class="header-link" data-testid="my-orders-link">
         {{ t('page.m_otc_001.my_orders') }}
       </RouterLink>

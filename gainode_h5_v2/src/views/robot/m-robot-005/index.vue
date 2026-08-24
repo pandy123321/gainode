@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 </script>
@@ -10,6 +11,7 @@ const router = useRouter()
   <main class="restricted-page">
     <header class="page-header">
       <h1>{{ t('page.m_robot_005.title') }}</h1>
+      <DataStateBadge page-id="M-ROBOT-005" />
     </header>
     <FiveStateContainer state="restricted" :restricted-message="t('page.m_robot_005.restricted')">
       <p class="hint">{{ t('page.m_robot_005.description') }}</p>

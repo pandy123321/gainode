@@ -6,6 +6,7 @@ import { t } from '../../../i18n'
 import { maskAccount } from '../../../utils/mask'
 import AuthShell from '../AuthShell.vue'
 import { authErrorMessage } from '../authError'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const RESEND_SECONDS = 60
 
@@ -134,6 +135,7 @@ onUnmounted(stopTimer)
 
 <template>
   <AuthShell :title="title" :description="t('page.m_auth_004.description')">
+  <DataStateBadge page-id="M-AUTH-004" />
     <div v-if="errorMessage" class="auth-error" data-testid="auth-error">
       {{ errorMessage }}
     </div>

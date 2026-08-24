@@ -7,6 +7,7 @@ import { useAuthFlowStore } from '../../../stores/auth'
 import { t } from '../../../i18n'
 import AuthShell from '../AuthShell.vue'
 import { authErrorMessage } from '../authError'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const session = useSessionStore()
@@ -55,6 +56,7 @@ onMounted(() => {
 
 <template>
   <AuthShell :title="t('page.m_auth_005.title')" :description="t('page.m_auth_005.description')">
+  <DataStateBadge page-id="M-AUTH-005" />
     <div v-if="errorMessage" class="auth-error" data-testid="auth-error">
       {{ errorMessage }}
     </div>

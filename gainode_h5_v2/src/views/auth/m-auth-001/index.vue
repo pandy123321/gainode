@@ -8,6 +8,7 @@ import { t } from '../../../i18n'
 import { maskAccount } from '../../../utils/mask'
 import AuthShell from '../AuthShell.vue'
 import { authErrorMessage } from '../authError'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const session = useSessionStore()
@@ -68,6 +69,7 @@ async function submit() {
 
 <template>
   <AuthShell :title="t('page.m_auth_001.title')" :description="t('page.m_auth_001.description')">
+  <DataStateBadge page-id="M-AUTH-001" />
     <div v-if="errorMessage" class="auth-error" data-testid="auth-error">
       {{ errorMessage }}
     </div>

@@ -5,6 +5,7 @@ import { useSessionStore } from '../../../stores/session'
 import { authApi } from '../../../api/auth'
 import { t, setLanguage, getCurrentLanguage, getSupportedLanguages } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const session = useSessionStore()
@@ -42,6 +43,7 @@ async function logout() {
   <main class="settings-root">
     <header class="page-header">
       <h1>{{ t('page.m_settings_001.title') }}</h1>
+      <DataStateBadge page-id="M-SETTINGS-001" />
     </header>
 
     <!-- 语言：本地切换（保留上下文；不改变业务数值/规则语义） -->

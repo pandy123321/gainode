@@ -5,6 +5,7 @@ import { useOtcStore } from '../../../stores/otc'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import type { OtcOrder } from '../../../api/otc'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const otc = useOtcStore()
@@ -27,6 +28,7 @@ onMounted(() => {
   <main class="otc-orders">
     <header class="page-header">
       <h1>{{ t('page.m_otc_005.title') }}</h1>
+      <DataStateBadge page-id="M-OTC-005" />
     </header>
 
     <FiveStateContainer

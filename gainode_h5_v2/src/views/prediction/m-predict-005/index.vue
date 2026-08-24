@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePredictionStore } from '../../../stores/prediction'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -33,6 +34,7 @@ onMounted(reload)
   <main class="order-detail">
     <header class="page-header">
       <h1>{{ t('page.m_predict_005.title') }}</h1>
+      <DataStateBadge page-id="M-PREDICT-005" />
     </header>
 
     <FiveStateContainer

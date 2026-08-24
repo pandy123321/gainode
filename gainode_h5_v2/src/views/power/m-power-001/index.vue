@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import { usePowerStore } from '../../../stores/power'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const power = usePowerStore()
 
@@ -23,6 +24,7 @@ onMounted(() => {
   <main class="power-root">
     <header class="page-header">
       <h1>{{ t('page.m_power_001.title') }}</h1>
+      <DataStateBadge page-id="M-POWER-001" />
     </header>
 
     <FiveStateContainer

@@ -6,6 +6,7 @@ import { useAuthFlowStore } from '../../../stores/auth'
 import { t } from '../../../i18n'
 import AuthShell from '../AuthShell.vue'
 import { authErrorMessage } from '../authError'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const RESEND_SECONDS = 60
 
@@ -98,6 +99,7 @@ onUnmounted(stopTimer)
 
 <template>
   <AuthShell :title="t('page.m_auth_003.title')" :description="description">
+  <DataStateBadge page-id="M-AUTH-003" />
     <div v-if="errorMessage" class="auth-error" data-testid="auth-error">
       {{ errorMessage }}
     </div>

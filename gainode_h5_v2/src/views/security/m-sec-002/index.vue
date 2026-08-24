@@ -4,6 +4,7 @@ import { useSecurityStore } from '../../../stores/security'
 import type { SessionDevice } from '../../../api/security'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const security = useSecurityStore()
 
@@ -32,6 +33,7 @@ onMounted(() => {
     <header class="page-header">
       <RouterLink to="/security" class="back-link" data-testid="back-link">‹</RouterLink>
       <h1>{{ t('page.m_sec_002.title') }}</h1>
+      <DataStateBadge page-id="M-SEC-002" />
     </header>
 
     <!-- MFA 注册：写操作 fail-closed，只读展示 enrolled methods -->

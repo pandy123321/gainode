@@ -6,6 +6,7 @@ import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import BottomNav from '../../../components/BottomNav.vue'
 import type { PredictionMarket } from '../../../api/prediction'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const prediction = usePredictionStore()
@@ -38,6 +39,7 @@ onMounted(() => {
   <main class="prediction-root">
     <header class="page-header">
       <h1>{{ t('page.m_predict_001.title') }}</h1>
+      <DataStateBadge page-id="M-PREDICT-001" />
       <RouterLink to="/prediction/my" class="header-link" data-testid="my-orders">
         {{ t('page.m_predict_001.my_orders') }}
       </RouterLink>

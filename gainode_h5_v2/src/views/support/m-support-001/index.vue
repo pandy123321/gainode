@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 </script>
 
 <template>
   <main class="support-root">
     <header class="page-header">
       <h1>{{ t('page.m_support_001.title') }}</h1>
+      <DataStateBadge page-id="M-SUPPORT-001" />
       <p class="page-desc">{{ t('page.m_support_001.description') }}</p>
     </header>
 

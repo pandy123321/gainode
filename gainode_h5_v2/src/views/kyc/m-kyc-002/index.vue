@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { kycApi } from '../../../api/kyc'
 import { t } from '../../../i18n'
 import { s3Upload, generateFileName } from '../../../utils/s3Upload'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 
@@ -74,6 +75,7 @@ async function onSubmit() {
   <main class="app-page">
     <header class="app-head">
       <h1>{{ t('page.m_kyc_002.title') }}</h1>
+      <DataStateBadge page-id="M-KYC-002" />
       <p>{{ t('page.m_kyc_002.description') }}</p>
     </header>
 

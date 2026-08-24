@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRobotStore } from '../../../stores/robot'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,6 +28,7 @@ onMounted(reload)
   <main class="upgrade-result">
     <header class="page-header">
       <h1>{{ t('page.m_robot_004.title') }}</h1>
+      <DataStateBadge page-id="M-ROBOT-004" />
     </header>
 
     <FiveStateContainer

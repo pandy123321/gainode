@@ -4,6 +4,7 @@ import { useRobotStore } from '../../../stores/robot'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import type { AIReward } from '../../../api/robot'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const robot = useRobotStore()
 
@@ -22,6 +23,7 @@ onMounted(reload)
   <main class="rewards">
     <header class="page-header">
       <h1>{{ t('page.m_robot_006.title') }}</h1>
+      <DataStateBadge page-id="M-ROBOT-006" />
     </header>
 
     <FiveStateContainer

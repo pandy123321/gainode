@@ -5,6 +5,7 @@ import { useAssetStore } from '../../../stores/asset'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import type { LedgerEntry } from '../../../api/asset'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const asset = useAssetStore()
@@ -37,6 +38,7 @@ onMounted(() => {
   <main class="asset-root">
     <header class="page-header">
       <h1>{{ t('page.m_asset_001.title') }}</h1>
+      <DataStateBadge page-id="M-ASSET-001" />
       <RouterLink to="/asset/ledger" class="header-link" data-testid="ledger-link">
         {{ t('page.m_asset_001.primary_action') }}
       </RouterLink>

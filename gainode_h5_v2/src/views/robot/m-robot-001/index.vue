@@ -5,6 +5,7 @@ import { useRobotStore } from '../../../stores/robot'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import BottomNav from '../../../components/BottomNav.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const robot = useRobotStore()
@@ -37,6 +38,7 @@ onMounted(() => {
   <main class="robot-root">
     <header class="page-header">
       <h1>{{ t('page.m_robot_001.title') }}</h1>
+      <DataStateBadge page-id="M-ROBOT-001" />
     </header>
 
     <FiveStateContainer

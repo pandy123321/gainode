@@ -10,6 +10,7 @@ import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
 import BottomNav from '../../../components/BottomNav.vue'
 import type { PredictionMarket } from '../../../api/prediction'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const router = useRouter()
 const ent = useEntitlementStore()
@@ -69,6 +70,7 @@ onMounted(reloadAll)
     <!-- Header -->
     <header class="home-header">
       <h1>{{ t('page.m_home_001.title') }}</h1>
+      <DataStateBadge page-id="M-HOME-001" />
       <RouterLink to="/notices" class="bell" :data-unread="notice.unreadCount" data-testid="home-bell" aria-label="消息">
         <span v-if="notice.unreadCount > 0" class="bell-badge">{{ notice.unreadCount }}</span>
       </RouterLink>

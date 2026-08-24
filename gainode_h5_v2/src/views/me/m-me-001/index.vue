@@ -5,6 +5,7 @@ import { useKycStore } from '../../../stores/kyc'
 import { useSecurityStore } from '../../../stores/security'
 import { t } from '../../../i18n'
 import FiveStateContainer from '../../../components/FiveStateContainer.vue'
+import DataStateBadge from '../../../components/DataStateBadge.vue'
 
 const profile = useProfileStore()
 const kyc = useKycStore()
@@ -32,6 +33,7 @@ onMounted(() => {
   <main class="me-root">
     <header class="page-header">
       <h1 data-testid="me-title">{{ t('page.m_me_001.title') }}</h1>
+      <DataStateBadge page-id="M-ME-001" />
     </header>
 
     <!-- 用户摘要（脱敏，不把资产/数字做成第一视觉焦点） -->
