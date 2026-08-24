@@ -54,6 +54,8 @@ abstract class ApiV2 extends Api
      */
     protected function envelopeError(\Throwable $e): Response
     {
+        // BE-11：AuthorizeException 已继承 DomainException（携带 AUTH_UNAUTHENTICATED/401），
+        // 由首分支统一映射；此处不再需要专用 elseif。
         if ($e instanceof DomainException) {
             $code = $e->resultCode();
             $status = $e->httpStatus();
