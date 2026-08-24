@@ -11,6 +11,13 @@ use library\service\admin\AdminGovernanceRoleService;
 
 check(class_exists(\library\service\admin\AdminGovernanceRoleService::class), 'AdminGovernanceRoleService exists');
 
+// NEXT-01 步骤2：canonical 角色全集必须为 13 个，含 LEDGER_OPERATOR / AUDITOR
+$roles = AdminGovernanceRoleService::ROLES;
+check(count($roles) === 13, 'ROLES canonical count = 13');
+check(in_array('LEDGER_OPERATOR', $roles, true), 'ROLES contains LEDGER_OPERATOR');
+check(in_array('AUDITOR', $roles, true), 'ROLES contains AUDITOR');
+check(count(array_unique($roles)) === count($roles), 'ROLES has no duplicates');
+
 $svc = new AdminGovernanceRoleService();
 
 // 超管（is_admin=1）→ 全部治理角色

@@ -866,15 +866,18 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/prediction/refunds — 退款发起（A-PREDICT-004 写）
-     * fail-closed：RefundCaseService::createCase 依赖退款契约/账本写（2B-1 未冻结）→ 服务层抛
-     * DEPENDENCY_UNAVAILABLE。控制器保持 fail-closed 转发语义，不绕过。
+     * NEXT-01 步骤3：移除角色 fallback。未匹配治理角色必须 POLICY_DENIED（fail-closed），
+     * 不再回退 OPS_OPERATOR；RefundCaseService 契约未冻结仍 DEPENDENCY_UNAVAILABLE。
      */
     public function refundCreate(): Response
     {
         try {
             $admin = $this->request->getTokenUser();
             [$actorId, $actorRoles] = $this->resolveActor($admin);
-            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']) ?? 'OPS_OPERATOR';
+            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']);
+            if ($role === null) {
+                throw new DomainException(ErrorDict::POLICY_DENIED, 'admin has no governance role for refund create');
+            }
             $data = $this->request->post();
             (new RefundCaseService())->createCase($data, $actorId, $role);
             return $this->envelope(['result' => 'ok']);
@@ -885,15 +888,18 @@ class AdminV2Controller extends ApiV2
 
     /**
      * POST /api/v1/admin/ledger/corrections — 更正冲正发起（A-LEDGER-004 写）
-     * fail-closed：CorrectionCase 领域写依赖契约/账本（未冻结），服务层抛 DEPENDENCY_UNAVAILABLE。
-     * 控制器保持 fail-closed 转发语义。
+     * NEXT-01 步骤3：移除角色 fallback。未匹配治理角色必须 POLICY_DENIED（fail-closed），
+     * 不再回退 OPS_OPERATOR；CorrectionCase 契约未冻结仍 DEPENDENCY_UNAVAILABLE。
      */
     public function correctionCreate(): Response
     {
         try {
             $admin = $this->request->getTokenUser();
             [$actorId, $actorRoles] = $this->resolveActor($admin);
-            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']) ?? 'OPS_OPERATOR';
+            $role = $this->pickRole($actorRoles, ['OPS_OPERATOR', 'RISK_APPROVER']);
+            if ($role === null) {
+                throw new DomainException(ErrorDict::POLICY_DENIED, 'admin has no governance role for correction create');
+            }
             $data = $this->request->post();
             (new CorrectionCaseService())->createCase($data, $actorId, $role);
             return $this->envelope(['result' => 'ok']);

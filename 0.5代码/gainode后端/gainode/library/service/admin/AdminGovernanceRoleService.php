@@ -23,13 +23,15 @@ use support\extend\Service;
 class AdminGovernanceRoleService extends Service
 {
     /**
-     * 05 §8 canonical 治理角色全集（冻结枚举）。
+     * 05 §8/§11.3 canonical 治理角色全集（冻结枚举，13 个）。
+     * NEXT-01 步骤2：补齐 LEDGER_OPERATOR、AUDITOR（此前缺失，仅 11 个）。
      */
     public const ROLES = [
         'END_USER', 'OPS_OPERATOR', 'ADMIN_SECURITY',
         'PARAM_EDITOR', 'PARAM_APPROVER', 'RELEASE_OPERATOR',
-        'RISK_ANALYST', 'RISK_APPROVER', 'FINANCE_REVIEWER',
-        'KYC_REVIEWER', 'SUPPORT_AGENT',
+        'RISK_ANALYST', 'RISK_APPROVER', 'LEDGER_OPERATOR',
+        'FINANCE_REVIEWER', 'KYC_REVIEWER', 'SUPPORT_AGENT',
+        'AUDITOR',
     ];
 
     /**
