@@ -177,4 +177,19 @@ describe('44 页接入防漂移（静态源码校验）', () => {
       }
     }
   })
+
+  it('Badge 引用的 CSS var() 必须在 tokens.css 有定义（封堵 --status-* 幻觉事故盲区）', () => {
+    const badgeSrc = readFileSync(
+      join(PROJECT_ROOT, 'src/components/DataStateBadge.vue'),
+      'utf8',
+    )
+    const tokensSrc = readFileSync(join(PROJECT_ROOT, 'src/tokens/tokens.css'), 'utf8')
+    const defined = new Set(
+      [...tokensSrc.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1]),
+    )
+    const referenced = [...badgeSrc.matchAll(/var\((--[a-z0-9-]+)[),]/g)].map((m) => m[1])
+    expect(referenced.length).toBeGreaterThan(0)
+    const missing = [...new Set(referenced)].filter((v) => !defined.has(v))
+    expect(missing, `未定义的 CSS 变量: ${missing.join(', ')}`).toEqual([])
+  })
 })
