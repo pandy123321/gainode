@@ -49,6 +49,7 @@
 - 背景：FLUTTER_ENGINEERING_DECISION.md 标"待 Owner 裁决"，而 build.gradle.kts 注释已写 "Owner-approved" 并按推荐落地依赖——触碰 S04-P00「Agent 不得代签」红线（口径不一，非既成事实代签）。
 - 建议：Owner 对 P00 工程决策正式签署（或推翻），同步改代码注释与文档口径一致；随后启动 NEXT-03。
 - 影响：不决策则 NEXT-03 无法合规启动（README 明令先收口再开工）。
+- **【2026-08-25 处置更新】Owner 批示"全部按照建议执行"→ 正式签署 FLUTTER_ENGINEERING_DECISION（DR-07 CLOSED）**。FLUTTER_ENGINEERING_DECISION.md 状态 OPEN→APPROVED；manifest `flutter_s04p00_engineering` 更新为 2026-08-25 正式签署；`android/app/build.gradle.kts` 的 "Owner-approved" 注释现已与文档口径一致。**DR-07 状态：已闭环**，可启动 NEXT-03。
 
 ## DR-08 README 既列待决项
 
