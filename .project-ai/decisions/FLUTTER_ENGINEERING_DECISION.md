@@ -2,8 +2,8 @@
 
 > 起草：DEVELOPMENT-01
 > 日期：2026-08-21
-> 状态：**OPEN（待 Owner 批准后才可运行 flutter create）**
-> 依据：07 §9 S04-P00（STAGE-04 边界：当前无 Flutter 工程，S04-P00 是强制架构 Decision Gate）
+> 状态：**APPROVED（Owner 2026-08-25 批准全部推荐值）**
+> 依据：07 §9 S04-P00（STAGE-04 边界）；Owner 批示"全部按照建议执行"（含签署 DR-07）
 > 规则：未经 Owner 批准不得运行 `flutter create`；Agent 不得代签生产签名/application ID。
 
 ---
@@ -80,8 +80,8 @@ Flutter/Dart 兼容     = Flutter 3.47.0 / Dart 3.13.0 匹配
 
 ---
 
-## 请 Owner 批准
+## Owner 批准记录
 
-1. 确认或修改上述**裁决字段**（尤其 APPLICATION_ID / MINIMUM_IOS / MINIMUM_ANDROID_SDK / STATE_MANAGEMENT / ROUTING / SECURE_STORAGE / HTTP_CLIENT）。
-2. 批准后，我才会运行 `flutter create` 建立 `E:\github\sports\gainode_app` 工程（S04-P01）。
-3. 未批准前，不运行 `flutter create`；不写入任何生产签名/keystore。
+1. 裁决字段全部采用推荐值：APPLICATION_ID_IOS/ANDROID=com.gainode.app、MINIMUM_IOS=13.0、MINIMUM_ANDROID_SDK=24、STATE_MANAGEMENT=RIVERPOD、ROUTING=GO_ROUTER、SECURE_STORAGE=FLUTTER_SECURE_STORAGE、HTTP_CLIENT=DIO、DECIMAL_LIBRARY=decimal、FLAVOR_SET=dev,test,sandbox、PRODUCTION_FLAVOR=SCAFFOLD_ONLY_NO_REAL_VALUES。
+2. **已批准**（Owner 2026-08-25，"全部按照建议执行"→ 签署 DR-07）。`android/app/build.gradle.kts` 中 "Owner-approved" 注释与本文档口径一致。
+3. 批准后可启动 NEXT-03（S04-P01 基础设施）。

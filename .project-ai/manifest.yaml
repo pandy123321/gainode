@@ -108,7 +108,7 @@ decisionSources:
     owner: OWNER
     provenance: "OWNER_DIRECTIVE ← ask_user_question admin_v2_auth (OPTION_A)"
   flutter_s04p00_engineering:
-    value: "APPROVED — Owner 2026-08-21 批准 FLUTTER_ENGINEERING_DECISION 全部推荐值：FLUTTER_TARGET_ROOT=E:\\github\\sports\\gainode_app；APPLICATION_ID_IOS/ANDROID=com.gainode.app；MIN_IOS=13.0/MIN_ANDROID_SDK=24；Flutter 3.47.0/Dart 3.13.0；STATE_MANAGEMENT=Riverpod；ROUTING=GoRouter；SECURE_STORAGE=flutter_secure_storage；HTTP_CLIENT=DIO；DECIMAL_LIBRARY=decimal；FLAVOR_SET=dev,test,sandbox；PRODUCTION_FLAVOR=SCAFFOLD_ONLY_NO_REAL_VALUES。批准后可运行 flutter create。"
-    decision_date: "2026-08-21"
+    value: "APPROVED — Owner 2026-08-25 正式签署 FLUTTER_ENGINEERING_DECISION（DR-07，全部推荐值）：FLUTTER_TARGET_ROOT=E:\\github\\sports\\gainode_app；APPLICATION_ID_IOS/ANDROID=com.gainode.app；MIN_IOS=13.0/MIN_ANDROID_SDK=24；Flutter 3.47.0/Dart 3.13.0；STATE_MANAGEMENT=Riverpod；ROUTING=GoRouter；SECURE_STORAGE=flutter_secure_storage；HTTP_CLIENT=DIO；DECIMAL_LIBRARY=decimal；FLAVOR_SET=dev,test,sandbox；PRODUCTION_FLAVOR=SCAFFOLD_ONLY_NO_REAL_VALUES。已运行 flutter create；可启动 NEXT-03（S04-P01 基础设施）。"
+    decision_date: "2026-08-25"
     owner: OWNER
-    provenance: "OWNER_DIRECTIVE ← ask_user_question flutter_s04p00 (批准全部推荐值)"
+    provenance: "OWNER_DIRECTIVE ← 2026-08-25 '全部按照建议执行'（含签署 DR-07）；原 2026-08-21 批准全部推荐值"
