@@ -126,7 +126,6 @@
 import { login, mobileLogin, userTreeMenus } from '../../api/module/user'
 import { verificationImg, loginQrcode,sendSmsCode} from '../../api/module/common'
 import { defineComponent, onMounted, reactive, ref } from 'vue'
-import CryptoJS from 'crypto-js';
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../../store/user'
 import { layer } from '@layui/layer-vue'
@@ -136,17 +135,6 @@ const userStore = useUserStore()
 const method = ref('1')
 const verificationImgUrl = ref('')
 const loging = ref(false);
-const defaultKey = 'f080a463654b2279'
-
-const encryptPassword = (word: string, keyStr: string = defaultKey): string => {
-  const key = CryptoJS.enc.Utf8.parse(keyStr)
-  const src = CryptoJS.enc.Utf8.parse(word)
-  const encrypted = CryptoJS.AES.encrypt(src, key, {
-    mode: CryptoJS.mode.ECB,
-    padding: CryptoJS.pad.Pkcs7,
-  })
-  return encrypted.toString()
-}
 const loginQrcodeText = ref('')
 const timeInterval = ref(0)
 const hasSend = ref(false)
@@ -255,9 +243,11 @@ const loginSubmit = async () => {
     return;
   }
   loging.value = true;
+  // DR-06：后端登录按明文密码比对（AdminAuth::verifyLogin 直接 hashPassword），
+  // 移除前端 AES-ECB 死加密（原硬编码密钥已暴露于 bundle）；明文经 HTTPS 传输。
   const loginPayload = {
     ...loginForm,
-    password: encryptPassword(loginForm.password)
+    password: loginForm.password
   }
   login(loginPayload).then(({ data, code, msg }) => {
     loging.value = false;

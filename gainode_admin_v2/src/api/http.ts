@@ -3,7 +3,6 @@ import { useUserStore } from "../store/user";
 import { useAppStore } from "../store/app";
 import { layer } from '@layui/layui-vue';
 import router from '../router'
-import md5 from 'md5'
 import { generateIdempotencyKey } from '../utils/request-id'
 
 type TAxiosOption = {
@@ -11,7 +10,6 @@ type TAxiosOption = {
     baseURL: string;
 }
 
-const SIGN_PRIVATE_KEY = 'projectApi'
 const API_VERSION = '1.0'
 
 const config: TAxiosOption = {
@@ -23,23 +21,6 @@ const config: TAxiosOption = {
 function generateTraceId(): string {
     return Math.random().toString(36).substring(2, 15) +
         Math.random().toString(36).substring(2, 15)
-}
-
-function generateSign(headers: Record<string, string>): string {
-    const params: Record<string, string> = {}
-    for (const [key, value] of Object.entries(headers)) {
-        if (value !== undefined && value !== null && value !== '') {
-            params[key] = value
-        }
-    }
-    delete params.Sign
-    const sortedKeys = Object.keys(params).sort()
-    let str = ''
-    for (const key of sortedKeys) {
-        str += `${key}=${params[key]}&`
-    }
-    str += `Key=${SIGN_PRIVATE_KEY}`
-    return md5(str).toUpperCase()
 }
 
 class Http {
@@ -63,8 +44,8 @@ class Http {
                     router.push('/login');
                 }
             }
-            headers.Sign = generateSign(headers)
-            // 写操作补 Idempotency-Key（后端 RequestContext 强制，且不参与签名）
+            // DR-06：后端 VerifySign 已停用（BE-08），移除签名头（原 SIGN_PRIVATE_KEY 已暴露于 bundle）
+            // 写操作补 Idempotency-Key（后端 RequestContext 强制）
             if (config.method && ['post', 'put', 'patch', 'delete'].includes(config.method)) {
                 headers['Idempotency-Key'] = generateIdempotencyKey()
             }
