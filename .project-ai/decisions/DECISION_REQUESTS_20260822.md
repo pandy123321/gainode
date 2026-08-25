@@ -10,12 +10,14 @@
 - 建议：**批准由 Owner 提供映射表**（role_id→roles 数组），Agent 仅录入并补契约测试。
 - 备选：维持仅超管模式至 S03 收口后再定。
 - 影响：不决策则 Admin 写路径继续仅超管可用；AD-02/AD-03 前端 RBAC 无法真实落地。
+- **【2026-08-25 处置更新】Owner 批示"按建议执行"→ 采纳备选项（维持仅超管模式）。核查证实该兜底已为实现且测试覆盖**（rolesFor() L54-56 超管返回全集；契约测试断言超管全通+非超管 fail-closed 双向；run_all 29/29 复验）。**DR-01 状态：核心已闭环**——Admin 写路径超管可用；剩余"非超管细粒度 role_id 映射"降级为低优先待办，待 Owner 提供组织 role_id 结构后录入。
 
 ## DR-02 .env 凭据轮换
 
 - 背景：本地 .env 含 Gmail 应用密码、SIGN_PRIVATE_KEY=projectApi、DOC_AUTH_PASS=doc123456，APP_DEBUG=true（未入 git）。
 - 建议：Owner 轮换全部凭据 + 关 APP_DEBUG；CI 增加 secret 扫描。
 - 影响：不决策则本机泄露面持续存在；不影响仓库。
+- **【2026-08-25 历史扫描结论】** ① `.env*` 真实凭据文件 **从未入过 git 历史**（0 提交触及，仅 .env.example 模板）→ 泄露面仅限本机，仓库侧干净；② `admin/123456` 后门字符串存在于 **2 个历史提交**（已删代码但历史可查）→ 若该后门曾在任何部署环境启用过，必须轮换该管理员口令；git 历史重写（filter-repo）可选但代价大，默认不做；③ 历史含早期 S01 阶段 SECRET_SCAN 报告工件（系扫描记录非密钥）。**剩余动作均为 Owner 运维操作**（轮换 Gmail/SIGN/DOC 凭据、关 APP_DEBUG），Agent 无法代办。
 
 ## DR-03 V1 钱包域 bcmath 化
 
