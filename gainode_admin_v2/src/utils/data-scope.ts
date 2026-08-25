@@ -12,6 +12,8 @@ export interface DataScopeContext {
   canonicalRole?: string
   dataScope?: string
   objectState?: string
+  /** 超管标记：DR-01 关闭后仅超管可执行写操作（is_admin=1） */
+  isSuperAdmin?: boolean
 }
 
 let scopeContext: DataScopeContext = {}
@@ -55,4 +57,33 @@ export function isFieldMasked(value: unknown): boolean {
     return Boolean((value as Record<string, unknown>).masked)
   }
   return false
+}
+
+/**
+ * DR-05 轻量 RBAC：是否有写/敏感操作权限。
+ * DR-01 关闭为「仅超管模式」→ 写操作仅 isSuperAdmin 可用，其余返回 false（前端据此置灰并显示原因）。
+ * 服务端仍强制校验（allowed_actions + 后端 guardRole），本函数仅用于按钮态展示。
+ */
+export const WRITE_ACTIONS = ['add', 'edit', 'approve', 'execute']
+
+export function isWritableAction(action: string): boolean {
+  return WRITE_ACTIONS.includes(action)
+}
+
+export function isSuperAdmin(): boolean {
+  return scopeContext.isSuperAdmin === true
+}
+
+/**
+ * 判定某动作是否可点击：非写动作按 allowed_actions；写动作额外要求超管。
+ * reason 用于展示禁用原因（仅超管可用）。
+ */
+export function canRenderAction(allowedActions: AllowedActions | undefined, action: string): { ok: boolean; reason?: string } {
+  if (!hasAction(allowedActions, action)) {
+    return { ok: false, reason: '无操作权限' }
+  }
+  if (isWritableAction(action) && !isSuperAdmin()) {
+    return { ok: false, reason: '仅超管可用' }
+  }
+  return { ok: true }
 }

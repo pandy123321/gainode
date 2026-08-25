@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import {menu, permission, logout, getUserInfo} from "../api/module/user";
+import { setDataScopeContext } from '../utils/data-scope'
 import router from '../router'
 
 export const useUserStore = defineStore({
@@ -27,6 +28,8 @@ export const useUserStore = defineStore({
       const { data, code } = await getUserInfo();
       if(code == 0) {
         this.userInfo = data;
+        // DR-05 轻量 RBAC：登录后写入超管标记（DR-01 仅超管模式）
+        setDataScopeContext({ isSuperAdmin: Number(data?.is_admin) === 1 })
       }
     },
     async loadMenus(){
